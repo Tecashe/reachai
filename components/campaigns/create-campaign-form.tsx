@@ -1,0 +1,128 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RESEARCH_DEPTH_OPTIONS, PERSONALIZATION_LEVELS, TONE_OPTIONS } from "@/lib/constants"
+import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
+
+export function CreateCampaignForm() {
+  const [dailyLimit, setDailyLimit] = useState([50])
+
+  return (
+    <form className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="name">Campaign Name</Label>
+          <Input id="name" placeholder="e.g., Q1 Outreach - Tech Startups" required />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description (Optional)</Label>
+          <Textarea id="description" placeholder="Brief description of your campaign goals..." rows={3} />
+        </div>
+      </div>
+
+      <div className="border-t border-border pt-6">
+        <h3 className="text-lg font-semibold mb-4">AI Settings</h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="research-depth">Research Depth</Label>
+            <Select defaultValue="STANDARD">
+              <SelectTrigger id="research-depth">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RESEARCH_DEPTH_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    <div>
+                      <div className="font-medium">{option.label}</div>
+                      <div className="text-xs text-muted-foreground">{option.description}</div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="personalization">Personalization Level</Label>
+            <Select defaultValue="MEDIUM">
+              <SelectTrigger id="personalization">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PERSONALIZATION_LEVELS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    <div>
+                      <div className="font-medium">{option.label}</div>
+                      <div className="text-xs text-muted-foreground">{option.description}</div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tone">Tone of Voice</Label>
+            <Select defaultValue="professional">
+              <SelectTrigger id="tone">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TONE_OPTIONS.map((tone) => (
+                  <SelectItem key={tone} value={tone}>
+                    {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-border pt-6">
+        <h3 className="text-lg font-semibold mb-4">Sending Settings</h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="daily-limit">Daily Send Limit</Label>
+              <span className="text-sm text-muted-foreground">{dailyLimit[0]} emails/day</span>
+            </div>
+            <Slider id="daily-limit" min={10} max={200} step={10} value={dailyLimit} onValueChange={setDailyLimit} />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="track-opens">Track Email Opens</Label>
+              <p className="text-sm text-muted-foreground">Monitor when prospects open your emails</p>
+            </div>
+            <Switch id="track-opens" defaultChecked />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="track-clicks">Track Link Clicks</Label>
+              <p className="text-sm text-muted-foreground">Monitor when prospects click links</p>
+            </div>
+            <Switch id="track-clicks" defaultChecked />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-4 pt-6">
+        <Button type="submit" className="flex-1">
+          Create Campaign
+        </Button>
+        <Button type="button" variant="outline">
+          Save as Draft
+        </Button>
+      </div>
+    </form>
+  )
+}

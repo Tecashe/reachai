@@ -1,0 +1,47 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ProfileSettings } from "@/components/settings/profile-settings"
+import { EmailSettings } from "@/components/settings/email-settings"
+import { ApiKeysSettings } from "@/components/settings/api-keys-settings"
+import { TeamSettings } from "@/components/settings/team-settings"
+import { NotificationSettings } from "@/components/settings/notification-settings"
+
+export default function SettingsPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground">Manage your account settings and preferences</p>
+      </div>
+
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="api">API Keys</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile">
+          <ProfileSettings />
+        </TabsContent>
+
+        <TabsContent value="email">
+          <EmailSettings />
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <NotificationSettings />
+        </TabsContent>
+
+        <TabsContent value="api">
+          <ApiKeysSettings />
+        </TabsContent>
+
+        <TabsContent value="team">
+          <TeamSettings />
+        </TabsContent>
+      </Tabs>
+    </div>
+  )
+}
