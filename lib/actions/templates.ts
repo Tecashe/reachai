@@ -1,55 +1,71 @@
-// import { type NextRequest, NextResponse } from "next/server"
-// import { emailSender } from "@/lib/services/email-sender"
+// "use server"
+
+// import { auth } from "@clerk/nextjs/server"
 // import { db } from "@/lib/db"
+// import { revalidatePath } from "next/cache"
 
-// export async function POST(request: NextRequest) {
-//   try {
-//     const body = await request.json()
-//     const { campaignId, prospectIds } = body
+// export async function getTemplates() {
+//   const { userId } = await auth()
+//   if (!userId) throw new Error("Unauthorized")
 
-//     // Get campaign and prospectss
-//     const campaign = await db.campaign.findUnique({
-//       where: { id: campaignId },
-//     })
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
 
-//     if (!campaign) {
-//       return NextResponse.json({ error: "Campaign not found" }, { status: 404 })
-//     }
+//   if (!user) throw new Error("User not found")
 
-//     const prospects = await db.prospect.findMany({
-//       where: {
-//         id: { in: prospectIds },
-//         campaignId,
-//       },
-//     })
+//   const templates = await db.emailTemplate.findMany({
+//     where: { userId: user.id },
+//     orderBy: { createdAt: "desc" },
+//   })
 
-//     // Prepare emails
-//     const emails = prospects.map((prospect) => ({
-//       to: prospect.email,
-//       subject: campaign.name,
-//       html: `<p>Hello ${prospect.firstName},</p><p>This is a test email.</p>`,
-//       trackingEnabled: true,
-//       prospectId: prospect.id,
-//       campaignId,
-//     }))
+//   return templates
+// }
 
-//     // Send bulk emails
-//     const results = await emailSender.sendBulkEmails(emails)
+// export async function createTemplate(formData: FormData) {
+//   const { userId } = await auth()
+//   if (!userId) throw new Error("Unauthorized")
 
-//     const successCount = results.filter((r) => r.success).length
-//     const failureCount = results.filter((r) => !r.success).length
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
 
-//     return NextResponse.json({
-//       success: true,
-//       total: results.length,
-//       sent: successCount,
-//       failed: failureCount,
-//       results,
-//     })
-//   } catch (error) {
-//     console.error("[v0] Bulk send error:", error)
-//     return NextResponse.json({ error: "Failed to send bulk emails" }, { status: 500 })
-//   }
+//   if (!user) throw new Error("User not found")
+
+//   const name = formData.get("name") as string
+//   const subject = formData.get("subject") as string
+//   const body = formData.get("body") as string
+//   const category = formData.get("category") as string
+
+//   const template = await db.emailTemplate.create({
+//     data: {
+//       userId: user.id,
+//       name,
+//       subject,
+//       body,
+//       category: category as any,
+//     },
+//   })
+
+//   revalidatePath("/dashboard/templates")
+//   return template
+// }
+
+// export async function deleteTemplate(templateId: string) {
+//   const { userId } = await auth()
+//   if (!userId) throw new Error("Unauthorized")
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) throw new Error("User not found")
+
+//   await db.emailTemplate.delete({
+//     where: { id: templateId, userId: user.id },
+//   })
+
+//   revalidatePath("/dashboard/templates")
 // }
 
 "use server"

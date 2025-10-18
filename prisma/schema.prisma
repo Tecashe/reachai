@@ -145,11 +145,12 @@ model Prospect {
   currentStep       Int @default(0)
   lastContactedAt   DateTime?
   
-  // Engagement
-  emailsReceived    Int @default(0)
-  emailsOpened      Int @default(0)
-  emailsClicked     Int @default(0)
-  replied           Boolean @default(false)
+  // Engagement - detailed tracking
+  emailsReceived    Int @default(0)  // Total emails sent to this prospect
+  emailsOpened      Int @default(0)  // Total times emails were opened
+  emailsClicked     Int @default(0)  // Total times links were clicked
+  emailsReplied     Int @default(0)  // Total replies received
+  replied           Boolean @default(false)  // Has replied at least once
   repliedAt         DateTime?
   bounced           Boolean @default(false)
   unsubscribed      Boolean @default(false)
