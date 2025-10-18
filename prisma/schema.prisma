@@ -8,159 +8,160 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(cuid())
-  clerkId           String   @unique
-  email             String   @unique
-  name              String?
-  firstName         String?
-  lastName          String?
-  imageUrl          String?
-  role              UserRole @default(USER)
-  
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  firstName String?
+  lastName  String?
+  imageUrl  String?
+  role      UserRole @default(USER)
+
   // Subscription
-  subscriptionTier  SubscriptionTier @default(FREE)
-  subscriptionId    String?
-  customerId        String?
+  subscriptionTier   SubscriptionTier   @default(FREE)
+  subscriptionId     String?
+  customerId         String?
   subscriptionStatus SubscriptionStatus @default(INACTIVE)
-  currentPeriodEnd  DateTime?
-  
-  emailCredits      Int @default(100)
-  researchCredits   Int @default(50)
-  
+  currentPeriodEnd   DateTime?
+
+  emailCredits    Int @default(100)
+  researchCredits Int @default(50)
+
   // Usage tracking
   emailsSentThisMonth Int @default(0)
   prospectsThisMonth  Int @default(0)
   aiCreditsUsed       Int @default(0)
-  
+
   // Settings
-  timezone          String @default("America/New_York")
-  emailSignature    String?
-  defaultFromName   String?
-  defaultFromEmail  String?
-  
-  subscription      Subscription?
-  
+  timezone         String  @default("America/New_York")
+  emailSignature   String?
+  defaultFromName  String?
+  defaultFromEmail String?
+
+  subscription Subscription?
+
   // Relationships
-  campaigns         Campaign[]
-  prospects         Prospect[]
-  emailTemplates    EmailTemplate[]
-  integrations      Integration[]
-  auditLogs         AuditLog[]
-  teamMembers       TeamMember[]
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  campaigns      Campaign[]
+  prospects      Prospect[]
+  emailTemplates EmailTemplate[]
+  integrations   Integration[]
+  auditLogs      AuditLog[]
+  teamMembers    TeamMember[]
+  notifications  Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clerkId])
   @@index([email])
 }
 
 model Subscription {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  stripeCustomerId      String   @unique
-  stripeSubscriptionId  String   @unique
-  stripePriceId         String
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeCustomerId       String   @unique
+  stripeSubscriptionId   String   @unique
+  stripePriceId          String
   stripeCurrentPeriodEnd DateTime
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
 }
 
 model Campaign {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name              String
-  description       String?
-  status            CampaignStatus @default(DRAFT)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  status      CampaignStatus @default(DRAFT)
+
   // Campaign settings
-  dailySendLimit    Int @default(50)
-  sendingSchedule   Json? // { days: [], startTime: "", endTime: "" }
-  trackOpens        Boolean @default(true)
-  trackClicks       Boolean @default(true)
-  
+  dailySendLimit  Int     @default(50)
+  sendingSchedule Json? // { days: [], startTime: "", endTime: "" }
+  trackOpens      Boolean @default(true)
+  trackClicks     Boolean @default(true)
+
   // AI settings
-  researchDepth     ResearchDepth @default(STANDARD)
+  researchDepth        ResearchDepth        @default(STANDARD)
   personalizationLevel PersonalizationLevel @default(MEDIUM)
-  toneOfVoice       String @default("professional")
-  
+  toneOfVoice          String               @default("professional")
+
   // Stats
-  totalProspects    Int @default(0)
-  emailsSent        Int @default(0)
-  emailsDelivered   Int @default(0)
-  emailsOpened      Int @default(0)
-  emailsClicked     Int @default(0)
-  emailsReplied     Int @default(0)
-  emailsBounced     Int @default(0)
-  
+  totalProspects  Int @default(0)
+  emailsSent      Int @default(0)
+  emailsDelivered Int @default(0)
+  emailsOpened    Int @default(0)
+  emailsClicked   Int @default(0)
+  emailsReplied   Int @default(0)
+  emailsBounced   Int @default(0)
+
   // Relationships
-  prospects         Prospect[]
-  emailSequences    EmailSequence[]
-  analytics         Analytics[]
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  launchedAt        DateTime?
-  
+  prospects      Prospect[]
+  emailSequences EmailSequence[]
+  analytics      Analytics[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  launchedAt DateTime?
+
   @@index([userId])
   @@index([status])
 }
 
 model Prospect {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaignId        String?
-  campaign          Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
   // Basic info
-  email             String
-  firstName         String?
-  lastName          String?
-  company           String?
-  jobTitle          String?
-  linkedinUrl       String?
-  websiteUrl        String?
-  
+  email       String
+  firstName   String?
+  lastName    String?
+  company     String?
+  jobTitle    String?
+  linkedinUrl String?
+  websiteUrl  String?
+
   // Enriched data
-  companySize       String?
-  industry          String?
-  location          String?
-  phoneNumber       String?
-  
+  companySize String?
+  industry    String?
+  location    String?
+  phoneNumber String?
+
   // AI research data
-  researchData      Json? // Scraped data, insights, talking points
-  qualityScore      Int? // 0-100
+  researchData          Json? // Scraped data, insights, talking points
+  qualityScore          Int? // 0-100
   personalizationTokens Json? // Key-value pairs for template variables
-  
+
   // Email status
-  status            ProspectStatus @default(ACTIVE)
-  currentStep       Int @default(0)
-  lastContactedAt   DateTime?
-  
+  status          ProspectStatus @default(ACTIVE)
+  currentStep     Int            @default(0)
+  lastContactedAt DateTime?
+
   // Engagement - detailed tracking
-  emailsReceived    Int @default(0)  // Total emails sent to this prospect
-  emailsOpened      Int @default(0)  // Total times emails were opened
-  emailsClicked     Int @default(0)  // Total times links were clicked
-  emailsReplied     Int @default(0)  // Total replies received
-  replied           Boolean @default(false)  // Has replied at least once
-  repliedAt         DateTime?
-  bounced           Boolean @default(false)
-  unsubscribed      Boolean @default(false)
-  
+  emailsReceived Int       @default(0) // Total emails sent to this prospect
+  emailsOpened   Int       @default(0) // Total times emails were opened
+  emailsClicked  Int       @default(0) // Total times links were clicked
+  emailsReplied  Int       @default(0) // Total replies received
+  replied        Boolean   @default(false) // Has replied at least once
+  repliedAt      DateTime?
+  bounced        Boolean   @default(false)
+  unsubscribed   Boolean   @default(false)
+
   // Relationships
-  emailLogs         EmailLog[]
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  emailLogs EmailLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([email, campaignId])
   @@index([userId])
   @@index([campaignId])
@@ -169,190 +170,218 @@ model Prospect {
 }
 
 model EmailTemplate {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name              String
-  description       String?
-  category          String? // "cold_outreach", "follow_up", "meeting_request"
-  
-  subject           String
-  body              String @db.Text
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  category    String? // "cold_outreach", "follow_up", "meeting_request"
+
+  subject String
+  body    String @db.Text
+
   // Template variables
-  variables         Json? // [{ name: "company", required: true }]
-  
+  variables Json? // [{ name: "company", required: true }]
+
   // AI generation settings
-  aiGenerated       Boolean @default(false)
-  basePrompt        String? @db.Text
-  
+  aiGenerated Boolean @default(false)
+  basePrompt  String? @db.Text
+
   // Stats
-  timesUsed         Int @default(0)
-  avgOpenRate       Float?
-  avgReplyRate      Float?
-  
+  timesUsed    Int    @default(0)
+  avgOpenRate  Float?
+  avgReplyRate Float?
+
   // Relationships
-  emailSequences    EmailSequence[]
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  emailSequences EmailSequence[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([category])
 }
 
 model EmailSequence {
-  id                String   @id @default(cuid())
-  campaignId        String
-  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  templateId        String
-  template          EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  
-  stepNumber        Int // 1, 2, 3, etc.
-  delayDays         Int @default(2) // Days after previous email
-  
+  id         String        @id @default(cuid())
+  campaignId String
+  campaign   Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  templateId String
+  template   EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  stepNumber Int // 1, 2, 3, etc.
+  delayDays  Int @default(2) // Days after previous email
+
   // Conditions
   sendOnlyIfNotReplied Boolean @default(true)
   sendOnlyIfNotOpened  Boolean @default(false)
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([campaignId, stepNumber])
   @@index([campaignId])
 }
 
 model EmailLog {
-  id                String   @id @default(cuid())
-  prospectId        String
-  prospect          Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
-  
+  id         String   @id @default(cuid())
+  prospectId String
+  prospect   Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
   // Email details
-  subject           String
-  body              String @db.Text
-  fromEmail         String
-  toEmail           String
-  
+  subject   String
+  body      String @db.Text
+  fromEmail String
+  toEmail   String
+
   // Status
-  status            EmailStatus @default(QUEUED)
-  sentAt            DateTime?
-  deliveredAt       DateTime?
-  openedAt          DateTime?
-  clickedAt         DateTime?
-  repliedAt         DateTime?
-  bouncedAt         DateTime?
-  
+  status      EmailStatus @default(QUEUED)
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+  repliedAt   DateTime?
+  bouncedAt   DateTime?
+
   // Tracking
-  opens             Int @default(0)
-  clicks            Int @default(0)
-  trackingId        String? @unique
-  
+  opens      Int     @default(0)
+  clicks     Int     @default(0)
+  trackingId String? @unique
+
   // Error handling
-  errorMessage      String?
-  retryCount        Int @default(0)
-  
+  errorMessage String?
+  retryCount   Int     @default(0)
+
   // Provider info
-  provider          String? // "resend", "gmail", "outlook"
-  providerId        String? // External ID from email provider
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  provider   String? // "resend", "gmail", "outlook"
+  providerId String? // External ID from email provider
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([prospectId])
   @@index([status])
   @@index([sentAt])
 }
 
 model Integration {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type              IntegrationType
-  name              String
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type IntegrationType
+  name String
+
   // Credentials (encrypted)
-  credentials       Json // Encrypted API keys, tokens, etc.
-  
+  credentials Json // Encrypted API keys, tokens, etc.
+
   // Status
-  isActive          Boolean @default(true)
-  lastSyncedAt      DateTime?
-  
+  isActive     Boolean   @default(true)
+  lastSyncedAt DateTime?
+
   // Settings
-  settings          Json? // Provider-specific settings
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  settings Json? // Provider-specific settings
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([userId, type])
   @@index([userId])
 }
 
 model Analytics {
-  id                String   @id @default(cuid())
-  campaignId        String
-  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  
-  date              DateTime @default(now())
-  
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  date DateTime @default(now())
+
   // Daily metrics
-  emailsSent        Int @default(0)
-  emailsDelivered   Int @default(0)
-  emailsOpened      Int @default(0)
-  emailsClicked     Int @default(0)
-  emailsReplied     Int @default(0)
-  emailsBounced     Int @default(0)
-  
+  emailsSent      Int @default(0)
+  emailsDelivered Int @default(0)
+  emailsOpened    Int @default(0)
+  emailsClicked   Int @default(0)
+  emailsReplied   Int @default(0)
+  emailsBounced   Int @default(0)
+
   // Calculated rates
-  deliveryRate      Float?
-  openRate          Float?
-  clickRate         Float?
-  replyRate         Float?
-  bounceRate        Float?
-  
-  createdAt         DateTime @default(now())
-  
+  deliveryRate Float?
+  openRate     Float?
+  clickRate    Float?
+  replyRate    Float?
+  bounceRate   Float?
+
+  createdAt DateTime @default(now())
+
   @@unique([campaignId, date])
   @@index([campaignId])
   @@index([date])
 }
 
 model AuditLog {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  action            String // "campaign.created", "prospect.imported", etc.
-  entityType        String // "campaign", "prospect", "template"
-  entityId          String?
-  
-  metadata          Json? // Additional context
-  ipAddress         String?
-  userAgent         String?
-  
-  createdAt         DateTime @default(now())
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action     String // "campaign.created", "prospect.imported", etc.
+  entityType String // "campaign", "prospect", "template"
+  entityId   String?
+
+  metadata  Json? // Additional context
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@index([entityType])
   @@index([createdAt])
 }
 
 model TeamMember {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  email             String
-  role              TeamRole @default(MEMBER)
-  permissions       Json? // Granular permissions
-  
-  invitedAt         DateTime @default(now())
-  acceptedAt        DateTime?
-  status            InviteStatus @default(PENDING)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  email       String
+  role        TeamRole @default(MEMBER)
+  permissions Json? // Granular permissions
+
+  invitedAt  DateTime     @default(now())
+  acceptedAt DateTime?
+  status     InviteStatus @default(PENDING)
+
   @@unique([userId, email])
   @@index([userId])
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+
+  type    NotificationType
+  title   String
+  message String           @db.Text
+
+  // Related entity
+  entityType String? // "campaign", "prospect", "email"
+  entityId   String?
+
+  // Status
+  read   Boolean   @default(false)
+  readAt DateTime?
+
+  // Metadata
+  metadata  Json? // Additional context
+  actionUrl String? // Link to related page
+
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
 }
 
 // Enums
@@ -441,4 +470,16 @@ enum InviteStatus {
   ACCEPTED
   DECLINED
   EXPIRED
+}
+
+enum NotificationType {
+  CAMPAIGN_COMPLETED
+  CAMPAIGN_PAUSED
+  NEW_REPLY
+  PROSPECT_IMPORTED
+  EMAIL_BOUNCED
+  CREDIT_LOW
+  SUBSCRIPTION_EXPIRING
+  TEAM_INVITE
+  SYSTEM_UPDATE
 }
