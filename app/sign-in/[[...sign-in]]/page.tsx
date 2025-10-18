@@ -5,7 +5,7 @@ export default function SignInPage() {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome bacck</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
           <p className="mt-2 text-gray-600">Sign in to your ReachAI account</p>
         </div>
         <SignIn
