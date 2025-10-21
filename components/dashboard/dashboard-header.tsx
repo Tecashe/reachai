@@ -701,7 +701,6 @@
 //   )
 // }
 
-
 "use client"
 
 import React from "react"
@@ -730,6 +729,7 @@ import { CommandPalette } from "@/components/command-palette/command-palette"
 import { MobileSidebar } from "@/components/dashboard/dashboard-sidebar"
 import { NotificationsPopover } from "@/components/dashboard/notifications-popover"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { TourTrigger } from "@/components/onboarding/onboarding-tour"
 
 export function DashboardHeader() {
   const { user } = useUser()
@@ -811,6 +811,12 @@ export function DashboardHeader() {
                   <p className="text-xs text-muted-foreground">{user?.emailAddresses[0]?.emailAddress}</p>
                 </div>
               </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <div className="w-full">
+                  <TourTrigger />
+                </div>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/settings">Settings</Link>
