@@ -1014,17 +1014,12 @@ export function OnboardingTour() {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-40 bg-black/60"
               onClick={handleSkip}
-              style={{
-                background: "rgba(0, 0, 0, 0.6)",
-                backdropFilter: "blur(2px)",
-              }}
             />
 
             {highlightedElement && (
@@ -1038,7 +1033,10 @@ export function OnboardingTour() {
                   left: highlightedElement.getBoundingClientRect().left - 8,
                   width: highlightedElement.getBoundingClientRect().width + 16,
                   height: highlightedElement.getBoundingClientRect().height + 16,
-                  boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.6), 0 0 20px 4px rgba(59, 130, 246, 0.5)",
+                  boxShadow: `
+                    0 0 0 4px rgba(59, 130, 246, 0.5),
+                    0 0 0 9999px rgba(0, 0, 0, 0.6)
+                  `,
                   borderRadius: "12px",
                   transition: "all 0.3s ease",
                 }}
