@@ -1,0 +1,11 @@
+firstName,lastName,email,company,jobTitle,linkedinUrl,websiteUrl
+John,Smith,john.smith@techcorp.com,TechCorp Inc,VP of Sales,https://linkedin.com/in/johnsmith,https://techcorp.com
+Sarah,Johnson,sarah.j@innovate.io,Innovate Solutions,Head of Marketing,https://linkedin.com/in/sarahjohnson,https://innovate.io
+Michael,Chen,m.chen@dataflow.com,DataFlow Systems,CTO,https://linkedin.com/in/michaelchen,https://dataflow.com
+Emily,Rodriguez,emily.r@cloudbase.net,CloudBase Technologies,Director of Operations,https://linkedin.com/in/emilyrodriguez,https://cloudbase.net
+David,Williams,david.w@nextstep.com,NextStep Ventures,CEO,https://linkedin.com/in/davidwilliams,https://nextstep.com
+Lisa,Anderson,lisa.anderson@growthlab.io,GrowthLab,VP of Business Development,https://linkedin.com/in/lisaanderson,https://growthlab.io
+James,Taylor,james.t@scalehub.com,ScaleHub,Head of Sales,https://linkedin.com/in/jamestaylor,https://scalehub.com
+Jennifer,Martinez,jennifer.m@futuretech.ai,FutureTech AI,Chief Product Officer,https://linkedin.com/in/jennifermartinez,https://futuretech.ai
+Robert,Brown,robert.brown@streamline.co,Streamline Software,VP of Engineering,https://linkedin.com/in/robertbrown,https://streamline.co
+Amanda,Davis,amanda.d@momentum.io,Momentum Digital,Marketing Director,https://linkedin.com/in/amandadavis,https://momentum.io
