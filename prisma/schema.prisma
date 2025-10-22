@@ -32,6 +32,17 @@ model User {
   prospectsThisMonth  Int @default(0)
   aiCreditsUsed       Int @default(0)
 
+  // Onboarding progress
+  hasCreatedCampaign      Boolean   @default(false)
+  hasAddedProspects       Boolean   @default(false)
+  hasResearchedProspects  Boolean   @default(false)
+  hasGeneratedEmail       Boolean   @default(false)
+  hasSentEmail            Boolean   @default(false)
+  hasViewedAnalytics      Boolean   @default(false)
+  onboardingCompletedAt   DateTime?
+  lastOnboardingEmailSent DateTime?
+  onboardingEmailsSent    Int       @default(0)
+
   // Settings
   timezone         String  @default("America/New_York")
   emailSignature   String?
