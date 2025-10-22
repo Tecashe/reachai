@@ -32,7 +32,7 @@ const envSchema = z.object({
   OUTLOOK_CLIENT_ID: z.string().optional(),
   OUTLOOK_CLIENT_SECRET: z.string().optional(),
 
-  // Optional - Web scraping
+  // Optional - Web scrapinngg
   BRIGHT_DATA_API_KEY: z.string().optional(),
   APIFY_API_KEY: z.string().optional(),
 })
