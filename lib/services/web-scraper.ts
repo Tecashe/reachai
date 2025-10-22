@@ -107,6 +107,9 @@
 //     return []
 //   }
 // }
+
+
+
 import { env } from "@/lib/env"
 
 interface ScrapedData {
@@ -141,7 +144,7 @@ export async function scrapeWebsite(url: string): Promise<ScrapedData> {
   console.log("[v0] Scraping website:", url)
 
   try {
-    // Use Firecrawl API for production web scraping
+    // Use Firecrawl API for production web scrapin
     if (env.FIRECRAWL_API_KEY) {
       const response = await fetch("https://api.firecrawl.dev/v0/scrape", {
         method: "POST",
