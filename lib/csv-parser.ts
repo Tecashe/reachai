@@ -7,8 +7,18 @@ const prospectSchema = z.object({
   lastName: z.string().optional(),
   company: z.string().optional(),
   jobTitle: z.string().optional(),
-  linkedinUrl: z.string().url().optional().or(z.literal("")),
-  websiteUrl: z.string().url().optional().or(z.literal("")),
+  linkedinUrl: z
+    .string()
+    .url()
+    .optional()
+    .or(z.literal(""))
+    .transform((val) => val || undefined),
+  websiteUrl: z
+    .string()
+    .url()
+    .optional()
+    .or(z.literal(""))
+    .transform((val) => val || undefined),
   phoneNumber: z.string().optional(),
   location: z.string().optional(),
   industry: z.string().optional(),
@@ -73,8 +83,15 @@ export async function parseProspectCSV(file: File): Promise<ParseResult> {
 
         results.data.forEach((row: any, index) => {
           try {
+            const cleanedRow = Object.fromEntries(
+              Object.entries(row).map(([key, value]) => [
+                key,
+                typeof value === "string" && value.trim() === "" ? undefined : value,
+              ]),
+            )
+
             // Validate row
-            const validated = prospectSchema.parse(row)
+            const validated = prospectSchema.parse(cleanedRow)
 
             // Check for duplicates
             if (seenEmails.has(validated.email.toLowerCase())) {

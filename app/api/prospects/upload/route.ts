@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     const parseResult = await parseProspectCSV(file)
 
     if (!parseResult.success || !parseResult.data) {
+      logger.error("CSV parsing failed", undefined, { errors: parseResult.errors })
       return NextResponse.json(
         {
           error: "Failed to parse CSV",
@@ -68,23 +69,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create prospects
+    const prospectsToCreate = parseResult.data.map((p) => ({
+      userId: user!.id,
+      campaignId,
+      email: p.email,
+      firstName: p.firstName || null,
+      lastName: p.lastName || null,
+      company: p.company || null,
+      jobTitle: p.jobTitle || null,
+      linkedinUrl: p.linkedinUrl || null,
+      websiteUrl: p.websiteUrl || null,
+      phoneNumber: p.phoneNumber || null,
+      location: p.location || null,
+      industry: p.industry || null,
+      status: "ACTIVE" as const,
+    }))
+
+    logger.info("Creating prospects", {
+      count: prospectsToCreate.length,
+      sample: prospectsToCreate[0],
+    })
+
     const created = await db.prospect.createMany({
-      data: parseResult.data.map((p) => ({
-        userId: user!.id,
-        campaignId,
-        email: p.email,
-        firstName: p.firstName || "",
-        lastName: p.lastName || "",
-        company: p.company || "",
-        jobTitle: p.jobTitle || "",
-        linkedinUrl: p.linkedinUrl || "",
-        websiteUrl: p.websiteUrl || "",
-        phoneNumber: p.phoneNumber || "",
-        location: p.location || "",
-        industry: p.industry || "",
-        status: "ACTIVE",
-      })),
+      data: prospectsToCreate,
       skipDuplicates: true,
     })
 
@@ -117,7 +124,18 @@ export async function POST(request: NextRequest) {
       warnings: parseResult.errors,
     })
   } catch (error) {
-    logger.error("CSV upload error", error as Error)
-    return NextResponse.json({ error: "Failed to upload prospects" }, { status: 500 })
+    const err = error instanceof Error ? error : new Error(String(error))
+    logger.error("CSV upload error", err, {
+      message: err.message,
+      stack: err.stack,
+    })
+
+    return NextResponse.json(
+      {
+        error: "Failed to upload prospects",
+        details: err.message,
+      },
+      { status: 500 },
+    )
   }
 }
