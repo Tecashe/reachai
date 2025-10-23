@@ -49,7 +49,8 @@ model User {
   defaultFromName  String?
   defaultFromEmail String?
 
-  subscription Subscription?
+  subscription    Subscription?
+  sendingAccounts SendingAccount[]
 
   // Relationships
   campaigns      Campaign[]
@@ -169,7 +170,8 @@ model Prospect {
   unsubscribed   Boolean   @default(false)
 
   // Relationships
-  emailLogs EmailLog[]
+  emailLogs        EmailLog[]
+  sendingSchedules SendingSchedule[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -269,12 +271,19 @@ model EmailLog {
   provider   String? // "resend", "gmail", "outlook"
   providerId String? // External ID from email provider
 
+  sendingAccountId String?
+  sendingAccount   SendingAccount? @relation(fields: [sendingAccountId], references: [id], onDelete: SetNull)
+
+  validationId String?
+  validation   EmailValidationResult? @relation(fields: [validationId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([prospectId])
   @@index([status])
   @@index([sentAt])
+  @@index([sendingAccountId])
 }
 
 model Integration {
@@ -427,6 +436,120 @@ model ApiKey {
   @@index([keyPrefix])
 }
 
+model SendingAccount {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Account details
+  name     String
+  email    String
+  provider String // "resend", "gmail", "outlook"
+
+  // Credentials (encrypted)
+  credentials Json // API keys, OAuth tokens, etc.
+
+  // Rate limiting
+  dailyLimit         Int      @default(50)
+  hourlyLimit        Int      @default(10)
+  emailsSentToday    Int      @default(0)
+  emailsSentThisHour Int      @default(0)
+  lastResetDate      DateTime @default(now())
+  lastResetHour      DateTime @default(now())
+
+  // Warmup configuration
+  warmupEnabled    Boolean @default(true)
+  warmupStage      Int     @default(1) // 1-5
+  warmupDailyLimit Int     @default(20)
+
+  // Health & reputation
+  isActive          Boolean   @default(true)
+  bounceRate        Float     @default(0)
+  spamComplaintRate Float     @default(0)
+  lastHealthCheck   DateTime?
+
+  // Relationships
+  emailLogs EmailLog[]
+  schedules SendingSchedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, email])
+  @@index([userId])
+  @@index([isActive])
+}
+
+model EmailValidationResult {
+  id     String @id @default(cuid())
+  userId String
+
+  // Email content
+  subject        String
+  body           String @db.Text
+  recipientEmail String
+
+  // Validation scores (0-100)
+  overallScore         Int
+  spamScore            Int
+  personalizationScore Int
+  deliverabilityScore  Int
+
+  // Detailed analysis
+  spamTriggers           Json // Array of detected spam triggers
+  missingPersonalization Json // Array of missing personalization opportunities
+  recommendations        Json // Array of improvement suggestions
+
+  // Metadata
+  validatedAt DateTime @default(now())
+
+  // Relationships
+  emailLogs EmailLog[]
+
+  @@index([userId])
+  @@index([overallScore])
+  @@index([validatedAt])
+}
+
+model SendingSchedule {
+  id     String @id @default(cuid())
+  userId String
+
+  // Email details
+  prospectId String
+  prospect   Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  campaignId String?
+
+  subject String
+  body    String @db.Text
+
+  // Scheduling
+  scheduledFor        DateTime
+  timezone            String   @default("America/New_York")
+  sendInBusinessHours Boolean  @default(true)
+
+  // Account assignment
+  sendingAccountId String?
+  sendingAccount   SendingAccount? @relation(fields: [sendingAccountId], references: [id], onDelete: SetNull)
+
+  // Status
+  status      ScheduleStatus @default(PENDING)
+  processedAt DateTime?
+  emailLogId  String?
+
+  // Error handling
+  errorMessage String?
+  retryCount   Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([scheduledFor])
+  @@index([status])
+  @@index([sendingAccountId])
+}
+
 // Enums
 enum UserRole {
   USER
@@ -525,4 +648,12 @@ enum NotificationType {
   SUBSCRIPTION_EXPIRING
   TEAM_INVITE
   SYSTEM_UPDATE
+}
+
+enum ScheduleStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  CANCELLED
 }
