@@ -210,3 +210,267 @@ export const LOW_CREDIT_THRESHOLDS = {
   EMAIL: 50,
   RESEARCH: 10,
 } as const
+
+export const TEMPLATE_LIBRARY = [
+  // Cold Outreach Templates
+  {
+    id: "cold_1",
+    name: "Problem-Solution Approach",
+    category: "cold_outreach",
+    subject: "Quick question about {{company}}'s {{pain_point}}",
+    body: `Hi {{firstName}},
+
+I noticed {{company}} is {{recent_activity}}. Many companies in {{industry}} face challenges with {{pain_point}}.
+
+We've helped similar companies like {{competitor}} achieve {{specific_result}}. Would you be open to a quick 15-minute call to explore if we could help {{company}} achieve similar results?
+
+Best regards,
+{{senderName}}`,
+    description: "Lead with a problem your prospect likely faces, then offer your solution",
+    variables: [
+      "firstName",
+      "company",
+      "recent_activity",
+      "industry",
+      "pain_point",
+      "competitor",
+      "specific_result",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "cold_2",
+    name: "Social Proof Opener",
+    category: "cold_outreach",
+    subject: "How {{competitor}} increased {{metric}} by {{percentage}}",
+    body: `Hi {{firstName}},
+
+I saw that {{company}} is {{recent_news}}. Congrats on the momentum!
+
+We recently helped {{competitor}} increase their {{metric}} by {{percentage}} in just {{timeframe}}. Given your focus on {{goal}}, I thought this might be relevant.
+
+Would you be interested in learning how they did it?
+
+Best,
+{{senderName}}`,
+    description: "Use social proof from similar companies to build credibility",
+    variables: [
+      "firstName",
+      "company",
+      "recent_news",
+      "competitor",
+      "metric",
+      "percentage",
+      "timeframe",
+      "goal",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "cold_3",
+    name: "Personalized Insight",
+    category: "cold_outreach",
+    subject: "Noticed {{company}}'s {{specific_initiative}}",
+    body: `Hi {{firstName}},
+
+I came across {{company}}'s {{specific_initiative}} and was impressed by {{specific_detail}}.
+
+As someone who works with {{industry}} companies, I noticed an opportunity to {{improvement_suggestion}}. We've helped companies like {{example_company}} achieve {{result}}.
+
+Would you be open to a brief conversation about this?
+
+Cheers,
+{{senderName}}`,
+    description: "Show you've done your research with specific, personalized insights",
+    variables: [
+      "firstName",
+      "company",
+      "specific_initiative",
+      "specific_detail",
+      "industry",
+      "improvement_suggestion",
+      "example_company",
+      "result",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+
+  // Follow-up Templates
+  {
+    id: "followup_1",
+    name: "Value-Add Follow-up",
+    category: "follow_up",
+    subject: "Re: {{original_subject}} + resource",
+    body: `Hi {{firstName}},
+
+Following up on my previous email about {{topic}}.
+
+I thought you might find this helpful: {{resource_link}} - it's a {{resource_description}} that {{benefit}}.
+
+Still interested in discussing how we can help {{company}} with {{goal}}?
+
+Best,
+{{senderName}}`,
+    description: "Add value in your follow-up with a relevant resource",
+    variables: [
+      "firstName",
+      "original_subject",
+      "topic",
+      "resource_link",
+      "resource_description",
+      "benefit",
+      "company",
+      "goal",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "followup_2",
+    name: "Breakup Email",
+    category: "follow_up",
+    subject: "Should I close your file?",
+    body: `Hi {{firstName}},
+
+I've reached out a few times about {{topic}} but haven't heard back.
+
+I don't want to be a pest, so I'll assume this isn't a priority for {{company}} right now.
+
+If that changes, feel free to reach out. Otherwise, I'll close your file.
+
+Best of luck with {{recent_initiative}}!
+
+{{senderName}}`,
+    description: "Final follow-up that often gets responses by creating urgency",
+    variables: ["firstName", "topic", "company", "recent_initiative", "senderName"],
+    isSystemTemplate: true,
+  },
+  {
+    id: "followup_3",
+    name: "Different Angle Follow-up",
+    category: "follow_up",
+    subject: "Different approach for {{company}}",
+    body: `Hi {{firstName}},
+
+I realize my previous email about {{original_topic}} might not have resonated.
+
+Let me try a different angle: What if you could {{alternative_benefit}} without {{common_objection}}?
+
+That's exactly what we did for {{case_study_company}}. Worth a quick chat?
+
+Best,
+{{senderName}}`,
+    description: "Approach from a different angle if the first attempt didn't work",
+    variables: [
+      "firstName",
+      "company",
+      "original_topic",
+      "alternative_benefit",
+      "common_objection",
+      "case_study_company",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+
+  // Meeting Request Templates
+  {
+    id: "meeting_1",
+    name: "Direct Meeting Request",
+    category: "meeting_request",
+    subject: "15 minutes to discuss {{topic}}?",
+    body: `Hi {{firstName}},
+
+Based on {{company}}'s {{recent_activity}}, I believe we could help you {{specific_outcome}}.
+
+Would you be available for a 15-minute call {{suggested_time}}? I'll come prepared with:
+
+• {{talking_point_1}}
+• {{talking_point_2}}
+• {{talking_point_3}}
+
+Here's my calendar: {{calendar_link}}
+
+Looking forward to connecting!
+
+{{senderName}}`,
+    description: "Clear, direct meeting request with specific agenda",
+    variables: [
+      "firstName",
+      "company",
+      "recent_activity",
+      "specific_outcome",
+      "suggested_time",
+      "talking_point_1",
+      "talking_point_2",
+      "talking_point_3",
+      "calendar_link",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "meeting_2",
+    name: "Soft Meeting Request",
+    category: "meeting_request",
+    subject: "Quick question about {{topic}}",
+    body: `Hi {{firstName}},
+
+I have a quick question about {{company}}'s approach to {{topic}}.
+
+Rather than a long email, would you be open to a brief 10-minute call? I promise to be respectful of your time.
+
+If {{suggested_day}} works, here's my calendar: {{calendar_link}}
+
+Thanks,
+{{senderName}}`,
+    description: "Softer approach that feels less salesy",
+    variables: ["firstName", "company", "topic", "suggested_day", "calendar_link", "senderName"],
+    isSystemTemplate: true,
+  },
+  {
+    id: "meeting_3",
+    name: "Executive Meeting Request",
+    category: "meeting_request",
+    subject: "{{mutual_connection}} suggested we connect",
+    body: `Hi {{firstName}},
+
+{{mutual_connection}} mentioned you're the right person to speak with about {{topic}} at {{company}}.
+
+I work with {{industry}} leaders like {{client_1}} and {{client_2}} to {{value_proposition}}.
+
+Would you be open to a brief conversation? I'm happy to work around your schedule.
+
+Best regards,
+{{senderName}}
+{{title}}`,
+    description: "Professional approach for reaching executives with social proof",
+    variables: [
+      "firstName",
+      "mutual_connection",
+      "topic",
+      "company",
+      "industry",
+      "client_1",
+      "client_2",
+      "value_proposition",
+      "senderName",
+      "title",
+    ],
+    isSystemTemplate: true,
+  },
+] as const
+
+export type SystemTemplate = {
+  id: string
+  name: string
+  category: string
+  subject: string
+  body: string
+  description: string
+  variables: readonly string[] // Changed from string[] to readonly string[] to match TEMPLATE_LIBRARY constants
+  isSystemTemplate: boolean
+}
