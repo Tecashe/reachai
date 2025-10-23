@@ -826,7 +826,7 @@ class EmailSender {
       //   html: trackedHtml,
       //   text: text || this.htmlToText(html),
       // })
-      
+
       const { data, error } = await resend.send({
         to,
         subject,
@@ -864,7 +864,7 @@ class EmailSender {
         await sendingAccountManager.incrementAccountUsage(selectedAccount.id)
       }
 
-      // Update prospect stats
+      // Update prospect stat
       if (prospectId) {
         await db.prospect.update({
           where: { id: prospectId },
