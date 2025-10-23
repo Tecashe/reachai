@@ -118,6 +118,7 @@ model Campaign {
   prospects      Prospect[]
   emailSequences EmailSequence[]
   analytics      Analytics[]
+  replies        EmailReply[]
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -172,6 +173,13 @@ model Prospect {
   // Relationships
   emailLogs        EmailLog[]
   sendingSchedules SendingSchedule[]
+  replies          EmailReply[]
+
+  timezone           String?
+  timezoneDetectedAt DateTime?
+
+  lastReplyAt DateTime?
+  replyCount  Int       @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -263,6 +271,9 @@ model EmailLog {
   clicks     Int     @default(0)
   trackingId String? @unique
 
+  recipientTimezone   String?
+  sentInBusinessHours Boolean @default(false)
+
   // Error handling
   errorMessage String?
   retryCount   Int     @default(0)
@@ -276,6 +287,9 @@ model EmailLog {
 
   validationId String?
   validation   EmailValidationResult? @relation(fields: [validationId], references: [id], onDelete: SetNull)
+
+  bounces EmailBounce[]
+  replies EmailReply[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -457,20 +471,31 @@ model SendingAccount {
   lastResetDate      DateTime @default(now())
   lastResetHour      DateTime @default(now())
 
-  // Warmup configuration
-  warmupEnabled    Boolean @default(true)
-  warmupStage      Int     @default(1) // 1-5
-  warmupDailyLimit Int     @default(20)
+  warmupEnabled    Boolean     @default(true)
+  warmupStage      WarmupStage @default(NEW)
+  warmupStartDate  DateTime    @default(now())
+  warmupDailyLimit Int         @default(20)
+  warmupProgress   Int         @default(0) // Days in current stage
 
-  // Health & reputation
   isActive          Boolean   @default(true)
+  healthScore       Int       @default(100) // 0-100
   bounceRate        Float     @default(0)
   spamComplaintRate Float     @default(0)
+  replyRate         Float     @default(0)
+  openRate          Float     @default(0)
   lastHealthCheck   DateTime?
+  pausedReason      String?
+  pausedAt          DateTime?
+
+  domainReputation Json? // SPF, DKIM, DMARC status
+  lastDomainCheck  DateTime?
+  blacklistStatus  Json? // Blacklist check results
 
   // Relationships
   emailLogs EmailLog[]
   schedules SendingSchedule[]
+  bounces   EmailBounce[]
+  replies   EmailReply[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -478,6 +503,64 @@ model SendingAccount {
   @@unique([userId, email])
   @@index([userId])
   @@index([isActive])
+  @@index([healthScore])
+}
+
+model EmailBounce {
+  id         String   @id @default(cuid())
+  emailLogId String
+  emailLog   EmailLog @relation(fields: [emailLogId], references: [id], onDelete: Cascade)
+
+  sendingAccountId String
+  sendingAccount   SendingAccount @relation(fields: [sendingAccountId], references: [id], onDelete: Cascade)
+
+  bounceType     BounceType // HARD, SOFT, COMPLAINT
+  bounceReason   String?
+  diagnosticCode String?
+
+  recipientEmail String
+  bouncedAt      DateTime @default(now())
+
+  @@index([sendingAccountId])
+  @@index([bounceType])
+  @@index([bouncedAt])
+}
+
+model EmailReply {
+  id         String   @id @default(cuid())
+  emailLogId String
+  emailLog   EmailLog @relation(fields: [emailLogId], references: [id], onDelete: Cascade)
+
+  sendingAccountId String?
+  sendingAccount   SendingAccount? @relation(fields: [sendingAccountId], references: [id], onDelete: SetNull)
+
+  prospectId String
+  prospect   Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  // Reply content
+  subject   String
+  body      String @db.Text
+  fromEmail String
+
+  // AI analysis
+  sentiment   ReplySentiment?
+  category    ReplyCategory?
+  isAutoReply Boolean         @default(false)
+
+  // Actions taken
+  campaignPaused  Boolean @default(false)
+  prospectUpdated Boolean @default(false)
+
+  repliedAt  DateTime  @default(now())
+  analyzedAt DateTime?
+
+  @@index([prospectId])
+  @@index([campaignId])
+  @@index([sentiment])
+  @@index([repliedAt])
 }
 
 model EmailValidationResult {
@@ -656,4 +739,34 @@ enum ScheduleStatus {
   SENT
   FAILED
   CANCELLED
+}
+
+enum WarmupStage {
+  NEW // 0-7 days: 20 emails/day
+  WARMING // 8-14 days: 40 emails/day
+  WARM // 15-21 days: 60 emails/day
+  ACTIVE // 22-30 days: 80 emails/day
+  ESTABLISHED // 30+ days: Full limit
+}
+
+enum BounceType {
+  HARD // Permanent failure (invalid email)
+  SOFT // Temporary failure (mailbox full)
+  COMPLAINT // Spam complaint
+}
+
+enum ReplySentiment {
+  POSITIVE // Interested, wants to learn more
+  NEUTRAL // Asking questions, needs info
+  NEGATIVE // Not interested, remove me
+  AUTO_REPLY // Out of office, auto-responder
+}
+
+enum ReplyCategory {
+  INTERESTED // Wants to schedule call/demo
+  NOT_INTERESTED // Not a fit, not now
+  QUESTION // Asking for more information
+  OUT_OF_OFFICE // Auto-reply
+  UNSUBSCRIBE // Remove from list
+  REFERRAL // Forwarded to someone else
 }
