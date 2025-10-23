@@ -274,6 +274,9 @@ model EmailLog {
   recipientTimezone   String?
   sentInBusinessHours Boolean @default(false)
 
+  variant      String? // "A", "B", "C" for A/B testing
+  variantGroup String? // Group ID for related variants
+
   // Error handling
   errorMessage String?
   retryCount   Int     @default(0)
@@ -298,6 +301,7 @@ model EmailLog {
   @@index([status])
   @@index([sentAt])
   @@index([sendingAccountId])
+  @@index([variantGroup])
 }
 
 model Integration {
@@ -550,6 +554,11 @@ model EmailReply {
   category    ReplyCategory?
   isAutoReply Boolean         @default(false)
 
+  isRead     Boolean   @default(false)
+  readAt     DateTime?
+  isArchived Boolean   @default(false)
+  archivedAt DateTime?
+
   // Actions taken
   campaignPaused  Boolean @default(false)
   prospectUpdated Boolean @default(false)
@@ -561,6 +570,8 @@ model EmailReply {
   @@index([campaignId])
   @@index([sentiment])
   @@index([repliedAt])
+  @@index([isRead])
+  @@index([isArchived])
 }
 
 model EmailValidationResult {
