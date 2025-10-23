@@ -49,6 +49,8 @@ model User {
   defaultFromName  String?
   defaultFromEmail String?
 
+  preferences Json? // { scrapingMode: "FAST" | "DEEP", ... }
+
   subscription    Subscription?
   sendingAccounts SendingAccount[]
 

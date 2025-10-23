@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Next.js Application
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - SCRAPER_SERVICE_URL=http://scraper-service:8000
+      - SCRAPER_API_KEY=${SCRAPER_API_KEY}
+    depends_on:
+      - scraper-service
+    networks:
+      - reachai-network
+    restart: unless-stopped
+
+  # Python Scraper Service
+  scraper-service:
+    build:
+      context: ./scraper-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SCRAPER_API_KEY=${SCRAPER_API_KEY}
+      - ALLOWED_ORIGINS=${NEXT_PUBLIC_APP_URL},http://localhost:3000
+    volumes:
+      - scraper-screenshots:/tmp
+    networks:
+      - reachai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  reachai-network:
+    driver: bridge
+
+volumes:
+  scraper-screenshots:

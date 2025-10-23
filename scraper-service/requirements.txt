@@ -1,0 +1,20 @@
+# FastAPI and server
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.2
+python-multipart==0.0.12
+
+# Web scraping
+playwright==1.48.0
+beautifulsoup4==4.12.3
+lxml==5.3.0
+httpx==0.27.2
+
+# AI providers
+anthropic==0.39.0
+openai==1.54.3
+
+# Utilities
+python-dotenv==1.0.1
+aiofiles==24.1.0
+pillow==11.0.0
