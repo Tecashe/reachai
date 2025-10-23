@@ -55,14 +55,16 @@ model User {
   sendingAccounts SendingAccount[]
 
   // Relationships
-  campaigns      Campaign[]
-  prospects      Prospect[]
-  emailTemplates EmailTemplate[]
-  integrations   Integration[]
-  auditLogs      AuditLog[]
-  teamMembers    TeamMember[]
-  notifications  Notification[]
-  apiKeys        ApiKey[]
+  campaigns          Campaign[]
+  prospects          Prospect[]
+  emailTemplates     EmailTemplate[]
+  integrations       Integration[]
+  auditLogs          AuditLog[]
+  teamMembers        TeamMember[]
+  notifications      Notification[]
+  apiKeys            ApiKey[]
+  creditTransactions CreditTransaction[]
+  creditPurchases    CreditPurchase[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -646,6 +648,60 @@ model SendingSchedule {
   @@index([sendingAccountId])
 }
 
+model CreditTransaction {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type       CreditTransactionType
+  creditType CreditType // EMAIL or RESEARCH
+  amount     Int // Positive for additions, negative for deductions
+  balance    Int // Balance after transaction
+
+  // Context
+  description String
+  entityType  String? // "email", "research", "campaign"
+  entityId    String?
+
+  metadata Json? // Additional context
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model CreditPurchase {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  packageId   String // "email_1000", "research_100", etc.
+  packageName String
+
+  creditType   CreditType
+  creditAmount Int
+
+  // Payment
+  amount   Int // Amount in cents
+  currency String @default("usd")
+
+  stripePaymentIntentId String? @unique
+  stripeSessionId       String? @unique
+
+  status PurchaseStatus @default(PENDING)
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
 // Enums
 enum UserRole {
   USER
@@ -782,4 +838,24 @@ enum ReplyCategory {
   OUT_OF_OFFICE // Auto-reply
   UNSUBSCRIBE // Remove from list
   REFERRAL // Forwarded to someone else
+}
+
+enum CreditTransactionType {
+  PURCHASE // Bought credits
+  DEDUCTION // Used credits
+  REFUND // Refunded credits
+  BONUS // Promotional credits
+  SUBSCRIPTION // Monthly subscription credits
+}
+
+enum CreditType {
+  EMAIL
+  RESEARCH
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }

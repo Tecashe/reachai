@@ -1,13 +1,99 @@
-import { headers } from "next/headers"
+// import { headers } from "next/headers"
+// import { NextResponse } from "next/server"
+// import Stripe from "stripe"
+// import { db } from "@/lib/db"
+
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+//   apiVersion: "2025-09-30.clover",
+// })
+
+// const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
+// export async function POST(req: Request) {
+//   const body = await req.text()
+//   const signature = (await headers()).get("stripe-signature")!
+
+//   let event: Stripe.Event
+
+//   try {
+//     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+//   } catch (err) {
+//     console.error("[v0] Stripe webhook error:", err)
+//     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
+//   }
+
+//   const session = event.data.object as Stripe.Checkout.Session
+
+//   if (event.type === "checkout.session.completed") {
+//     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+
+//     await db.subscription.create({
+//       data: {
+//         userId: session.metadata?.userId!,
+//         stripeSubscriptionId: subscription.id,
+//         stripeCustomerId: subscription.customer as string,
+//         stripePriceId: subscription.items.data[0].price.id,
+//         // stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+//         stripeCurrentPeriodEnd: new Date(),
+//       },
+//     })
+
+//     // Update user subscription tier based on price
+//     const priceId = subscription.items.data[0].price.id
+//     let tier: "STARTER" | "PRO" | "AGENCY" = "STARTER"
+//     let emailCredits = 1000
+//     let researchCredits = 500
+
+//     if (priceId.includes("pro")) {
+//       tier = "PRO"
+//       emailCredits = 5000
+//       researchCredits = 2500
+//     } else if (priceId.includes("agency")) {
+//       tier = "AGENCY"
+//       emailCredits = 20000
+//       researchCredits = 10000
+//     }
+
+//     await db.user.update({
+//       where: { id: session.metadata?.userId! },
+//       data: {
+//         subscriptionTier: tier,
+//         subscriptionStatus: "ACTIVE",
+//         emailCredits,
+//         researchCredits,
+//       },
+//     })
+//   }
+
+//   if (event.type === "invoice.payment_succeeded") {
+//     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+
+//     await db.subscription.update({
+//       where: {
+//         stripeSubscriptionId: subscription.id,
+//       },
+//       data: {
+//         stripePriceId: subscription.items.data[0].price.id,
+//         // stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+//         stripeCurrentPeriodEnd: new Date(),
+//       },
+//     })
+//   }
+
+//   return NextResponse.json({ received: true })
+// }
+
+
+
+
+
+
+
 import { NextResponse } from "next/server"
-import Stripe from "stripe"
+import { headers } from "next/headers"
+import { stripe } from "@/lib/stripe"
 import { db } from "@/lib/db"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-09-30.clover",
-})
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+import type Stripe from "stripe"
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -16,79 +102,80 @@ export async function POST(req: Request) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-  } catch (err) {
-    console.error("[v0] Stripe webhook error:", err)
+    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+  } catch (error: any) {
+    console.error("Webhook signature verification failed:", error.message)
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  const session = event.data.object as Stripe.Checkout.Session
+  try {
+    switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session
 
-  if (event.type === "checkout.session.completed") {
-    const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+        if (session.metadata?.userId && session.metadata?.creditAmount) {
+          const userId = session.metadata.userId
+          const creditType = session.metadata.creditType as "email" | "research"
+          const creditAmount = Number.parseInt(session.metadata.creditAmount)
+          const packageName = session.metadata.packageId
 
-    await db.subscription.create({
-      data: {
-        userId: session.metadata?.userId!,
-        stripeSubscriptionId: subscription.id,
-        stripeCustomerId: subscription.customer as string,
-        stripePriceId: subscription.items.data[0].price.id,
-        // stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        stripeCurrentPeriodEnd: new Date(),
-      },
-    })
+          // Update user credits
+          const fieldToUpdate = creditType === "email" ? "emailCredits" : "researchCredits"
 
-    // Update user subscription tier based on price
-    const priceId = subscription.items.data[0].price.id
-    let tier: "STARTER" | "PRO" | "AGENCY" = "STARTER"
-    let emailCredits = 1000
-    let researchCredits = 500
+          const user = await db.user.update({
+            where: { id: userId },
+            data: {
+              [fieldToUpdate]: {
+                increment: creditAmount,
+              },
+            },
+          })
 
-    if (priceId.includes("pro")) {
-      tier = "PRO"
-      emailCredits = 5000
-      researchCredits = 2500
-    } else if (priceId.includes("agency")) {
-      tier = "AGENCY"
-      emailCredits = 20000
-      researchCredits = 10000
+          // Update purchase record
+          await db.creditPurchase.updateMany({
+            where: { stripeSessionId: session.id },
+            data: {
+              status: "COMPLETED",
+              completedAt: new Date(),
+              stripePaymentIntentId: session.payment_intent as string,
+            },
+          })
+
+          // Create transaction record
+          await db.creditTransaction.create({
+            data: {
+              userId,
+              type: "PURCHASE",
+              amount: creditAmount,
+              balance: user[fieldToUpdate],
+              description: `Purchased ${creditAmount} ${creditType} credits`,
+              entityType: "purchase",
+              entityId: session.id,
+            },
+          })
+
+          console.log(`[v0] Credits added: ${creditAmount} ${creditType} credits for user ${userId}`)
+        }
+        break
+      }
+
+      case "checkout.session.expired": {
+        const session = event.data.object as Stripe.Checkout.Session
+
+        await db.creditPurchase.updateMany({
+          where: { stripeSessionId: session.id },
+          data: { status: "FAILED" },
+        })
+        break
+      }
     }
 
-    await db.user.update({
-      where: { id: session.metadata?.userId! },
-      data: {
-        subscriptionTier: tier,
-        subscriptionStatus: "ACTIVE",
-        emailCredits,
-        researchCredits,
-      },
-    })
+    return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error("Error processing webhook:", error)
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
   }
-
-  if (event.type === "invoice.payment_succeeded") {
-    const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
-
-    await db.subscription.update({
-      where: {
-        stripeSubscriptionId: subscription.id,
-      },
-      data: {
-        stripePriceId: subscription.items.data[0].price.id,
-        // stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        stripeCurrentPeriodEnd: new Date(),
-      },
-    })
-  }
-
-  return NextResponse.json({ received: true })
 }
-
-
-
-
-
-
-
 
 
 
