@@ -83,13 +83,6 @@ export const EMAIL_PROVIDERS = [
   { id: "outlook", name: "Outlook", icon: "📨" },
 ] as const
 
-// CRM integrations
-export const CRM_INTEGRATIONS = [
-  { id: "lemlist", name: "Lemlist", icon: "🔗" },
-  { id: "instantly", name: "Instantly", icon: "⚡" },
-  { id: "smartlead", name: "Smartlead", icon: "🎯" },
-] as const
-
 // Research depth options
 export const RESEARCH_DEPTH_OPTIONS = [
   { value: "BASIC", label: "Basic", description: "Company name and website" },
