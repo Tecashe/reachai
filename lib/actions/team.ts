@@ -1,143 +1,10 @@
-// "use server"
-
-// import { auth } from "@clerk/nextjs/server"
-// import { db } from "@/lib/db"
-// import { revalidatePath } from "next/cache"
-// import type { TeamRole } from "@prisma/client"
-
-// export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER") {
-//   const { userId } = await auth()
-//   if (!userId) return { success: false, error: "Unauthorized" }
-
-//   const user = await db.user.findUnique({
-//     where: { clerkId: userId },
-//   })
-
-//   if (!user) return { success: false, error: "User not found" }
-
-//   try {
-//     // Check if already invited
-//     const existing = await db.teamMember.findUnique({
-//       where: {
-//         userId_email: {
-//           userId: user.id,
-//           email,
-//         },
-//       },
-//     })
-
-//     if (existing) {
-//       return { success: false, error: "User already invited" }
-//     }
-
-//     const teamMember = await db.teamMember.create({
-//       data: {
-//         userId: user.id,
-//         email,
-//         role,
-//         status: "PENDING",
-//       },
-//     })
-
-//     // TODO: Send invitation email via Resend
-
-//     revalidatePath("/dashboard/settings")
-//     return { success: true, teamMember }
-//   } catch (error) {
-//     console.error("[v0] Error inviting team member:", error)
-//     return { success: false, error: "Failed to send invitation" }
-//   }
-// }
-
-// export async function removeTeamMember(memberId: string) {
-//   const { userId } = await auth()
-//   if (!userId) return { success: false, error: "Unauthorized" }
-
-//   const user = await db.user.findUnique({
-//     where: { clerkId: userId },
-//   })
-
-//   if (!user) return { success: false, error: "User not found" }
-
-//   try {
-//     await db.teamMember.delete({
-//       where: {
-//         id: memberId,
-//         userId: user.id,
-//       },
-//     })
-
-//     revalidatePath("/dashboard/settings")
-//     return { success: true }
-//   } catch (error) {
-//     console.error("[v0] Error removing team member:", error)
-//     return { success: false, error: "Failed to remove team member" }
-//   }
-// }
-
-// export async function updateTeamMemberRole(memberId: string, role: TeamRole) {
-//   const { userId } = await auth()
-//   if (!userId) return { success: false, error: "Unauthorized" }
-
-//   const user = await db.user.findUnique({
-//     where: { clerkId: userId },
-//   })
-
-//   if (!user) return { success: false, error: "User not found" }
-
-//   try {
-//     const teamMember = await db.teamMember.update({
-//       where: {
-//         id: memberId,
-//         userId: user.id,
-//       },
-//       data: { role },
-//     })
-
-//     revalidatePath("/dashboard/settings")
-//     return { success: true, teamMember }
-//   } catch (error) {
-//     console.error("[v0] Error updating team member role:", error)
-//     return { success: false, error: "Failed to update role" }
-//   }
-// }
-
-// export async function resendInvitation(memberId: string) {
-//   const { userId } = await auth()
-//   if (!userId) return { success: false, error: "Unauthorized" }
-
-//   const user = await db.user.findUnique({
-//     where: { clerkId: userId },
-//   })
-
-//   if (!user) return { success: false, error: "User not found" }
-
-//   try {
-//     const teamMember = await db.teamMember.findUnique({
-//       where: {
-//         id: memberId,
-//         userId: user.id,
-//       },
-//     })
-
-//     if (!teamMember) return { success: false, error: "Team member not found" }
-
-//     // TODO: Send invitation email via Resend
-
-//     revalidatePath("/dashboard/settings")
-//     return { success: true }
-//   } catch (error) {
-//     console.error("[v0] Error resending invitation:", error)
-//     return { success: false, error: "Failed to resend invitation" }
-//   }
-// }
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { TeamRole } from "@prisma/client"
-import { resend } from "@/lib/resend"
+import { resend, FROM_EMAIL } from "@/lib/resend"
 import { TeamInvitationEmail } from "@/lib/email-templates/team-invitation"
 import { render } from "@react-email/render"
 import { requirePermission } from "@/lib/permissions"
@@ -196,26 +63,25 @@ export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER")
       },
     })
 
-    // Send invitation email
     const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitationToken}`
 
-    const emailHtml = render(
-      TeamInvitationEmail({
-        inviterName: user.name || user.email,
-        inviterEmail: user.email,
-        inviteeEmail: email,
-        role,
-        invitationUrl,
-        expiresAt: invitationExpiry.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
+    const emailComponent = TeamInvitationEmail({
+      inviterName: user.name || user.email,
+      inviterEmail: user.email,
+      inviteeEmail: email,
+      role: role,
+      invitationUrl: invitationUrl,
+      expiresAt: invitationExpiry.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       }),
-    )
+    })
+
+    const emailHtml = await render(emailComponent)
 
     await resend.emails.send({
-      from: "ReachAI <invitations@reachai.com>",
+      from: FROM_EMAIL,
       to: email,
       subject: `You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
       html: emailHtml,
@@ -339,26 +205,25 @@ export async function resendInvitation(memberId: string) {
       },
     })
 
-    // Send new invitation email
     const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitationToken}`
 
-    const emailHtml = render(
-      TeamInvitationEmail({
-        inviterName: user.name || user.email,
-        inviterEmail: user.email,
-        inviteeEmail: teamMember.email,
-        role: teamMember.role,
-        invitationUrl,
-        expiresAt: invitationExpiry.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
+    const emailComponent = TeamInvitationEmail({
+      inviterName: user.name || user.email,
+      inviterEmail: user.email,
+      inviteeEmail: teamMember.email,
+      role: teamMember.role,
+      invitationUrl: invitationUrl,
+      expiresAt: invitationExpiry.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       }),
-    )
+    })
+
+    const emailHtml = await render(emailComponent)
 
     await resend.emails.send({
-      from: "ReachAI <invitations@reachai.com>",
+      from: FROM_EMAIL,
       to: teamMember.email,
       subject: `Reminder: You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
       html: emailHtml,
