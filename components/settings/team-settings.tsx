@@ -1,390 +1,10 @@
-// "use client"
-
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Plus, MoreVertical } from "lucide-react"
-
-// const teamMembers = [
-//   { id: "1", name: "John Doe", email: "john@acme.com", role: "Owner", avatar: "/placeholder.svg?height=40&width=40" },
-//   { id: "2", name: "Jane Smith", email: "jane@acme.com", role: "Admin", avatar: "/placeholder.svg?height=40&width=40" },
-//   {
-//     id: "3",
-//     name: "Mike Johnson",
-//     email: "mike@acme.com",
-//     role: "Member",
-//     avatar: "/placeholder.svg?height=40&width=40",
-//   },
-// ]
-
-// export function TeamSettings() {
-//   return (
-//     <div className="space-y-6">
-//       <Card>
-//         <CardHeader>
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <CardTitle>Team Members</CardTitle>
-//               <CardDescription>Manage your team members and their permissions</CardDescription>
-//             </div>
-//             <Button>
-//               <Plus className="h-4 w-4 mr-2" />
-//               Invite Member
-//             </Button>
-//           </div>
-//         </CardHeader>
-//         <CardContent>
-//           <div className="space-y-4">
-//             {teamMembers.map((member) => (
-//               <div key={member.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-//                 <div className="flex items-center gap-4">
-//                   <Avatar>
-//                     <AvatarImage src={member.avatar || "/placeholder.svg"} />
-//                     <AvatarFallback>
-//                       {member.name
-//                         .split(" ")
-//                         .map((n) => n[0])
-//                         .join("")}
-//                     </AvatarFallback>
-//                   </Avatar>
-//                   <div>
-//                     <p className="font-medium">{member.name}</p>
-//                     <p className="text-sm text-muted-foreground">{member.email}</p>
-//                   </div>
-//                 </div>
-//                 <div className="flex items-center gap-2">
-//                   <Badge variant="secondary">{member.role}</Badge>
-//                   <Button variant="ghost" size="icon">
-//                     <MoreVertical className="h-4 w-4" />
-//                   </Button>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </CardContent>
-//       </Card>
-
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Pending Invitations</CardTitle>
-//           <CardDescription>Team members who haven't accepted their invitation yet</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <p className="text-sm text-muted-foreground">No pending invitations</p>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
-
-// "use client"
-
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Plus, MoreVertical } from "lucide-react"
-// import { useState } from "react"
-// import { toast } from "sonner"
-
-// interface TeamSettingsProps {
-//   teamMembers: Array<{
-//     id: string
-//     name: string
-//     email: string
-//     role: string
-//     avatar?: string
-//   }>
-//   onInviteMember?: () => void
-// }
-
-// export function TeamSettings({ teamMembers, onInviteMember }: TeamSettingsProps) {
-//   const [isInviting, setIsInviting] = useState(false)
-
-//   const handleInvite = async () => {
-//     setIsInviting(true)
-//     try {
-//       if (onInviteMember) {
-//         await onInviteMember()
-//       }
-//       toast.success("Invitation sent successfully")
-//     } catch (error) {
-//       toast.error("Failed to send invitation")
-//     } finally {
-//       setIsInviting(false)
-//     }
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <Card>
-//         <CardHeader>
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <CardTitle>Team Members</CardTitle>
-//               <CardDescription>Manage your team members and their permissions</CardDescription>
-//             </div>
-//             <Button onClick={handleInvite} disabled={isInviting}>
-//               <Plus className="h-4 w-4 mr-2" />
-//               Invite Member
-//             </Button>
-//           </div>
-//         </CardHeader>
-//         <CardContent>
-//           {teamMembers.length === 0 ? (
-//             <p className="text-sm text-muted-foreground text-center py-8">No team members yet</p>
-//           ) : (
-//             <div className="space-y-4">
-//               {teamMembers.map((member) => (
-//                 <div key={member.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-//                   <div className="flex items-center gap-4">
-//                     <Avatar>
-//                       <AvatarImage src={member.avatar || "/placeholder.svg"} />
-//                       <AvatarFallback>
-//                         {member.name
-//                           .split(" ")
-//                           .map((n) => n[0])
-//                           .join("")}
-//                       </AvatarFallback>
-//                     </Avatar>
-//                     <div>
-//                       <p className="font-medium">{member.name}</p>
-//                       <p className="text-sm text-muted-foreground">{member.email}</p>
-//                     </div>
-//                   </div>
-//                   <div className="flex items-center gap-2">
-//                     <Badge variant="secondary">{member.role}</Badge>
-//                     <Button variant="ghost" size="icon">
-//                       <MoreVertical className="h-4 w-4" />
-//                     </Button>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </CardContent>
-//       </Card>
-
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Pending Invitations</CardTitle>
-//           <CardDescription>Team members who haven't accepted their invitation yet</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <p className="text-sm text-muted-foreground">No pending invitations</p>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
-
-
-// "use client"
-
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Plus, MoreVertical } from "lucide-react"
-// import { useState } from "react"
-// import { toast } from "sonner"
-
-// interface TeamSettingsProps {
-//   members: Array<{
-//     id: string
-//     email: string
-//     role: string
-//     status: string
-//     invitedAt: Date
-//     acceptedAt: Date | null
-//   }>
-//   onInviteMember?: () => void
-// }
-
-// export function TeamSettings({ members, onInviteMember }: TeamSettingsProps) {
-//   const [isInviting, setIsInviting] = useState(false)
-
-//   const handleInvite = async () => {
-//     setIsInviting(true)
-//     try {
-//       if (onInviteMember) {
-//         await onInviteMember()
-//       }
-//       toast.success("Invitation sent successfully")
-//     } catch (error) {
-//       toast.error("Failed to send invitation")
-//     } finally {
-//       setIsInviting(false)
-//     }
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <Card>
-//         <CardHeader>
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <CardTitle>Team Members</CardTitle>
-//               <CardDescription>Manage your team members and their permissions</CardDescription>
-//             </div>
-//             <Button onClick={handleInvite} disabled={isInviting}>
-//               <Plus className="h-4 w-4 mr-2" />
-//               Invite Member
-//             </Button>
-//           </div>
-//         </CardHeader>
-//         <CardContent>
-//           {members.length === 0 ? (
-//             <p className="text-sm text-muted-foreground text-center py-8">No team members yet</p>
-//           ) : (
-//             <div className="space-y-4">
-//               {members.map((member) => (
-//                 <div key={member.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-//                   <div className="flex items-center gap-4">
-//                     <Avatar>
-//                       <AvatarImage src={member.avatar || "/placeholder.svg"} />
-//                       <AvatarFallback>{member.email.substring(0, 2).toUpperCase()}</AvatarFallback>
-//                     </Avatar>
-//                     <div>
-//                       <p className="font-medium">{member.email}</p>
-//                       <p className="text-sm text-muted-foreground">
-//                         {member.status === "ACCEPTED" ? "Active" : "Pending"}
-//                       </p>
-//                     </div>
-//                   </div>
-//                   <div className="flex items-center gap-2">
-//                     <Badge variant="secondary">{member.role.toLowerCase()}</Badge>
-//                     <Button variant="ghost" size="icon">
-//                       <MoreVertical className="h-4 w-4" />
-//                     </Button>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </CardContent>
-//       </Card>
-
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Pending Invitations</CardTitle>
-//           <CardDescription>Team members who haven't accepted their invitation yet</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <p className="text-sm text-muted-foreground">No pending invitations</p>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
-
-// "use client"
-
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { Plus, MoreVertical } from "lucide-react"
-// import { useState } from "react"
-// import { toast } from "sonner"
-
-// interface TeamSettingsProps {
-//   members: Array<{
-//     id: string
-//     email: string
-//     role: string
-//     status: string
-//     invitedAt: Date
-//     acceptedAt: Date | null
-//   }>
-//   onInviteMember?: () => void
-// }
-
-// export function TeamSettings({ members, onInviteMember }: TeamSettingsProps) {
-//   const [isInviting, setIsInviting] = useState(false)
-
-//   const handleInvite = async () => {
-//     setIsInviting(true)
-//     try {
-//       if (onInviteMember) {
-//         await onInviteMember()
-//       }
-//       toast.success("Invitation sent successfully")
-//     } catch (error) {
-//       toast.error("Failed to send invitation")
-//     } finally {
-//       setIsInviting(false)
-//     }
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <Card>
-//         <CardHeader>
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <CardTitle>Team Members</CardTitle>
-//               <CardDescription>Manage your team members and their permissions</CardDescription>
-//             </div>
-//             <Button onClick={handleInvite} disabled={isInviting}>
-//               <Plus className="h-4 w-4 mr-2" />
-//               Invite Member
-//             </Button>
-//           </div>
-//         </CardHeader>
-//         <CardContent>
-//           {members.length === 0 ? (
-//             <p className="text-sm text-muted-foreground text-center py-8">No team members yet</p>
-//           ) : (
-//             <div className="space-y-4">
-//               {members.map((member) => (
-//                 <div key={member.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-//                   <div className="flex items-center gap-4">
-//                     <Avatar>
-//                       <AvatarImage src="/placeholder.svg" />
-//                       <AvatarFallback>{member.email.substring(0, 2).toUpperCase()}</AvatarFallback>
-//                     </Avatar>
-//                     <div>
-//                       <p className="font-medium">{member.email}</p>
-//                       <p className="text-sm text-muted-foreground">
-//                         {member.status === "ACCEPTED" ? "Active" : "Pending"}
-//                       </p>
-//                     </div>
-//                   </div>
-//                   <div className="flex items-center gap-2">
-//                     <Badge variant="secondary">{member.role.toLowerCase()}</Badge>
-//                     <Button variant="ghost" size="icon">
-//                       <MoreVertical className="h-4 w-4" />
-//                     </Button>
-//                   </div>
-//                 </div>
-//               ))}
-//             </div>
-//           )}
-//         </CardContent>
-//       </Card>
-
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>Pending Invitations</CardTitle>
-//           <CardDescription>Team members who haven't accepted their invitation yet</CardDescription>
-//         </CardHeader>
-//         <CardContent>
-//           <p className="text-sm text-muted-foreground">No pending invitations</p>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
-
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, MoreVertical, Mail, Trash2 } from "lucide-react"
+import { Plus, MoreVertical, Mail, Trash2, Clock, CheckCircle2 } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { inviteTeamMember, removeTeamMember, resendInvitation } from "@/lib/actions/team"
@@ -431,6 +51,9 @@ export function TeamSettings({ members }: TeamSettingsProps) {
   const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER")
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false)
+
+  const activeMembers = members.filter((m) => m.status === "ACCEPTED")
+  const pendingInvitations = members.filter((m) => m.status === "PENDING")
 
   const handleInvite = async () => {
     if (!email) {
@@ -505,7 +128,7 @@ export function TeamSettings({ members }: TeamSettingsProps) {
             </div>
           </CardHeader>
           <CardContent>
-            {members.length === 0 ? (
+            {activeMembers.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-sm text-muted-foreground mb-4">No team members yet</p>
                 <Button onClick={() => setInviteDialogOpen(true)}>
@@ -515,7 +138,7 @@ export function TeamSettings({ members }: TeamSettingsProps) {
               </div>
             ) : (
               <div className="space-y-4">
-                {members.map((member) => (
+                {activeMembers.map((member) => (
                   <div
                     key={member.id}
                     className="flex items-center justify-between p-4 border border-border rounded-lg"
@@ -527,9 +150,10 @@ export function TeamSettings({ members }: TeamSettingsProps) {
                       </Avatar>
                       <div>
                         <p className="font-medium">{member.email}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {member.status === "ACCEPTED" ? "Active" : "Pending invitation"}
-                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <CheckCircle2 className="h-3 w-3 text-green-600" />
+                          <p className="text-sm text-muted-foreground">Active</p>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -541,12 +165,6 @@ export function TeamSettings({ members }: TeamSettingsProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {member.status === "PENDING" && (
-                            <DropdownMenuItem onClick={() => handleResend(member.id)}>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Resend Invitation
-                            </DropdownMenuItem>
-                          )}
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => {
@@ -567,15 +185,67 @@ export function TeamSettings({ members }: TeamSettingsProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Invitations</CardTitle>
-            <CardDescription>Team members who haven't accepted their invitation yet</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No pending invitations</p>
-          </CardContent>
-        </Card>
+        {pendingInvitations.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Invitations</CardTitle>
+              <CardDescription>Team members who haven't accepted their invitation yet</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingInvitations.map((member) => (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/50"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Avatar>
+                        <AvatarFallback>{member.email.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{member.email}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Clock className="h-3 w-3 text-amber-600" />
+                          <p className="text-sm text-muted-foreground">
+                            Invited {new Date(member.invitedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-amber-600 text-amber-600">
+                        Pending
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleResend(member.id)}>
+                            <Mail className="h-4 w-4 mr-2" />
+                            Resend Invitation
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => {
+                              setMemberToRemove(member.id)
+                              setRemoveDialogOpen(true)
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Cancel Invitation
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
@@ -602,13 +272,38 @@ export function TeamSettings({ members }: TeamSettingsProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MEMBER">Member</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
+                  <SelectItem value="MEMBER">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">Member</span>
+                      <span className="text-xs text-muted-foreground">Can create and edit campaigns</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="ADMIN">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">Admin</span>
+                      <span className="text-xs text-muted-foreground">Full access except billing</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                Members can view and edit campaigns. Admins have full access to settings.
-              </p>
+              <div className="rounded-lg bg-muted p-3 text-xs space-y-2">
+                <p className="font-medium">Role Permissions:</p>
+                {role === "MEMBER" ? (
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>Create and edit campaigns</li>
+                    <li>Add and manage prospects</li>
+                    <li>Generate AI emails</li>
+                    <li>View analytics</li>
+                  </ul>
+                ) : (
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                    <li>All Member permissions</li>
+                    <li>Delete campaigns and prospects</li>
+                    <li>Invite team members</li>
+                    <li>Configure integrations</li>
+                  </ul>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>

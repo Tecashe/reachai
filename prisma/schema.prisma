@@ -391,12 +391,19 @@ model TeamMember {
   role        TeamRole @default(MEMBER)
   permissions Json? // Granular permissions
 
+  invitationToken  String?   @unique
+  invitationExpiry DateTime?
+
   invitedAt  DateTime     @default(now())
   acceptedAt DateTime?
   status     InviteStatus @default(PENDING)
 
+  invitedBy String? // User ID of inviter
+
   @@unique([userId, email])
   @@index([userId])
+  @@index([invitationToken])
+  @@index([status])
 }
 
 model Notification {

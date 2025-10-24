@@ -1,13 +1,158 @@
+// "use server"
+
+// import { auth } from "@clerk/nextjs/server"
+// import { db } from "@/lib/db"
+// import { revalidatePath } from "next/cache"
+// import type { TeamRole } from "@prisma/client"
+
+// export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER") {
+//   const { userId } = await auth()
+//   if (!userId) return { success: false, error: "Unauthorized" }
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) return { success: false, error: "User not found" }
+
+//   try {
+//     // Check if already invited
+//     const existing = await db.teamMember.findUnique({
+//       where: {
+//         userId_email: {
+//           userId: user.id,
+//           email,
+//         },
+//       },
+//     })
+
+//     if (existing) {
+//       return { success: false, error: "User already invited" }
+//     }
+
+//     const teamMember = await db.teamMember.create({
+//       data: {
+//         userId: user.id,
+//         email,
+//         role,
+//         status: "PENDING",
+//       },
+//     })
+
+//     // TODO: Send invitation email via Resend
+
+//     revalidatePath("/dashboard/settings")
+//     return { success: true, teamMember }
+//   } catch (error) {
+//     console.error("[v0] Error inviting team member:", error)
+//     return { success: false, error: "Failed to send invitation" }
+//   }
+// }
+
+// export async function removeTeamMember(memberId: string) {
+//   const { userId } = await auth()
+//   if (!userId) return { success: false, error: "Unauthorized" }
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) return { success: false, error: "User not found" }
+
+//   try {
+//     await db.teamMember.delete({
+//       where: {
+//         id: memberId,
+//         userId: user.id,
+//       },
+//     })
+
+//     revalidatePath("/dashboard/settings")
+//     return { success: true }
+//   } catch (error) {
+//     console.error("[v0] Error removing team member:", error)
+//     return { success: false, error: "Failed to remove team member" }
+//   }
+// }
+
+// export async function updateTeamMemberRole(memberId: string, role: TeamRole) {
+//   const { userId } = await auth()
+//   if (!userId) return { success: false, error: "Unauthorized" }
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) return { success: false, error: "User not found" }
+
+//   try {
+//     const teamMember = await db.teamMember.update({
+//       where: {
+//         id: memberId,
+//         userId: user.id,
+//       },
+//       data: { role },
+//     })
+
+//     revalidatePath("/dashboard/settings")
+//     return { success: true, teamMember }
+//   } catch (error) {
+//     console.error("[v0] Error updating team member role:", error)
+//     return { success: false, error: "Failed to update role" }
+//   }
+// }
+
+// export async function resendInvitation(memberId: string) {
+//   const { userId } = await auth()
+//   if (!userId) return { success: false, error: "Unauthorized" }
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) return { success: false, error: "User not found" }
+
+//   try {
+//     const teamMember = await db.teamMember.findUnique({
+//       where: {
+//         id: memberId,
+//         userId: user.id,
+//       },
+//     })
+
+//     if (!teamMember) return { success: false, error: "Team member not found" }
+
+//     // TODO: Send invitation email via Resend
+
+//     revalidatePath("/dashboard/settings")
+//     return { success: true }
+//   } catch (error) {
+//     console.error("[v0] Error resending invitation:", error)
+//     return { success: false, error: "Failed to resend invitation" }
+//   }
+// }
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { TeamRole } from "@prisma/client"
+import { resend } from "@/lib/resend"
+import { TeamInvitationEmail } from "@/lib/email-templates/team-invitation"
+import { render } from "@react-email/render"
+import { requirePermission } from "@/lib/permissions"
+import crypto from "crypto"
 
 export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER") {
   const { userId } = await auth()
   if (!userId) return { success: false, error: "Unauthorized" }
+
+  // Check permission to invite team members
+  try {
+    await requirePermission(userId, "team", "invite")
+  } catch (error) {
+    return { success: false, error: "You don't have permission to invite team members" }
+  }
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
@@ -27,8 +172,17 @@ export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER")
     })
 
     if (existing) {
-      return { success: false, error: "User already invited" }
+      if (existing.status === "ACCEPTED") {
+        return { success: false, error: "User is already a team member" }
+      }
+      if (existing.status === "PENDING") {
+        return { success: false, error: "Invitation already sent. Use 'Resend' to send again." }
+      }
     }
+
+    // Generate secure invitation token
+    const invitationToken = crypto.randomBytes(32).toString("hex")
+    const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
     const teamMember = await db.teamMember.create({
       data: {
@@ -36,10 +190,36 @@ export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER")
         email,
         role,
         status: "PENDING",
+        invitationToken,
+        invitationExpiry,
+        invitedBy: user.id,
       },
     })
 
-    // TODO: Send invitation email via Resend
+    // Send invitation email
+    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitationToken}`
+
+    const emailHtml = render(
+      TeamInvitationEmail({
+        inviterName: user.name || user.email,
+        inviterEmail: user.email,
+        inviteeEmail: email,
+        role,
+        invitationUrl,
+        expiresAt: invitationExpiry.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      }),
+    )
+
+    await resend.emails.send({
+      from: "ReachAI <invitations@reachai.com>",
+      to: email,
+      subject: `You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
+      html: emailHtml,
+    })
 
     revalidatePath("/dashboard/settings")
     return { success: true, teamMember }
@@ -52,6 +232,13 @@ export async function inviteTeamMember(email: string, role: TeamRole = "MEMBER")
 export async function removeTeamMember(memberId: string) {
   const { userId } = await auth()
   if (!userId) return { success: false, error: "Unauthorized" }
+
+  // Check permission to remove team members
+  try {
+    await requirePermission(userId, "team", "remove")
+  } catch (error) {
+    return { success: false, error: "You don't have permission to remove team members" }
+  }
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
@@ -78,6 +265,13 @@ export async function removeTeamMember(memberId: string) {
 export async function updateTeamMemberRole(memberId: string, role: TeamRole) {
   const { userId } = await auth()
   if (!userId) return { success: false, error: "Unauthorized" }
+
+  // Check permission to update roles
+  try {
+    await requirePermission(userId, "team", "updateRoles")
+  } catch (error) {
+    return { success: false, error: "You don't have permission to update team member roles" }
+  }
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
@@ -106,6 +300,13 @@ export async function resendInvitation(memberId: string) {
   const { userId } = await auth()
   if (!userId) return { success: false, error: "Unauthorized" }
 
+  // Check permission to invite team members
+  try {
+    await requirePermission(userId, "team", "invite")
+  } catch (error) {
+    return { success: false, error: "You don't have permission to resend invitations" }
+  }
+
   const user = await db.user.findUnique({
     where: { clerkId: userId },
   })
@@ -121,13 +322,129 @@ export async function resendInvitation(memberId: string) {
     })
 
     if (!teamMember) return { success: false, error: "Team member not found" }
+    if (teamMember.status === "ACCEPTED") {
+      return { success: false, error: "This invitation has already been accepted" }
+    }
 
-    // TODO: Send invitation email via Resend
+    // Generate new token and expiry
+    const invitationToken = crypto.randomBytes(32).toString("hex")
+    const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+    await db.teamMember.update({
+      where: { id: memberId },
+      data: {
+        invitationToken,
+        invitationExpiry,
+        status: "PENDING",
+      },
+    })
+
+    // Send new invitation email
+    const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitationToken}`
+
+    const emailHtml = render(
+      TeamInvitationEmail({
+        inviterName: user.name || user.email,
+        inviterEmail: user.email,
+        inviteeEmail: teamMember.email,
+        role: teamMember.role,
+        invitationUrl,
+        expiresAt: invitationExpiry.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      }),
+    )
+
+    await resend.emails.send({
+      from: "ReachAI <invitations@reachai.com>",
+      to: teamMember.email,
+      subject: `Reminder: You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
+      html: emailHtml,
+    })
 
     revalidatePath("/dashboard/settings")
     return { success: true }
   } catch (error) {
     console.error("[v0] Error resending invitation:", error)
     return { success: false, error: "Failed to resend invitation" }
+  }
+}
+
+export async function acceptInvitation(token: string) {
+  try {
+    const invitation = await db.teamMember.findUnique({
+      where: { invitationToken: token },
+      include: { user: true },
+    })
+
+    if (!invitation) {
+      return { success: false, error: "Invalid invitation link" }
+    }
+
+    if (invitation.status === "ACCEPTED") {
+      return { success: false, error: "This invitation has already been accepted" }
+    }
+
+    if (invitation.status === "DECLINED") {
+      return { success: false, error: "This invitation has been declined" }
+    }
+
+    if (invitation.invitationExpiry && invitation.invitationExpiry < new Date()) {
+      await db.teamMember.update({
+        where: { id: invitation.id },
+        data: { status: "EXPIRED" },
+      })
+      return { success: false, error: "This invitation has expired" }
+    }
+
+    // Accept the invitation
+    await db.teamMember.update({
+      where: { id: invitation.id },
+      data: {
+        status: "ACCEPTED",
+        acceptedAt: new Date(),
+        invitationToken: null, // Clear token after acceptance
+      },
+    })
+
+    return {
+      success: true,
+      workspaceName: invitation.user.name || invitation.user.email,
+      role: invitation.role,
+    }
+  } catch (error) {
+    console.error("[v0] Error accepting invitation:", error)
+    return { success: false, error: "Failed to accept invitation" }
+  }
+}
+
+export async function declineInvitation(token: string) {
+  try {
+    const invitation = await db.teamMember.findUnique({
+      where: { invitationToken: token },
+    })
+
+    if (!invitation) {
+      return { success: false, error: "Invalid invitation link" }
+    }
+
+    if (invitation.status === "ACCEPTED") {
+      return { success: false, error: "This invitation has already been accepted" }
+    }
+
+    await db.teamMember.update({
+      where: { id: invitation.id },
+      data: {
+        status: "DECLINED",
+        invitationToken: null,
+      },
+    })
+
+    return { success: true }
+  } catch (error) {
+    console.error("[v0] Error declining invitation:", error)
+    return { success: false, error: "Failed to decline invitation" }
   }
 }
