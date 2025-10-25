@@ -27,5 +27,4 @@ USER pwuser
 # Expose port
 EXPOSE 8000
 
-# Railway sets PORT env var, default to 8000 if not set
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2
+CMD ["python", "start.py"]
