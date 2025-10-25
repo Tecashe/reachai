@@ -32,6 +32,13 @@ model User {
   prospectsThisMonth  Int @default(0)
   aiCreditsUsed       Int @default(0)
 
+  // Onboarding questionnaire
+  companyName                      String?
+  userRole                         String? // "founder", "sales", "marketing", "other"
+  useCase                          String? // "finding_customers", "partnerships", "recruiting", "other"
+  monthlyVolume                    String? // "under_500", "500_2000", "over_2000"
+  onboardingCompletedQuestionnaire Boolean @default(false)
+
   // Onboarding progress
   hasCreatedCampaign      Boolean   @default(false)
   hasAddedProspects       Boolean   @default(false)

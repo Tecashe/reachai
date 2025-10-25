@@ -393,6 +393,124 @@
 //     </form>
 //   )
 // }
+// "use client"
+
+// import type React from "react"
+
+// import { useState, useEffect, useTransition } from "react"
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { getCampaigns } from "@/lib/actions/campaigns"
+// import { createProspect } from "@/lib/actions/prospects"
+// import { useRouter } from "next/navigation"
+// import { useToast } from "@/hooks/use-toast"
+
+// export function AddProspectForm() {
+//   const [campaigns, setCampaigns] = useState<any[]>([])
+//   const [selectedCampaign, setSelectedCampaign] = useState<string>("")
+//   const [isPending, startTransition] = useTransition()
+//   const router = useRouter()
+//   const { toast } = useToast()
+
+//   useEffect(() => {
+//     getCampaigns().then(setCampaigns)
+//   }, [])
+
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault()
+//     const formData = new FormData(e.currentTarget)
+//     formData.set("campaignId", selectedCampaign)
+
+//     startTransition(async () => {
+//       const result = await createProspect(formData)
+//       if (result.success) {
+//         toast({
+//           title: "Success!",
+//           description: "Prospect added successfully",
+//         })
+//         router.push(`/dashboard/prospects/${result.prospectId}`)
+//       } else {
+//         toast({
+//           title: "Error",
+//           description: "Failed to add prospect",
+//           variant: "destructive",
+//         })
+//       }
+//     })
+//   }
+
+//   return (
+//     <form onSubmit={handleSubmit} className="space-y-6">
+//       <div className="grid gap-4 md:grid-cols-2">
+//         <div className="space-y-2">
+//           <Label htmlFor="firstName">First Name</Label>
+//           <Input id="firstName" name="firstName" placeholder="John" />
+//         </div>
+//         <div className="space-y-2">
+//           <Label htmlFor="lastName">Last Name</Label>
+//           <Input id="lastName" name="lastName" placeholder="Doe" />
+//         </div>
+//       </div>
+
+//       <div className="space-y-2">
+//         <Label htmlFor="email">
+//           Email <span className="text-destructive">*</span>
+//         </Label>
+//         <Input id="email" name="email" type="email" placeholder="john@example.com" required />
+//       </div>
+
+//       <div className="space-y-2">
+//         <Label htmlFor="company">Company</Label>
+//         <Input id="company" name="company" placeholder="Acme Inc." />
+//       </div>
+
+//       <div className="space-y-2">
+//         <Label htmlFor="jobTitle">Job Title</Label>
+//         <Input id="jobTitle" name="jobTitle" placeholder="Head of Sales" />
+//       </div>
+
+//       <div className="space-y-2">
+//         <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+//         <Input id="linkedinUrl" name="linkedinUrl" type="url" placeholder="https://linkedin.com/in/johndoe" />
+//       </div>
+
+//       <div className="space-y-2">
+//         <Label htmlFor="websiteUrl">Website URL</Label>
+//         <Input id="websiteUrl" name="websiteUrl" type="url" placeholder="https://example.com" />
+//       </div>
+
+//       <div className="space-y-2">
+//         <Label htmlFor="campaign">
+//           Assign to Campaign <span className="text-destructive">*</span>
+//         </Label>
+//         <Select value={selectedCampaign} onValueChange={setSelectedCampaign} required>
+//           <SelectTrigger id="campaign">
+//             <SelectValue placeholder="Select a campaign" />
+//           </SelectTrigger>
+//           <SelectContent>
+//             {campaigns.map((campaign) => (
+//               <SelectItem key={campaign.id} value={campaign.id}>
+//                 {campaign.name}
+//               </SelectItem>
+//             ))}
+//           </SelectContent>
+//         </Select>
+//       </div>
+
+//       <div className="flex gap-4 pt-4">
+//         <Button type="submit" className="flex-1" disabled={isPending || !selectedCampaign}>
+//           {isPending ? "Adding..." : "Add Prospect"}
+//         </Button>
+//         <Button type="button" variant="outline" onClick={() => router.back()}>
+//           Cancel
+//         </Button>
+//       </div>
+//     </form>
+//   )
+// }
+
 "use client"
 
 import type React from "react"
@@ -407,16 +525,24 @@ import { createProspect } from "@/lib/actions/prospects"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
-export function AddProspectForm() {
+export function AddProspectForm({
+  campaignId,
+  onSuccess,
+}: {
+  campaignId?: string
+  onSuccess?: (count: number) => void
+}) {
   const [campaigns, setCampaigns] = useState<any[]>([])
-  const [selectedCampaign, setSelectedCampaign] = useState<string>("")
+  const [selectedCampaign, setSelectedCampaign] = useState<string>(campaignId || "")
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const { toast } = useToast()
 
   useEffect(() => {
-    getCampaigns().then(setCampaigns)
-  }, [])
+    if (!campaignId) {
+      getCampaigns().then(setCampaigns)
+    }
+  }, [campaignId])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -430,11 +556,15 @@ export function AddProspectForm() {
           title: "Success!",
           description: "Prospect added successfully",
         })
-        router.push(`/dashboard/prospects/${result.prospectId}`)
+        if (onSuccess) {
+          onSuccess(1)
+        } else {
+          router.push(`/dashboard/prospects/${result.prospectId}`)
+        }
       } else {
         toast({
           title: "Error",
-          description: "Failed to add prospect",
+          description: result.error || "Failed to add prospect",
           variant: "destructive",
         })
       }
@@ -481,26 +611,28 @@ export function AddProspectForm() {
         <Input id="websiteUrl" name="websiteUrl" type="url" placeholder="https://example.com" />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="campaign">
-          Assign to Campaign <span className="text-destructive">*</span>
-        </Label>
-        <Select value={selectedCampaign} onValueChange={setSelectedCampaign} required>
-          <SelectTrigger id="campaign">
-            <SelectValue placeholder="Select a campaign" />
-          </SelectTrigger>
-          <SelectContent>
-            {campaigns.map((campaign) => (
-              <SelectItem key={campaign.id} value={campaign.id}>
-                {campaign.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {!campaignId && (
+        <div className="space-y-2">
+          <Label htmlFor="campaign">
+            Assign to Campaign <span className="text-destructive">*</span>
+          </Label>
+          <Select value={selectedCampaign} onValueChange={setSelectedCampaign} required>
+            <SelectTrigger id="campaign">
+              <SelectValue placeholder="Select a campaign" />
+            </SelectTrigger>
+            <SelectContent>
+              {campaigns.map((campaign) => (
+                <SelectItem key={campaign.id} value={campaign.id}>
+                  {campaign.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="flex gap-4 pt-4">
-        <Button type="submit" className="flex-1" disabled={isPending || !selectedCampaign}>
+        <Button type="submit" className="flex-1" disabled={isPending || (!campaignId && !selectedCampaign)}>
           {isPending ? "Adding..." : "Add Prospect"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
