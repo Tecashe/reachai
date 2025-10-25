@@ -105,6 +105,10 @@ model Campaign {
   description String?
   status      CampaignStatus @default(DRAFT)
 
+  wizardStep           String @default("prospects") // "prospects", "research", "generate", "review", "launch"
+  wizardData           Json? // Store step-specific progress data
+  wizardCompletedSteps Json? // Array of completed step IDs
+
   // Campaign settings
   dailySendLimit  Int     @default(50)
   sendingSchedule Json? // { days: [], startTime: "", endTime: "" }
