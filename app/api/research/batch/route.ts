@@ -81,40 +81,92 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    console.log("[v0] Research request body:", {
-      prospectCount: body.prospects?.length,
-      depth: body.depth,
-    })
+    console.log("[v0] Research request body:", body)
 
-    const { prospects, depth = "STANDARD" } = body
+    const { campaignId, depth = "STANDARD" } = body
 
-    if (!prospects || !Array.isArray(prospects) || prospects.length === 0) {
-      console.error("[v0] Invalid prospects array:", prospects)
-      return NextResponse.json({ error: "Prospects array is required" }, { status: 400 })
+    if (!campaignId) {
+      console.error("[v0] Missing campaignId")
+      return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
     }
 
+    // Fetch prospects for this campaign
+    console.log("[v0] Fetching prospects for campaign:", campaignId)
+    const prospectsFromDb = await db.prospect.findMany({
+      where: {
+        campaignId,
+        userId: user!.id, // Security: ensure user owns this campaign
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        company: true,
+        jobTitle: true, // was 'position'
+        linkedinUrl: true,
+        websiteUrl: true, // was 'companyWebsite'
+      },
+    })
+
+    if (prospectsFromDb.length === 0) {
+      console.error("[v0] No prospects found for campaign:", campaignId)
+      return NextResponse.json(
+        { error: "No prospects found for this campaign. Please add prospects first." },
+        { status: 400 },
+      )
+    }
+
+    console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
     console.log("[v0] User research credits:", user!.researchCredits)
 
-    if (user!.researchCredits < prospects.length) {
+    if (user!.researchCredits < prospectsFromDb.length) {
       console.error("[v0] Insufficient credits:", {
-        needed: prospects.length,
+        needed: prospectsFromDb.length,
         available: user!.researchCredits,
       })
       return NextResponse.json(
-        { error: `Insufficient research credits. Need ${prospects.length}, have ${user!.researchCredits}` },
+        { error: `Insufficient research credits. Need ${prospectsFromDb.length}, have ${user!.researchCredits}` },
         { status: 403 },
       )
     }
+
+    const prospects = prospectsFromDb.map((p) => ({
+      email: p.email,
+      firstName: p.firstName ?? undefined,
+      lastName: p.lastName ?? undefined,
+      company: p.company ?? undefined,
+      jobTitle: p.jobTitle ?? undefined,
+      linkedinUrl: p.linkedinUrl ?? undefined,
+      websiteUrl: p.websiteUrl ?? undefined,
+    }))
 
     console.log("[v0] Starting batch research for", prospects.length, "prospects")
     const results = await batchResearchProspects(prospects, depth)
     console.log("[v0] Batch research completed successfully:", results.size, "results")
 
+    for (const [email, researchData] of results.entries()) {
+      const prospect = prospectsFromDb.find((p) => p.email === email)
+      if (prospect) {
+        await db.prospect.update({
+          where: { id: prospect.id },
+          data: {
+            researchData: researchData as any,
+            qualityScore: researchData.qualityScore,
+            personalizationTokens: researchData.personalizationTokens as any,
+          },
+        })
+      }
+    }
+
     await db.user.update({
       where: { id: user!.id },
-      data: { researchCredits: { decrement: prospects.length } },
+      data: {
+        researchCredits: { decrement: prospects.length },
+        hasResearchedProspects: true, // Mark onboarding step complete
+      },
     })
-    console.log("[v0] Credits decremented successfully")
+    console.log("[v0] Credits decremented and research data saved successfully")
 
     return NextResponse.json({
       success: true,

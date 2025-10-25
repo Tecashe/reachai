@@ -290,6 +290,83 @@ Cheers,
     ],
     isSystemTemplate: true,
   },
+  {
+    id: "cold_4",
+    name: "Mutual Connection Intro",
+    category: "cold_outreach",
+    subject: "{{mutual_connection}} recommended I reach out",
+    body: `Hi {{firstName}},
+
+{{mutual_connection}} mentioned you're doing great work at {{company}} and suggested I reach out.
+
+We specialize in helping {{industry}} companies {{value_proposition}}. Given {{company}}'s focus on {{goal}}, I thought there might be a fit.
+
+Would you be open to a brief intro call?
+
+Best,
+{{senderName}}`,
+    description: "Leverage mutual connections for warm introductions",
+    variables: ["firstName", "mutual_connection", "company", "industry", "value_proposition", "goal", "senderName"],
+    isSystemTemplate: true,
+  },
+  {
+    id: "cold_5",
+    name: "Congratulations Approach",
+    category: "cold_outreach",
+    subject: "Congrats on {{achievement}}!",
+    body: `Hi {{firstName}},
+
+Congratulations on {{achievement}}! I saw the announcement about {{company}} and wanted to reach out.
+
+As you scale {{specific_area}}, you might find {{our_solution}} helpful. We've helped companies like {{example_company}} {{result}} during similar growth phases.
+
+Would love to share how we could support {{company}}'s next chapter.
+
+Best regards,
+{{senderName}}`,
+    description: "Congratulate on recent achievements to start a positive conversation",
+    variables: [
+      "firstName",
+      "achievement",
+      "company",
+      "specific_area",
+      "our_solution",
+      "example_company",
+      "result",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "cold_6",
+    name: "Industry Trend Opener",
+    category: "cold_outreach",
+    subject: "{{industry}} companies are shifting to {{trend}}",
+    body: `Hi {{firstName}},
+
+I've noticed {{industry}} leaders like {{competitor_1}} and {{competitor_2}} are {{trend_action}}.
+
+At {{company}}, you're well-positioned to {{opportunity}}. We've helped similar companies navigate this shift and achieve {{result}}.
+
+Interested in a quick conversation about how this applies to {{company}}?
+
+Cheers,
+{{senderName}}`,
+    description: "Position yourself as an industry expert by discussing relevant trends",
+    variables: [
+      "firstName",
+      "industry",
+      "trend",
+      "competitor_1",
+      "competitor_2",
+      "trend_action",
+      "company",
+      "opportunity",
+      "result",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
 
   // Follow-up Templates
   {
@@ -366,6 +443,78 @@ Best,
       "case_study_company",
       "senderName",
     ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "followup_4",
+    name: "Case Study Follow-up",
+    category: "follow_up",
+    subject: "Case study: How {{case_study_company}} achieved {{result}}",
+    body: `Hi {{firstName}},
+
+I wanted to share a recent case study that might be relevant to {{company}}.
+
+{{case_study_company}} (similar to {{company}} in {{similarity}}) used our solution to {{achievement}}. The results:
+
+• {{metric_1}}
+• {{metric_2}}
+• {{metric_3}}
+
+Would you like to see how this could work for {{company}}?
+
+Best,
+{{senderName}}`,
+    description: "Share a relevant case study to demonstrate value",
+    variables: [
+      "firstName",
+      "case_study_company",
+      "result",
+      "company",
+      "similarity",
+      "achievement",
+      "metric_1",
+      "metric_2",
+      "metric_3",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "followup_5",
+    name: "Question-Based Follow-up",
+    category: "follow_up",
+    subject: "Quick question about {{company}}'s {{area}}",
+    body: `Hi {{firstName}},
+
+Quick question: Is {{company}} currently {{current_situation}}?
+
+I ask because we just helped {{similar_company}} solve this exact challenge, and I thought the approach might be relevant for you.
+
+Worth a 10-minute conversation?
+
+Thanks,
+{{senderName}}`,
+    description: "Use a question to re-engage and show relevance",
+    variables: ["firstName", "company", "area", "current_situation", "similar_company", "senderName"],
+    isSystemTemplate: true,
+  },
+  {
+    id: "followup_6",
+    name: "Timing Follow-up",
+    category: "follow_up",
+    subject: "Bad timing before?",
+    body: `Hi {{firstName}},
+
+I reached out {{timeframe}} ago about {{topic}}, but I'm guessing the timing wasn't right.
+
+Things change quickly, so I wanted to check in. Are you still facing challenges with {{pain_point}}?
+
+If so, I'd love to share how we've helped companies like {{example_company}} solve this.
+
+Best,
+{{senderName}}`,
+    description: "Acknowledge timing might have been off and try again",
+    variables: ["firstName", "timeframe", "topic", "pain_point", "example_company", "senderName"],
     isSystemTemplate: true,
   },
 
@@ -452,6 +601,102 @@ Best regards,
       "value_proposition",
       "senderName",
       "title",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "meeting_4",
+    name: "Demo Request",
+    category: "meeting_request",
+    subject: "Quick demo of {{solution}} for {{company}}",
+    body: `Hi {{firstName}},
+
+I'd love to show you a quick demo of how {{solution}} could help {{company}} {{achieve_goal}}.
+
+The demo takes just 15 minutes and I'll customize it to show:
+• {{benefit_1}}
+• {{benefit_2}}
+• {{benefit_3}}
+
+Does {{suggested_time}} work? Here's my calendar: {{calendar_link}}
+
+Best,
+{{senderName}}`,
+    description: "Request a product demo with clear benefits",
+    variables: [
+      "firstName",
+      "solution",
+      "company",
+      "achieve_goal",
+      "benefit_1",
+      "benefit_2",
+      "benefit_3",
+      "suggested_time",
+      "calendar_link",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "meeting_5",
+    name: "Audit/Assessment Offer",
+    category: "meeting_request",
+    subject: "Free {{assessment_type}} for {{company}}",
+    body: `Hi {{firstName}},
+
+I'd like to offer {{company}} a complimentary {{assessment_type}} to identify opportunities for {{improvement_area}}.
+
+This typically takes 20 minutes and companies find value in:
+• {{insight_1}}
+• {{insight_2}}
+• {{insight_3}}
+
+No strings attached - just actionable insights. Interested?
+
+Calendar: {{calendar_link}}
+
+Best regards,
+{{senderName}}`,
+    description: "Offer a free audit or assessment to provide value upfront",
+    variables: [
+      "firstName",
+      "company",
+      "assessment_type",
+      "improvement_area",
+      "insight_1",
+      "insight_2",
+      "insight_3",
+      "calendar_link",
+      "senderName",
+    ],
+    isSystemTemplate: true,
+  },
+  {
+    id: "meeting_6",
+    name: "Peer Introduction",
+    category: "meeting_request",
+    subject: "Introduction to {{peer_name}} at {{peer_company}}",
+    body: `Hi {{firstName}},
+
+I thought you might benefit from connecting with {{peer_name}}, {{peer_title}} at {{peer_company}}.
+
+They recently solved {{similar_challenge}} and achieved {{result}}. Given {{company}}'s focus on {{goal}}, I thought the introduction could be valuable.
+
+Would you be interested in a brief three-way intro call?
+
+Best,
+{{senderName}}`,
+    description: "Offer to introduce them to a relevant peer for networking value",
+    variables: [
+      "firstName",
+      "peer_name",
+      "peer_title",
+      "peer_company",
+      "similar_challenge",
+      "result",
+      "company",
+      "goal",
+      "senderName",
     ],
     isSystemTemplate: true,
   },
