@@ -19,11 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Create non-root user for security
-RUN useradd -m -u 1000 scraper && \
-    chown -R scraper:scraper /app
+# The Playwright image already has a non-root user (pwuser) with UID 1001
+RUN chown -R pwuser:pwuser /app
 
-USER scraper
+USER pwuser
 
 # Expose port
 EXPOSE 8000
