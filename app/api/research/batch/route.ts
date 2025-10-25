@@ -65,6 +65,130 @@
 //   }
 // }
 
+// import { type NextRequest, NextResponse } from "next/server"
+// import { batchResearchProspects } from "@/lib/services/ai-research"
+// import { protectApiRoute } from "@/lib/api-protection"
+// import { db } from "@/lib/db"
+
+// export async function POST(request: NextRequest) {
+//   console.log("[v0] Batch research API called")
+
+//   const { error, user } = await protectApiRoute()
+//   if (error) {
+//     console.error("[v0] Auth failed in research API")
+//     return error
+//   }
+
+//   try {
+//     const body = await request.json()
+//     console.log("[v0] Research request body:", body)
+
+//     const { campaignId, depth = "STANDARD" } = body
+
+//     if (!campaignId) {
+//       console.error("[v0] Missing campaignId")
+//       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
+//     }
+
+//     // Fetch prospects for this campaign
+//     console.log("[v0] Fetching prospects for campaign:", campaignId)
+//     const prospectsFromDb = await db.prospect.findMany({
+//       where: {
+//         campaignId,
+//         userId: user!.id, // Security: ensure user owns this campaign
+//       },
+//       select: {
+//         id: true,
+//         firstName: true,
+//         lastName: true,
+//         email: true,
+//         company: true,
+//         jobTitle: true, // was 'position'
+//         linkedinUrl: true,
+//         websiteUrl: true, // was 'companyWebsite'
+//       },
+//     })
+
+//     if (prospectsFromDb.length === 0) {
+//       console.error("[v0] No prospects found for campaign:", campaignId)
+//       return NextResponse.json(
+//         { error: "No prospects found for this campaign. Please add prospects first." },
+//         { status: 400 },
+//       )
+//     }
+
+//     console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
+//     console.log("[v0] User research credits:", user!.researchCredits)
+
+//     if (user!.researchCredits < prospectsFromDb.length) {
+//       console.error("[v0] Insufficient credits:", {
+//         needed: prospectsFromDb.length,
+//         available: user!.researchCredits,
+//       })
+//       return NextResponse.json(
+//         { error: `Insufficient research credits. Need ${prospectsFromDb.length}, have ${user!.researchCredits}` },
+//         { status: 403 },
+//       )
+//     }
+
+//     const prospects = prospectsFromDb.map((p) => ({
+//       email: p.email,
+//       firstName: p.firstName ?? undefined,
+//       lastName: p.lastName ?? undefined,
+//       company: p.company ?? undefined,
+//       jobTitle: p.jobTitle ?? undefined,
+//       linkedinUrl: p.linkedinUrl ?? undefined,
+//       websiteUrl: p.websiteUrl ?? undefined,
+//     }))
+
+//     console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//     const results = await batchResearchProspects(prospects, depth)
+//     console.log("[v0] Batch research completed successfully:", results.size, "results")
+
+//     for (const [email, researchData] of results.entries()) {
+//       const prospect = prospectsFromDb.find((p) => p.email === email)
+//       if (prospect) {
+//         await db.prospect.update({
+//           where: { id: prospect.id },
+//           data: {
+//             researchData: researchData as any,
+//             qualityScore: researchData.qualityScore,
+//             personalizationTokens: researchData.personalizationTokens as any,
+//           },
+//         })
+//       }
+//     }
+
+//     await db.user.update({
+//       where: { id: user!.id },
+//       data: {
+//         researchCredits: { decrement: prospects.length },
+//         hasResearchedProspects: true, // Mark onboarding step complete
+//       },
+//     })
+//     console.log("[v0] Credits decremented and research data saved successfully")
+
+//     return NextResponse.json({
+//       success: true,
+//       data: Object.fromEntries(results),
+//       count: results.size,
+//     })
+//   } catch (error) {
+//     console.error("[v0] Batch research API error:", error)
+//     console.error("[v0] Error details:", {
+//       message: error instanceof Error ? error.message : "Unknown error",
+//       stack: error instanceof Error ? error.stack : undefined,
+//       name: error instanceof Error ? error.name : undefined,
+//     })
+//     return NextResponse.json(
+//       {
+//         error: "Failed to research prospects",
+//         details: error instanceof Error ? error.message : "Unknown error",
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
 import { type NextRequest, NextResponse } from "next/server"
 import { batchResearchProspects } from "@/lib/services/ai-research"
 import { protectApiRoute } from "@/lib/api-protection"
@@ -83,12 +207,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log("[v0] Research request body:", body)
 
-    const { campaignId, depth = "STANDARD" } = body
+    const { campaignId, depth: requestDepth } = body
 
     if (!campaignId) {
       console.error("[v0] Missing campaignId")
       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
     }
+
+    const userPreferences = (user!.preferences as any) || {}
+    const userScrapingMode = userPreferences.scrapingMode || "FAST"
+
+    // Convert scraping mode to research depth
+    const depth = userScrapingMode === "DEEP" ? "DEEP" : requestDepth || "STANDARD"
+
+    console.log("[v0] User scraping mode preference:", userScrapingMode)
+    console.log("[v0] Using research depth:", depth)
 
     // Fetch prospects for this campaign
     console.log("[v0] Fetching prospects for campaign:", campaignId)
