@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
     },
   })
 
-  // If already completed, redirect to dashboard
+  // If already completed, redirect to the dashboarrd
   if (user?.onboardingCompletedQuestionnaire) {
     redirect("/dashboard")
   }
