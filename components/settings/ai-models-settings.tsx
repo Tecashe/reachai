@@ -103,30 +103,59 @@ export function AIModelSettings() {
     }
   }
 
-  const estimateMonthlyCost = () => {
-    // Rough estimate based on typical usage
+//   const estimateMonthlyCost = () => {
+//     // Rough estimate based on typical usage
+//     const avgResearchTokens = 2000
+//     const avgEmailTokens = 1500
+//     const avgOptimizationTokens = 3000
+//     const avgReplyTokens = 500
+//     const avgAnalyticsTokens = 2500
+
+//     const researchModel = AI_MODELS[preferences.research]
+//     const emailModel = AI_MODELS[preferences.emailGeneration]
+//     const optimizationModel = AI_MODELS[preferences.emailOptimization]
+//     const replyModel = AI_MODELS[preferences.replyDetection]
+//     const analyticsModel = AI_MODELS[preferences.analytics]
+
+//     // Assume 100 prospects, 200 emails, 50 optimizations, 100 replies, 20 analytics per month
+//     const monthlyCost =
+//       (avgResearchTokens / 1000) * researchModel.costPer1kTokens * 100 +
+//       (avgEmailTokens / 1000) * emailModel.costPer1kTokens * 200 +
+//       (avgOptimizationTokens / 1000) * optimizationModel.costPer1kTokens * 50 +
+//       (avgReplyTokens / 1000) * replyModel.costPer1kTokens * 100 +
+//       (avgAnalyticsTokens / 1000) * analyticsModel.costPer1kTokens * 20
+
+//     return monthlyCost.toFixed(2)
+//   }
+
+    const estimateMonthlyCost = () => {
     const avgResearchTokens = 2000
     const avgEmailTokens = 1500
     const avgOptimizationTokens = 3000
     const avgReplyTokens = 500
     const avgAnalyticsTokens = 2500
 
+    // Add safety checks
     const researchModel = AI_MODELS[preferences.research]
     const emailModel = AI_MODELS[preferences.emailGeneration]
     const optimizationModel = AI_MODELS[preferences.emailOptimization]
     const replyModel = AI_MODELS[preferences.replyDetection]
     const analyticsModel = AI_MODELS[preferences.analytics]
 
-    // Assume 100 prospects, 200 emails, 50 optimizations, 100 replies, 20 analytics per month
+    // Return 0 if any model is undefined
+    if (!researchModel || !emailModel || !optimizationModel || !replyModel || !analyticsModel) {
+        return "0.00"
+    }
+
     const monthlyCost =
-      (avgResearchTokens / 1000) * researchModel.costPer1kTokens * 100 +
-      (avgEmailTokens / 1000) * emailModel.costPer1kTokens * 200 +
-      (avgOptimizationTokens / 1000) * optimizationModel.costPer1kTokens * 50 +
-      (avgReplyTokens / 1000) * replyModel.costPer1kTokens * 100 +
-      (avgAnalyticsTokens / 1000) * analyticsModel.costPer1kTokens * 20
+        (avgResearchTokens / 1000) * researchModel.costPer1kTokens * 100 +
+        (avgEmailTokens / 1000) * emailModel.costPer1kTokens * 200 +
+        (avgOptimizationTokens / 1000) * optimizationModel.costPer1kTokens * 50 +
+        (avgReplyTokens / 1000) * replyModel.costPer1kTokens * 100 +
+        (avgAnalyticsTokens / 1000) * analyticsModel.costPer1kTokens * 20
 
     return monthlyCost.toFixed(2)
-  }
+    }
 
   return (
     <div className="space-y-6">
@@ -225,6 +254,7 @@ export function AIModelSettings() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">{AI_MODELS[preferences.emailGeneration]?.description}</p>
+                  
                 </div>
 
                 {/* Email Optimization Model */}
