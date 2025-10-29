@@ -1228,6 +1228,11 @@
 
 
 
+    
+  
+
+
+import { createOpenAI } from '@ai-sdk/openai'
 import { generateObject } from "ai"
 import { z } from "zod"
 import { scrapeWebsiteEnhanced, scrapeLinkedInProfileEnhanced, searchCompanyNewsEnhanced } from "./web-scraper"
@@ -1342,20 +1347,27 @@ Format your response as JSON.
     //     personalizationTokens: z.record(z.string()),
     //   }),
     // })
-    const { object } = await generateObject({
-  model: "deepseek/deepseek-chat",  // or "deepseek/deepseek-reasoner" for more complex reasoning
-  prompt,
-  schema: z.object({
-    companyInfo: z.string(),
-    recentNews: z.array(z.string()),
-    painPoints: z.array(z.string()),
-    competitorTools: z.array(z.string()),
-    talkingPoints: z.array(z.string()),
-    qualityScore: z.number(),
-    personalizationTokens: z.record(z.string()),
-  }),
-})
+   
+    // Create a custom DeepSeek provider
+    const deepseek = createOpenAI({
+      baseURL: 'https://api.deepseek.com',
+      apiKey: process.env.DEEPSEEK_API_KEY,
+    })
 
+    // Then in your researchProspect function, change:
+    const { object } = await generateObject({
+      model: deepseek('deepseek-chat'),  // Use the custom provider
+      prompt,
+      schema: z.object({
+        companyInfo: z.string(),
+        recentNews: z.array(z.string()),
+        painPoints: z.array(z.string()),
+        competitorTools: z.array(z.string()),
+        talkingPoints: z.array(z.string()),
+        qualityScore: z.number(),
+        personalizationTokens: z.record(z.string()),
+      }),
+    })
     console.log("[v0] AI research completed with quality score:", object.qualityScore)
 
     if (depth === "DEEP" && scrapedData.enhanced) {
