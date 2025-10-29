@@ -1348,13 +1348,17 @@ Format your response as JSON.
     //   }),
     // })
    
-    // Create a custom DeepSeek provider
+
+
+
+
+    // Creatinng a custom DeepSeek provider
     const deepseek = createOpenAI({
-      baseURL: 'https://api.deepseek.com',
+      baseURL: 'https://api.deepseek.com/v1',
       apiKey: process.env.DEEPSEEK_API_KEY,
     })
 
-    // Then in your researchProspect function, change:
+    
     const { object } = await generateObject({
       model: deepseek('deepseek-chat'),  // Use the custom provider
       prompt,
