@@ -1539,6 +1539,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
@@ -1594,8 +1595,15 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     <>
       <div className={cn("p-6 border-b border-border/50 transition-all duration-300", collapsed && "p-4")}>
         <Link href="/dashboard" className="flex items-center gap-2 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-cyan-500 to-blue-600 shadow-lg drop-shadow-md group-hover:drop-shadow-2xl transition-all duration-300 group-hover:scale-110">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="relative h-10 w-10 flex items-center justify-center rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+            <Image
+              src="/logo.png"
+              alt="ReachAI Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+              priority
+            />
           </div>
           {!collapsed && (
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
