@@ -101,13 +101,13 @@ class SmartCampaignAutomator {
     }
 
     // Send email
-    await emailSender.sendEmail({
+    await emailSender.sendCampaignEmail({
       to: prospect.email,
       subject,
       html: body,
       prospectId: prospect.id,
       campaignId: campaign.id,
-      trackingEnabled: campaign.trackOpens,
+      // trackingEnabled: campaign.trackOpens,
     })
 
     // Update prospect
