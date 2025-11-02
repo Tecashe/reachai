@@ -207,6 +207,9 @@
 //   )
 // }
 
+// import { SignIn } from '@clerk/clerk-react'
+import { dark } from '@clerk/themes'
+
 import { SignIn } from "@clerk/nextjs"
 import Link from "next/link"
 import { Sparkles, ArrowLeft } from "lucide-react"
@@ -250,38 +253,9 @@ export default function SignInPage() {
             <p className="text-[#a1a1aa]">Sign in to your ReachAI account</p>
           </div>
 
-          <SignIn
+         <SignIn
             appearance={{
-              baseTheme: undefined,
-              variables: {
-                colorPrimary: "#3b82f6",
-                colorBackground: "#0a0a0a",
-                colorInputBackground: "#18181b",
-                colorInputText: "#fafafa",
-                colorText: "#fafafa",
-                colorTextSecondary: "#a1a1aa",
-                colorDanger: "#ef4444",
-                borderRadius: "0.75rem",
-              },
-              elements: {
-                rootBox: "mx-auto",
-                card: "bg-[#141414] shadow-2xl border border-[#27272a] rounded-xl",
-                headerTitle: "hidden",
-                headerSubtitle: "hidden",
-                formButtonPrimary: 
-                  "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200",
-                formFieldInput: 
-                  "bg-[#18181b] border-[#27272a] text-[#fafafa] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all",
-                footerActionLink: "text-blue-400 hover:text-blue-300 transition-colors",
-                identityPreviewText: "text-[#fafafa]",
-                formFieldLabel: "text-[#d4d4d8]",
-                dividerLine: "bg-[#27272a]",
-                dividerText: "text-[#71717a]",
-                socialButtonsBlockButton: 
-                  "bg-[#18181b] border-[#27272a] text-[#fafafa] hover:bg-[#1f1f23] hover:border-[#3f3f46] transition-all shadow-md",
-                formFieldInputShowPasswordButton: "text-[#a1a1aa] hover:text-[#fafafa]",
-                identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
-              },
+              baseTheme: dark,
             }}
           />
 
@@ -299,3 +273,6 @@ export default function SignInPage() {
     </div>
   )
 }
+
+
+
