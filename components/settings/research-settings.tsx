@@ -347,179 +347,20 @@
 // }
 
 
-// "use client"
-
-// import { useState, useEffect } from "react"
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Label } from "@/components/ui/label"
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-// import { Badge } from "@/components/ui/badge"
-// import { Zap, Brain, CheckCircle2 } from "lucide-react"
-// import { Button } from "@/components/ui/button"
-// import { useToast } from "@/hooks/use-toast"
-// import { CREDIT_COSTS } from "@/lib/constants"
-// import { updateResearchSettings, getResearchSettings } from "@/lib/actions/settings"
-
-// export function ResearchSettings() {
-//   const [scrapingMode, setScrapingMode] = useState<"FAST" | "DEEP">("FAST")
-//   const [saving, setSaving] = useState(false)
-//   const [loading, setLoading] = useState(true)
-//   const { toast } = useToast()
-
-//   useEffect(() => {
-//     const loadSettings = async () => {
-//       try {
-//         const settings = await getResearchSettings()
-//         setScrapingMode(settings.scrapingMode)
-//       } catch (error) {
-//         console.error("[v0] Failed to load research settings:", error)
-//       } finally {
-//         setLoading(false)
-//       }
-//     }
-//     loadSettings()
-//   }, [])
-
-//   const handleSave = async () => {
-//     setSaving(true)
-//     try {
-//       await updateResearchSettings(scrapingMode)
-
-//       toast({
-//         title: "Settings saved",
-//         description: "Your research preferences have been updated.",
-//       })
-//     } catch (error) {
-//       console.error("[v0] Failed to save research settings:", error)
-//       toast({
-//         title: "Error",
-//         description: "Failed to save settings. Please try again.",
-//         variant: "destructive",
-//       })
-//     } finally {
-//       setSaving(false)
-//     }
-//   }
-
-//   if (loading) {
-//     return (
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>AI Research Mode</CardTitle>
-//           <CardDescription>Loading your preferences...</CardDescription>
-//         </CardHeader>
-//       </Card>
-//     )
-//   }
-
-//   return (
-//     <div className="space-y-6">
-//       <Card>
-//         <CardHeader>
-//           <CardTitle>AI Research Mode</CardTitle>
-//           <CardDescription>
-//             Choose how deeply AI should research your prospects. Deep mode provides richer insights but uses more
-//             credits.
-//           </CardDescription>
-//         </CardHeader>
-//         <CardContent className="space-y-6">
-//           <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
-//             <div className="space-y-4">
-//               <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-//                 <RadioGroupItem value="FAST" id="fast" className="mt-1" />
-//                 <div className="flex-1">
-//                   <Label htmlFor="fast" className="cursor-pointer">
-//                     <div className="flex items-center gap-2 mb-1">
-//                       <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-//                       <span className="font-semibold">Fast Mode</span>
-//                       <Badge variant="secondary">{CREDIT_COSTS.RESEARCH_FAST} credit/prospect</Badge>
-//                     </div>
-//                     <p className="text-sm text-muted-foreground leading-relaxed">
-//                       Quick research using multiple data sources. Perfect for high-volume prospecting.
-//                     </p>
-//                     <div className="mt-3 space-y-1">
-//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-//                         <span>Company website & LinkedIn data</span>
-//                       </div>
-//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-//                         <span>Recent news & technology stack</span>
-//                       </div>
-//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-//                         <span>AI-generated talking points</span>
-//                       </div>
-//                     </div>
-//                     <div className="mt-3 flex items-center gap-4 text-xs">
-//                       <span className="text-muted-foreground">Speed: ~5-10 seconds</span>
-//                     </div>
-//                   </Label>
-//                 </div>
-//               </div>
-
-//               <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-//                 <RadioGroupItem value="DEEP" id="deep" className="mt-1" />
-//                 <div className="flex-1">
-//                   <Label htmlFor="deep" className="cursor-pointer">
-//                     <div className="flex items-center gap-2 mb-1">
-//                       <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-//                       <span className="font-semibold">Deep Mode</span>
-//                       <Badge variant="default">{CREDIT_COSTS.RESEARCH_DEEP} credits/prospect</Badge>
-//                     </div>
-//                     <p className="text-sm text-muted-foreground leading-relaxed">
-//                       Comprehensive research with advanced AI extraction. Best for high-value prospects.
-//                     </p>
-//                     <div className="mt-3 space-y-1">
-//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-//                         <span>Everything in Fast Mode, plus:</span>
-//                       </div>
-//                       <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-//                         <CheckCircle2 className="h-3 w-3" />
-//                         <span>Products, pricing & team insights</span>
-//                       </div>
-//                       <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-//                         <CheckCircle2 className="h-3 w-3" />
-//                         <span>Hiring signals & growth indicators</span>
-//                       </div>
-//                       <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-//                         <CheckCircle2 className="h-3 w-3" />
-//                         <span>News sentiment & personalization hooks</span>
-//                       </div>
-//                     </div>
-//                     <div className="mt-3 flex items-center gap-4 text-xs">
-//                       <span className="text-muted-foreground">Speed: ~30-60 seconds</span>
-//                     </div>
-//                   </Label>
-//                 </div>
-//               </div>
-//             </div>
-//           </RadioGroup>
-
-//           <div className="flex justify-end">
-//             <Button onClick={handleSave} disabled={saving}>
-//               {saving ? "Saving..." : "Save Preferences"}
-//             </Button>
-//           </div>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   )
-// }
-
 "use client"
 
 import { useState, useEffect } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
+import { Zap, Brain, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { CREDIT_COSTS } from "@/lib/constants"
 import { updateResearchSettings, getResearchSettings } from "@/lib/actions/settings"
 
-export function PremiumResearchSettings() {
+export function ResearchSettings() {
   const [scrapingMode, setScrapingMode] = useState<"FAST" | "DEEP">("FAST")
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -543,8 +384,9 @@ export function PremiumResearchSettings() {
     setSaving(true)
     try {
       await updateResearchSettings(scrapingMode)
+
       toast({
-        title: "⚡ Settings saved",
+        title: "Settings saved",
         description: "Your research preferences have been updated.",
       })
     } catch (error) {
@@ -561,188 +403,107 @@ export function PremiumResearchSettings() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 mx-auto rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-          <p className="text-foreground/80">Loading your preferences...</p>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>AI Research Mode</CardTitle>
+          <CardDescription>Loading your preferences...</CardDescription>
+        </CardHeader>
+      </Card>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6 md:p-12">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl opacity-20 animate-float" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl opacity-20 animate-float-delayed" />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-12 space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-accent" />
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
-              AI Research Mode
-            </h1>
-          </div>
-          <p className="text-lg text-foreground/70 max-w-2xl">
-            Choose your research depth. Fast mode for volume, Deep mode for precision. Both powered by cutting-edge AI.
-          </p>
-        </div>
-
-        {/* Mode Selection */}
-        <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
-          <div className="flex flex-col lg:flex-row gap-6 mb-10">
-            {/* Fast Mode Card */}
-            <div
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer flex-1 ${
-                scrapingMode === "FAST"
-                  ? "ring-2 ring-primary/50 bg-gradient-to-br from-card via-card to-card/50"
-                  : "bg-card/50 hover:bg-card/80 hover:ring-1 hover:ring-primary/30"
-              }`}
-            >
-              {scrapingMode === "FAST" && (
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              )}
-
-              <div className="relative p-6 md:p-8 space-y-6 h-full flex flex-col">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="flex-shrink-0 relative">
-                      <div className="absolute inset-0 bg-amber-500/30 rounded-lg blur-lg" />
-                      <RadioGroupItem value="FAST" id="fast" className="mt-1 relative" />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>AI Research Mode</CardTitle>
+          <CardDescription>
+            Choose how deeply AI should research your prospects. Deep mode provides richer insights but uses more
+            credits.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="FAST" id="fast" className="mt-1" />
+                <div className="flex-1">
+                  <Label htmlFor="fast" className="cursor-pointer">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                      <span className="font-semibold">Fast Mode</span>
+                      <Badge variant="secondary">{CREDIT_COSTS.RESEARCH_FAST} credit/prospect</Badge>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30">
-                          <span className="font-semibold text-sm text-amber-400">Lightning Speed</span>
-                        </div>
-                        <Badge className="bg-gradient-to-r from-amber-600 to-amber-500 text-white border-0">
-                          {CREDIT_COSTS.RESEARCH_FAST} credit/prospect
-                        </Badge>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Quick research using multiple data sources. Perfect for high-volume prospecting.
+                    </p>
+                    <div className="mt-3 space-y-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        <span>Company website & LinkedIn data</span>
                       </div>
-
-                      <Label htmlFor="fast" className="cursor-pointer">
-                        <h3 className="text-xl font-bold text-foreground mb-2">Fast Mode</h3>
-                        <p className="text-sm text-foreground/70 leading-relaxed mb-4">
-                          Quick research using multiple data sources. Perfect for high-volume prospecting.
-                        </p>
-                      </Label>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        <span>Recent news & technology stack</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        <span>AI-generated talking points</span>
+                      </div>
                     </div>
-                  </div>
+                    <div className="mt-3 flex items-center gap-4 text-xs">
+                      <span className="text-muted-foreground">Speed: ~5-10 seconds</span>
+                    </div>
+                  </Label>
                 </div>
+              </div>
 
-                {/* Features List */}
-                <div className="space-y-2 ml-10 flex-1">
-                  {[
-                    "Company website & LinkedIn data",
-                    "Recent news & technology stack",
-                    "AI-generated talking points",
-                    "Speed: ~5-10 seconds",
-                  ].map((feature, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-3 p-2 rounded-lg bg-foreground/5 hover:bg-foreground/10 transition-colors"
-                    >
-                      <div className="h-2 w-2 rounded-full bg-amber-400 flex-shrink-0" />
-                      <span className="text-xs text-foreground/80">{feature}</span>
+              <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+                <RadioGroupItem value="DEEP" id="deep" className="mt-1" />
+                <div className="flex-1">
+                  <Label htmlFor="deep" className="cursor-pointer">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      <span className="font-semibold">Deep Mode</span>
+                      <Badge variant="default">{CREDIT_COSTS.RESEARCH_DEEP} credits/prospect</Badge>
                     </div>
-                  ))}
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Comprehensive research with advanced AI extraction. Best for high-value prospects.
+                    </p>
+                    <div className="mt-3 space-y-1">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        <span>Everything in Fast Mode, plus:</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>Products, pricing & team insights</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>Hiring signals & growth indicators</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+                        <CheckCircle2 className="h-3 w-3" />
+                        <span>News sentiment & personalization hooks</span>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-4 text-xs">
+                      <span className="text-muted-foreground">Speed: ~30-60 seconds</span>
+                    </div>
+                  </Label>
                 </div>
               </div>
             </div>
+          </RadioGroup>
 
-            {/* Deep Mode Card */}
-            <div
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer flex-1 ${
-                scrapingMode === "DEEP"
-                  ? "ring-2 ring-primary/50 bg-gradient-to-br from-card via-card to-card/50"
-                  : "bg-card/50 hover:bg-card/80 hover:ring-1 hover:ring-primary/30"
-              }`}
-            >
-              {scrapingMode === "DEEP" && (
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              )}
-
-              <div className="relative p-6 md:p-8 space-y-6 h-full flex flex-col">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="flex-shrink-0 relative">
-                      <div className="absolute inset-0 bg-primary/30 rounded-lg blur-lg" />
-                      <RadioGroupItem value="DEEP" id="deep" className="mt-1 relative" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30">
-                          <span className="font-semibold text-sm text-primary">Advanced AI</span>
-                        </div>
-                        <Badge className="bg-gradient-to-r from-primary to-primary/80 text-white border-0">
-                          {CREDIT_COSTS.RESEARCH_DEEP} credits/prospect
-                        </Badge>
-                      </div>
-
-                      <Label htmlFor="deep" className="cursor-pointer">
-                        <h3 className="text-xl font-bold text-foreground mb-2">Deep Mode</h3>
-                        <p className="text-sm text-foreground/70 leading-relaxed mb-4">
-                          Comprehensive research with advanced AI extraction. Best for high-value prospects.
-                        </p>
-                      </Label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Features List with Enhanced Styling */}
-                <div className="space-y-2 ml-10 flex-1">
-                  <div className="flex items-center gap-3 p-2 rounded-lg bg-foreground/5 hover:bg-foreground/10 transition-colors">
-                    <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
-                    <span className="text-xs text-foreground/80">Everything in Fast Mode, plus:</span>
-                  </div>
-                  {[
-                    "Products, pricing & team insights",
-                    "Hiring signals & growth indicators",
-                    "News sentiment & personalization hooks",
-                    "Speed: ~30-60 seconds",
-                  ].map((feature, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-3 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/20"
-                    >
-                      <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
-                      <span className="text-xs text-primary/90 font-medium">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save Preferences"}
+            </Button>
           </div>
-        </RadioGroup>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="group relative px-8 py-3 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="relative flex items-center gap-2">
-              {saving ? (
-                <>
-                  <div className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <div className="w-4 h-4 rounded-full bg-primary-foreground/80" />
-                  Save Preferences
-                </>
-              )}
-            </span>
-          </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
