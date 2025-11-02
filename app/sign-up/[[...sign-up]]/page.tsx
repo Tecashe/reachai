@@ -143,6 +143,7 @@
 
 
 import { SignUp } from "@clerk/nextjs"
+import { dark } from '@clerk/themes'
 import Link from "next/link"
 import { Sparkles, ArrowLeft } from "lucide-react"
 
@@ -154,7 +155,7 @@ export default function SignUpPage() {
         <div className="relative w-full max-w-lg">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-500/20 blur-3xl rounded-full" />
           <img
-            src="/path-to-your-image.png"
+            src="/oauth.png"
             alt="Sign up"
             className="relative w-full h-auto object-contain drop-shadow-2xl"
           />
@@ -172,51 +173,10 @@ export default function SignUpPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to home</span>
             </Link>
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/50">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-[#fafafa]">ReachAI</span>
-            </div>
           </div>
-
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-[#fafafa]">Create your account</h1>
-            <p className="text-[#a1a1aa]">Start your free trial today</p>
-          </div>
-
           <SignUp
             appearance={{
-              baseTheme: undefined,
-              variables: {
-                colorPrimary: "#3b82f6",
-                colorBackground: "#0a0a0a",
-                colorInputBackground: "#18181b",
-                colorInputText: "#fafafa",
-                colorText: "#fafafa",
-                colorTextSecondary: "#a1a1aa",
-                colorDanger: "#ef4444",
-                borderRadius: "0.75rem",
-              },
-              elements: {
-                rootBox: "mx-auto",
-                card: "bg-[#141414] shadow-2xl border border-[#27272a] rounded-xl",
-                headerTitle: "hidden",
-                headerSubtitle: "hidden",
-                formButtonPrimary: 
-                  "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200",
-                formFieldInput: 
-                  "bg-[#18181b] border-[#27272a] text-[#fafafa] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all",
-                footerActionLink: "text-blue-400 hover:text-blue-300 transition-colors",
-                identityPreviewText: "text-[#fafafa]",
-                formFieldLabel: "text-[#d4d4d8]",
-                dividerLine: "bg-[#27272a]",
-                dividerText: "text-[#71717a]",
-                socialButtonsBlockButton: 
-                  "bg-[#18181b] border-[#27272a] text-[#fafafa] hover:bg-[#1f1f23] hover:border-[#3f3f46] transition-all shadow-md",
-                formFieldInputShowPasswordButton: "text-[#a1a1aa] hover:text-[#fafafa]",
-                identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
-              },
+              baseTheme: dark,
             }}
           />
         </div>

@@ -222,7 +222,7 @@ export default function SignInPage() {
         <div className="relative w-full max-w-lg">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-500/20 blur-3xl rounded-full" />
           <img
-            src="/path-to-your-image.png"
+            src="/oauth.png"
             alt="Sign in"
             className="relative w-full h-auto object-contain drop-shadow-2xl"
           />
@@ -240,34 +240,12 @@ export default function SignInPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to home</span>
             </Link>
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/50">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-[#fafafa]">ReachAI</span>
-            </div>
           </div>
-
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-[#fafafa]">Welcome back</h1>
-            <p className="text-[#a1a1aa]">Sign in to your ReachAI account</p>
-          </div>
-
          <SignIn
             appearance={{
               baseTheme: dark,
             }}
           />
-
-          <p className="text-center text-sm text-[#a1a1aa]">
-            Don't have an account?{" "}
-            <Link 
-              href="/sign-up" 
-              className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              Sign up for free
-            </Link>
-          </p>
         </div>
       </div>
     </div>
