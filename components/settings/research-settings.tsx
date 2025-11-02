@@ -507,13 +507,13 @@
 //     </div>
 //   )
 // }
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
-import { Zap, Brain, CheckCircle2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { CREDIT_COSTS } from "@/lib/constants"
@@ -563,7 +563,7 @@ export function PremiumResearchSettings() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
         <div className="text-center space-y-4">
-          <Sparkles className="w-12 h-12 mx-auto text-primary animate-pulse" />
+          <div className="w-12 h-12 mx-auto rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
           <p className="text-foreground/80">Loading your preferences...</p>
         </div>
       </div>
@@ -578,11 +578,11 @@ export function PremiumResearchSettings() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl opacity-20 animate-float-delayed" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto">
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-12 space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" />
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary to-accent" />
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-accent bg-clip-text text-transparent">
               AI Research Mode
             </h1>
@@ -594,10 +594,10 @@ export function PremiumResearchSettings() {
 
         {/* Mode Selection */}
         <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
-          <div className="space-y-4 md:space-y-6">
+          <div className="flex flex-col lg:flex-row gap-6 mb-10">
             {/* Fast Mode Card */}
             <div
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer ${
+              className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer flex-1 ${
                 scrapingMode === "FAST"
                   ? "ring-2 ring-primary/50 bg-gradient-to-br from-card via-card to-card/50"
                   : "bg-card/50 hover:bg-card/80 hover:ring-1 hover:ring-primary/30"
@@ -607,7 +607,7 @@ export function PremiumResearchSettings() {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               )}
 
-              <div className="relative p-6 md:p-8 space-y-6">
+              <div className="relative p-6 md:p-8 space-y-6 h-full flex flex-col">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="flex-shrink-0 relative">
@@ -617,7 +617,6 @@ export function PremiumResearchSettings() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30">
-                          <Zap className="h-4 w-4 text-amber-400" />
                           <span className="font-semibold text-sm text-amber-400">Lightning Speed</span>
                         </div>
                         <Badge className="bg-gradient-to-r from-amber-600 to-amber-500 text-white border-0">
@@ -635,20 +634,20 @@ export function PremiumResearchSettings() {
                   </div>
                 </div>
 
-                {/* Features Grid */}
-                <div className="grid md:grid-cols-2 gap-3 ml-10">
+                {/* Features List */}
+                <div className="space-y-2 ml-10 flex-1">
                   {[
-                    { icon: "🔗", text: "Company website & LinkedIn data" },
-                    { icon: "📰", text: "Recent news & technology stack" },
-                    { icon: "💡", text: "AI-generated talking points" },
-                    { icon: "⚡", text: "Speed: ~5-10 seconds" },
+                    "Company website & LinkedIn data",
+                    "Recent news & technology stack",
+                    "AI-generated talking points",
+                    "Speed: ~5-10 seconds",
                   ].map((feature, idx) => (
                     <div
                       key={idx}
                       className="flex items-center gap-3 p-2 rounded-lg bg-foreground/5 hover:bg-foreground/10 transition-colors"
                     >
-                      <CheckCircle2 className="h-4 w-4 text-amber-400 flex-shrink-0" />
-                      <span className="text-xs text-foreground/80">{feature.text}</span>
+                      <div className="h-2 w-2 rounded-full bg-amber-400 flex-shrink-0" />
+                      <span className="text-xs text-foreground/80">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -657,7 +656,7 @@ export function PremiumResearchSettings() {
 
             {/* Deep Mode Card */}
             <div
-              className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer ${
+              className={`group relative overflow-hidden rounded-2xl transition-all duration-500 cursor-pointer flex-1 ${
                 scrapingMode === "DEEP"
                   ? "ring-2 ring-primary/50 bg-gradient-to-br from-card via-card to-card/50"
                   : "bg-card/50 hover:bg-card/80 hover:ring-1 hover:ring-primary/30"
@@ -667,7 +666,7 @@ export function PremiumResearchSettings() {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               )}
 
-              <div className="relative p-6 md:p-8 space-y-6">
+              <div className="relative p-6 md:p-8 space-y-6 h-full flex flex-col">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="flex-shrink-0 relative">
@@ -677,7 +676,6 @@ export function PremiumResearchSettings() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 border border-primary/30">
-                          <Brain className="h-4 w-4 text-primary" />
                           <span className="font-semibold text-sm text-primary">Advanced AI</span>
                         </div>
                         <Badge className="bg-gradient-to-r from-primary to-primary/80 text-white border-0">
@@ -695,24 +693,24 @@ export function PremiumResearchSettings() {
                   </div>
                 </div>
 
-                {/* Features Grid with Enhanced Styling */}
-                <div className="grid md:grid-cols-2 gap-3 ml-10">
+                {/* Features List with Enhanced Styling */}
+                <div className="space-y-2 ml-10 flex-1">
                   <div className="flex items-center gap-3 p-2 rounded-lg bg-foreground/5 hover:bg-foreground/10 transition-colors">
-                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                    <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
                     <span className="text-xs text-foreground/80">Everything in Fast Mode, plus:</span>
                   </div>
                   {[
-                    { icon: "📊", text: "Products, pricing & team insights" },
-                    { icon: "🚀", text: "Hiring signals & growth indicators" },
-                    { icon: "📈", text: "News sentiment & personalization hooks" },
-                    { icon: "⏱️", text: "Speed: ~30-60 seconds" },
+                    "Products, pricing & team insights",
+                    "Hiring signals & growth indicators",
+                    "News sentiment & personalization hooks",
+                    "Speed: ~30-60 seconds",
                   ].map((feature, idx) => (
                     <div
                       key={idx}
                       className="flex items-center gap-3 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors border border-primary/20"
                     >
-                      <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="text-xs text-primary/90 font-medium">{feature.text}</span>
+                      <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                      <span className="text-xs text-primary/90 font-medium">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -722,7 +720,7 @@ export function PremiumResearchSettings() {
         </RadioGroup>
 
         {/* Save Button */}
-        <div className="mt-10 flex justify-end">
+        <div className="flex justify-end">
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -732,12 +730,12 @@ export function PremiumResearchSettings() {
             <span className="relative flex items-center gap-2">
               {saving ? (
                 <>
-                  <Sparkles className="w-4 h-4 animate-spin" />
+                  <div className="w-4 h-4 rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
+                  <div className="w-4 h-4 rounded-full bg-primary-foreground/80" />
                   Save Preferences
                 </>
               )}
