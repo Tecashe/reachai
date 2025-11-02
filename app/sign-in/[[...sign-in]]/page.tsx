@@ -135,44 +135,119 @@
 //   )
 // }
 
+// import { SignIn } from "@clerk/nextjs"
+// import Link from "next/link"
+// import { Sparkles, ArrowLeft } from "lucide-react"
+
+// export default function SignInPage() {
+//   return (
+//     <div className="min-h-screen grid lg:grid-cols-2">
+//       {/* Left side - Image */}
+//       <div className="hidden lg:block relative overflow-hidden bg-gray-100">
+//         <img
+//           src="/oauth.png"
+//           alt="Sign in"
+//           className="w-full h-full object-cover"
+//         />
+//       </div>
+
+//       {/* Right side - Sign in form */}
+//       <div className="flex items-center justify-center p-6 sm:p-12 bg-black">
+//         <div className="w-full max-w-md space-y-8">
+//           <div className="lg:hidden text-center mb-8">
+//             <Link
+//               href="/"
+//               className="inline-flex items-center gap-2 mb-6 text-gray-400 hover:text-white transition-colors"
+//             >
+//               <ArrowLeft className="h-4 w-4" />
+//               <span>Back to home</span>
+//             </Link>
+//             <div className="flex items-center justify-center gap-2 mb-4">
+//               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+//                 <Sparkles className="h-6 w-6 text-white" />
+//               </div>
+//               <span className="text-2xl font-bold text-white">ReachAI</span>
+//             </div>
+//           </div>
+
+//           <div className="text-center space-y-2">
+//             <h1 className="text-3xl font-bold text-white">Welcome back</h1>
+//             <p className="text-gray-400">Sign in to your ReachAI account</p>
+//           </div>
+
+//           <SignIn
+//             appearance={{
+//               baseTheme: undefined,
+//               variables: {
+//                 colorPrimary: "#3b82f6",
+//                 colorBackground: "#000000",
+//                 colorInputBackground: "#18181b",
+//                 colorInputText: "#ffffff",
+//                 colorText: "#ffffff",
+//                 colorTextSecondary: "#9ca3af",
+//                 colorDanger: "#ef4444",
+//                 borderRadius: "0.5rem",
+//               },
+//               elements: {
+//                 rootBox: "mx-auto",
+//                 card: "bg-black shadow-xl border border-zinc-800",
+//                 headerTitle: "hidden",
+//                 headerSubtitle: "hidden",
+//                 formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
+//                 formFieldInput: "bg-zinc-900 border-zinc-800 text-white",
+//                 footerActionLink: "text-blue-400 hover:text-blue-300",
+//                 identityPreviewText: "text-white",
+//                 formFieldLabel: "text-gray-300",
+//               },
+//             }}
+//           />
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
 import { SignIn } from "@clerk/nextjs"
 import Link from "next/link"
 import { Sparkles, ArrowLeft } from "lucide-react"
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
       {/* Left side - Image */}
-      <div className="hidden lg:block relative overflow-hidden bg-gray-100">
-        <img
-          src="/oauth.png"
-          alt="Sign in"
-          className="w-full h-full object-cover"
-        />
+      <div className="hidden lg:flex items-center justify-center p-12 bg-[#0a0a0a]">
+        <div className="relative w-full max-w-lg">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-500/20 blur-3xl rounded-full" />
+          <img
+            src="/path-to-your-image.png"
+            alt="Sign in"
+            className="relative w-full h-auto object-contain drop-shadow-2xl"
+          />
+        </div>
       </div>
 
       {/* Right side - Sign in form */}
-      <div className="flex items-center justify-center p-6 sm:p-12 bg-black">
+      <div className="flex items-center justify-center p-6 sm:p-12 bg-[#0a0a0a]">
         <div className="w-full max-w-md space-y-8">
           <div className="lg:hidden text-center mb-8">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 mb-6 text-gray-400 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 mb-6 text-[#a1a1aa] hover:text-[#e4e4e7] transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to home</span>
             </Link>
             <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/50">
                 <Sparkles className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-white">ReachAI</span>
+              <span className="text-2xl font-bold text-[#fafafa]">ReachAI</span>
             </div>
           </div>
 
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-white">Welcome back</h1>
-            <p className="text-gray-400">Sign in to your ReachAI account</p>
+            <h1 className="text-3xl font-bold text-[#fafafa]">Welcome back</h1>
+            <p className="text-[#a1a1aa]">Sign in to your ReachAI account</p>
           </div>
 
           <SignIn
@@ -180,27 +255,45 @@ export default function SignInPage() {
               baseTheme: undefined,
               variables: {
                 colorPrimary: "#3b82f6",
-                colorBackground: "#000000",
+                colorBackground: "#0a0a0a",
                 colorInputBackground: "#18181b",
-                colorInputText: "#ffffff",
-                colorText: "#ffffff",
-                colorTextSecondary: "#9ca3af",
+                colorInputText: "#fafafa",
+                colorText: "#fafafa",
+                colorTextSecondary: "#a1a1aa",
                 colorDanger: "#ef4444",
-                borderRadius: "0.5rem",
+                borderRadius: "0.75rem",
               },
               elements: {
                 rootBox: "mx-auto",
-                card: "bg-black shadow-xl border border-zinc-800",
+                card: "bg-[#141414] shadow-2xl border border-[#27272a] rounded-xl",
                 headerTitle: "hidden",
                 headerSubtitle: "hidden",
-                formButtonPrimary: "bg-blue-600 hover:bg-blue-700",
-                formFieldInput: "bg-zinc-900 border-zinc-800 text-white",
-                footerActionLink: "text-blue-400 hover:text-blue-300",
-                identityPreviewText: "text-white",
-                formFieldLabel: "text-gray-300",
+                formButtonPrimary: 
+                  "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-200",
+                formFieldInput: 
+                  "bg-[#18181b] border-[#27272a] text-[#fafafa] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all",
+                footerActionLink: "text-blue-400 hover:text-blue-300 transition-colors",
+                identityPreviewText: "text-[#fafafa]",
+                formFieldLabel: "text-[#d4d4d8]",
+                dividerLine: "bg-[#27272a]",
+                dividerText: "text-[#71717a]",
+                socialButtonsBlockButton: 
+                  "bg-[#18181b] border-[#27272a] text-[#fafafa] hover:bg-[#1f1f23] hover:border-[#3f3f46] transition-all shadow-md",
+                formFieldInputShowPasswordButton: "text-[#a1a1aa] hover:text-[#fafafa]",
+                identityPreviewEditButton: "text-blue-400 hover:text-blue-300",
               },
             }}
           />
+
+          <p className="text-center text-sm text-[#a1a1aa]">
+            Don't have an account?{" "}
+            <Link 
+              href="/sign-up" 
+              className="font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Sign up for free
+            </Link>
+          </p>
         </div>
       </div>
     </div>
