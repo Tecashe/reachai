@@ -340,8 +340,6 @@
 //   }
 // }
 
-"use server"
-
 import { db } from "@/lib/db"
 
 export interface CrmCredentials {
@@ -693,3 +691,4 @@ export async function scoreProspect(prospect: any, crmData?: any): Promise<numbe
     return 0
   }
 }
+
