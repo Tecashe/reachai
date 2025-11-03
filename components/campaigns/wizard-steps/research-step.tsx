@@ -165,6 +165,7 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
   const [hasStarted, setHasStarted] = useState(false)
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState<number | null>(null)
   const [researchError, setResearchError] = useState<string | null>(null)
+  const [isInitializing, setIsInitializing] = useState(true)
   
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const startTimeRef = useRef<number>(0)
@@ -187,36 +188,58 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
   }, [campaign.id])
 
   const checkExistingResearch = async () => {
+    console.log("[UI] Checking existing research for campaign:", campaign.id)
+    setIsInitializing(true)
+    
     try {
-      console.log("[UI] Checking existing research for campaign:", campaign.id)
       const response = await fetch(`/api/research/batch/status?campaignId=${campaign.id}`)
       
       if (!response.ok) {
         console.warn("[UI] Failed to check existing research:", response.status)
+        setIsInitializing(false)
         return
       }
 
       const status: ResearchStatus = await response.json()
       console.log("[UI] Existing research status:", status)
       
+      // Update all state based on existing research
+      setResearchedCount(status.completed)
+      setSuccessfulCount(status.successful || status.completed)
+      setFailedCount(status.failed || 0)
+      setTotalProspects(status.total)
+      setProgress((status.completed / status.total) * 100)
+      
+      // Determine if research has started or is complete
       if (status.completed > 0) {
-        setResearchedCount(status.completed)
-        setSuccessfulCount(status.successful || status.completed)
-        setFailedCount(status.failed || 0)
-        setTotalProspects(status.total)
-        setProgress((status.completed / status.total) * 100)
         setHasStarted(true)
         
         if (status.completed === status.total) {
+          // Research is complete
           console.log("[UI] Research already completed")
-          toast.info(`Research already completed for ${status.completed} prospects`)
-        } else if (status.completed > 0) {
-          console.log("[UI] Partial research found")
-          toast.info(`Found ${status.completed} of ${status.total} prospects already researched`)
+          setIsResearching(false)
+          // toast.info(`Research already completed for ${status.completed} prospects`)
+        } else if (status.isRunning) {
+          // Research is currently running
+          console.log("[UI] Research is currently running")
+          setIsResearching(true)
+          startPolling()
+        } else {
+          // Partial research but not running
+          console.log("[UI] Partial research found, not currently running")
+          setIsResearching(false)
+          // toast.info(`Found ${status.completed} of ${status.total} prospects already researched`)
         }
+      } else {
+        // No research started yet
+        setIsResearching(false)
+        setHasStarted(false)
       }
     } catch (error) {
       console.error("[UI] Failed to check existing research:", error)
+      setIsResearching(false)
+    } finally {
+      setIsInitializing(false)
     }
   }
 
@@ -330,7 +353,7 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
       console.error("[UI] Research error:", error)
       const errorMessage = error instanceof Error ? error.message : "Failed to start research"
       setResearchError(errorMessage)
-      toast.error(errorMessage)
+      // toast.error(errorMessage)
       stopPolling()
       setIsResearching(false)
       setEstimatedTimeRemaining(null)
@@ -344,8 +367,9 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
     return `~${minutes}m ${secs}s`
   }
 
-  // Allow proceeding if we have ANY research results
-  const canProceed = researchedCount > 0 && !isResearching
+  // FIXED: Allow proceeding if we have ANY research results OR if we're not researching
+  // This ensures the button is enabled when there's data available
+  const canProceed = (researchedCount > 0 || hasStarted) && !isResearching && !isInitializing
   const isComplete = researchedCount === totalProspects && totalProspects > 0
   const hasPartialResults = researchedCount > 0 && researchedCount < totalProspects && !isResearching
 
@@ -364,8 +388,16 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
           </p>
         </div>
 
+        {/* Initializing State */}
+        {isInitializing && (
+          <div className="flex items-center justify-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+            <span className="text-sm font-medium">Checking existing research...</span>
+          </div>
+        )}
+
         {/* Active Research State */}
-        {isResearching && (
+        {!isInitializing && isResearching && (
           <div className="space-y-4 max-w-md mx-auto">
             <div className="flex items-center justify-center gap-2">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -395,7 +427,7 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
         )}
 
         {/* Complete State */}
-        {!isResearching && isComplete && (
+        {!isInitializing && !isResearching && isComplete && (
           <div className="flex flex-col items-center justify-center gap-3">
             <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle2 className="h-6 w-6" />
@@ -409,7 +441,7 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
         )}
 
         {/* Partial Results State */}
-        {!isResearching && hasPartialResults && (
+        {!isInitializing && !isResearching && hasPartialResults && (
           <div className="flex flex-col items-center justify-center gap-3">
             <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
               <AlertCircle className="h-5 w-5" />
@@ -427,7 +459,7 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
         )}
 
         {/* Initial State */}
-        {!isResearching && !hasStarted && (
+        {!isInitializing && !isResearching && !hasStarted && (
           <div className="space-y-3">
             <Button onClick={startResearch} size="lg" className="gap-2">
               <Sparkles className="h-4 w-4" />
@@ -448,27 +480,29 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
         )}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto pt-6">
-          <div className="text-center p-4 rounded-lg bg-muted/50">
-            <div className="text-2xl font-bold">{totalProspects}</div>
-            <div className="text-xs text-muted-foreground">Total Prospects</div>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              {successfulCount}
+        {!isInitializing && (
+          <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto pt-6">
+            <div className="text-center p-4 rounded-lg bg-muted/50">
+              <div className="text-2xl font-bold">{totalProspects}</div>
+              <div className="text-xs text-muted-foreground">Total Prospects</div>
             </div>
-            <div className="text-xs text-muted-foreground">Fully Researched</div>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
-            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-              {failedCount}
+            <div className="text-center p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {successfulCount}
+              </div>
+              <div className="text-xs text-muted-foreground">Fully Researched</div>
             </div>
-            <div className="text-xs text-muted-foreground">Partial Data</div>
+            <div className="text-center p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800">
+              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {failedCount}
+              </div>
+              <div className="text-xs text-muted-foreground">Partial Data</div>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Progress Bar (always visible when started) */}
-        {hasStarted && (
+        {!isInitializing && hasStarted && (
           <div className="max-w-md mx-auto pt-4 space-y-2">
             <Progress value={progress} className="h-2" />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -481,7 +515,7 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
 
       {/* Navigation */}
       <div className="flex items-center justify-between pt-4 border-t">
-        <Button variant="outline" onClick={onBack} disabled={isResearching}>
+        <Button variant="outline" onClick={onBack} disabled={isResearching || isInitializing}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
@@ -496,7 +530,12 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
             disabled={!canProceed}
             className="gap-2"
           >
-            {canProceed ? (
+            {isInitializing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Checking status...
+              </>
+            ) : canProceed ? (
               <>
                 Continue to Email Generation
                 <ArrowRight className="h-4 w-4" />
