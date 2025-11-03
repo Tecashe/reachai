@@ -334,23 +334,26 @@ model Integration {
   id     String @id @default(cuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
   type IntegrationType
   name String
-
+  
   // Credentials (encrypted)
-  credentials Json // Encrypted API keys, tokens, etc.
-
+  credentials Json? // Encrypted API keys, tokens, etc.
+  
   // Status
   isActive     Boolean   @default(true)
   lastSyncedAt DateTime?
-
+  
   // Settings
-  settings Json? // Provider-specific settings
-
+  settings     Json? // Provider-specific settings
+  accessToken  String
+  refreshToken String?  // Make optional since some providers might not provide it
+  expiresAt    DateTime? // Add this field
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   @@unique([userId, type])
   @@index([userId])
 }
