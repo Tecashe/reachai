@@ -511,11 +511,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Badge } from "@/components/ui/badge"
-import { Zap, Brain, CheckCircle2 } from "lucide-react"
+import { Zap, Brain, CheckCircle2, Gauge } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { CREDIT_COSTS } from "@/lib/constants"
@@ -574,97 +574,154 @@ export function ResearchSettings() {
   }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Research Mode</CardTitle>
-          <CardDescription>
-            Choose how deeply AI should research your prospects. Deep mode provides richer insights but uses more
-            credits.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold tracking-tight">Research Mode</h2>
+        <p className="text-muted-foreground">
+          Select your preferred AI research depth. Choose between speed and comprehensive insights.
+        </p>
+      </div>
+
+      <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Fast Mode Card */}
+          <div
+            className={`relative rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
+              scrapingMode === "FAST"
+                ? "border-yellow-500/50 bg-yellow-50/30 dark:bg-yellow-950/20"
+                : "border-border hover:border-yellow-300/30"
+            }`}
+          >
+            <div className="p-6 space-y-6">
+              {/* Card Header */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30">
+                    <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                  </div>
+                  <div className="space-y-1 flex-1">
+                    <Label htmlFor="fast" className="text-base font-semibold cursor-pointer block">
+                      Fast Mode
+                    </Label>
+                    <p className="text-sm text-muted-foreground">Quick and efficient research</p>
+                  </div>
+                </div>
                 <RadioGroupItem value="FAST" id="fast" className="mt-1" />
-                <div className="flex-1">
-                  <Label htmlFor="fast" className="cursor-pointer">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                      <span className="font-semibold">Fast Mode</span>
-                      <Badge variant="secondary">{CREDIT_COSTS.RESEARCH_FAST} credit/prospect</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Quick research using multiple data sources. Perfect for high-volume prospecting.
-                    </p>
-                    <div className="mt-3 space-y-1">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-                        <span>Company website & LinkedIn data</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-                        <span>Recent news & technology stack</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-                        <span>AI-generated talking points</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center gap-4 text-xs">
-                      <span className="text-muted-foreground">Speed: ~5-10 seconds</span>
-                    </div>
-                  </Label>
+              </div>
+
+              {/* Cost Section */}
+              <div className="space-y-2 py-4 border-y border-border/50">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cost per prospect</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                    {CREDIT_COSTS.RESEARCH_FAST}
+                  </span>
+                  <span className="text-sm text-muted-foreground">credit</span>
                 </div>
               </div>
 
-              <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
-                <RadioGroupItem value="DEEP" id="deep" className="mt-1" />
-                <div className="flex-1">
-                  <Label htmlFor="deep" className="cursor-pointer">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                      <span className="font-semibold">Deep Mode</span>
-                      <Badge variant="default">{CREDIT_COSTS.RESEARCH_DEEP} credits/prospect</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Comprehensive research with advanced AI extraction. Best for high-value prospects.
-                    </p>
-                    <div className="mt-3 space-y-1">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-                        <span>Everything in Fast Mode, plus:</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-                        <CheckCircle2 className="h-3 w-3" />
-                        <span>Products, pricing & team insights</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-                        <CheckCircle2 className="h-3 w-3" />
-                        <span>Hiring signals & growth indicators</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
-                        <CheckCircle2 className="h-3 w-3" />
-                        <span>News sentiment & personalization hooks</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center gap-4 text-xs">
-                      <span className="text-muted-foreground">Speed: ~30-60 seconds</span>
-                    </div>
-                  </Label>
+              {/* Features Section */}
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">What you get</p>
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-foreground">Company website & LinkedIn data</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-foreground">Recent news & tech stack</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-foreground">AI-generated talking points</span>
+                  </div>
                 </div>
+              </div>
+
+              {/* Speed Section */}
+              <div className="flex items-center gap-2 pt-2 px-3 py-2 bg-muted/40 rounded-lg">
+                <Gauge className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">~5-10 seconds per prospect</span>
               </div>
             </div>
-          </RadioGroup>
-
-          <div className="flex justify-end">
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save Preferences"}
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Deep Mode Card */}
+          <div
+            className={`relative rounded-xl border-2 transition-all duration-200 cursor-pointer overflow-hidden ${
+              scrapingMode === "DEEP"
+                ? "border-purple-500/50 bg-purple-50/30 dark:bg-purple-950/20"
+                : "border-border hover:border-purple-300/30"
+            }`}
+          >
+            <div className="p-6 space-y-6">
+              {/* Card Header */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                    <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="space-y-1 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="deep" className="text-base font-semibold cursor-pointer">
+                        Deep Mode
+                      </Label>
+                      <Badge className="bg-purple-600 hover:bg-purple-700 text-xs">Advanced</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Comprehensive intelligence</p>
+                  </div>
+                </div>
+                <RadioGroupItem value="DEEP" id="deep" className="mt-1" />
+              </div>
+
+              {/* Cost Section */}
+              <div className="space-y-2 py-4 border-y border-border/50">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Cost per prospect</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {CREDIT_COSTS.RESEARCH_DEEP}
+                  </span>
+                  <span className="text-sm text-muted-foreground">credits</span>
+                </div>
+              </div>
+
+              {/* Features Section */}
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Everything in Fast Mode, plus
+                </p>
+                <div className="space-y-2.5">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-foreground">Products, pricing & team insights</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-foreground">Hiring signals & growth indicators</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-foreground">News sentiment & personalization hooks</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Speed Section */}
+              <div className="flex items-center gap-2 pt-2 px-3 py-2 bg-muted/40 rounded-lg">
+                <Gauge className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">~30-60 seconds per prospect</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </RadioGroup>
+
+      <div className="flex justify-end pt-4">
+        <Button onClick={handleSave} disabled={saving} size="lg" className="font-medium">
+          {saving ? "Saving..." : "Save Preferences"}
+        </Button>
+      </div>
     </div>
   )
 }
