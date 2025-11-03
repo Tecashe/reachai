@@ -1819,7 +1819,7 @@ function createFallbackResult(
   
   // Log error message safely
   const errorMessage = error instanceof Error ? error.message : String(error)
-  console.log("[v0] Error:", errorMessage)
+  console.log("[v0] Fallback reason:", errorMessage)
 
   // Use whatever data we have to create a basic result
   const hasCompanyData = !!scrapedData.companyWebsite
@@ -2027,7 +2027,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 export async function batchResearchProspects(
   prospects: ProspectData[],
   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
-  onProgress?: (completed: number, total: number) => void,
+  onProgress?: (completed: number, total: number, successful: number, failed: number) => void,
   concurrency = 3,
 ): Promise<Map<string, ResearchResult | EnhancedResearchResult>> {
   console.log("[v0] Starting batch research for", prospects.length, "prospects")
@@ -2058,10 +2058,10 @@ export async function batchResearchProspects(
         )
 
         if (onProgress) {
-          onProgress(completed, prospects.length)
+          onProgress(completed, prospects.length, successful, failed)
         }
 
-        return { email: prospect.email, success: true }
+        return { email: prospect.email, success: true, result }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error)
         console.error(`[v0] ✗ Failed to research ${prospect.email}:`, errorMessage)
@@ -2073,10 +2073,10 @@ export async function batchResearchProspects(
         results.set(prospect.email, fallbackResult)
 
         if (onProgress) {
-          onProgress(completed, prospects.length)
+          onProgress(completed, prospects.length, successful, failed)
         }
 
-        return { email: prospect.email, success: false, error }
+        return { email: prospect.email, success: false, error, result: fallbackResult }
       }
     })
 
@@ -2084,6 +2084,7 @@ export async function batchResearchProspects(
 
     // Add a small delay between batches to avoid overwhelming the API
     if (i + concurrency < prospects.length) {
+      console.log("[v0] Waiting 1s before next batch...")
       await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
