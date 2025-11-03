@@ -347,6 +347,167 @@
 // }
 
 
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Label } from "@/components/ui/label"
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+// import { Badge } from "@/components/ui/badge"
+// import { Zap, Brain, CheckCircle2 } from "lucide-react"
+// import { Button } from "@/components/ui/button"
+// import { useToast } from "@/hooks/use-toast"
+// import { CREDIT_COSTS } from "@/lib/constants"
+// import { updateResearchSettings, getResearchSettings } from "@/lib/actions/settings"
+
+// export function ResearchSettings() {
+//   const [scrapingMode, setScrapingMode] = useState<"FAST" | "DEEP">("FAST")
+//   const [saving, setSaving] = useState(false)
+//   const [loading, setLoading] = useState(true)
+//   const { toast } = useToast()
+
+//   useEffect(() => {
+//     const loadSettings = async () => {
+//       try {
+//         const settings = await getResearchSettings()
+//         setScrapingMode(settings.scrapingMode)
+//       } catch (error) {
+//         console.error("[v0] Failed to load research settings:", error)
+//       } finally {
+//         setLoading(false)
+//       }
+//     }
+//     loadSettings()
+//   }, [])
+
+//   const handleSave = async () => {
+//     setSaving(true)
+//     try {
+//       await updateResearchSettings(scrapingMode)
+
+//       toast({
+//         title: "Settings saved",
+//         description: "Your research preferences have been updated.",
+//       })
+//     } catch (error) {
+//       console.error("[v0] Failed to save research settings:", error)
+//       toast({
+//         title: "Error",
+//         description: "Failed to save settings. Please try again.",
+//         variant: "destructive",
+//       })
+//     } finally {
+//       setSaving(false)
+//     }
+//   }
+
+//   if (loading) {
+//     return (
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>AI Research Mode</CardTitle>
+//           <CardDescription>Loading your preferences...</CardDescription>
+//         </CardHeader>
+//       </Card>
+//     )
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>AI Research Mode</CardTitle>
+//           <CardDescription>
+//             Choose how deeply AI should research your prospects. Deep mode provides richer insights but uses more
+//             credits.
+//           </CardDescription>
+//         </CardHeader>
+//         <CardContent className="space-y-6">
+//           <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
+//             <div className="space-y-4">
+//               <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+//                 <RadioGroupItem value="FAST" id="fast" className="mt-1" />
+//                 <div className="flex-1">
+//                   <Label htmlFor="fast" className="cursor-pointer">
+//                     <div className="flex items-center gap-2 mb-1">
+//                       <Zap className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+//                       <span className="font-semibold">Fast Mode</span>
+//                       <Badge variant="secondary">{CREDIT_COSTS.RESEARCH_FAST} credit/prospect</Badge>
+//                     </div>
+//                     <p className="text-sm text-muted-foreground leading-relaxed">
+//                       Quick research using multiple data sources. Perfect for high-volume prospecting.
+//                     </p>
+//                     <div className="mt-3 space-y-1">
+//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
+//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+//                         <span>Company website & LinkedIn data</span>
+//                       </div>
+//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
+//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+//                         <span>Recent news & technology stack</span>
+//                       </div>
+//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
+//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+//                         <span>AI-generated talking points</span>
+//                       </div>
+//                     </div>
+//                     <div className="mt-3 flex items-center gap-4 text-xs">
+//                       <span className="text-muted-foreground">Speed: ~5-10 seconds</span>
+//                     </div>
+//                   </Label>
+//                 </div>
+//               </div>
+
+//               <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
+//                 <RadioGroupItem value="DEEP" id="deep" className="mt-1" />
+//                 <div className="flex-1">
+//                   <Label htmlFor="deep" className="cursor-pointer">
+//                     <div className="flex items-center gap-2 mb-1">
+//                       <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+//                       <span className="font-semibold">Deep Mode</span>
+//                       <Badge variant="default">{CREDIT_COSTS.RESEARCH_DEEP} credits/prospect</Badge>
+//                     </div>
+//                     <p className="text-sm text-muted-foreground leading-relaxed">
+//                       Comprehensive research with advanced AI extraction. Best for high-value prospects.
+//                     </p>
+//                     <div className="mt-3 space-y-1">
+//                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
+//                         <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+//                         <span>Everything in Fast Mode, plus:</span>
+//                       </div>
+//                       <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+//                         <CheckCircle2 className="h-3 w-3" />
+//                         <span>Products, pricing & team insights</span>
+//                       </div>
+//                       <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+//                         <CheckCircle2 className="h-3 w-3" />
+//                         <span>Hiring signals & growth indicators</span>
+//                       </div>
+//                       <div className="flex items-center gap-2 text-xs text-purple-600 dark:text-purple-400">
+//                         <CheckCircle2 className="h-3 w-3" />
+//                         <span>News sentiment & personalization hooks</span>
+//                       </div>
+//                     </div>
+//                     <div className="mt-3 flex items-center gap-4 text-xs">
+//                       <span className="text-muted-foreground">Speed: ~30-60 seconds</span>
+//                     </div>
+//                   </Label>
+//                 </div>
+//               </div>
+//             </div>
+//           </RadioGroup>
+
+//           <div className="flex justify-end">
+//             <Button onClick={handleSave} disabled={saving}>
+//               {saving ? "Saving..." : "Save Preferences"}
+//             </Button>
+//           </div>
+//         </CardContent>
+//       </Card>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -424,7 +585,7 @@ export function ResearchSettings() {
         </CardHeader>
         <CardContent className="space-y-6">
           <RadioGroup value={scrapingMode} onValueChange={(value: any) => setScrapingMode(value)}>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-muted/50 transition-colors">
                 <RadioGroupItem value="FAST" id="fast" className="mt-1" />
                 <div className="flex-1">
