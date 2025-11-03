@@ -170,8 +170,6 @@ model Prospect {
   qualityScore          Int? // 0-100
   personalizationTokens Json? // Key-value pairs for template variables
 
-  generatedEmail Json? // { subject: string, body: string, qualityScore: number, personalizationScore: number }
-
   // Email status
   status          ProspectStatus @default(ACTIVE)
   currentStep     Int            @default(0)
@@ -186,13 +184,6 @@ model Prospect {
   repliedAt      DateTime?
   bounced        Boolean   @default(false)
   unsubscribed   Boolean   @default(false)
-
-  crmId       String? // External CRM ID (HubSpot, Salesforce, etc.)
-  crmType     String? // Type of CRM (hubspot, salesforce, pipedrive)
-  crmSyncedAt DateTime? // Last sync timestamp
-  crmData     Json? // Raw CRM data
-  dealId      String? // Associated deal ID in CRM
-  dealScore   Float? // AI deal score 0-100
 
   // Relationships
   emailLogs        EmailLog[]
@@ -213,8 +204,6 @@ model Prospect {
   @@index([campaignId])
   @@index([email])
   @@index([status])
-  @@index([crmId])
-  @@index([dealScore])
 }
 
 model EmailTemplate {
@@ -800,9 +789,6 @@ enum IntegrationType {
   RESEND
   OPENAI
   STRIPE
-  HUBSPOT
-  SALESFORCE
-  PIPEDRIVE
 }
 
 enum TeamRole {
