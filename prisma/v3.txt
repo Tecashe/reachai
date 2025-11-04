@@ -72,7 +72,6 @@ model User {
   apiKeys            ApiKey[]
   creditTransactions CreditTransaction[]
   creditPurchases    CreditPurchase[]
-  domains            Domain[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -335,23 +334,26 @@ model Integration {
   id     String @id @default(cuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  
   type IntegrationType
   name String
-
+  
   // Credentials (encrypted)
-  credentials Json // Encrypted API keys, tokens, etc.
-
+  credentials Json? // Encrypted API keys, tokens, etc.
+  
   // Status
   isActive     Boolean   @default(true)
   lastSyncedAt DateTime?
-
+  
   // Settings
-  settings Json? // Provider-specific settings
-
+  settings     Json? // Provider-specific settings
+  accessToken  String
+  refreshToken String?  // Make optional since some providers might not provide it
+  expiresAt    DateTime? // Add this field
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  
   @@unique([userId, type])
   @@index([userId])
 }
@@ -498,8 +500,6 @@ model SendingAccount {
   email    String
   provider String // "resend", "gmail", "outlook"
 
-  domainId String?
-
   // Credentials (encrypted)
   credentials Json // API keys, OAuth tokens, etc.
 
@@ -536,11 +536,6 @@ model SendingAccount {
   schedules SendingSchedule[]
   bounces   EmailBounce[]
   replies   EmailReply[]
-  domain    Domain?           @relation(fields: [domainId], references: [id])
-
-  ipAddress     String?
-  rotatedAt     DateTime?
-  rotationCount Int       @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -549,7 +544,6 @@ model SendingAccount {
   @@index([userId])
   @@index([isActive])
   @@index([healthScore])
-  @@index([domainId])
 }
 
 model EmailBounce {
@@ -740,132 +734,6 @@ model CreditPurchase {
   @@index([createdAt])
 }
 
-model Domain {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Domain details
-  domain     String // e.g., mail.company.com
-  recordType String @default("subdomain") // "subdomain" or "main"
-
-  // DNS Records
-  dnsRecords Json? // { spf: {...}, dkim: {...}, dmarc: {...} }
-
-  // Verification status
-  isVerified            Boolean   @default(false)
-  verifiedAt            DateTime?
-  verificationAttempts  Int       @default(0)
-  lastVerificationCheck DateTime?
-
-  // Health status
-  healthScore          Int                   @default(100) // 0-100
-  deliverabilityHealth DeliverabilityHealth?
-
-  // Blacklist status
-  isBlacklisted    Boolean   @default(false)
-  blacklistedOn    String[]  @default([]) // Which blacklists
-  blacklistCheckAt DateTime?
-
-  // Bounce tracking
-  bounceRate        Float @default(0)
-  spamComplaintRate Float @default(0)
-
-  // Associated sending accounts
-  sendingAccounts SendingAccount[]
-
-  // Status
-  isActive     Boolean   @default(true)
-  pausedReason String?
-  pausedAt     DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, domain])
-  @@index([userId])
-  @@index([isVerified])
-  @@index([isBlacklisted])
-  @@index([healthScore])
-}
-
-model DeliverabilityHealth {
-  id       String @id @default(cuid())
-  domainId String @unique
-  domain   Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
-
-  // DNS Status
-  spfStatus DNSStatus @default(UNKNOWN)
-  spfValid  Boolean   @default(false)
-  spfRecord String?
-
-  dkimStatus    DNSStatus @default(UNKNOWN)
-  dkimValid     Boolean   @default(false)
-  dkimSelectors Json? // Array of DKIM selectors
-
-  dmarcStatus DNSStatus @default(UNKNOWN)
-  dmarcValid  Boolean   @default(false)
-  dmarcPolicy String?
-
-  mxRecordsValid Boolean @default(false)
-  mxRecords      Json?
-  dmarcRecord    String?
-
-  // Reputation metrics
-  senderReputation  Int @default(0) // 0-100
-  gmailReputation   Int @default(0)
-  outlookReputation Int @default(0)
-
-  // Engagement metrics (last 30 days)
-  avgDeliveryRate      Float?
-  avgOpenRate          Float?
-  avgClickRate         Float?
-  avgReplyRate         Float?
-  avgBounceRate        Float?
-  avgSpamComplaintRate Float?
-
-  // Alerts
-  hasIssues    Boolean    @default(false)
-  alertLevel   AlertLevel @default(NONE) // NONE, WARNING, CRITICAL
-  alertMessage String?
-
-  // Last checks
-  lastFullCheck       DateTime?
-  lastReputationCheck DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([domainId])
-  @@index([alertLevel])
-}
-
-model DomainVerificationRecord {
-  id     String @id @default(cuid())
-  userId String
-
-  domain     String
-  recordType String // "SPF", "DKIM", "DMARC"
-
-  // Generated record
-  recordName  String // DNS name
-  recordValue String @db.Text // DNS value
-
-  // Verification
-  isVerified Boolean   @default(false)
-  verifiedAt DateTime?
-
-  // Metadata
-  selector String? // For DKIM
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([domain])
-  @@index([recordType])
-}
-
 // Enums
 enum UserRole {
   USER
@@ -1022,18 +890,4 @@ enum PurchaseStatus {
   COMPLETED
   FAILED
   REFUNDED
-}
-
-enum DNSStatus {
-  UNKNOWN
-  PENDING
-  VALID
-  INVALID
-  MISSING
-}
-
-enum AlertLevel {
-  NONE
-  WARNING
-  CRITICAL
 }
