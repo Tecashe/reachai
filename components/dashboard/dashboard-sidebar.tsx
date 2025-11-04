@@ -1562,6 +1562,7 @@ import {
   ChevronRight,
   Inbox,
   Building2,
+  MailCheck,
 } from "lucide-react"
 import { UpgradeModal } from "@/components/subscription/upgrade-modal"
 
@@ -1569,6 +1570,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, tourId: "dashboard" },
   { name: "Campaigns", href: "/dashboard/campaigns", icon: Mail, tourId: "campaigns" },
   { name: "CRM", href: "/dashboard/crm", icon: Building2, tourId: "crm" },
+   { name: "Deliverability", href: "/dashboard/deliverability", icon: MailCheck, tourId: "deliverability" },
   { name: "Inbox", href: "/dashboard/inbox", icon: Inbox, tourId: "inbox" },
   { name: "Prospects", href: "/dashboard/prospects", icon: Users, tourId: "prospects" },
   { name: "Sequences", href: "/dashboard/sequences", icon: GitBranch, tourId: "sequences" },
