@@ -498,11 +498,11 @@ export function HeroSection() {
             transition={{ duration: 0.5 }}
             className="mb-8 flex justify-center"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm px-4 py-2 text-sm font-medium text-primary shadow-lg shadow-primary/10">
+            {/* <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm px-4 py-2 text-sm font-medium text-primary shadow-lg shadow-primary/10">
               <Sparkles className="h-4 w-4" />
               <span>AI-Powered Cold Email Platform</span>
               <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
-            </div>
+            </div> */}
           </motion.div>
 
           <motion.h1

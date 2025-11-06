@@ -756,7 +756,7 @@ export async function batchScrapeWebsites(
 ): Promise<Map<string, ScrapedData>> {
   const results = new Map<string, ScrapedData>()
   const batchSize = 5 // Process 5 at a time
-  const delayMs = 1000 // 1 second delay between batches
+  const delayMs = 1000 // 1 second delay between batche
 
   for (let i = 0; i < urls.length; i += batchSize) {
     const batch = urls.slice(i, i + batchSize)
