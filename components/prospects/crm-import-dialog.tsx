@@ -115,7 +115,7 @@ export function CRMImportDialog({ onImportComplete }: CRMImportDialogProps) {
             <AlertTitle>No CRM Integrations Connected</AlertTitle>
             <AlertDescription>
               <p className="mb-3">Connect HubSpot, Salesforce, or Pipedrive to import leads from your CRM.</p>
-              <Button size="sm" onClick={() => (window.location.href = "/dashboard/integrations")}>
+              <Button size="sm" onClick={() => (window.location.href = "/dashboard/crm")}>
                 Connect CRM
               </Button>
             </AlertDescription>
