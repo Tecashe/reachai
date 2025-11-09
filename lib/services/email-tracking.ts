@@ -89,7 +89,7 @@ export class EmailTrackingService {
         },
       })
 
-      // Update campaign stats
+      // Update campaign stat
       if (emailLog.prospect.campaignId) {
         await db.campaign.update({
           where: { id: emailLog.prospect.campaignId },
