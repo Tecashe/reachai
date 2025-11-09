@@ -60,6 +60,7 @@ model User {
 
   subscription    Subscription?
   sendingAccounts SendingAccount[]
+  prospectFolders ProspectFolder[]
 
   // Relationships
   campaigns          Campaign[]
@@ -206,6 +207,12 @@ model Prospect {
   lastReplyAt DateTime?
   replyCount  Int       @default(0)
 
+  folderId String?
+  folder   ProspectFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+
+  isTrashed Boolean   @default(false)
+  trashedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -216,6 +223,8 @@ model Prospect {
   @@index([status])
   @@index([crmId])
   @@index([dealScore])
+  @@index([folderId])
+  @@index([isTrashed])
 }
 
 model EmailTemplate {
@@ -809,7 +818,6 @@ model DeliverabilityHealth {
 
   mxRecordsValid Boolean @default(false)
   mxRecords      Json?
-  dmarcRecord    String?
 
   // Reputation metrics
   senderReputation  Int @default(0) // 0-100
@@ -864,6 +872,24 @@ model DomainVerificationRecord {
   @@index([userId])
   @@index([domain])
   @@index([recordType])
+}
+
+model ProspectFolder {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name          String
+  color         String @default("#3b82f6")
+  icon          String @default("Folder")
+  prospectCount Int    @default(0)
+
+  prospects Prospect[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 // Enums
