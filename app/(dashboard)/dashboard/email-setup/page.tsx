@@ -483,13 +483,116 @@
 // }
 
 
+// import { auth } from "@clerk/nextjs/server"
+// import { db } from "@/lib/db"
+// import { redirect } from "next/navigation"
+// import { GuidedEmailWizard } from "@/components/email-setup/guided-email-wizard"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Badge } from "@/components/ui/badge"
+// import { CheckCircle2, Clock } from "lucide-react"
+
+// export default async function EmailSetupPage() {
+//   const { userId } = await auth()
+//   if (!userId) redirect("/sign-in")
+
+//   const user = await db.user.findUnique({ where: { clerkId: userId } })
+//   if (!user) redirect("/sign-in")
+
+//   const domains = await db.domain.findMany({
+//     where: { userId: user.id },
+//     include: {
+//       deliverabilityHealth: true,
+//       sendingAccounts: true,
+//     },
+//     orderBy: { createdAt: "desc" },
+//   })
+
+//   const unconfiguredDomains = domains.filter((d) => !d.isVerified)
+//   const configuredDomains = domains.filter((d) => d.isVerified)
+
+//   return (
+//     <div className="space-y-6">
+//       <div>
+//         <h1 className="text-3xl font-bold tracking-tight">Email & Domain Setup</h1>
+//         <p className="text-muted-foreground">Configure your domains and email accounts for maximum deliverability</p>
+//       </div>
+
+//       {domains.length > 0 && (
+//         <Card>
+//           <CardHeader>
+//             <CardTitle>Your Domains</CardTitle>
+//             <CardDescription>Select a domain to configure or view its status</CardDescription>
+//           </CardHeader>
+//           <CardContent className="space-y-3">
+//             {unconfiguredDomains.length > 0 && (
+//               <div className="space-y-2">
+//                 <h4 className="text-sm font-medium text-muted-foreground">Needs Configuration</h4>
+//                 {unconfiguredDomains.map((domain) => (
+//                   <div
+//                     key={domain.id}
+//                     className="flex items-center justify-between p-3 border border-amber-200 rounded-lg bg-amber-50 dark:border-amber-900 dark:bg-amber-950"
+//                   >
+//                     <div className="flex items-center gap-3">
+//                       <Clock className="h-5 w-5 text-amber-600" />
+//                       <div>
+//                         <p className="font-medium">{domain.domain}</p>
+//                         <p className="text-xs text-muted-foreground">
+//                           DNS configuration incomplete - Resume setup below
+//                         </p>
+//                       </div>
+//                     </div>
+//                     <Badge variant="outline" className="border-amber-600 text-amber-600">
+//                       Pending
+//                     </Badge>
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+
+//             {configuredDomains.length > 0 && (
+//               <div className="space-y-2">
+//                 <h4 className="text-sm font-medium text-muted-foreground">Verified & Active</h4>
+//                 {configuredDomains.map((domain) => (
+//                   <div
+//                     key={domain.id}
+//                     className="flex items-center justify-between p-3 border border-green-200 rounded-lg bg-green-50 dark:border-green-900 dark:bg-green-950"
+//                   >
+//                     <div className="flex items-center gap-3">
+//                       <CheckCircle2 className="h-5 w-5 text-green-600" />
+//                       <div>
+//                         <p className="font-medium">{domain.domain}</p>
+//                         <p className="text-xs text-muted-foreground">
+//                           {domain.sendingAccounts.length} sending account
+//                           {domain.sendingAccounts.length !== 1 ? "s" : ""} connected
+//                         </p>
+//                       </div>
+//                     </div>
+//                     <Badge variant="default" className="bg-green-600">
+//                       Verified
+//                     </Badge>
+//                   </div>
+//                 ))}
+//               </div>
+//             )}
+//           </CardContent>
+//         </Card>
+//       )}
+
+//       {/* Main Setup Wizard */}
+//       <GuidedEmailWizard existingDomains={domains} />
+//     </div>
+//   )
+// }
+
+
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { redirect } from "next/navigation"
 import { GuidedEmailWizard } from "@/components/email-setup/guided-email-wizard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Clock } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CheckCircle2, Clock, Settings } from "lucide-react"
 
 export default async function EmailSetupPage() {
   const { userId } = await auth()
@@ -537,7 +640,9 @@ export default async function EmailSetupPage() {
                       <div>
                         <p className="font-medium">{domain.domain}</p>
                         <p className="text-xs text-muted-foreground">
-                          DNS configuration incomplete - Resume setup below
+                          {domain.verificationAttempts > 0
+                            ? `${domain.verificationAttempts} verification attempt${domain.verificationAttempts !== 1 ? "s" : ""} - Click to resume`
+                            : "DNS configuration needed"}
                         </p>
                       </div>
                     </div>
@@ -567,9 +672,17 @@ export default async function EmailSetupPage() {
                         </p>
                       </div>
                     </div>
-                    <Badge variant="default" className="bg-green-600">
-                      Verified
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="default" className="bg-green-600">
+                        Verified
+                      </Badge>
+                      <Button size="sm" variant="outline" asChild>
+                        <a href="/dashboard/settings">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Manage
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
