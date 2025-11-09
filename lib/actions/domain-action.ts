@@ -545,9 +545,9 @@ export async function deleteDomain(domainId: string) {
 function getDomainLimit(tier: string): number {
   switch (tier) {
     case "FREE":
-      return 1
+      return 2
     case "STARTER":
-      return 3
+      return 4
     case "PRO":
       return 10
     case "AGENCY":
