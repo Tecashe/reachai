@@ -582,12 +582,17 @@ export default function ProspectsPage() {
   const [showTrash, setShowTrash] = useState(false)
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [trashedCount, setTrashedCount] = useState(0) // Add state for trashed count
+  
+  
+  const [trashedCount, setTrashedCount] = useState(0)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
     loadFolders()
-    loadTrashedCount() // Load trashed count
+    loadTrashedCount()
   }, [])
+
 
   const loadFolders = async () => {
     setLoading(true)
@@ -614,6 +619,7 @@ const loadTrashedCount = async () => {
 
   return (
     <div className="flex h-full">
+      {isClient && (
       <FolderSidebar
         folders={folders}
         selectedFolderId={selectedFolderId}
@@ -626,8 +632,23 @@ const loadTrashedCount = async () => {
           setShowTrash(true)
           setSelectedFolderId(null)
         }}
-        trashedCount={trashedCount} // Use state instead of hardcoded value
+        trashedCount={trashedCount}
       />
+    )}
+      {/* <FolderSidebar
+        folders={folders}
+        selectedFolderId={selectedFolderId}
+        onSelectFolder={(id) => {
+          setSelectedFolderId(id)
+          setShowTrash(false)
+        }}
+        showTrash={showTrash}
+        onShowTrash={() => {
+          setShowTrash(true)
+          setSelectedFolderId(null)
+        }}
+        trashedCount={trashedCount} // Use state instead of hardcoded value
+      /> */}
 
       <div className="flex-1 space-y-6 p-6">
         <div className="flex items-center justify-between">
