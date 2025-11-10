@@ -1,4 +1,3 @@
-"use server"
 
 import { db } from "@/lib/db"
 import { logger } from "@/lib/logger"
@@ -160,3 +159,5 @@ export class EmailTrackingService {
 }
 
 export const emailTracking = new EmailTrackingService()
+
+

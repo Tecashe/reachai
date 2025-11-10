@@ -815,6 +815,7 @@ model DeliverabilityHealth {
   dmarcStatus DNSStatus @default(UNKNOWN)
   dmarcValid  Boolean   @default(false)
   dmarcPolicy String?
+  dmarcRecord String? // Full DMARC DNS record value
 
   mxRecordsValid Boolean @default(false)
   mxRecords      Json?
