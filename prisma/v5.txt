@@ -885,16 +885,12 @@ model ProspectFolder {
   icon          String @default("Folder")
   prospectCount Int    @default(0)
 
-  isTrashed Boolean   @default(false)
-  trashedAt DateTime?
-
   prospects Prospect[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@index([isTrashed])
 }
 
 // Enums
@@ -1068,3 +1064,7 @@ enum AlertLevel {
   WARNING
   CRITICAL
 }
+
+
+
+
