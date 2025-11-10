@@ -696,18 +696,12 @@ import { ProspectActions } from "./prospect-actions"
 interface ProspectsListProps {
   status?: string
   folderId?: string | null
-  searchQuery?: string
   isTrashed?: boolean
+  searchQuery?: string
 }
 
-export async function ProspectsList({ 
-  status, 
-  folderId, 
-  searchQuery, 
-  isTrashed 
-}: ProspectsListProps) {
-  // Pass all the parameters to getProspects
-  const prospects = await getProspects(status, folderId, searchQuery, isTrashed)
+export async function ProspectsList({ status, folderId, isTrashed = false, searchQuery = "" }: ProspectsListProps) {
+  const prospects = await getProspects(status, folderId, isTrashed, searchQuery)
 
   const getStatusColor = (status: string) => {
     switch (status) {

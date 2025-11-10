@@ -780,8 +780,8 @@ import { updateOnboardingStep } from "./onboarding"
 export async function getProspects(
   status?: string,
   folderId?: string | null,
-  searchQuery?: string,
   isTrashed?: boolean,
+  searchQuery?: string,
 ) {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorized")
@@ -796,20 +796,14 @@ export async function getProspects(
     campaign: {
       userId: user.id,
     },
-    // Fix: Only filter by isTrashed if explicitly provided
-    ...(isTrashed !== undefined && { isTrashed }),
-  }
-
-  // If isTrashed is not provided, default to showing non-trashed items
-  if (isTrashed === undefined) {
-    where.isTrashed = false
+    isTrashed: isTrashed || false,
   }
 
   if (status) {
     where.status = status
   }
 
-  if (folderId !== undefined && folderId !== null) {
+  if (folderId !== undefined) {
     where.folderId = folderId
   }
 
@@ -935,8 +929,6 @@ export async function uploadProspects(campaignId: string, prospects: any[]) {
     skipDuplicates: true,
   })
 
-  await updateOnboardingStep("hasAddedProspects")
-
   revalidatePath("/dashboard/prospects")
   revalidatePath(`/dashboard/campaigns/${campaignId}`)
 
@@ -994,27 +986,4 @@ export async function deleteProspect(prospectId: string) {
   })
 
   revalidatePath("/dashboard/prospects")
-}
-
-// Add this function to get trashed prospects count
-export async function getTrashedProspectsCount() {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await db.user.findUnique({
-    where: { clerkId: userId },
-  })
-
-  if (!user) throw new Error("User not found")
-
-  const count = await db.prospect.count({
-    where: {
-      campaign: {
-        userId: user.id,
-      },
-      isTrashed: true,
-    },
-  })
-
-  return count
 }
