@@ -1,13 +1,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LandingHeader } from "@/components/landing/landing-header"
-import { LandingFooter } from "@/components/landing/landing-footer"
+import { Navigation } from "@/components/landing/navigation"
+import { Footer } from "@/components/landing/footer"
 import { ArrowLeft, Target, Users, Zap, Heart } from "lucide-react"
 
 export default function AboutPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <LandingHeader />
+      <Navigation />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -94,7 +94,7 @@ export default function AboutPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <Footer />
     </div>
   )
 }

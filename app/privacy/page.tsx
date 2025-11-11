@@ -1,13 +1,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LandingHeader } from "@/components/landing/landing-header"
-import { LandingFooter } from "@/components/landing/landing-footer"
+import { Navigation } from "@/components/landing/navigation"
+import { Footer } from "@/components/landing/footer"
 import { ArrowLeft } from "lucide-react"
 
 export default function PrivacyPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <LandingHeader />
+      <Navigation />
 
       <main className="flex-1">
         <section className="container py-20">
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <Footer />
     </div>
   )
 }

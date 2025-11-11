@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { LandingHeader } from "@/components/landing/landing-header"
-import { LandingFooter } from "@/components/landing/landing-footer"
+import { Navigation } from "@/components/landing/navigation"
+import { Footer } from "@/components/landing/footer"
 import { ArrowLeft, Search, BookOpen, Zap, Users, Mail, BarChart, Settings } from "lucide-react"
 
 export default function DocsPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <LandingHeader />
+      <Navigation />
 
       <main className="flex-1">
         <section className="container py-20">
@@ -109,7 +109,7 @@ export default function DocsPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <Footer />
     </div>
   )
 }

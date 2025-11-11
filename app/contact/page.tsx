@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { LandingHeader } from "@/components/landing/landing-header"
-import { LandingFooter } from "@/components/landing/landing-footer"
+import { Navigation } from "@/components/landing/navigation"
+import { Footer } from "@/components/landing/footer"
 import { ArrowLeft, Mail, MessageSquare, Phone } from "lucide-react"
 
 export default function ContactPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <LandingHeader />
+      <Navigation />
 
       <main className="flex-1">
         <section className="container py-20">
@@ -103,7 +103,7 @@ export default function ContactPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <Footer />
     </div>
   )
 }

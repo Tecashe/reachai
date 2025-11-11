@@ -1,13 +1,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { LandingHeader } from "@/components/landing/landing-header"
-import { LandingFooter } from "@/components/landing/landing-footer"
+import { Navigation } from "@/components/landing/navigation"
+import { Footer } from "@/components/landing/footer"
 import { ArrowLeft, Shield, Lock, Eye, Server, FileCheck, AlertTriangle } from "lucide-react"
 
 export default function SecurityPage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <LandingHeader />
+      <Navigation />
 
       <main className="flex-1">
         <section className="container py-20">
@@ -134,7 +134,7 @@ export default function SecurityPage() {
         </section>
       </main>
 
-      <LandingFooter />
+      <Footer />
     </div>
   )
 }
