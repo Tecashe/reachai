@@ -1,16 +1,8 @@
-
-
-
-
-
-
-
-
-
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant light (&:is(.light, .light *));
 
 :root {
   /* Enhanced color palette with better contrast and modern feel */
@@ -408,12 +400,3 @@
 .testimonial-card.animate-in {
   animation: fade-in-up 0.7s ease-out forwards;
 }
-
-
-
-
-
-
-
-
-
