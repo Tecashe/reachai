@@ -8,10 +8,12 @@ import { StatsSection } from "@/components/landing/stats-section"
 import { TestimonialSection } from "@/components/landing/testimonial-section"
 import { CTASection } from "@/components/landing/cta-section"
 import { Footer } from "@/components/landing/footer"
+import { ForceLightTheme } from "@/components/theme/landing-page-light-theme"
 
 export default function Page() {
   return (
-    <div className="light min-h-screen">
+   <div className="min-h-screen">
+      <ForceLightTheme />
       <Navigation />
       <Hero />
       <FeaturesGrid />

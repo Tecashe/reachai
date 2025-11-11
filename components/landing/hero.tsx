@@ -19,10 +19,10 @@ export function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium">
+            {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm font-medium">
               <Sparkles className="w-4 h-4 text-primary" />
               <span>AI-Powered Email Outreach Platform</span>
-            </div>
+            </div> */}
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.1] text-balance">
               Generate leads in{" "}
