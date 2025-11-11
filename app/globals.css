@@ -385,6 +385,47 @@
   animation-delay: 15s;
 }
 
+/* Added floating animations for geometric elements */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-30px) translateX(5px);
+  }
+}
+
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) translateX(-10px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-25px) translateX(10px) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(-10px) translateX(-5px) rotate(3deg);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
+}
+
 /* Add testimonial card animation */
 @keyframes fade-in-up {
   from {
@@ -399,4 +440,21 @@
 
 .testimonial-card.animate-in {
   animation: fade-in-up 0.7s ease-out forwards;
+}
+
+/* Added fade-in-up animation for feature cards */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.7s ease-out forwards;
+  opacity: 0;
 }
