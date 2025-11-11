@@ -1,82 +1,27 @@
-// import { HeroSection } from "@/components/landing/hero-section"
-// import { FeaturesSection } from "@/components/landing/features-section"
-// import { HowItWorksSection } from "@/components/landing/how-it-works-section"
-// import { PricingSection } from "@/components/landing/pricing-section"
-// import { TestimonialsSection } from "@/components/landing/testimonials-section"
-// import { CTASection } from "@/components/landing/cta-section"
-// import { LandingHeader } from "@/components/landing/landing-header"
-// import { LandingFooter } from "@/components/landing/landing-footer"
-
-// export default function LandingPage() {
-//   return (
-//     <div className="min-h-screen bg-background">
-//       <LandingHeader />
-//       <main>
-//         <HeroSection />
-//         <FeaturesSection />
-//         <HowItWorksSection />
-//         <PricingSection />
-//         <TestimonialsSection />
-//         <CTASection />
-//       </main>
-//       <LandingFooter />
-//     </div>
-//   )
-// }
-
-
-// import { HeroSection } from "@/components/landing/hero-section"
-// import { FeaturesSection } from "@/components/landing/features-section"
-// import { HowItWorksSection } from "@/components/landing/how-it-works-section"
-// import { PricingSection } from "@/components/landing/pricing-section"
-// import { TestimonialsSection } from "@/components/landing/testimonials-section"
-// import { CTASection } from "@/components/landing/cta-section"
-// import { LandingHeader } from "@/components/landing/landing-header"
-// import { LandingFooter } from "@/components/landing/landing-footer"
-
-// export default function LandingPage() {
-//   return (
-//     <div className="min-h-screen bg-background">
-//       <LandingHeader />
-//       <main className="overflow-hidden">
-//         <HeroSection />
-//         <FeaturesSection />
-//         <HowItWorksSection />
-//         <PricingSection />
-//         <TestimonialsSection />
-//         <CTASection />
-//       </main>
-//       <LandingFooter />
-//     </div>
-//   )
-// }
-
-import { HeroSection } from "@/components/landing/hero-section"
-import { FeaturesSection } from "@/components/landing/features-section"
-import { HowItWorksSection } from "@/components/landing/how-it-works-section"
+import { Navigation } from "@/components/landing/navigation"
+import { Hero } from "@/components/landing/hero"
+import { FeaturesGrid } from "@/components/landing/features-grid"
+import { SecurityShowcase } from "@/components/landing/security-showcase"
+import { GradientBentoSection } from "@/components/landing/gradient-bento-section"
+import { IntegrationsSection } from "@/components/landing/integrations-section"
 import { StatsSection } from "@/components/landing/stats-section"
-import { PricingSection } from "@/components/landing/pricing-section"
-import { TestimonialsSection } from "@/components/landing/testimonials-section"
-import { ComparisonSection } from "@/components/landing/comparison-section"
+import { TestimonialSection } from "@/components/landing/testimonial-section"
 import { CTASection } from "@/components/landing/cta-section"
-import { LandingHeader } from "@/components/landing/landing-header"
-import { LandingFooter } from "@/components/landing/landing-footer"
+import { Footer } from "@/components/landing/footer"
 
-export default function LandingPage() {
+export default function Page() {
   return (
-    <div className="min-h-screen bg-background">
-      <LandingHeader />
-      <main className="overflow-hidden">
-        <HeroSection />
-        <StatsSection />
-        <FeaturesSection />
-        <HowItWorksSection />
-        <ComparisonSection />
-        <TestimonialsSection />
-        <PricingSection />
-        <CTASection />
-      </main>
-      <LandingFooter />
+    <div className="min-h-screen">
+      <Navigation />
+      <Hero />
+      <FeaturesGrid />
+      <SecurityShowcase />
+      <GradientBentoSection />
+      <IntegrationsSection />
+      <StatsSection />
+      <TestimonialSection />
+      <CTASection />
+      <Footer />
     </div>
   )
 }
