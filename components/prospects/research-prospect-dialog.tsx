@@ -67,7 +67,7 @@
 //       setResult(mockResult)
 //       setComplete(true)
 //     } catch (error) {
-//       console.error("[v0] Research failed:", error)
+//       console.error("[builtbycashe] Research failed:", error)
 //     } finally {
 //       setResearching(false)
 //     }
@@ -303,7 +303,7 @@
 //       setResult(data.research)
 //       setComplete(true)
 //     } catch (error) {
-//       console.error("[v0] Research failed:", error)
+//       console.error("[builtbycashe] Research failed:", error)
 //       clearInterval(progressInterval)
 //     } finally {
 //       setResearching(false)
@@ -540,7 +540,7 @@ export function ResearchProspectDialog({ prospectId, prospectEmail }: ResearchPr
       setResult(data.research)
       setComplete(true)
     } catch (error) {
-      console.error("[v0] Research failed:", error)
+      console.error("[builtbycashe] Research failed:", error)
       clearInterval(progressInterval)
     } finally {
       setResearching(false)

@@ -125,7 +125,7 @@ export async function getDashboardStats() {
     })
 
     if (!user) {
-      console.error("[v0] User not found in database")
+      console.error("[builtbycashe] User not found in database")
       return {
         emailsSent: 0,
         activeProspects: 0,
@@ -182,7 +182,7 @@ export async function getDashboardStats() {
       replyRate: replyRate.toFixed(1),
     }
   } catch (error) {
-    console.error("[v0] Error getting dashboard stats:", error)
+    console.error("[builtbycashe] Error getting dashboard stats:", error)
     return {
       emailsSent: 0,
       activeProspects: 0,
@@ -203,7 +203,7 @@ export async function getRecentActivity() {
     })
 
     if (!user) {
-      console.error("[v0] User not found in database")
+      console.error("[builtbycashe] User not found in database")
       return []
     }
 
@@ -243,7 +243,7 @@ export async function getRecentActivity() {
       prospect: log.prospect,
     }))
   } catch (error) {
-    console.error("[v0] Error getting recent activity:", error)
+    console.error("[builtbycashe] Error getting recent activity:", error)
     return []
   }
 }

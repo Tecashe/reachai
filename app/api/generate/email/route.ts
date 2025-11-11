@@ -24,7 +24,7 @@
 //       data: result,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Email generation API error:", error)
+//     console.error("[builtbycashe] Email generation API error:", error)
 //     return NextResponse.json({ error: "Failed to generate email" }, { status: 500 })
 //   }
 // }
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       data: result,
     })
   } catch (error) {
-    console.error("[v0] Email generation API error:", error)
+    console.error("[builtbycashe] Email generation API error:", error)
     return NextResponse.json({ error: "Failed to generate email" }, { status: 500 })
   }
 }

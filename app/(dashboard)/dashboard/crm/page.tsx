@@ -36,7 +36,7 @@ export default function CrmPage() {
       const data = await response.json()
       setIntegrationConnected(data.connected)
     } catch (error) {
-      console.error("[v0] Error checking CRM integration:", error)
+      console.error("[builtbycashe] Error checking CRM integration:", error)
     } finally {
       setLoading(false)
     }
@@ -48,7 +48,7 @@ export default function CrmPage() {
       const data = await response.json()
       setStats(data)
     } catch (error) {
-      console.error("[v0] Error loading CRM stats:", error)
+      console.error("[builtbycashe] Error loading CRM stats:", error)
     }
   }
 

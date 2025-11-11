@@ -24,7 +24,7 @@
 //       data: variations,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Email variations API error:", error)
+//     console.error("[builtbycashe] Email variations API error:", error)
 //     return NextResponse.json({ error: "Failed to generate email variations" }, { status: 500 })
 //   }
 // }
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       data: variations,
     })
   } catch (error) {
-    console.error("[v0] Email variations API error:", error)
+    console.error("[builtbycashe] Email variations API error:", error)
     return NextResponse.json({ error: "Failed to generate email variations" }, { status: 500 })
   }
 }

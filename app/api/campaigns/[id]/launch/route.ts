@@ -52,7 +52,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Failed to launch campaign:", error)
+    console.error("[builtbycashe] Failed to launch campaign:", error)
     return NextResponse.json({ error: "Failed to launch campaign" }, { status: 500 })
   }
 }

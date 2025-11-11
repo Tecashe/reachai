@@ -47,7 +47,7 @@
 //       results,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Bulk send error:", error)
+//     console.error("[builtbycashe] Bulk send error:", error)
 //     return NextResponse.json({ error: "Failed to send bulk emails" }, { status: 500 })
 //   }
 // }
@@ -121,7 +121,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true, template }
 //   } catch (error) {
-//     console.error("[v0] Error creating template:", error)
+//     console.error("[builtbycashe] Error creating template:", error)
 //     return { success: false, error: "Failed to create template" }
 //   }
 // }
@@ -144,7 +144,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error deleting template:", error)
+//     console.error("[builtbycashe] Error deleting template:", error)
 //     return { success: false, error: "Failed to delete template" }
 //   }
 // }

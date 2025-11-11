@@ -250,7 +250,7 @@ export function BatchResearchDialog({ campaignId, prospectCount }: BatchResearch
         }
       }, 2000)
     } catch (error) {
-      console.error("[v0] Batch research failed:", error)
+      console.error("[builtbycashe] Batch research failed:", error)
       setResearching(false)
     }
   }

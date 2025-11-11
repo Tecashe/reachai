@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     // Redirect back to settings with success message
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=outlook_connected`)
   } catch (error) {
-    console.error("[v0] Outlook OAuth callback error:", error)
+    console.error("[builtbycashe] Outlook OAuth callback error:", error)
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_failed`)
   }
 }

@@ -26,7 +26,7 @@
 //       avgScore: 85,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Batch research status error:", error)
+//     console.error("[builtbycashe] Batch research status error:", error)
 //     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
 //   }
 // }
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       avgScore,
     })
   } catch (error) {
-    console.error("[v0] Batch research status error:", error)
+    console.error("[builtbycashe] Batch research status error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

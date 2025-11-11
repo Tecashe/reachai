@@ -137,7 +137,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true, template }
 //   } catch (error) {
-//     console.error("[v0] Error creating template:", error)
+//     console.error("[builtbycashe] Error creating template:", error)
 //     return { success: false, error: "Failed to create template" }
 //   }
 // }
@@ -160,7 +160,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error deleting template:", error)
+//     console.error("[builtbycashe] Error deleting template:", error)
 //     return { success: false, error: "Failed to delete template" }
 //   }
 // }
@@ -233,7 +233,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true, template }
 //   } catch (error) {
-//     console.error("[v0] Error creating template:", error)
+//     console.error("[builtbycashe] Error creating template:", error)
 //     return { success: false, error: "Failed to create template" }
 //   }
 // }
@@ -256,7 +256,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error deleting template:", error)
+//     console.error("[builtbycashe] Error deleting template:", error)
 //     return { success: false, error: "Failed to delete template" }
 //   }
 // }
@@ -316,7 +316,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true, template }
 //   } catch (error) {
-//     console.error("[v0] Error updating template:", error)
+//     console.error("[builtbycashe] Error updating template:", error)
 //     return { success: false, error: "Failed to update template" }
 //   }
 // }
@@ -353,7 +353,7 @@
 //     revalidatePath("/dashboard/templates")
 //     return { success: true, template }
 //   } catch (error) {
-//     console.error("[v0] Error duplicating template:", error)
+//     console.error("[builtbycashe] Error duplicating template:", error)
 //     return { success: false, error: "Failed to duplicate template" }
 //   }
 // }
@@ -428,7 +428,7 @@ export async function createTemplate(data: {
     revalidatePath("/dashboard/templates")
     return { success: true, template }
   } catch (error) {
-    console.error("[v0] Error creating template:", error)
+    console.error("[builtbycashe] Error creating template:", error)
     return { success: false, error: "Failed to create template" }
   }
 }
@@ -451,7 +451,7 @@ export async function deleteTemplate(templateId: string) {
     revalidatePath("/dashboard/templates")
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error deleting template:", error)
+    console.error("[builtbycashe] Error deleting template:", error)
     return { success: false, error: "Failed to delete template" }
   }
 }
@@ -511,7 +511,7 @@ export async function updateTemplate(
     revalidatePath("/dashboard/templates")
     return { success: true, template }
   } catch (error) {
-    console.error("[v0] Error updating template:", error)
+    console.error("[builtbycashe] Error updating template:", error)
     return { success: false, error: "Failed to update template" }
   }
 }
@@ -535,7 +535,7 @@ export async function getTemplate(templateId: string) {
 
     return { success: true, template }
   } catch (error) {
-    console.error("[v0] Error fetching template:", error)
+    console.error("[builtbycashe] Error fetching template:", error)
     return { success: false, error: "Failed to fetch template" }
   }
 }
@@ -572,7 +572,7 @@ export async function duplicateTemplate(templateId: string) {
     revalidatePath("/dashboard/templates")
     return { success: true, template }
   } catch (error) {
-    console.error("[v0] Error duplicating template:", error)
+    console.error("[builtbycashe] Error duplicating template:", error)
     return { success: false, error: "Failed to duplicate template" }
   }
 }

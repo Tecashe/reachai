@@ -7,8 +7,8 @@ if __name__ == "__main__":
     # Get port from environment variable, default to 8000
     port = int(os.getenv("PORT", "8000"))
     
-    print(f"[v0] Starting server on port {port}")
-    print(f"[v0] Environment PORT variable: {os.getenv('PORT', 'not set')}")
+    print(f"[builtbycashe] Starting server on port {port}")
+    print(f"[builtbycashe] Environment PORT variable: {os.getenv('PORT', 'not set')}")
     
     # Start uvicorn
     uvicorn.run(

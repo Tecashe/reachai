@@ -54,7 +54,7 @@
 
 //     return NextResponse.json({ success: true, sequence })
 //   } catch (error) {
-//     console.error("[v0] Error creating sequence:", error)
+//     console.error("[builtbycashe] Error creating sequence:", error)
 //     return NextResponse.json({ error: "Failed to create sequence" }, { status: 500 })
 //   }
 // }
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, sequence })
   } catch (error) {
-    console.error("[v0] Error creating sequence:", error)
+    console.error("[builtbycashe] Error creating sequence:", error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid request data", details: error.errors }, { status: 400 })
     }

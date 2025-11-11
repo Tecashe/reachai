@@ -272,7 +272,7 @@ export async function checkSubscriptionGate(userId: string, allowedTiers: string
     if (!user) return false
     return allowedTiers.includes(user.subscriptionTier)
   } catch (error) {
-    console.error("[v0] Subscription gate error:", error)
+    console.error("[builtbycashe] Subscription gate error:", error)
     return false
   }
 }

@@ -19,7 +19,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //     // Continue loading the dashboard even if sync fails
 //   }
 
@@ -56,7 +56,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //   }
 
 //   return (
@@ -93,7 +93,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //   }
 
 //   return (
@@ -132,7 +132,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //   }
 
 //   return (
@@ -172,7 +172,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //   }
 
 //   return (
@@ -211,7 +211,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //   }
 
 //   return (
@@ -252,7 +252,7 @@
 //   try {
 //     await syncUserToDatabase(userId)
 //   } catch (error) {
-//     console.error("[v0] Failed to sync user to database:", error)
+//     console.error("[builtbycashe] Failed to sync user to database:", error)
 //   }
 
 //   // Check if user has completed onboarding questionnaire
@@ -266,7 +266,7 @@
 //       redirect("/onboarding")
 //     }
 //   } catch (error) {
-//     console.error("[v0] Failed to check onboarding status:", error)
+//     console.error("[builtbycashe] Failed to check onboarding status:", error)
 //   }
 
 //   return (
@@ -308,7 +308,7 @@ export default async function DashboardLayout({
   try {
     await syncUserToDatabase(userId)
   } catch (error) {
-    console.error("[v0] Failed to sync user to database:", error)
+    console.error("[builtbycashe] Failed to sync user to database:", error)
   }
 
   // Check if user has completed onboarding questionnaire

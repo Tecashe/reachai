@@ -292,7 +292,7 @@ export function CampaignWizard({ campaign }: { campaign: Campaign }) {
       })
 
       if (!result.success) {
-        console.error("[v0] Failed to auto-save wizard progress")
+        console.error("[builtbycashe] Failed to auto-save wizard progress")
       }
     }
 

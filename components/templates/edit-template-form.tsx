@@ -51,7 +51,7 @@ export function EditTemplateForm({ template }: EditTemplateFormProps) {
         toast.error(result.error || "Failed to update template")
       }
     } catch (error) {
-      console.error("[v0] Error updating template:", error)
+      console.error("[builtbycashe] Error updating template:", error)
       toast.error("An unexpected error occurred")
     } finally {
       setIsLoading(false)

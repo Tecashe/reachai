@@ -34,7 +34,7 @@ interface GeneratedEmail {
 }
 
 export async function generateEmail(params: GenerateEmailParams): Promise<GeneratedEmail> {
-  console.log("[v0] Generating email for:", params.prospect.email)
+  console.log("[builtbycashe] Generating email for:", params.prospect.email)
 
   const {
     prospect,
@@ -60,11 +60,11 @@ export async function generateEmail(params: GenerateEmailParams): Promise<Genera
       }),
     })
 
-    console.log("[v0] Email generated with quality score:", object.qualityScore)
+    console.log("[builtbycashe] Email generated with quality score:", object.qualityScore)
 
     return object as GeneratedEmail
   } catch (error) {
-    console.error("[v0] Email generation failed:", error)
+    console.error("[builtbycashe] Email generation failed:", error)
     throw new Error("Failed to generate email")
   }
 }
@@ -144,7 +144,7 @@ Make it feel like a human wrote it, not AI. Be specific, not generic.
 }
 
 export async function generateEmailVariations(params: GenerateEmailParams, count = 3): Promise<GeneratedEmail[]> {
-  console.log("[v0] Generating", count, "email variations")
+  console.log("[builtbycashe] Generating", count, "email variations")
 
   const variations = await Promise.all(
     Array.from({ length: count }, async (_, i) => {
@@ -165,7 +165,7 @@ export async function improveEmail(
   originalEmail: { subject: string; body: string },
   feedback: string,
 ): Promise<GeneratedEmail> {
-  console.log("[v0] Improving email based on feedback")
+  console.log("[builtbycashe] Improving email based on feedback")
 
   const prompt = `
 You are an expert email copywriter. Improve this cold email based on the feedback provided.
@@ -198,7 +198,7 @@ Provide the improved version with quality scores and suggestions.
 
     return object as GeneratedEmail
   } catch (error) {
-    console.error("[v0] Email improvement failed:", error)
+    console.error("[builtbycashe] Email improvement failed:", error)
     throw new Error("Failed to improve email")
   }
 }

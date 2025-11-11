@@ -32,7 +32,7 @@ export function AIModelSettings() {
         }
       }
     } catch (error) {
-      console.error("[v0] Failed to load AI model preferences:", error)
+      console.error("[builtbycashe] Failed to load AI model preferences:", error)
     }
   }
 
@@ -51,7 +51,7 @@ export function AIModelSettings() {
         throw new Error("Failed to save preferences")
       }
     } catch (error) {
-      console.error("[v0] Failed to save AI model preferences:", error)
+      console.error("[builtbycashe] Failed to save AI model preferences:", error)
       toast.error("Failed to save preferences")
     } finally {
       setLoading(false)

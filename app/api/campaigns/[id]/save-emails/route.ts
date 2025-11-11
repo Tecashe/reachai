@@ -39,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       message: `Saved ${Object.keys(emails).length} emails`,
     })
   } catch (error) {
-    console.error("[v0] Failed to save emails:", error)
+    console.error("[builtbycashe] Failed to save emails:", error)
     return NextResponse.json({ error: "Failed to save emails" }, { status: 500 })
   }
 }

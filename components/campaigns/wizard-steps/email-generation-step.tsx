@@ -55,7 +55,7 @@
 //       toast.success(`Generated ${data.count} personalized emails!`)
 //       onNext()
 //     } catch (error) {
-//       console.error("[v0] Email generation error:", error)
+//       console.error("[builtbycashe] Email generation error:", error)
 //       toast.error("Failed to generate emails. Please try again.")
 //     } finally {
 //       setIsGenerating(false)
@@ -221,7 +221,7 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
           setSelectedProspectId(data.prospects[0].id)
         }
       } catch (error) {
-        console.error("[v0] Failed to load prospects:", error)
+        console.error("[builtbycashe] Failed to load prospects:", error)
         toast.error("Failed to load prospects")
       } finally {
         setIsLoadingProspects(false)
@@ -292,7 +292,7 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
 
         results.forEach((result, idx) => {
           if (result.status === "rejected") {
-            console.error(`[v0] Failed to generate email for prospect ${batch[idx].email}:`, result.reason)
+            console.error(`[builtbycashe] Failed to generate email for prospect ${batch[idx].email}:`, result.reason)
             errorCount++
           }
         })
@@ -312,7 +312,7 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
         toast.error(`Failed to generate emails for all prospects`)
       }
     } catch (error) {
-      console.error("[v0] Email generation error:", error)
+      console.error("[builtbycashe] Email generation error:", error)
       toast.error("An error occurred while generating emails")
     } finally {
       setIsGenerating(false)
@@ -356,7 +356,7 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
 
       toast.success("Email regenerated successfully")
     } catch (error) {
-      console.error("[v0] Regeneration error:", error)
+      console.error("[builtbycashe] Regeneration error:", error)
       toast.error("Failed to regenerate email")
     } finally {
       setIsGenerating(false)
@@ -392,7 +392,7 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
       toast.success("Emails saved successfully")
       onNext()
     } catch (error) {
-      console.error("[v0] Save emails error:", error)
+      console.error("[builtbycashe] Save emails error:", error)
       toast.error("Failed to save emails")
     }
   }

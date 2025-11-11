@@ -118,7 +118,7 @@ export async function getBillingHistory() {
         invoiceUrl: invoice.hosted_invoice_url,
       }))
     } catch (error) {
-      console.error("[v0] Failed to fetch Stripe invoices:", error)
+      console.error("[builtbycashe] Failed to fetch Stripe invoices:", error)
     }
   }
 

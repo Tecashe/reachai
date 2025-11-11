@@ -22,7 +22,7 @@ export async function GET() {
       integrationId: integration?.id || null,
     })
   } catch (error) {
-    console.error("[v0] CRM status error:", error)
+    console.error("[builtbycashe] CRM status error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

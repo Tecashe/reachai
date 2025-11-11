@@ -145,7 +145,7 @@ export function CrmIntegrationSetup({ onSuccess }: CrmIntegrationSetupProps) {
         onSuccess?.()
       }, 2000)
     } catch (error) {
-      console.error("[v0] CRM connect error:", error)
+      console.error("[builtbycashe] CRM connect error:", error)
       toast({ title: "Error", description: "Failed to connect CRM", variant: "destructive" })
     } finally {
       setConnecting(false)

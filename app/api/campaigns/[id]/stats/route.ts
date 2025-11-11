@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       lowQuality,
     })
   } catch (error) {
-    console.error("[v0] Failed to get campaign stats:", error)
+    console.error("[builtbycashe] Failed to get campaign stats:", error)
     return NextResponse.json({ error: "Failed to get campaign stats" }, { status: 500 })
   }
 }

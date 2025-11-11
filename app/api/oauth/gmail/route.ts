@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Redirect user to Google OAuth consent screen
     return NextResponse.redirect(authUrl)
   } catch (error) {
-    console.error("[v0] Gmail OAuth error:", error)
+    console.error("[builtbycashe] Gmail OAuth error:", error)
     return NextResponse.json({ error: "Failed to initiate Gmail OAuth" }, { status: 500 })
   }
 }

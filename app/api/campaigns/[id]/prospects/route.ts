@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json({ prospects })
   } catch (error) {
-    console.error("[v0] Failed to fetch prospects:", error)
+    console.error("[builtbycashe] Failed to fetch prospects:", error)
     return NextResponse.json({ error: "Failed to fetch prospects" }, { status: 500 })
   }
 }

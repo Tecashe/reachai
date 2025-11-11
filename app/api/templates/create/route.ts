@@ -53,7 +53,7 @@
 
 //     return NextResponse.json({ success: true, template })
 //   } catch (error) {
-//     console.error("[v0] Error creating template:", error)
+//     console.error("[builtbycashe] Error creating template:", error)
 //     return NextResponse.json({ error: "Failed to create template" }, { status: 500 })
 //   }
 // }
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, sequence })
   } catch (error) {
-    console.error("[v0] Error creating sequence:", error)
+    console.error("[builtbycashe] Error creating sequence:", error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid request data", details: error.errors }, { status: 400 })
     }

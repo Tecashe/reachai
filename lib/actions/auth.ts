@@ -85,7 +85,7 @@ export async function syncUserToDatabase(userId: string) {
 
     return { success: true, user: newUser }
   } catch (error) {
-    console.error("[v0] Error syncing user to database:", error)
+    console.error("[builtbycashe] Error syncing user to database:", error)
     return { success: false, error: "Failed to sync user" }
   }
 }
@@ -101,7 +101,7 @@ export async function getCurrentUser(userId: string) {
 
     return user
   } catch (error) {
-    console.error("[v0] Error getting current user:", error)
+    console.error("[builtbycashe] Error getting current user:", error)
     return null
   }
 }

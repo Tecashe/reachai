@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Failed to update research settings:", error)
+    console.error("[builtbycashe] Failed to update research settings:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
       scrapingMode: (user?.preferences as any)?.scrapingMode || "FAST",
     })
   } catch (error) {
-    console.error("[v0] Failed to get research settings:", error)
+    console.error("[builtbycashe] Failed to get research settings:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

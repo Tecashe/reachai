@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       validation: result,
     })
   } catch (err) {
-    console.error("[v0] Email validation error:", err)
+    console.error("[builtbycashe] Email validation error:", err)
     return NextResponse.json({ error: "Failed to validate email" }, { status: 500 })
   }
 }

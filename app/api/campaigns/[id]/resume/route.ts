@@ -32,7 +32,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Failed to resume campaign:", error)
+    console.error("[builtbycashe] Failed to resume campaign:", error)
     return NextResponse.json({ error: "Failed to resume campaign" }, { status: 500 })
   }
 }

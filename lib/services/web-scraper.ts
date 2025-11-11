@@ -6,7 +6,7 @@
 // }
 
 // export async function scrapeWebsite(url: string): Promise<ScrapedData> {
-//   console.log("[v0] Scraping website:", url)
+//   console.log("[builtbycashe] Scraping website:", url)
 
 //   try {
 //     // In production, this would use a web scraping service like:
@@ -28,13 +28,13 @@
 //       },
 //     }
 //   } catch (error) {
-//     console.error("[v0] Web scraping failed:", error)
+//     console.error("[builtbycashe] Web scraping failed:", error)
 //     throw new Error("Failed to scrape website")
 //   }
 // }
 
 // export async function scrapeLinkedInProfile(url: string): Promise<any> {
-//   console.log("[v0] Scraping LinkedIn profile:", url)
+//   console.log("[builtbycashe] Scraping LinkedIn profile:", url)
 
 //   try {
 //     // In production, use LinkedIn scraping API or service
@@ -54,13 +54,13 @@
 //       skills: ["Sales", "Leadership", "Strategy"],
 //     }
 //   } catch (error) {
-//     console.error("[v0] LinkedIn scraping failed:", error)
+//     console.error("[builtbycashe] LinkedIn scraping failed:", error)
 //     throw new Error("Failed to scrape LinkedIn profile")
 //   }
 // }
 
 // export async function searchCompanyNews(companyName: string): Promise<any[]> {
-//   console.log("[v0] Searching news for company:", companyName)
+//   console.log("[builtbycashe] Searching news for company:", companyName)
 
 //   try {
 //     // In production, use news API like:
@@ -85,13 +85,13 @@
 //       },
 //     ]
 //   } catch (error) {
-//     console.error("[v0] News search failed:", error)
+//     console.error("[builtbycashe] News search failed:", error)
 //     return []
 //   }
 // }
 
 // export async function findCompetitorTools(companyWebsite: string): Promise<string[]> {
-//   console.log("[v0] Finding competitor tools for:", companyWebsite)
+//   console.log("[builtbycashe] Finding competitor tools for:", companyWebsite)
 
 //   try {
 //     // In production, use tools like:
@@ -103,7 +103,7 @@
 
 //     return ["Salesforce", "HubSpot", "Outreach", "LinkedIn Sales Navigator"]
 //   } catch (error) {
-//     console.error("[v0] Competitor tool detection failed:", error)
+//     console.error("[builtbycashe] Competitor tool detection failed:", error)
 //     return []
 //   }
 // }
@@ -141,12 +141,12 @@
 // }
 
 // export async function scrapeWebsite(url: string): Promise<ScrapedData> {
-//   console.log("[v0] Scraping website:", url)
+//   console.log("[builtbycashe] Scraping website:", url)
 
 //   try {
 //     // Use Firecrawl API for production web scrapin
 //     if (env.FIRECRAWL_API_KEY) {
-//       const response = await fetch("https://api.firecrawl.dev/v0/scrape", {
+//       const response = await fetch("https://api.firecrawl.dev/builtbycashe/scrape", {
 //         method: "POST",
 //         headers: {
 //           "Content-Type": "application/json",
@@ -207,13 +207,13 @@
 //       },
 //     }
 //   } catch (error) {
-//     console.error("[v0] Web scraping failed:", error)
+//     console.error("[builtbycashe] Web scraping failed:", error)
 //     throw new Error(`Failed to scrape website: ${error instanceof Error ? error.message : "Unknown error"}`)
 //   }
 // }
 
 // export async function scrapeLinkedInProfile(url: string): Promise<LinkedInProfile> {
-//   console.log("[v0] Scraping LinkedIn profile:", url)
+//   console.log("[builtbycashe] Scraping LinkedIn profile:", url)
 
 //   try {
 //     if (env.APIFY_API_KEY) {
@@ -260,13 +260,13 @@
 //     // Fallback: Return basic structure
 //     throw new Error("LinkedIn scraping requires Apify API key")
 //   } catch (error) {
-//     console.error("[v0] LinkedIn scraping failed:", error)
+//     console.error("[builtbycashe] LinkedIn scraping failed:", error)
 //     throw new Error(`Failed to scrape LinkedIn profile: ${error instanceof Error ? error.message : "Unknown error"}`)
 //   }
 // }
 
 // export async function searchCompanyNews(companyName: string, limit = 5): Promise<CompanyNews[]> {
-//   console.log("[v0] Searching news for company:", companyName)
+//   console.log("[builtbycashe] Searching news for company:", companyName)
 
 //   try {
 //     if (env.NEWS_API_KEY) {
@@ -325,13 +325,13 @@
 //       }
 //     })
 //   } catch (error) {
-//     console.error("[v0] News search failed:", error)
+//     console.error("[builtbycashe] News search failed:", error)
 //     return []
 //   }
 // }
 
 // export async function findCompetitorTools(companyWebsite: string): Promise<string[]> {
-//   console.log("[v0] Finding competitor tools for:", companyWebsite)
+//   console.log("[builtbycashe] Finding competitor tools for:", companyWebsite)
 
 //   try {
 //     if (env.BUILTWITH_API_KEY) {
@@ -395,7 +395,7 @@
 
 //     return tools
 //   } catch (error) {
-//     console.error("[v0] Competitor tool detection failed:", error)
+//     console.error("[builtbycashe] Competitor tool detection failed:", error)
 //     return []
 //   }
 // }
@@ -418,7 +418,7 @@
 //       if (result.status === "fulfilled") {
 //         results.set(url, result.value)
 //       } else {
-//         console.error(`[v0] Failed to scrape ${url}:`, result.reason)
+//         console.error(`[builtbycashe] Failed to scrape ${url}:`, result.reason)
 //       }
 //     })
 
@@ -491,12 +491,12 @@ interface EnhancedNewsData extends CompanyNews {
 export type ScrapingMode = "FAST" | "DEEP"
 
 export async function scrapeWebsite(url: string): Promise<ScrapedData> {
-  console.log("[v0] Scraping website:", url)
+  console.log("[builtbycashe] Scraping website:", url)
 
   try {
     // Use Firecrawl API for production web scraping
     if (env.FIRECRAWL_API_KEY) {
-      const response = await fetch("https://api.firecrawl.dev/v0/scrape", {
+      const response = await fetch("https://api.firecrawl.dev/builtbycashe/scrape", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -557,13 +557,13 @@ export async function scrapeWebsite(url: string): Promise<ScrapedData> {
       },
     }
   } catch (error) {
-    console.error("[v0] Web scraping failed:", error)
+    console.error("[builtbycashe] Web scraping failed:", error)
     throw new Error(`Failed to scrape website: ${error instanceof Error ? error.message : "Unknown error"}`)
   }
 }
 
 export async function scrapeLinkedInProfile(url: string): Promise<LinkedInProfile> {
-  console.log("[v0] Scraping LinkedIn profile:", url)
+  console.log("[builtbycashe] Scraping LinkedIn profile:", url)
 
   try {
     if (env.APIFY_API_KEY) {
@@ -610,13 +610,13 @@ export async function scrapeLinkedInProfile(url: string): Promise<LinkedInProfil
     // Fallback: Return basic structure
     throw new Error("LinkedIn scraping requires Apify API key")
   } catch (error) {
-    console.error("[v0] LinkedIn scraping failed:", error)
+    console.error("[builtbycashe] LinkedIn scraping failed:", error)
     throw new Error(`Failed to scrape LinkedIn profile: ${error instanceof Error ? error.message : "Unknown error"}`)
   }
 }
 
 export async function searchCompanyNews(companyName: string, limit = 5): Promise<CompanyNews[]> {
-  console.log("[v0] Searching news for company:", companyName)
+  console.log("[builtbycashe] Searching news for company:", companyName)
 
   try {
     if (env.NEWS_API_KEY) {
@@ -675,13 +675,13 @@ export async function searchCompanyNews(companyName: string, limit = 5): Promise
       }
     })
   } catch (error) {
-    console.error("[v0] News search failed:", error)
+    console.error("[builtbycashe] News search failed:", error)
     return []
   }
 }
 
 export async function findCompetitorTools(companyWebsite: string): Promise<string[]> {
-  console.log("[v0] Finding competitor tools for:", companyWebsite)
+  console.log("[builtbycashe] Finding competitor tools for:", companyWebsite)
 
   try {
     if (env.BUILTWITH_API_KEY) {
@@ -745,7 +745,7 @@ export async function findCompetitorTools(companyWebsite: string): Promise<strin
 
     return tools
   } catch (error) {
-    console.error("[v0] Competitor tool detection failed:", error)
+    console.error("[builtbycashe] Competitor tool detection failed:", error)
     return []
   }
 }
@@ -768,7 +768,7 @@ export async function batchScrapeWebsites(
       if (result.status === "fulfilled") {
         results.set(url, result.value)
       } else {
-        console.error(`[v0] Failed to scrape ${url}:`, result.reason)
+        console.error(`[builtbycashe] Failed to scrape ${url}:`, result.reason)
       }
     })
 
@@ -789,7 +789,7 @@ export async function scrapeWebsiteEnhanced(
   url: string,
   mode: ScrapingMode = "FAST",
 ): Promise<ScrapedData | EnhancedCompanyData> {
-  console.log("[v0] Scraping website with mode:", mode)
+  console.log("[builtbycashe] Scraping website with mode:", mode)
 
   // Try Python scraper first if in DEEP mode
   if (mode === "DEEP" && env.PYTHON_SCRAPER_URL) {
@@ -812,7 +812,7 @@ export async function scrapeWebsiteEnhanced(
         competitors: result.competitors,
       }
     } catch (error) {
-      console.error("[v0] Python scraper failed, falling back to API:", error)
+      console.error("[builtbycashe] Python scraper failed, falling back to API:", error)
     }
   }
 
@@ -824,7 +824,7 @@ export async function scrapeLinkedInProfileEnhanced(
   url: string,
   mode: ScrapingMode = "FAST",
 ): Promise<LinkedInProfile | EnhancedLinkedInProfile> {
-  console.log("[v0] Scraping LinkedIn profile with mode:", mode)
+  console.log("[builtbycashe] Scraping LinkedIn profile with mode:", mode)
 
   // Try Python scraper first if in DEEP mode
   if (mode === "DEEP" && env.PYTHON_SCRAPER_URL) {
@@ -843,7 +843,7 @@ export async function scrapeLinkedInProfileEnhanced(
         connections: result.connections ? Number.parseInt(result.connections) : undefined,
       }
     } catch (error) {
-      console.error("[v0] Python scraper failed, falling back to API:", error)
+      console.error("[builtbycashe] Python scraper failed, falling back to API:", error)
     }
   }
 
@@ -856,7 +856,7 @@ export async function searchCompanyNewsEnhanced(
   limit = 5,
   mode: ScrapingMode = "FAST",
 ): Promise<CompanyNews[] | EnhancedNewsData[]> {
-  console.log("[v0] Searching news with mode:", mode)
+  console.log("[builtbycashe] Searching news with mode:", mode)
 
   // Try Python scraper first if in DEEP mode
   if (mode === "DEEP" && env.PYTHON_SCRAPER_URL) {
@@ -879,7 +879,7 @@ export async function searchCompanyNewsEnhanced(
         }),
       )
     } catch (error) {
-      console.error("[v0] Python scraper failed, falling back to API:", error)
+      console.error("[builtbycashe] Python scraper failed, falling back to API:", error)
     }
   }
 

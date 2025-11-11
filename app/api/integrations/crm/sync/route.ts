@@ -30,7 +30,7 @@ export async function POST() {
     const crmType = integration.type.toLowerCase()
     const credentials = integration.credentials as any
 
-    console.log("[v0] Starting CRM sync for user:", userId)
+    console.log("[builtbycashe] Starting CRM sync for user:", userId)
     const leads = await syncCrmLeads(userId, crmType, credentials)
 
     return NextResponse.json({
@@ -39,7 +39,7 @@ export async function POST() {
       message: `Successfully imported ${leads.length} prospects from ${crmType}`,
     })
   } catch (error) {
-    console.error("[v0] CRM sync route error:", error)
+    console.error("[builtbycashe] CRM sync route error:", error)
     return NextResponse.json({ error: "Failed to sync CRM" }, { status: 500 })
   }
 }

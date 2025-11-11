@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     // Redirect back to settings with success message
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=gmail_connected`)
   } catch (error) {
-    console.error("[v0] Gmail OAuth callback error:", error)
+    console.error("[builtbycashe] Gmail OAuth callback error:", error)
     return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=gmail_oauth_failed`)
   }
 }

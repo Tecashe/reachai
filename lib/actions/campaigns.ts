@@ -284,7 +284,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     return { success: true, campaignId: campaign.id }
 //   } catch (error) {
-//     console.error("[v0] Error creating campaign:", error)
+//     console.error("[builtbycashe] Error creating campaign:", error)
 //     return { success: false, error: "Failed to create campaign" }
 //   }
 // }
@@ -311,7 +311,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     revalidatePath(`/dashboard/campaigns/${campaignId}`)
 //   } catch (error) {
-//     console.error("[v0] Error updating campaign status:", error)
+//     console.error("[builtbycashe] Error updating campaign status:", error)
 //     throw error
 //   }
 // }
@@ -482,7 +482,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     return { success: true, campaignId: campaign.id }
 //   } catch (error) {
-//     console.error("[v0] Error creating campaign:", error)
+//     console.error("[builtbycashe] Error creating campaign:", error)
 //     return { success: false, error: "Failed to create campaign" }
 //   }
 // }
@@ -509,7 +509,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     revalidatePath(`/dashboard/campaigns/${campaignId}`)
 //   } catch (error) {
-//     console.error("[v0] Error updating campaign status:", error)
+//     console.error("[builtbycashe] Error updating campaign status:", error)
 //     throw error
 //   }
 // }
@@ -680,7 +680,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     return { success: true, campaignId: campaign.id }
 //   } catch (error) {
-//     console.error("[v0] Error creating campaign:", error)
+//     console.error("[builtbycashe] Error creating campaign:", error)
 //     return { success: false, error: "Failed to create campaign" }
 //   }
 // }
@@ -707,7 +707,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     revalidatePath(`/dashboard/campaigns/${campaignId}`)
 //   } catch (error) {
-//     console.error("[v0] Error updating campaign status:", error)
+//     console.error("[builtbycashe] Error updating campaign status:", error)
 //     throw error
 //   }
 // }
@@ -730,7 +730,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error deleting campaign:", error)
+//     console.error("[builtbycashe] Error deleting campaign:", error)
 //     return { success: false, error: "Failed to delete campaign" }
 //   }
 // }
@@ -889,7 +889,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     return { success: true, campaignId: campaign.id }
 //   } catch (error) {
-//     console.error("[v0] Error creating campaign:", error)
+//     console.error("[builtbycashe] Error creating campaign:", error)
 //     return { success: false, error: "Failed to create campaign" }
 //   }
 // }
@@ -916,7 +916,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     revalidatePath(`/dashboard/campaigns/${campaignId}`)
 //   } catch (error) {
-//     console.error("[v0] Error updating campaign status:", error)
+//     console.error("[builtbycashe] Error updating campaign status:", error)
 //     throw error
 //   }
 // }
@@ -939,7 +939,7 @@
 //     revalidatePath("/dashboard/campaigns")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error deleting campaign:", error)
+//     console.error("[builtbycashe] Error deleting campaign:", error)
 //     return { success: false, error: "Failed to delete campaign" }
 //   }
 // }
@@ -1096,7 +1096,7 @@ export async function createCampaign(formData: FormData) {
     revalidatePath("/dashboard/campaigns")
     return { success: true, campaignId: campaign.id }
   } catch (error) {
-    console.error("[v0] Error creating campaign:", error)
+    console.error("[builtbycashe] Error creating campaign:", error)
     return { success: false, error: "Failed to create campaign" }
   }
 }
@@ -1123,7 +1123,7 @@ export async function updateCampaignStatus(formData: FormData) {
     revalidatePath("/dashboard/campaigns")
     revalidatePath(`/dashboard/campaigns/${campaignId}`)
   } catch (error) {
-    console.error("[v0] Error updating campaign status:", error)
+    console.error("[builtbycashe] Error updating campaign status:", error)
     throw error
   }
 }
@@ -1146,7 +1146,7 @@ export async function deleteCampaign(campaignId: string) {
     revalidatePath("/dashboard/campaigns")
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error deleting campaign:", error)
+    console.error("[builtbycashe] Error deleting campaign:", error)
     return { success: false, error: "Failed to delete campaign" }
   }
 }
@@ -1227,7 +1227,7 @@ export async function updateCampaignWizardProgress(
 
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error updating wizard progress:", error)
+    console.error("[builtbycashe] Error updating wizard progress:", error)
     return { success: false, error: "Failed to update wizard progress" }
   }
 }
@@ -1260,7 +1260,7 @@ export async function getDraftCampaigns() {
 
     return draftCampaigns
   } catch (error) {
-    console.error("[v0] Error fetching draft campaigns:", error)
+    console.error("[builtbycashe] Error fetching draft campaigns:", error)
     return []
   }
 }

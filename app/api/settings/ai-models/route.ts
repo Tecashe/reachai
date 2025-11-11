@@ -18,7 +18,7 @@ export async function GET() {
 
     return NextResponse.json({ preferences })
   } catch (error) {
-    console.error("[v0] Failed to get AI model preferences:", error)
+    console.error("[builtbycashe] Failed to get AI model preferences:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Failed to save AI model preferences:", error)
+    console.error("[builtbycashe] Failed to save AI model preferences:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

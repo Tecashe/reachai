@@ -28,7 +28,7 @@ export async function getNotifications() {
 
     return notifications
   } catch (error) {
-    console.error("[v0] Error fetching notifications:", error)
+    console.error("[builtbycashe] Error fetching notifications:", error)
     return []
   }
 }
@@ -44,7 +44,7 @@ export async function getUnreadCount() {
 
     return count
   } catch (error) {
-    console.error("[v0] Error fetching unread count:", error)
+    console.error("[builtbycashe] Error fetching unread count:", error)
     return 0
   }
 }
@@ -62,7 +62,7 @@ export async function markAsRead(notificationId: string) {
     revalidatePath("/dashboard")
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error marking notification as read:", error)
+    console.error("[builtbycashe] Error marking notification as read:", error)
     return { success: false, error: "Failed to mark as read" }
   }
 }
@@ -80,7 +80,7 @@ export async function markAllAsRead() {
     revalidatePath("/dashboard")
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error marking all as read:", error)
+    console.error("[builtbycashe] Error marking all as read:", error)
     return { success: false, error: "Failed to mark all as read" }
   }
 }
@@ -121,7 +121,7 @@ export async function createNotification({
     revalidatePath("/dashboard")
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error creating notification:", error)
+    console.error("[builtbycashe] Error creating notification:", error)
     return { success: false, error: "Failed to create notification" }
   }
 }
@@ -138,7 +138,7 @@ export async function deleteNotification(notificationId: string) {
     revalidatePath("/dashboard")
     return { success: true }
   } catch (error) {
-    console.error("[v0] Error deleting notification:", error)
+    console.error("[builtbycashe] Error deleting notification:", error)
     return { success: false, error: "Failed to delete notification" }
   }
 }

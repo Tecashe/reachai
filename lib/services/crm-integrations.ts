@@ -35,14 +35,14 @@
 //       })
 //       return response.ok
 //     } catch (error) {
-//       console.error("[v0] HubSpot validation error:", error)
+//       console.error("[builtbycashe] HubSpot validation error:", error)
 //       return false
 //     }
 //   },
 
 //   async syncLeads(userId: string, apiKey: string): Promise<CrmLead[]> {
 //     try {
-//       console.log("[v0] Starting HubSpot sync for user:", userId)
+//       console.log("[builtbycashe] Starting HubSpot sync for user:", userId)
 //       const leads: CrmLead[] = []
 //       let after: string | undefined
 
@@ -81,10 +81,10 @@
 //         after = data.paging?.next?.after
 //       } while (after)
 
-//       console.log("[v0] HubSpot sync completed, leads found:", leads.length)
+//       console.log("[builtbycashe] HubSpot sync completed, leads found:", leads.length)
 //       return leads
 //     } catch (error) {
-//       console.error("[v0] HubSpot sync error:", error)
+//       console.error("[builtbycashe] HubSpot sync error:", error)
 //       return []
 //     }
 //   },
@@ -111,7 +111,7 @@
 //       const data = await response.json()
 //       return data.id
 //     } catch (error) {
-//       console.error("[v0] HubSpot deal creation error:", error)
+//       console.error("[builtbycashe] HubSpot deal creation error:", error)
 //       return null
 //     }
 //   },
@@ -127,14 +127,14 @@
 //       })
 //       return response.ok
 //     } catch (error) {
-//       console.error("[v0] Salesforce validation error:", error)
+//       console.error("[builtbycashe] Salesforce validation error:", error)
 //       return false
 //     }
 //   },
 
 //   async syncLeads(userId: string, accessToken: string, instanceUrl: string): Promise<CrmLead[]> {
 //     try {
-//       console.log("[v0] Starting Salesforce sync for user:", userId)
+//       console.log("[builtbycashe] Starting Salesforce sync for user:", userId)
 //       const leads: CrmLead[] = []
 
 //       const response = await fetch(
@@ -162,10 +162,10 @@
 //         })
 //       })
 
-//       console.log("[v0] Salesforce sync completed, leads found:", leads.length)
+//       console.log("[builtbycashe] Salesforce sync completed, leads found:", leads.length)
 //       return leads
 //     } catch (error) {
-//       console.error("[v0] Salesforce sync error:", error)
+//       console.error("[builtbycashe] Salesforce sync error:", error)
 //       return []
 //     }
 //   },
@@ -195,7 +195,7 @@
 //       const data = await response.json()
 //       return data.id
 //     } catch (error) {
-//       console.error("[v0] Salesforce opportunity creation error:", error)
+//       console.error("[builtbycashe] Salesforce opportunity creation error:", error)
 //       return null
 //     }
 //   },
@@ -210,14 +210,14 @@
 //       })
 //       return response.ok
 //     } catch (error) {
-//       console.error("[v0] Pipedrive validation error:", error)
+//       console.error("[builtbycashe] Pipedrive validation error:", error)
 //       return false
 //     }
 //   },
 
 //   async syncLeads(userId: string, apiKey: string): Promise<CrmLead[]> {
 //     try {
-//       console.log("[v0] Starting Pipedrive sync for user:", userId)
+//       console.log("[builtbycashe] Starting Pipedrive sync for user:", userId)
 //       const leads: CrmLead[] = []
 //       let start = 0
 
@@ -246,10 +246,10 @@
 //         if (!data.additional_data?.pagination?.more_items_in_collection) break
 //       } while (true)
 
-//       console.log("[v0] Pipedrive sync completed, leads found:", leads.length)
+//       console.log("[builtbycashe] Pipedrive sync completed, leads found:", leads.length)
 //       return leads
 //     } catch (error) {
-//       console.error("[v0] Pipedrive sync error:", error)
+//       console.error("[builtbycashe] Pipedrive sync error:", error)
 //       return []
 //     }
 //   },
@@ -258,7 +258,7 @@
 // // Database sync helpers
 // export async function syncCrmLeads(userId: string, crmType: string, credentials: CrmCredentials) {
 //   try {
-//     console.log("[v0] Syncing CRM leads for user:", userId, "CRM type:", crmType)
+//     console.log("[builtbycashe] Syncing CRM leads for user:", userId, "CRM type:", crmType)
 //     let leads: CrmLead[] = []
 
 //     if (crmType === "hubspot" && credentials.accessToken) {
@@ -302,10 +302,10 @@
 //       })
 //     }
 
-//     console.log("[v0] Synced", leads.length, "leads from CRM")
+//     console.log("[builtbycashe] Synced", leads.length, "leads from CRM")
 //     return leads
 //   } catch (error) {
-//     console.error("[v0] CRM sync error:", error)
+//     console.error("[builtbycashe] CRM sync error:", error)
 //     return []
 //   }
 // }
@@ -335,7 +335,7 @@
 
 //     return Math.min(100, Math.max(0, score))
 //   } catch (error) {
-//     console.error("[v0] Deal scoring error:", error)
+//     console.error("[builtbycashe] Deal scoring error:", error)
 //     return 0
 //   }
 // }
@@ -377,14 +377,14 @@
 //       })
 //       return response.ok
 //     } catch (error) {
-//       console.error("[v0] HubSpot validation error:", error)
+//       console.error("[builtbycashe] HubSpot validation error:", error)
 //       return false
 //     }
 //   },
 
 //   async syncLeads(userId: string, apiKey: string): Promise<CrmLead[]> {
 //     try {
-//       console.log("[v0] Starting HubSpot sync for user:", userId)
+//       console.log("[builtbycashe] Starting HubSpot sync for user:", userId)
 //       const leads: CrmLead[] = []
 //       let after: string | undefined
 
@@ -423,10 +423,10 @@
 //         after = data.paging?.next?.after
 //       } while (after)
 
-//       console.log("[v0] HubSpot sync completed, leads found:", leads.length)
+//       console.log("[builtbycashe] HubSpot sync completed, leads found:", leads.length)
 //       return leads
 //     } catch (error) {
-//       console.error("[v0] HubSpot sync error:", error)
+//       console.error("[builtbycashe] HubSpot sync error:", error)
 //       return []
 //     }
 //   },
@@ -453,7 +453,7 @@
 //       const data = await response.json()
 //       return data.id
 //     } catch (error) {
-//       console.error("[v0] HubSpot deal creation error:", error)
+//       console.error("[builtbycashe] HubSpot deal creation error:", error)
 //       return null
 //     }
 //   },
@@ -469,14 +469,14 @@
 //       })
 //       return response.ok
 //     } catch (error) {
-//       console.error("[v0] Salesforce validation error:", error)
+//       console.error("[builtbycashe] Salesforce validation error:", error)
 //       return false
 //     }
 //   },
 
 //   async syncLeads(userId: string, accessToken: string, instanceUrl: string): Promise<CrmLead[]> {
 //     try {
-//       console.log("[v0] Starting Salesforce sync for user:", userId)
+//       console.log("[builtbycashe] Starting Salesforce sync for user:", userId)
 //       const leads: CrmLead[] = []
 
 //       const response = await fetch(
@@ -504,10 +504,10 @@
 //         })
 //       })
 
-//       console.log("[v0] Salesforce sync completed, leads found:", leads.length)
+//       console.log("[builtbycashe] Salesforce sync completed, leads found:", leads.length)
 //       return leads
 //     } catch (error) {
-//       console.error("[v0] Salesforce sync error:", error)
+//       console.error("[builtbycashe] Salesforce sync error:", error)
 //       return []
 //     }
 //   },
@@ -537,7 +537,7 @@
 //       const data = await response.json()
 //       return data.id
 //     } catch (error) {
-//       console.error("[v0] Salesforce opportunity creation error:", error)
+//       console.error("[builtbycashe] Salesforce opportunity creation error:", error)
 //       return null
 //     }
 //   },
@@ -552,14 +552,14 @@
 //       })
 //       return response.ok
 //     } catch (error) {
-//       console.error("[v0] Pipedrive validation error:", error)
+//       console.error("[builtbycashe] Pipedrive validation error:", error)
 //       return false
 //     }
 //   },
 
 //   async syncLeads(userId: string, apiKey: string): Promise<CrmLead[]> {
 //     try {
-//       console.log("[v0] Starting Pipedrive sync for user:", userId)
+//       console.log("[builtbycashe] Starting Pipedrive sync for user:", userId)
 //       const leads: CrmLead[] = []
 //       let start = 0
 
@@ -588,10 +588,10 @@
 //         if (!data.additional_data?.pagination?.more_items_in_collection) break
 //       } while (true)
 
-//       console.log("[v0] Pipedrive sync completed, leads found:", leads.length)
+//       console.log("[builtbycashe] Pipedrive sync completed, leads found:", leads.length)
 //       return leads
 //     } catch (error) {
-//       console.error("[v0] Pipedrive sync error:", error)
+//       console.error("[builtbycashe] Pipedrive sync error:", error)
 //       return []
 //     }
 //   },
@@ -600,7 +600,7 @@
 // // Database sync helpers
 // export async function syncCrmLeads(userId: string, crmType: string, credentials: CrmCredentials) {
 //   try {
-//     console.log("[v0] Syncing CRM leads for user:", userId, "CRM type:", crmType)
+//     console.log("[builtbycashe] Syncing CRM leads for user:", userId, "CRM type:", crmType)
 //     let leads: CrmLead[] = []
 
 //     if (crmType === "hubspot" && credentials.accessToken) {
@@ -656,10 +656,10 @@
 //       }
 //     }
 
-//     console.log("[v0] Synced", leads.length, "leads from CRM")
+//     console.log("[builtbycashe] Synced", leads.length, "leads from CRM")
 //     return leads
 //   } catch (error) {
-//     console.error("[v0] CRM sync error:", error)
+//     console.error("[builtbycashe] CRM sync error:", error)
 //     return []
 //   }
 // }
@@ -689,7 +689,7 @@
 
 //     return Math.min(100, Math.max(0, score))
 //   } catch (error) {
-//     console.error("[v0] Deal scoring error:", error)
+//     console.error("[builtbycashe] Deal scoring error:", error)
 //     return 0
 //   }
 // }
@@ -728,14 +728,14 @@ export const hubspotService = {
       })
       return response.ok
     } catch (error) {
-      console.error("[v0] HubSpot validation error:", error)
+      console.error("[builtbycashe] HubSpot validation error:", error)
       return false
     }
   },
 
   async syncLeads(userId: string, apiKey: string): Promise<CrmLead[]> {
     try {
-      console.log("[v0] Starting HubSpot sync for user:", userId)
+      console.log("[builtbycashe] Starting HubSpot sync for user:", userId)
       const leads: CrmLead[] = []
       let after: string | undefined
 
@@ -774,10 +774,10 @@ export const hubspotService = {
         after = data.paging?.next?.after
       } while (after)
 
-      console.log("[v0] HubSpot sync completed, leads found:", leads.length)
+      console.log("[builtbycashe] HubSpot sync completed, leads found:", leads.length)
       return leads
     } catch (error) {
-      console.error("[v0] HubSpot sync error:", error)
+      console.error("[builtbycashe] HubSpot sync error:", error)
       return []
     }
   },
@@ -804,7 +804,7 @@ export const hubspotService = {
       const data = await response.json()
       return data.id
     } catch (error) {
-      console.error("[v0] HubSpot deal creation error:", error)
+      console.error("[builtbycashe] HubSpot deal creation error:", error)
       return null
     }
   },
@@ -820,14 +820,14 @@ export const salesforceService = {
       })
       return response.ok
     } catch (error) {
-      console.error("[v0] Salesforce validation error:", error)
+      console.error("[builtbycashe] Salesforce validation error:", error)
       return false
     }
   },
 
   async syncLeads(userId: string, accessToken: string, instanceUrl: string): Promise<CrmLead[]> {
     try {
-      console.log("[v0] Starting Salesforce sync for user:", userId)
+      console.log("[builtbycashe] Starting Salesforce sync for user:", userId)
       const leads: CrmLead[] = []
 
       const response = await fetch(
@@ -855,10 +855,10 @@ export const salesforceService = {
         })
       })
 
-      console.log("[v0] Salesforce sync completed, leads found:", leads.length)
+      console.log("[builtbycashe] Salesforce sync completed, leads found:", leads.length)
       return leads
     } catch (error) {
-      console.error("[v0] Salesforce sync error:", error)
+      console.error("[builtbycashe] Salesforce sync error:", error)
       return []
     }
   },
@@ -888,7 +888,7 @@ export const salesforceService = {
       const data = await response.json()
       return data.id
     } catch (error) {
-      console.error("[v0] Salesforce opportunity creation error:", error)
+      console.error("[builtbycashe] Salesforce opportunity creation error:", error)
       return null
     }
   },
@@ -903,14 +903,14 @@ export const pipedriveService = {
       })
       return response.ok
     } catch (error) {
-      console.error("[v0] Pipedrive validation error:", error)
+      console.error("[builtbycashe] Pipedrive validation error:", error)
       return false
     }
   },
 
   async syncLeads(userId: string, apiKey: string): Promise<CrmLead[]> {
     try {
-      console.log("[v0] Starting Pipedrive sync for user:", userId)
+      console.log("[builtbycashe] Starting Pipedrive sync for user:", userId)
       const leads: CrmLead[] = []
       let start = 0
 
@@ -939,10 +939,10 @@ export const pipedriveService = {
         if (!data.additional_data?.pagination?.more_items_in_collection) break
       } while (true)
 
-      console.log("[v0] Pipedrive sync completed, leads found:", leads.length)
+      console.log("[builtbycashe] Pipedrive sync completed, leads found:", leads.length)
       return leads
     } catch (error) {
-      console.error("[v0] Pipedrive sync error:", error)
+      console.error("[builtbycashe] Pipedrive sync error:", error)
       return []
     }
   },
@@ -951,7 +951,7 @@ export const pipedriveService = {
 // Database sync helpers
 export async function syncCrmLeads(userId: string, crmType: string, credentials: CrmCredentials) {
   try {
-    console.log("[v0] Syncing CRM leads for user:", userId, "CRM type:", crmType)
+    console.log("[builtbycashe] Syncing CRM leads for user:", userId, "CRM type:", crmType)
     let leads: CrmLead[] = []
 
     if (crmType === "hubspot" && credentials.accessToken) {
@@ -1007,10 +1007,10 @@ export async function syncCrmLeads(userId: string, crmType: string, credentials:
       }
     }
 
-    console.log("[v0] Synced", leads.length, "leads from CRM")
+    console.log("[builtbycashe] Synced", leads.length, "leads from CRM")
     return leads
   } catch (error) {
-    console.error("[v0] CRM sync error:", error)
+    console.error("[builtbycashe] CRM sync error:", error)
     return []
   }
 }
@@ -1042,7 +1042,7 @@ export async function scoreProspect(prospect: any, crmData?: any): Promise<numbe
 
     return Math.min(100, Math.max(0, score))
   } catch (error) {
-    console.error("[v0] Deal scoring error:", error)
+    console.error("[builtbycashe] Deal scoring error:", error)
     return 0
   }
 }

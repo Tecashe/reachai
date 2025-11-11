@@ -138,7 +138,7 @@ Be brutally honest and specific. Focus on actionable insights that will improve 
       estimatedReadTime,
     }
   } catch (error) {
-    console.error("[v0] Email performance prediction failed:", error)
+    console.error("[builtbycashe] Email performance prediction failed:", error)
     throw new Error("Failed to predict email performance")
   }
 }

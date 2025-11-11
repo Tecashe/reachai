@@ -256,7 +256,7 @@ Open [http://localhost:3000](http://localhost:3000) to see your app.
 
 3. **Debugging:**
    - Check logs in Vercel dashboard
-   - Use `console.log("[v0] ...")` for debugging
+   - Use `console.log("[builtbycashe] ...")` for debugging
    - Monitor webhook events in Stripe/Clerk dashboards
 
 ## Support

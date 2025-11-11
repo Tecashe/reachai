@@ -192,7 +192,7 @@ export async function createSequence(data: {
 
     return { success: true, sequence }
   } catch (error) {
-    console.error("[v0] Error creating sequence:", error)
+    console.error("[builtbycashe] Error creating sequence:", error)
     return { success: false, error: "Failed to create sequence" }
   }
 }

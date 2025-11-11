@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       logId: result.logId,
     })
   } catch (error) {
-    console.error("[v0] Send email error:", error)
+    console.error("[builtbycashe] Send email error:", error)
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 })
   }
 }

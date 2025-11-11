@@ -44,7 +44,7 @@ export function LaunchStep({ campaign, onBack }: LaunchStepProps) {
       toast.success("Campaign launched successfully!")
       router.push(`/dashboard/campaigns/${campaign.id}`)
     } catch (error) {
-      console.error("[v0] Launch error:", error)
+      console.error("[builtbycashe] Launch error:", error)
       toast.error("Failed to launch campaign. Please try again.")
       setIsLaunching(false)
     }

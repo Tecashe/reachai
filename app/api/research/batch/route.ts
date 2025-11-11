@@ -18,7 +18,7 @@
 //       count: results.size,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Batch research API error:", error)
+//     console.error("[builtbycashe] Batch research API error:", error)
 //     return NextResponse.json({ error: "Failed to research prospects" }, { status: 500 })
 //   }
 // }
@@ -60,7 +60,7 @@
 //       count: results.size,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Batch research API error:", error)
+//     console.error("[builtbycashe] Batch research API error:", error)
 //     return NextResponse.json({ error: "Failed to research prospects" }, { status: 500 })
 //   }
 // }
@@ -71,27 +71,27 @@
 // import { db } from "@/lib/db"
 
 // export async function POST(request: NextRequest) {
-//   console.log("[v0] Batch research API called")
+//   console.log("[builtbycashe] Batch research API called")
 
 //   const { error, user } = await protectApiRoute()
 //   if (error) {
-//     console.error("[v0] Auth failed in research API")
+//     console.error("[builtbycashe] Auth failed in research API")
 //     return error
 //   }
 
 //   try {
 //     const body = await request.json()
-//     console.log("[v0] Research request body:", body)
+//     console.log("[builtbycashe] Research request body:", body)
 
 //     const { campaignId, depth = "STANDARD" } = body
 
 //     if (!campaignId) {
-//       console.error("[v0] Missing campaignId")
+//       console.error("[builtbycashe] Missing campaignId")
 //       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
 //     }
 
 //     // Fetch prospects for this campaign
-//     console.log("[v0] Fetching prospects for campaign:", campaignId)
+//     console.log("[builtbycashe] Fetching prospects for campaign:", campaignId)
 //     const prospectsFromDb = await db.prospect.findMany({
 //       where: {
 //         campaignId,
@@ -110,18 +110,18 @@
 //     })
 
 //     if (prospectsFromDb.length === 0) {
-//       console.error("[v0] No prospects found for campaign:", campaignId)
+//       console.error("[builtbycashe] No prospects found for campaign:", campaignId)
 //       return NextResponse.json(
 //         { error: "No prospects found for this campaign. Please add prospects first." },
 //         { status: 400 },
 //       )
 //     }
 
-//     console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
-//     console.log("[v0] User research credits:", user!.researchCredits)
+//     console.log("[builtbycashe] Found", prospectsFromDb.length, "prospects to research")
+//     console.log("[builtbycashe] User research credits:", user!.researchCredits)
 
 //     if (user!.researchCredits < prospectsFromDb.length) {
-//       console.error("[v0] Insufficient credits:", {
+//       console.error("[builtbycashe] Insufficient credits:", {
 //         needed: prospectsFromDb.length,
 //         available: user!.researchCredits,
 //       })
@@ -141,9 +141,9 @@
 //       websiteUrl: p.websiteUrl ?? undefined,
 //     }))
 
-//     console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//     console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 //     const results = await batchResearchProspects(prospects, depth)
-//     console.log("[v0] Batch research completed successfully:", results.size, "results")
+//     console.log("[builtbycashe] Batch research completed successfully:", results.size, "results")
 
 //     for (const [email, researchData] of results.entries()) {
 //       const prospect = prospectsFromDb.find((p) => p.email === email)
@@ -166,7 +166,7 @@
 //         hasResearchedProspects: true, // Mark onboarding step complete
 //       },
 //     })
-//     console.log("[v0] Credits decremented and research data saved successfully")
+//     console.log("[builtbycashe] Credits decremented and research data saved successfully")
 
 //     return NextResponse.json({
 //       success: true,
@@ -174,8 +174,8 @@
 //       count: results.size,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Batch research API error:", error)
-//     console.error("[v0] Error details:", {
+//     console.error("[builtbycashe] Batch research API error:", error)
+//     console.error("[builtbycashe] Error details:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //       name: error instanceof Error ? error.name : undefined,
@@ -198,22 +198,22 @@
 // import { db } from "@/lib/db"
 
 // export async function POST(request: NextRequest) {
-//   console.log("[v0] Batch research API called")
+//   console.log("[builtbycashe] Batch research API called")
 
 //   const { error, user } = await protectApiRoute()
 //   if (error) {
-//     console.error("[v0] Auth failed in research API")
+//     console.error("[builtbycashe] Auth failed in research API")
 //     return error
 //   }
 
 //   try {
 //     const body = await request.json()
-//     console.log("[v0] Research request body:", body)
+//     console.log("[builtbycashe] Research request body:", body)
 
 //     const { campaignId, depth: requestDepth } = body
 
 //     if (!campaignId) {
-//       console.error("[v0] Missing campaignId")
+//       console.error("[builtbycashe] Missing campaignId")
 //       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
 //     }
 
@@ -223,11 +223,11 @@
 //     // Convert scraping mode to research depth
 //     const depth = userScrapingMode === "DEEP" ? "DEEP" : requestDepth || "STANDARD"
 
-//     console.log("[v0] User scraping mode preference:", userScrapingMode)
-//     console.log("[v0] Using research depth:", depth)
+//     console.log("[builtbycashe] User scraping mode preference:", userScrapingMode)
+//     console.log("[builtbycashe] Using research depth:", depth)
 
 //     // Fetch prospects for this campaign
-//     console.log("[v0] Fetching prospects for campaign:", campaignId)
+//     console.log("[builtbycashe] Fetching prospects for campaign:", campaignId)
 //     const prospectsFromDb = await db.prospect.findMany({
 //       where: {
 //         campaignId,
@@ -246,18 +246,18 @@
 //     })
 
 //     if (prospectsFromDb.length === 0) {
-//       console.error("[v0] No prospects found for campaign:", campaignId)
+//       console.error("[builtbycashe] No prospects found for campaign:", campaignId)
 //       return NextResponse.json(
 //         { error: "No prospects found for this campaign. Please add prospects first." },
 //         { status: 400 },
 //       )
 //     }
 
-//     console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
-//     console.log("[v0] User research credits:", user!.researchCredits)
+//     console.log("[builtbycashe] Found", prospectsFromDb.length, "prospects to research")
+//     console.log("[builtbycashe] User research credits:", user!.researchCredits)
 
 //     if (user!.researchCredits < prospectsFromDb.length) {
-//       console.error("[v0] Insufficient credits:", {
+//       console.error("[builtbycashe] Insufficient credits:", {
 //         needed: prospectsFromDb.length,
 //         available: user!.researchCredits,
 //       })
@@ -277,9 +277,9 @@
 //       websiteUrl: p.websiteUrl ?? undefined,
 //     }))
 
-//     console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//     console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 //     const results = await batchResearchProspects(prospects, depth)
-//     console.log("[v0] Batch research completed successfully:", results.size, "results")
+//     console.log("[builtbycashe] Batch research completed successfully:", results.size, "results")
 
 //     for (const [email, researchData] of results.entries()) {
 //       const prospect = prospectsFromDb.find((p) => p.email === email)
@@ -302,7 +302,7 @@
 //         hasResearchedProspects: true, // Mark onboarding step complete
 //       },
 //     })
-//     console.log("[v0] Credits decremented and research data saved successfully")
+//     console.log("[builtbycashe] Credits decremented and research data saved successfully")
 
 //     return NextResponse.json({
 //       success: true,
@@ -310,8 +310,8 @@
 //       count: results.size,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Batch research API error:", error)
-//     console.error("[v0] Error details:", {
+//     console.error("[builtbycashe] Batch research API error:", error)
+//     console.error("[builtbycashe] Error details:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //       name: error instanceof Error ? error.name : undefined,
@@ -333,22 +333,22 @@
 // import { deductCreditsWithTracking, refundCredits } from "@/lib/actions/credits"
 
 // export async function POST(request: NextRequest) {
-//   console.log("[v0] Batch research API called")
+//   console.log("[builtbycashe] Batch research API called")
 
 //   const { error, user } = await protectApiRoute()
 //   if (error) {
-//     console.error("[v0] Auth failed in research API")
+//     console.error("[builtbycashe] Auth failed in research API")
 //     return error
 //   }
 
 //   try {
 //     const body = await request.json()
-//     console.log("[v0] Research request body:", body)
+//     console.log("[builtbycashe] Research request body:", body)
 
 //     const { campaignId, depth: requestDepth } = body
 
 //     if (!campaignId) {
-//       console.error("[v0] Missing campaignId")
+//       console.error("[builtbycashe] Missing campaignId")
 //       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
 //     }
 
@@ -357,10 +357,10 @@
 
 //     const depth = userScrapingMode === "DEEP" ? "DEEP" : requestDepth || "STANDARD"
 
-//     console.log("[v0] User scraping mode preference:", userScrapingMode)
-//     console.log("[v0] Using research depth:", depth)
+//     console.log("[builtbycashe] User scraping mode preference:", userScrapingMode)
+//     console.log("[builtbycashe] Using research depth:", depth)
 
-//     console.log("[v0] Fetching prospects for campaign:", campaignId)
+//     console.log("[builtbycashe] Fetching prospects for campaign:", campaignId)
 //     const prospectsFromDb = await db.prospect.findMany({
 //       where: {
 //         campaignId,
@@ -379,18 +379,18 @@
 //     })
 
 //     if (prospectsFromDb.length === 0) {
-//       console.error("[v0] No prospects found for campaign:", campaignId)
+//       console.error("[builtbycashe] No prospects found for campaign:", campaignId)
 //       return NextResponse.json(
 //         { error: "No prospects found for this campaign. Please add prospects first." },
 //         { status: 400 },
 //       )
 //     }
 
-//     console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
-//     console.log("[v0] User research credits:", user!.researchCredits)
+//     console.log("[builtbycashe] Found", prospectsFromDb.length, "prospects to research")
+//     console.log("[builtbycashe] User research credits:", user!.researchCredits)
 
 //     if (user!.researchCredits < prospectsFromDb.length) {
-//       console.error("[v0] Insufficient credits:", {
+//       console.error("[builtbycashe] Insufficient credits:", {
 //         needed: prospectsFromDb.length,
 //         available: user!.researchCredits,
 //       })
@@ -410,7 +410,7 @@
 //       websiteUrl: p.websiteUrl ?? undefined,
 //     }))
 
-//     console.log("[v0] Deducting", prospects.length, "research credits with transaction logging")
+//     console.log("[builtbycashe] Deducting", prospects.length, "research credits with transaction logging")
 //     await deductCreditsWithTracking(
 //       user!.id,
 //       "RESEARCH",
@@ -424,9 +424,9 @@
 //     let results: Map<string, any>
 
 //     try {
-//       console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//       console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 //       results = await batchResearchProspects(prospects, depth)
-//       console.log("[v0] Batch research completed successfully:", results.size, "results")
+//       console.log("[builtbycashe] Batch research completed successfully:", results.size, "results")
 //       researchSuccessful = true
 
 //       for (const [email, researchData] of results.entries()) {
@@ -449,7 +449,7 @@
 //           hasResearchedProspects: true,
 //         },
 //       })
-//       console.log("[v0] Research data saved successfully")
+//       console.log("[builtbycashe] Research data saved successfully")
 
 //       return NextResponse.json({
 //         success: true,
@@ -457,7 +457,7 @@
 //         count: results.size,
 //       })
 //     } catch (researchError) {
-//       console.error("[v0] Research failed, refunding credits:", researchError)
+//       console.error("[builtbycashe] Research failed, refunding credits:", researchError)
 
 //       await refundCredits(
 //         user!.id,
@@ -468,13 +468,13 @@
 //         campaignId,
 //       )
 
-//       console.log("[v0] Credits refunded due to research failure")
+//       console.log("[builtbycashe] Credits refunded due to research failure")
 
 //       throw researchError
 //     }
 //   } catch (error) {
-//     console.error("[v0] Batch research API error:", error)
-//     console.error("[v0] Error details:", {
+//     console.error("[builtbycashe] Batch research API error:", error)
+//     console.error("[builtbycashe] Error details:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //       name: error instanceof Error ? error.name : undefined,
@@ -497,22 +497,22 @@
 // import { deductCreditsWithTracking } from "@/lib/actions/credits"
 
 // export async function POST(request: NextRequest) {
-//   console.log("[v0] Batch research API called")
+//   console.log("[builtbycashe] Batch research API called")
 
 //   const { error, user } = await protectApiRoute()
 //   if (error) {
-//     console.error("[v0] Auth failed in research API")
+//     console.error("[builtbycashe] Auth failed in research API")
 //     return error
 //   }
 
 //   try {
 //     const body = await request.json()
-//     console.log("[v0] Research request body:", body)
+//     console.log("[builtbycashe] Research request body:", body)
 
 //     const { campaignId, depth: requestDepth } = body
 
 //     if (!campaignId) {
-//       console.error("[v0] Missing campaignId")
+//       console.error("[builtbycashe] Missing campaignId")
 //       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
 //     }
 
@@ -521,10 +521,10 @@
 
 //     const depth = userScrapingMode === "DEEP" ? "DEEP" : requestDepth || "STANDARD"
 
-//     console.log("[v0] User scraping mode preference:", userScrapingMode)
-//     console.log("[v0] Using research depth:", depth)
+//     console.log("[builtbycashe] User scraping mode preference:", userScrapingMode)
+//     console.log("[builtbycashe] Using research depth:", depth)
 
-//     console.log("[v0] Fetching prospects for campaign:", campaignId)
+//     console.log("[builtbycashe] Fetching prospects for campaign:", campaignId)
 //     const prospectsFromDb = await db.prospect.findMany({
 //       where: {
 //         campaignId,
@@ -543,18 +543,18 @@
 //     })
 
 //     if (prospectsFromDb.length === 0) {
-//       console.error("[v0] No prospects found for campaign:", campaignId)
+//       console.error("[builtbycashe] No prospects found for campaign:", campaignId)
 //       return NextResponse.json(
 //         { error: "No prospects found for this campaign. Please add prospects first." },
 //         { status: 400 },
 //       )
 //     }
 
-//     console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
-//     console.log("[v0] User research credits:", user!.researchCredits)
+//     console.log("[builtbycashe] Found", prospectsFromDb.length, "prospects to research")
+//     console.log("[builtbycashe] User research credits:", user!.researchCredits)
 
 //     if (user!.researchCredits < prospectsFromDb.length) {
-//       console.error("[v0] Insufficient credits:", {
+//       console.error("[builtbycashe] Insufficient credits:", {
 //         needed: prospectsFromDb.length,
 //         available: user!.researchCredits,
 //       })
@@ -574,16 +574,16 @@
 //       websiteUrl: p.websiteUrl ?? undefined,
 //     }))
 
-//     console.log("[v0] Starting batch research for", prospects.length, "prospects (credits will be deducted on success)")
+//     console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects (credits will be deducted on success)")
 
 //     let results: Map<string, any>
 
 //     try {
-//       console.log("[v0] Performing research...")
+//       console.log("[builtbycashe] Performing research...")
 //       results = await batchResearchProspects(prospects, depth)
-//       console.log("[v0] Batch research completed successfully:", results.size, "results")
+//       console.log("[builtbycashe] Batch research completed successfully:", results.size, "results")
 
-//       console.log("[v0] Research successful! Deducting", prospects.length, "research credits")
+//       console.log("[builtbycashe] Research successful! Deducting", prospects.length, "research credits")
 //       await deductCreditsWithTracking(
 //         user!.id,
 //         "RESEARCH",
@@ -592,7 +592,7 @@
 //         "CAMPAIGN",
 //         campaignId,
 //       )
-//       console.log("[v0] Credits deducted successfully")
+//       console.log("[builtbycashe] Credits deducted successfully")
 
 //       // Save research data to database
 //       for (const [email, researchData] of results.entries()) {
@@ -615,7 +615,7 @@
 //           hasResearchedProspects: true,
 //         },
 //       })
-//       console.log("[v0] Research data saved successfully")
+//       console.log("[builtbycashe] Research data saved successfully")
 
 //       return NextResponse.json({
 //         success: true,
@@ -623,8 +623,8 @@
 //         count: results.size,
 //       })
 //     } catch (researchError) {
-//       console.error("[v0] Research failed - no credits were deducted:", researchError)
-//       console.error("[v0] Error details:", {
+//       console.error("[builtbycashe] Research failed - no credits were deducted:", researchError)
+//       console.error("[builtbycashe] Error details:", {
 //         message: researchError instanceof Error ? researchError.message : "Unknown error",
 //         stack: researchError instanceof Error ? researchError.stack : undefined,
 //       })
@@ -632,8 +632,8 @@
 //       throw researchError
 //     }
 //   } catch (error) {
-//     console.error("[v0] Batch research API error:", error)
-//     console.error("[v0] Error details:", {
+//     console.error("[builtbycashe] Batch research API error:", error)
+//     console.error("[builtbycashe] Error details:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //       name: error instanceof Error ? error.name : undefined,
@@ -659,38 +659,38 @@ import { getResearchLimits, type SubscriptionTier } from "@/lib/subscription-lim
 export const maxDuration = 300 // 5 minutes max
 
 export async function POST(request: NextRequest) {
-  console.log("[v0] Batch research API called")
+  console.log("[builtbycashe] Batch research API called")
 
   const { error, user } = await protectApiRoute()
   if (error) {
-    console.error("[v0] Auth failed in research API")
+    console.error("[builtbycashe] Auth failed in research API")
     return error
   }
 
   try {
     const body = await request.json()
-    console.log("[v0] Research request body:", body)
+    console.log("[builtbycashe] Research request body:", body)
 
     const { campaignId, depth: requestDepth } = body
 
     if (!campaignId) {
-      console.error("[v0] Missing campaignId")
+      console.error("[builtbycashe] Missing campaignId")
       return NextResponse.json({ error: "Campaign ID is required" }, { status: 400 })
     }
 
     const tier = user!.subscriptionTier as SubscriptionTier
     const limits = getResearchLimits(tier)
-    console.log("[v0] User tier:", tier, "Limits:", limits)
+    console.log("[builtbycashe] User tier:", tier, "Limits:", limits)
 
     const userPreferences = (user!.preferences as any) || {}
     const userScrapingMode = userPreferences.scrapingMode || "FAST"
 
     const depth = userScrapingMode === "DEEP" ? "DEEP" : requestDepth || "STANDARD"
 
-    console.log("[v0] User scraping mode preference:", userScrapingMode)
-    console.log("[v0] Using research depth:", depth)
+    console.log("[builtbycashe] User scraping mode preference:", userScrapingMode)
+    console.log("[builtbycashe] Using research depth:", depth)
 
-    console.log("[v0] Fetching prospects for campaign:", campaignId)
+    console.log("[builtbycashe] Fetching prospects for campaign:", campaignId)
     const prospectsFromDb = await db.prospect.findMany({
       where: {
         campaignId,
@@ -709,17 +709,17 @@ export async function POST(request: NextRequest) {
     })
 
     if (prospectsFromDb.length === 0) {
-      console.error("[v0] No prospects found for campaign:", campaignId)
+      console.error("[builtbycashe] No prospects found for campaign:", campaignId)
       return NextResponse.json(
         { error: "No prospects found for this campaign. Please add prospects first." },
         { status: 400 },
       )
     }
 
-    console.log("[v0] Found", prospectsFromDb.length, "prospects to research")
+    console.log("[builtbycashe] Found", prospectsFromDb.length, "prospects to research")
 
     if (prospectsFromDb.length > limits.maxProspectsPerBatch) {
-      console.error("[v0] Prospect limit exceeded:", {
+      console.error("[builtbycashe] Prospect limit exceeded:", {
         requested: prospectsFromDb.length,
         limit: limits.maxProspectsPerBatch,
         tier,
@@ -732,10 +732,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("[v0] User research credits:", user!.researchCredits)
+    console.log("[builtbycashe] User research credits:", user!.researchCredits)
 
     if (user!.researchCredits < prospectsFromDb.length) {
-      console.error("[v0] Insufficient credits:", {
+      console.error("[builtbycashe] Insufficient credits:", {
         needed: prospectsFromDb.length,
         available: user!.researchCredits,
       })
@@ -755,19 +755,19 @@ export async function POST(request: NextRequest) {
       websiteUrl: p.websiteUrl ?? undefined,
     }))
 
-    console.log("[v0] Starting batch research for", prospects.length, "prospects (credits will be deducted on success)")
-    console.log("[v0] Using concurrency:", limits.maxConcurrentResearch)
+    console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects (credits will be deducted on success)")
+    console.log("[builtbycashe] Using concurrency:", limits.maxConcurrentResearch)
 
     let results: Map<string, any>
 
     try {
-      console.log("[v0] Performing research...")
+      console.log("[builtbycashe] Performing research...")
       results = await batchResearchProspects(prospects, depth, undefined, limits.maxConcurrentResearch)
-      console.log("[v0] Batch research completed successfully:", results.size, "results")
+      console.log("[builtbycashe] Batch research completed successfully:", results.size, "results")
 
       const successfulCount = results.size
       if (successfulCount > 0) {
-        console.log("[v0] Research successful! Deducting", successfulCount, "research credits")
+        console.log("[builtbycashe] Research successful! Deducting", successfulCount, "research credits")
         await deductCreditsWithTracking(
           user!.id,
           "RESEARCH",
@@ -776,7 +776,7 @@ export async function POST(request: NextRequest) {
           "CAMPAIGN",
           campaignId,
         )
-        console.log("[v0] Credits deducted successfully")
+        console.log("[builtbycashe] Credits deducted successfully")
       }
 
       // Save research data to database
@@ -800,7 +800,7 @@ export async function POST(request: NextRequest) {
           hasResearchedProspects: true,
         },
       })
-      console.log("[v0] Research data saved successfully")
+      console.log("[builtbycashe] Research data saved successfully")
 
       return NextResponse.json({
         success: true,
@@ -809,8 +809,8 @@ export async function POST(request: NextRequest) {
         failed: prospects.length - results.size,
       })
     } catch (researchError) {
-      console.error("[v0] Research failed - no credits were deducted:", researchError)
-      console.error("[v0] Error details:", {
+      console.error("[builtbycashe] Research failed - no credits were deducted:", researchError)
+      console.error("[builtbycashe] Error details:", {
         message: researchError instanceof Error ? researchError.message : "Unknown error",
         stack: researchError instanceof Error ? researchError.stack : undefined,
       })
@@ -818,8 +818,8 @@ export async function POST(request: NextRequest) {
       throw researchError
     }
   } catch (error) {
-    console.error("[v0] Batch research API error:", error)
-    console.error("[v0] Error details:", {
+    console.error("[builtbycashe] Batch research API error:", error)
+    console.error("[builtbycashe] Error details:", {
       message: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined,

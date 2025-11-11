@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { type, data } = body
 
-    console.log("[v0] Resend webhook:", type, data)
+    console.log("[builtbycashe] Resend webhook:", type, data)
 
     // Handle different webhook events
     switch (type) {
@@ -21,12 +21,12 @@ export async function POST(request: NextRequest) {
         await handleComplained(data)
         break
       default:
-        console.log("[v0] Unknown webhook type:", type)
+        console.log("[builtbycashe] Unknown webhook type:", type)
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[v0] Webhook error:", error)
+    console.error("[builtbycashe] Webhook error:", error)
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
   }
 }

@@ -56,7 +56,7 @@
 //         }
 //       }, 2000)
 //     } catch (error) {
-//       console.error("[v0] Research error:", error)
+//       console.error("[builtbycashe] Research error:", error)
 //       toast.error("Failed to start research. Please try again.")
 //       setIsResearching(false)
 //     }

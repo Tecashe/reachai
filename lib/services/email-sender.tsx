@@ -93,7 +93,7 @@
 //         logId: log.id,
 //       }
 //     } catch (error) {
-//       console.error("[v0] Email send error:", error)
+//       console.error("[builtbycashe] Email send error:", error)
 
 //       // Update log with failure if log was created
 //       if (options.prospectId) {
@@ -253,7 +253,7 @@
 //         logId: log.id,
 //       }
 //     } catch (error) {
-//       console.error("[v0] Email send error:", error)
+//       console.error("[builtbycashe] Email send error:", error)
 
 //       // Update log with failure if log was created
 //       if (options.prospectId) {
@@ -1488,7 +1488,7 @@
 //   ): Promise<{ success: boolean; messageId?: string; error?: string; logId?: string }> {
 //     const { to, subject, html, userId, campaignId, prospectId, skipValidation } = params
 
-//     console.log("[v0] Sending campaign email to:", to, "for user:", userId)
+//     console.log("[builtbycashe] Sending campaign email to:", to, "for user:", userId)
 
 //     try {
 //       let actualUserId = userId
@@ -1592,11 +1592,11 @@
 //         })
 //       }
 
-//       console.log("[v0] Email sent successfully via", sendingAccount.provider, "messageId:", messageId)
+//       console.log("[builtbycashe] Email sent successfully via", sendingAccount.provider, "messageId:", messageId)
 
 //       return { success: true, messageId, logId }
 //     } catch (error) {
-//       console.error("[v0] Failed to send email:", error)
+//       console.error("[builtbycashe] Failed to send email:", error)
 //       return {
 //         success: false,
 //         error: error instanceof Error ? error.message : "Failed to send email",
@@ -1644,7 +1644,7 @@
 
 //       // Check if token is expired and refresh if needed
 //       if (credentials.expiresAt && credentials.expiresAt < Date.now()) {
-//         console.log("[v0] Gmail token expired, refreshing...")
+//         console.log("[builtbycashe] Gmail token expired, refreshing...")
 //         const newTokens = await gmailOAuth.refreshAccessToken(credentials.refreshToken)
 
 //         // Update credentials in database
@@ -1673,7 +1673,7 @@
 
 //       return messageId
 //     } catch (error) {
-//       console.error("[v0] Gmail sending error:", error)
+//       console.error("[builtbycashe] Gmail sending error:", error)
 //       throw new Error(`Gmail sending failed: ${error instanceof Error ? error.message : "Unknown error"}`)
 //     }
 //   }
@@ -1694,7 +1694,7 @@
 //       // Check if token is expired and refresh if needed
 //       const expiresAt = credentials.expiresAt || Date.now() + credentials.expiresIn * 1000
 //       if (expiresAt < Date.now()) {
-//         console.log("[v0] Outlook token expired, refreshing...")
+//         console.log("[builtbycashe] Outlook token expired, refreshing...")
 //         const newTokens = await outlookOAuth.refreshAccessToken(credentials.refreshToken)
 
 //         // Update credentials in database
@@ -1724,7 +1724,7 @@
 
 //       return messageId
 //     } catch (error) {
-//       console.error("[v0] Outlook sending error:", error)
+//       console.error("[builtbycashe] Outlook sending error:", error)
 //       throw new Error(`Outlook sending failed: ${error instanceof Error ? error.message : "Unknown error"}`)
 //     }
 //   }
@@ -1741,7 +1741,7 @@
 //     // TODO: Implement SMTP sending using nodemailer
 //     // Use account.credentials for SMTP config
 
-//     console.log("[v0] SMTP sending not yet implemented")
+//     console.log("[builtbycashe] SMTP sending not yet implemented")
 //     throw new Error("SMTP sending not yet implemented. Please use Resend.")
 //   }
 
@@ -1832,7 +1832,7 @@ export class EmailSenderService {
   ): Promise<{ success: boolean; messageId?: string; error?: string; logId?: string }> {
     const { to, subject, html, userId, campaignId, prospectId, skipValidation } = params
 
-    console.log("[v0] Sending campaign email to:", to, "for user:", userId)
+    console.log("[builtbycashe] Sending campaign email to:", to, "for user:", userId)
 
     try {
       let actualUserId = userId
@@ -1878,7 +1878,7 @@ export class EmailSenderService {
 
         // Prevent sending if domain health is critical
         if (domainHealth.reputation && domainHealth.reputation.overall < 60) {
-          console.warn("[v0] Domain health too low for sending:", domainHealth.reputation.overall)
+          console.warn("[builtbycashe] Domain health too low for sending:", domainHealth.reputation.overall)
           return {
             success: false,
             error: `Domain ${sendingAccount.domain.domain} has poor health (score: ${domainHealth.reputation.overall}). Please fix DNS issues before sending.`,
@@ -1886,7 +1886,7 @@ export class EmailSenderService {
         }
 
         if (sendingAccount.domain.isBlacklisted && sendingAccount.domain.blacklistedOn.length > 0) {
-          console.warn("[v0] Domain is blacklisted:", sendingAccount.domain.blacklistedOn)
+          console.warn("[builtbycashe] Domain is blacklisted:", sendingAccount.domain.blacklistedOn)
           return {
             success: false,
             error: `Domain ${sendingAccount.domain.domain} is blacklisted on: ${sendingAccount.domain.blacklistedOn.join(", ")}. Cannot send emails.`,
@@ -1970,7 +1970,7 @@ export class EmailSenderService {
       }
 
       console.log(
-        "[v0] Email sent successfully via",
+        "[builtbycashe] Email sent successfully via",
         sendingAccount.provider,
         "messageId:",
         messageId,
@@ -1980,7 +1980,7 @@ export class EmailSenderService {
 
       return { success: true, messageId, logId }
     } catch (error) {
-      console.error("[v0] Failed to send email:", error)
+      console.error("[builtbycashe] Failed to send email:", error)
       return {
         success: false,
         error: error instanceof Error ? error.message : "Failed to send email",
@@ -2028,7 +2028,7 @@ export class EmailSenderService {
 
       // Check if token is expired and refresh if needed
       if (credentials.expiresAt && credentials.expiresAt < Date.now()) {
-        console.log("[v0] Gmail token expired, refreshing...")
+        console.log("[builtbycashe] Gmail token expired, refreshing...")
         const newTokens = await gmailOAuth.refreshAccessToken(credentials.refreshToken)
 
         // Update credentials in database
@@ -2057,7 +2057,7 @@ export class EmailSenderService {
 
       return messageId
     } catch (error) {
-      console.error("[v0] Gmail sending error:", error)
+      console.error("[builtbycashe] Gmail sending error:", error)
       throw new Error(`Gmail sending failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -2078,7 +2078,7 @@ export class EmailSenderService {
       // Check if token is expired and refresh if needed
       const expiresAt = credentials.expiresAt || Date.now() + credentials.expiresIn * 1000
       if (expiresAt < Date.now()) {
-        console.log("[v0] Outlook token expired, refreshing...")
+        console.log("[builtbycashe] Outlook token expired, refreshing...")
         const newTokens = await outlookOAuth.refreshAccessToken(credentials.refreshToken)
 
         // Update credentials in database
@@ -2108,7 +2108,7 @@ export class EmailSenderService {
 
       return messageId
     } catch (error) {
-      console.error("[v0] Outlook sending error:", error)
+      console.error("[builtbycashe] Outlook sending error:", error)
       throw new Error(`Outlook sending failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }
@@ -2125,7 +2125,7 @@ export class EmailSenderService {
     // TODO: Implement SMTP sending using nodemailer
     // Use account.credentials for SMTP config
 
-    console.log("[v0] SMTP sending not yet implemented")
+    console.log("[builtbycashe] SMTP sending not yet implemented")
     throw new Error("SMTP sending not yet implemented. Please use Resend.")
   }
 

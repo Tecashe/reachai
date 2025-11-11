@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(analysis)
   } catch (error) {
-    console.error("[v0] Email performance prediction error:", error)
+    console.error("[builtbycashe] Email performance prediction error:", error)
     return NextResponse.json({ error: "Failed to predict email performance" }, { status: 500 })
   }
 }

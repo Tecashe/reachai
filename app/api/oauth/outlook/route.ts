@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     // Redirect user to Microsoft OAuth consent screen
     return NextResponse.redirect(authUrl)
   } catch (error) {
-    console.error("[v0] Outlook OAuth error:", error)
+    console.error("[builtbycashe] Outlook OAuth error:", error)
     return NextResponse.json({ error: "Failed to initiate Outlook OAuth" }, { status: 500 })
   }
 }

@@ -24,7 +24,7 @@
 //   prospect: ProspectData,
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 // ): Promise<ResearchResult> {
-//   console.log("[v0] Starting AI research for prospect:", prospect.email)
+//   console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
 
 //   // Simulate web scraping data(in production, this would call actual scraping APIs)
 //   const scrapedData = await simulateWebScraping(prospect)
@@ -86,7 +86,7 @@
 
 //     return object as ResearchResult
 //   } catch (error) {
-//     console.error("[v0] AI research failed:", error)
+//     console.error("[builtbycashe] AI research failed:", error)
 //     // Return fallback data
 //     return {
 //       companyInfo: `${prospect.company} is a company in the ${prospect.jobTitle?.includes("Tech") ? "technology" : "business"} sector.`,
@@ -147,7 +147,7 @@
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 //   onProgress?: (completed: number, total: number) => void,
 // ): Promise<Map<string, ResearchResult>> {
-//   console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//   console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 
 //   const results = new Map<string, ResearchResult>()
 
@@ -161,11 +161,11 @@
 //         onProgress(i + 1, prospects.length)
 //       }
 //     } catch (error) {
-//       console.error("[v0] Failed to research prospect:", prospect.email, error)
+//       console.error("[builtbycashe] Failed to research prospect:", prospect.email, error)
 //     }
 //   }
 
-//   console.log("[v0] Batch research completed:", results.size, "successful")
+//   console.log("[builtbycashe] Batch research completed:", results.size, "successful")
 
 //   return results
 // }
@@ -221,7 +221,7 @@
 //   prospect: ProspectData,
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 // ): Promise<ResearchResult> {
-//   console.log("[v0] Starting AI research for prospect:", prospect.email)
+//   console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
 
 //   // Simulate web scraping data (in production, this would call actual scraping APIs)
 //   const scrapedData = await simulateWebScraping(prospect)
@@ -269,11 +269,11 @@
 //       }),
 //     })
 
-//     console.log("[v0] AI research completed with quality score:", object.qualityScore)
+//     console.log("[builtbycashe] AI research completed with quality score:", object.qualityScore)
 
 //     return object as ResearchResult
 //   } catch (error) {
-//     console.error("[v0] AI research failed:", error)
+//     console.error("[builtbycashe] AI research failed:", error)
 //     // Return fallback data
 //     return {
 //       companyInfo: `${prospect.company} is a company in the ${prospect.jobTitle?.includes("Tech") ? "technology" : "business"} sector.`,
@@ -334,7 +334,7 @@
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 //   onProgress?: (completed: number, total: number) => void,
 // ): Promise<Map<string, ResearchResult>> {
-//   console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//   console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 
 //   const results = new Map<string, ResearchResult>()
 
@@ -348,11 +348,11 @@
 //         onProgress(i + 1, prospects.length)
 //       }
 //     } catch (error) {
-//       console.error("[v0] Failed to research prospect:", prospect.email, error)
+//       console.error("[builtbycashe] Failed to research prospect:", prospect.email, error)
 //     }
 //   }
 
-//   console.log("[v0] Batch research completed:", results.size, "successful")
+//   console.log("[builtbycashe] Batch research completed:", results.size, "successful")
 
 //   return results
 // }
@@ -411,7 +411,7 @@
 //   prospect: ProspectData,
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 // ): Promise<ResearchResult> {
-//   console.log("[v0] Starting AI research for prospect:", prospect.email)
+//   console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
 
 //   // Simulate web scraping data (in production, this would call actual scraping APIs)
 //   const scrapedData = await simulateWebScraping(prospect)
@@ -459,11 +459,11 @@
 //       }),
 //     })
 
-//     console.log("[v0] AI research completed with quality score:", object.qualityScore)
+//     console.log("[builtbycashe] AI research completed with quality score:", object.qualityScore)
 
 //     return object as ResearchResult
 //   } catch (error) {
-//     console.error("[v0] AI research failed:", error)
+//     console.error("[builtbycashe] AI research failed:", error)
 //     // Return fallback data
 //     return {
 //       companyInfo: `${prospect.company} is a company in the ${prospect.jobTitle?.includes("Tech") ? "technology" : "business"} sector.`,
@@ -531,7 +531,7 @@
 
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Web scraping error:", error)
+//     console.error("[builtbycashe] Web scraping error:", error)
 //     return results
 //   }
 // }
@@ -541,7 +541,7 @@
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 //   onProgress?: (completed: number, total: number) => void,
 // ): Promise<Map<string, ResearchResult>> {
-//   console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//   console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 
 //   const results = new Map<string, ResearchResult>()
 
@@ -555,11 +555,11 @@
 //         onProgress(i + 1, prospects.length)
 //       }
 //     } catch (error) {
-//       console.error("[v0] Failed to research prospect:", prospect.email, error)
+//       console.error("[builtbycashe] Failed to research prospect:", prospect.email, error)
 //     }
 //   }
 
-//   console.log("[v0] Batch research completed:", results.size, "successful")
+//   console.log("[builtbycashe] Batch research completed:", results.size, "successful")
 
 //   return results
 // }
@@ -636,7 +636,7 @@
 //   prospect: ProspectData,
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 // ): Promise<ResearchResult | EnhancedResearchResult> {
-//   console.log("[v0] Starting AI research for prospect:", prospect.email)
+//   console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
 
 //   const scrapingMode: ScrapingMode = depth === "DEEP" ? "DEEP" : "FAST"
 
@@ -685,7 +685,7 @@
 //       }),
 //     })
 
-//     console.log("[v0] AI research completed with quality score:", object.qualityScore)
+//     console.log("[builtbycashe] AI research completed with quality score:", object.qualityScore)
 
 //     if (depth === "DEEP" && scrapedData.enhanced) {
 //       return {
@@ -698,7 +698,7 @@
 
 //     return object as ResearchResult
 //   } catch (error) {
-//     console.error("[v0] AI research failed:", error)
+//     console.error("[builtbycashe] AI research failed:", error)
 //     // Return fallback data
 //     return {
 //       companyInfo: `${prospect.company} is a company in the ${prospect.jobTitle?.includes("Tech") ? "technology" : "business"} sector.`,
@@ -772,7 +772,7 @@
 
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Enhanced data gathering error:", error)
+//     console.error("[builtbycashe] Enhanced data gathering error:", error)
 //     return results
 //   }
 // }
@@ -782,7 +782,7 @@
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 //   onProgress?: (completed: number, total: number) => void,
 // ): Promise<Map<string, ResearchResult | EnhancedResearchResult>> {
-//   console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//   console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 
 //   const results = new Map<string, ResearchResult | EnhancedResearchResult>()
 
@@ -796,11 +796,11 @@
 //         onProgress(i + 1, prospects.length)
 //       }
 //     } catch (error) {
-//       console.error("[v0] Failed to research prospect:", prospect.email, error)
+//       console.error("[builtbycashe] Failed to research prospect:", prospect.email, error)
 //     }
 //   }
 
-//   console.log("[v0] Batch research completed:", results.size, "successful")
+//   console.log("[builtbycashe] Batch research completed:", results.size, "successful")
 
 //   return results
 // }
@@ -879,7 +879,7 @@
 
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Web scraping error:", error)
+//     console.error("[builtbycashe] Web scraping error:", error)
 //     return results
 //   }
 // }
@@ -932,9 +932,9 @@
 //   prospect: ProspectData,
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 // ): Promise<ResearchResult | EnhancedResearchResult> {
-//   console.log("[v0] Starting AI research for prospect:", prospect.email)
-//   console.log("[v0] Research depth:", depth)
-//   console.log("[v0] Prospect data:", {
+//   console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
+//   console.log("[builtbycashe] Research depth:", depth)
+//   console.log("[builtbycashe] Prospect data:", {
 //     hasFirstName: !!prospect.firstName,
 //     hasLastName: !!prospect.lastName,
 //     hasCompany: !!prospect.company,
@@ -945,9 +945,9 @@
 
 //   const scrapingMode: ScrapingMode = depth === "DEEP" ? "DEEP" : "FAST"
 
-//   console.log("[v0] Gathering enhanced data...")
+//   console.log("[builtbycashe] Gathering enhanced data...")
 //   const scrapedData = await gatherEnhancedData(prospect, scrapingMode)
-//   console.log("[v0] Enhanced data gathered:", {
+//   console.log("[builtbycashe] Enhanced data gathered:", {
 //     hasCompanyWebsite: !!scrapedData.companyWebsite,
 //     hasLinkedInProfile: !!scrapedData.linkedinProfile,
 //     newsArticlesCount: scrapedData.newsArticles?.length || 0,
@@ -982,8 +982,8 @@
 // `
 
 //   try {
-//     console.log("[v0] Calling OpenAI API for analysis...")
-//     console.log("[v0] Checking OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "Present" : "MISSING")
+//     console.log("[builtbycashe] Calling OpenAI API for analysis...")
+//     console.log("[builtbycashe] Checking OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "Present" : "MISSING")
 
 //     const { object } = await generateObject({
 //       model: "openai/gpt-4o-mini",
@@ -999,7 +999,7 @@
 //       }),
 //     })
 
-//     console.log("[v0] AI research completed with quality score:", object.qualityScore)
+//     console.log("[builtbycashe] AI research completed with quality score:", object.qualityScore)
 
 //     if (depth === "DEEP" && scrapedData.enhanced) {
 //       return {
@@ -1012,8 +1012,8 @@
 
 //     return object as ResearchResult
 //   } catch (error) {
-//     console.error("[v0] AI research failed:", error)
-//     console.error("[v0] AI error details:", {
+//     console.error("[builtbycashe] AI research failed:", error)
+//     console.error("[builtbycashe] AI error details:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //       name: error instanceof Error ? error.name : undefined,
@@ -1038,7 +1038,7 @@
 // }
 
 // async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): Promise<any> {
-//   console.log("[v0] Gathering enhanced data with mode:", mode)
+//   console.log("[builtbycashe] Gathering enhanced data with mode:", mode)
 
 //   const results: any = {
 //     enhanced: mode === "DEEP",
@@ -1050,11 +1050,11 @@
 //   try {
 //     // Scrape company website
 //     if (prospect.websiteUrl) {
-//       console.log("[v0] Scraping company website:", prospect.websiteUrl)
+//       console.log("[builtbycashe] Scraping company website:", prospect.websiteUrl)
 //       try {
 //         const companyData = await scrapeWebsiteEnhanced(prospect.websiteUrl, mode)
 //         results.companyWebsite = companyData
-//         console.log("[v0] Company website scraped successfully")
+//         console.log("[builtbycashe] Company website scraped successfully")
 
 //         if (mode === "DEEP" && "products" in companyData) {
 //           results.companyInsights = {
@@ -1066,17 +1066,17 @@
 //           }
 //         }
 //       } catch (error) {
-//         console.error("[v0] Company website scraping failed:", error)
+//         console.error("[builtbycashe] Company website scraping failed:", error)
 //       }
 //     }
 
 //     // Scrape LinkedIn profile
 //     if (prospect.linkedinUrl) {
-//       console.log("[v0] Scraping LinkedIn profile:", prospect.linkedinUrl)
+//       console.log("[builtbycashe] Scraping LinkedIn profile:", prospect.linkedinUrl)
 //       try {
 //         const linkedInData = await scrapeLinkedInProfileEnhanced(prospect.linkedinUrl, mode)
 //         results.linkedinProfile = linkedInData
-//         console.log("[v0] LinkedIn profile scraped successfully")
+//         console.log("[builtbycashe] LinkedIn profile scraped successfully")
 
 //         if (mode === "DEEP" && "certifications" in linkedInData) {
 //           results.linkedInInsights = {
@@ -1086,17 +1086,17 @@
 //           }
 //         }
 //       } catch (error) {
-//         console.error("[v0] LinkedIn scraping failed:", error)
+//         console.error("[builtbycashe] LinkedIn scraping failed:", error)
 //       }
 //     }
 
 //     // Search news
 //     if (prospect.company) {
-//       console.log("[v0] Searching news for company:", prospect.company)
+//       console.log("[builtbycashe] Searching news for company:", prospect.company)
 //       try {
 //         const newsData = await searchCompanyNewsEnhanced(prospect.company, 5, mode)
 //         results.newsArticles = newsData
-//         console.log("[v0] Found", newsData.length, "news articles")
+//         console.log("[builtbycashe] Found", newsData.length, "news articles")
 
 //         if (mode === "DEEP" && newsData.length > 0 && "sentiment" in newsData[0]) {
 //           const sentiments = newsData.map((n: any) => n.sentiment).filter(Boolean)
@@ -1107,14 +1107,14 @@
 //           }
 //         }
 //       } catch (error) {
-//         console.error("[v0] News search failed:", error)
+//         console.error("[builtbycashe] News search failed:", error)
 //       }
 //     }
 
-//     console.log("[v0] Enhanced data gathering completed")
+//     console.log("[builtbycashe] Enhanced data gathering completed")
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Enhanced data gathering error:", error)
+//     console.error("[builtbycashe] Enhanced data gathering error:", error)
 //     return results
 //   }
 // }
@@ -1124,7 +1124,7 @@
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 //   onProgress?: (completed: number, total: number) => void,
 // ): Promise<Map<string, ResearchResult | EnhancedResearchResult>> {
-//   console.log("[v0] Starting batch research for", prospects.length, "prospects")
+//   console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
 
 //   const results = new Map<string, ResearchResult | EnhancedResearchResult>()
 
@@ -1138,11 +1138,11 @@
 //         onProgress(i + 1, prospects.length)
 //       }
 //     } catch (error) {
-//       console.error("[v0] Failed to research prospect:", prospect.email, error)
+//       console.error("[builtbycashe] Failed to research prospect:", prospect.email, error)
 //     }
 //   }
 
-//   console.log("[v0] Batch research completed:", results.size, "successful")
+//   console.log("[builtbycashe] Batch research completed:", results.size, "successful")
 
 //   return results
 // }
@@ -1221,7 +1221,7 @@
 
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Web scraping error:", error)
+//     console.error("[builtbycashe] Web scraping error:", error)
 //     return results
 //   }
 // }
@@ -1281,9 +1281,9 @@
 //   prospect: ProspectData,
 //   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 // ): Promise<ResearchResult | EnhancedResearchResult> {
-//   console.log("[v0] Starting AI research for prospect:", prospect.email)
-//   console.log("[v0] Research depth:", depth)
-//   console.log("[v0] Prospect data:", {
+//   console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
+//   console.log("[builtbycashe] Research depth:", depth)
+//   console.log("[builtbycashe] Prospect data:", {
 //     hasFirstName: !!prospect.firstName,
 //     hasLastName: !!prospect.lastName,
 //     hasCompany: !!prospect.company,
@@ -1294,9 +1294,9 @@
 
 //   const scrapingMode: ScrapingMode = depth === "DEEP" ? "DEEP" : "FAST"
 
-//   console.log("[v0] Gathering enhanced data...")
+//   console.log("[builtbycashe] Gathering enhanced data...")
 //   const scrapedData = await gatherEnhancedData(prospect, scrapingMode)
-//   console.log("[v0] Enhanced data gathered:", {
+//   console.log("[builtbycashe] Enhanced data gathered:", {
 //     hasCompanyWebsite: !!scrapedData.companyWebsite,
 //     hasLinkedInProfile: !!scrapedData.linkedinProfile,
 //     newsArticlesCount: scrapedData.newsArticles?.length || 0,
@@ -1331,8 +1331,8 @@
 // `
 
 //   try {
-//     console.log("[v0] Calling OpenAI API for analysis...")
-//     console.log("[v0] Checking OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "Present" : "MISSING")
+//     console.log("[builtbycashe] Calling OpenAI API for analysis...")
+//     console.log("[builtbycashe] Checking OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "Present" : "MISSING")
 
 //     // const { object } = await generateObject({
 //     //   model: "openai/gpt-4o-mini",
@@ -1372,7 +1372,7 @@
 //         personalizationTokens: z.record(z.string()),
 //       }),
 //     })
-//     console.log("[v0] AI research completed with quality score:", object.qualityScore)
+//     console.log("[builtbycashe] AI research completed with quality score:", object.qualityScore)
 
 //     if (depth === "DEEP" && scrapedData.enhanced) {
 //       return {
@@ -1385,8 +1385,8 @@
 
 //     return object as ResearchResult
 //   } catch (error) {
-//     console.error("[v0] AI research failed:", error)
-//     console.error("[v0] AI error details:", {
+//     console.error("[builtbycashe] AI research failed:", error)
+//     console.error("[builtbycashe] AI error details:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //       name: error instanceof Error ? error.name : undefined,
@@ -1411,7 +1411,7 @@
 // }
 
 // async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): Promise<any> {
-//   console.log("[v0] Gathering enhanced data with mode:", mode)
+//   console.log("[builtbycashe] Gathering enhanced data with mode:", mode)
 
 //   const results: any = {
 //     enhanced: mode === "DEEP",
@@ -1423,11 +1423,11 @@
 //   try {
 //     // Scrape company website
 //     if (prospect.websiteUrl) {
-//       console.log("[v0] Scraping company website:", prospect.websiteUrl)
+//       console.log("[builtbycashe] Scraping company website:", prospect.websiteUrl)
 //       try {
 //         const companyData = await scrapeWebsiteEnhanced(prospect.websiteUrl, mode)
 //         results.companyWebsite = companyData
-//         console.log("[v0] Company website scraped successfully")
+//         console.log("[builtbycashe] Company website scraped successfully")
 
 //         if (mode === "DEEP" && "products" in companyData) {
 //           results.companyInsights = {
@@ -1439,17 +1439,17 @@
 //           }
 //         }
 //       } catch (error) {
-//         console.error("[v0] Company website scraping failed:", error)
+//         console.error("[builtbycashe] Company website scraping failed:", error)
 //       }
 //     }
 
 //     // Scrape LinkedIn profile
 //     if (prospect.linkedinUrl) {
-//       console.log("[v0] Scraping LinkedIn profile:", prospect.linkedinUrl)
+//       console.log("[builtbycashe] Scraping LinkedIn profile:", prospect.linkedinUrl)
 //       try {
 //         const linkedInData = await scrapeLinkedInProfileEnhanced(prospect.linkedinUrl, mode)
 //         results.linkedinProfile = linkedInData
-//         console.log("[v0] LinkedIn profile scraped successfully")
+//         console.log("[builtbycashe] LinkedIn profile scraped successfully")
 
 //         if (mode === "DEEP" && "certifications" in linkedInData) {
 //           results.linkedInInsights = {
@@ -1459,17 +1459,17 @@
 //           }
 //         }
 //       } catch (error) {
-//         console.error("[v0] LinkedIn scraping failed:", error)
+//         console.error("[builtbycashe] LinkedIn scraping failed:", error)
 //       }
 //     }
 
 //     // Search news
 //     if (prospect.company) {
-//       console.log("[v0] Searching news for company:", prospect.company)
+//       console.log("[builtbycashe] Searching news for company:", prospect.company)
 //       try {
 //         const newsData = await searchCompanyNewsEnhanced(prospect.company, 5, mode)
 //         results.newsArticles = newsData
-//         console.log("[v0] Found", newsData.length, "news articles")
+//         console.log("[builtbycashe] Found", newsData.length, "news articles")
 
 //         if (mode === "DEEP" && newsData.length > 0 && "sentiment" in newsData[0]) {
 //           const sentiments = newsData.map((n: any) => n.sentiment).filter(Boolean)
@@ -1480,14 +1480,14 @@
 //           }
 //         }
 //       } catch (error) {
-//         console.error("[v0] News search failed:", error)
+//         console.error("[builtbycashe] News search failed:", error)
 //       }
 //     }
 
-//     console.log("[v0] Enhanced data gathering completed")
+//     console.log("[builtbycashe] Enhanced data gathering completed")
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Enhanced data gathering error:", error)
+//     console.error("[builtbycashe] Enhanced data gathering error:", error)
 //     return results
 //   }
 // }
@@ -1498,15 +1498,15 @@
 //   onProgress?: (completed: number, total: number) => void,
 //   concurrency = 5, // Add concurrency parameter
 // ): Promise<Map<string, ResearchResult | EnhancedResearchResult>> {
-//   console.log("[v0] Starting batch research for", prospects.length, "prospects")
-//   console.log("[v0] Using concurrency:", concurrency)
+//   console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
+//   console.log("[builtbycashe] Using concurrency:", concurrency)
 
 //   const results = new Map<string, ResearchResult | EnhancedResearchResult>()
 //   let completed = 0
 
 //   for (let i = 0; i < prospects.length; i += concurrency) {
 //     const batch = prospects.slice(i, i + concurrency)
-//     console.log(`[v0] Processing batch ${Math.floor(i / concurrency) + 1}: ${batch.length} prospects`)
+//     console.log(`[builtbycashe] Processing batch ${Math.floor(i / concurrency) + 1}: ${batch.length} prospects`)
 
 //     const batchPromises = batch.map(async (prospect) => {
 //       try {
@@ -1520,7 +1520,7 @@
 
 //         return { email: prospect.email, success: true }
 //       } catch (error) {
-//         console.error("[v0] Failed to research prospect:", prospect.email, error)
+//         console.error("[builtbycashe] Failed to research prospect:", prospect.email, error)
 //         completed++
 
 //         if (onProgress) {
@@ -1532,10 +1532,10 @@
 //     })
 
 //     await Promise.all(batchPromises)
-//     console.log(`[v0] Batch completed. Total progress: ${completed}/${prospects.length}`)
+//     console.log(`[builtbycashe] Batch completed. Total progress: ${completed}/${prospects.length}`)
 //   }
 
-//   console.log("[v0] Batch research completed:", results.size, "successful out of", prospects.length)
+//   console.log("[builtbycashe] Batch research completed:", results.size, "successful out of", prospects.length)
 
 //   return results
 // }
@@ -1614,7 +1614,7 @@
 
 //     return results
 //   } catch (error) {
-//     console.error("[v0] Web scraping error:", error)
+//     console.error("[builtbycashe] Web scraping error:", error)
 //     return results
 //   }
 // }
@@ -1681,7 +1681,7 @@ const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 function getCachedData(key: string): any | null {
   const cached = scrapeCache.get(key)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log("[v0] Using cached data for:", key)
+    console.log("[builtbycashe] Using cached data for:", key)
     return cached.data
   }
   return null
@@ -1695,20 +1695,20 @@ export async function researchProspect(
   prospect: ProspectData,
   depth: "BASIC" | "STANDARD" | "DEEP" = "STANDARD",
 ): Promise<ResearchResult | EnhancedResearchResult> {
-  console.log("[v0] Starting AI research for prospect:", prospect.email)
-  console.log("[v0] Research depth:", depth)
+  console.log("[builtbycashe] Starting AI research for prospect:", prospect.email)
+  console.log("[builtbycashe] Research depth:", depth)
 
   const scrapingMode: ScrapingMode = depth === "DEEP" ? "DEEP" : "FAST"
 
-  console.log("[v0] Gathering enhanced data...")
+  console.log("[builtbycashe] Gathering enhanced data...")
   const scrapedData = await gatherEnhancedData(prospect, scrapingMode)
-  console.log("[v0] Enhanced data gathered successfully")
+  console.log("[builtbycashe] Enhanced data gathered successfully")
 
   // Build a concise, efficient prompt
   const prompt = buildEfficientPrompt(prospect, scrapedData, depth)
 
   try {
-    console.log("[v0] Calling DeepSeek API for analysis...")
+    console.log("[builtbycashe] Calling DeepSeek API for analysis...")
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
@@ -1749,8 +1749,8 @@ export async function researchProspect(
       throw new Error("Invalid response structure from DeepSeek")
     }
 
-    console.log("[v0] AI research completed with quality score:", object.qualityScore)
-    console.log("[v0] DeepSeek tokens used:", data.usage?.total_tokens || "unknown")
+    console.log("[builtbycashe] AI research completed with quality score:", object.qualityScore)
+    console.log("[builtbycashe] DeepSeek tokens used:", data.usage?.total_tokens || "unknown")
 
     if (depth === "DEEP" && scrapedData.enhanced) {
       return {
@@ -1763,7 +1763,7 @@ export async function researchProspect(
 
     return object as ResearchResult
   } catch (error) {
-    console.error("[v0] AI research failed:", error)
+    console.error("[builtbycashe] AI research failed:", error)
 
     // Return graceful fallback with available data
     return createFallbackResult(prospect, scrapedData, error)
@@ -1815,11 +1815,11 @@ function createFallbackResult(
   scrapedData: any,
   error: unknown,
 ): ResearchResult {
-  console.log("[v0] Creating fallback result with available data")
+  console.log("[builtbycashe] Creating fallback result with available data")
   
   // Log error message safely
   const errorMessage = error instanceof Error ? error.message : String(error)
-  console.log("[v0] Fallback reason:", errorMessage)
+  console.log("[builtbycashe] Fallback reason:", errorMessage)
 
   // Use whatever data we have to create a basic result
   const hasCompanyData = !!scrapedData.companyWebsite
@@ -1859,7 +1859,7 @@ function createFallbackResult(
 }
 
 async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): Promise<any> {
-  console.log("[v0] Gathering enhanced data with mode:", mode)
+  console.log("[builtbycashe] Gathering enhanced data with mode:", mode)
 
   const results: any = {
     enhanced: mode === "DEEP",
@@ -1879,12 +1879,12 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 
     if (cached) {
       results.companyWebsite = cached
-      console.log("[v0] Using cached company website data")
+      console.log("[builtbycashe] Using cached company website data")
     } else {
       promises.push(
         (async () => {
           try {
-            console.log("[v0] Scraping company website:", prospect.websiteUrl)
+            console.log("[builtbycashe] Scraping company website:", prospect.websiteUrl)
             const timeoutPromise = new Promise((_, reject) =>
               setTimeout(() => reject(new Error("Website scrape timeout")), SCRAPE_TIMEOUT),
             )
@@ -1894,7 +1894,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 
             results.companyWebsite = companyData
             setCachedData(cacheKey, companyData)
-            console.log("[v0] Company website scraped successfully")
+            console.log("[builtbycashe] Company website scraped successfully")
 
             // Use type guard instead of 'in' operator
             if (mode === "DEEP" && isObject(companyData) && hasProperty(companyData, "products")) {
@@ -1908,7 +1908,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
             }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error)
-            console.warn("[v0] Company website scraping failed (continuing anyway):", errorMessage)
+            console.warn("[builtbycashe] Company website scraping failed (continuing anyway):", errorMessage)
             results.companyWebsite = null
           }
         })(),
@@ -1923,12 +1923,12 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 
     if (cached) {
       results.linkedinProfile = cached
-      console.log("[v0] Using cached LinkedIn data")
+      console.log("[builtbycashe] Using cached LinkedIn data")
     } else {
       promises.push(
         (async () => {
           try {
-            console.log("[v0] Scraping LinkedIn profile:", prospect.linkedinUrl)
+            console.log("[builtbycashe] Scraping LinkedIn profile:", prospect.linkedinUrl)
             const timeoutPromise = new Promise((_, reject) =>
               setTimeout(() => reject(new Error("LinkedIn scrape timeout")), SCRAPE_TIMEOUT),
             )
@@ -1938,7 +1938,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 
             results.linkedinProfile = linkedInData
             setCachedData(cacheKey, linkedInData)
-            console.log("[v0] LinkedIn profile scraped successfully")
+            console.log("[builtbycashe] LinkedIn profile scraped successfully")
 
             // Use type guard instead of 'in' operator
             if (mode === "DEEP" && isObject(linkedInData) && hasProperty(linkedInData, "certifications")) {
@@ -1950,7 +1950,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
             }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error)
-            console.warn("[v0] LinkedIn scraping failed (continuing anyway):", errorMessage)
+            console.warn("[builtbycashe] LinkedIn scraping failed (continuing anyway):", errorMessage)
             results.linkedinProfile = null
           }
         })(),
@@ -1965,12 +1965,12 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 
     if (cached) {
       results.newsArticles = cached
-      console.log("[v0] Using cached news data")
+      console.log("[builtbycashe] Using cached news data")
     } else {
       promises.push(
         (async () => {
           try {
-            console.log("[v0] Searching news for company:", prospect.company)
+            console.log("[builtbycashe] Searching news for company:", prospect.company)
             const timeoutPromise = new Promise((_, reject) =>
               setTimeout(() => reject(new Error("News search timeout")), 10000),
             )
@@ -1980,7 +1980,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
 
             results.newsArticles = newsData
             setCachedData(cacheKey, newsData)
-            // console.log("[v0] Found", newsData.length, "news articles")
+            // console.log("[builtbycashe] Found", newsData.length, "news articles")
 
             // Use type guard and check if array has items
             if (mode === "DEEP" && Array.isArray(newsData) && newsData.length > 0) {
@@ -2004,7 +2004,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
             }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error)
-            console.warn("[v0] News search failed (continuing anyway):", errorMessage)
+            console.warn("[builtbycashe] News search failed (continuing anyway):", errorMessage)
             results.newsArticles = []
           }
         })(),
@@ -2015,7 +2015,7 @@ async function gatherEnhancedData(prospect: ProspectData, mode: ScrapingMode): P
   // Wait for all scraping operations to complete (or timeout)
   await Promise.allSettled(promises)
 
-  console.log("[v0] Enhanced data gathering completed:", {
+  console.log("[builtbycashe] Enhanced data gathering completed:", {
     hasCompanyData: !!results.companyWebsite,
     hasLinkedInData: !!results.linkedinProfile,
     newsCount: results.newsArticles?.length || 0,
@@ -2030,8 +2030,8 @@ export async function batchResearchProspects(
   onProgress?: (completed: number, total: number, successful: number, failed: number) => void,
   concurrency = 3,
 ): Promise<Map<string, ResearchResult | EnhancedResearchResult>> {
-  console.log("[v0] Starting batch research for", prospects.length, "prospects")
-  console.log("[v0] Using concurrency:", concurrency)
+  console.log("[builtbycashe] Starting batch research for", prospects.length, "prospects")
+  console.log("[builtbycashe] Using concurrency:", concurrency)
 
   const results = new Map<string, ResearchResult | EnhancedResearchResult>()
   let completed = 0
@@ -2041,7 +2041,7 @@ export async function batchResearchProspects(
   for (let i = 0; i < prospects.length; i += concurrency) {
     const batch = prospects.slice(i, i + concurrency)
     console.log(
-      `[v0] Processing batch ${Math.floor(i / concurrency) + 1}/${Math.ceil(prospects.length / concurrency)}: ${batch.length} prospects`,
+      `[builtbycashe] Processing batch ${Math.floor(i / concurrency) + 1}/${Math.ceil(prospects.length / concurrency)}: ${batch.length} prospects`,
     )
 
     const batchPromises = batch.map(async (prospect) => {
@@ -2054,7 +2054,7 @@ export async function batchResearchProspects(
 
         const duration = ((Date.now() - startTime) / 1000).toFixed(1)
         console.log(
-          `[v0] ✓ Researched ${prospect.email} in ${duration}s (score: ${result.qualityScore})`,
+          `[builtbycashe] ✓ Researched ${prospect.email} in ${duration}s (score: ${result.qualityScore})`,
         )
 
         if (onProgress) {
@@ -2064,7 +2064,7 @@ export async function batchResearchProspects(
         return { email: prospect.email, success: true, result }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error)
-        console.error(`[v0] ✗ Failed to research ${prospect.email}:`, errorMessage)
+        console.error(`[builtbycashe] ✗ Failed to research ${prospect.email}:`, errorMessage)
         completed++
         failed++
 
@@ -2084,16 +2084,16 @@ export async function batchResearchProspects(
 
     // Add a small delay between batches to avoid overwhelming the API
     if (i + concurrency < prospects.length) {
-      console.log("[v0] Waiting 1s before next batch...")
+      console.log("[builtbycashe] Waiting 1s before next batch...")
       await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
     console.log(
-      `[v0] Batch completed. Progress: ${completed}/${prospects.length} (${successful} successful, ${failed} failed)`,
+      `[builtbycashe] Batch completed. Progress: ${completed}/${prospects.length} (${successful} successful, ${failed} failed)`,
     )
   }
 
-  console.log("[v0] ✓ Batch research completed:", {
+  console.log("[builtbycashe] ✓ Batch research completed:", {
     total: prospects.length,
     successful,
     failed,

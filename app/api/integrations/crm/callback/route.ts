@@ -50,7 +50,7 @@
 //     // Redirect to success page
 //     return NextResponse.redirect(new URL(`/dashboard/crm?connected=${provider}`, request.url))
 //   } catch (error) {
-//     console.error("[v0] CRM OAuth callback error:", error)
+//     console.error("[builtbycashe] CRM OAuth callback error:", error)
 //     return NextResponse.redirect(new URL("/dashboard/crm?error=connection_failed", request.url))
 //   }
 // }
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
     // Redirect to success page
     return NextResponse.redirect(new URL(`/dashboard/crm?connected=${provider}`, request.url))
   } catch (error) {
-    console.error("[v0] CRM OAuth callback error:", error)
+    console.error("[builtbycashe] CRM OAuth callback error:", error)
     return NextResponse.redirect(new URL("/dashboard/crm?error=connection_failed", request.url))
   }
 }

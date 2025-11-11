@@ -90,7 +90,7 @@
 //     revalidatePath("/dashboard/settings")
 //     return { success: true, teamMember }
 //   } catch (error) {
-//     console.error("[v0] Error inviting team member:", error)
+//     console.error("[builtbycashe] Error inviting team member:", error)
 //     return { success: false, error: "Failed to send invitation" }
 //   }
 // }
@@ -123,7 +123,7 @@
 //     revalidatePath("/dashboard/settings")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error removing team member:", error)
+//     console.error("[builtbycashe] Error removing team member:", error)
 //     return { success: false, error: "Failed to remove team member" }
 //   }
 // }
@@ -157,7 +157,7 @@
 //     revalidatePath("/dashboard/settings")
 //     return { success: true, teamMember }
 //   } catch (error) {
-//     console.error("[v0] Error updating team member role:", error)
+//     console.error("[builtbycashe] Error updating team member role:", error)
 //     return { success: false, error: "Failed to update role" }
 //   }
 // }
@@ -232,7 +232,7 @@
 //     revalidatePath("/dashboard/settings")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error resending invitation:", error)
+//     console.error("[builtbycashe] Error resending invitation:", error)
 //     return { success: false, error: "Failed to resend invitation" }
 //   }
 // }
@@ -280,7 +280,7 @@
 //       role: invitation.role,
 //     }
 //   } catch (error) {
-//     console.error("[v0] Error accepting invitation:", error)
+//     console.error("[builtbycashe] Error accepting invitation:", error)
 //     return { success: false, error: "Failed to accept invitation" }
 //   }
 // }
@@ -309,7 +309,7 @@
 
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error declining invitation:", error)
+//     console.error("[builtbycashe] Error declining invitation:", error)
 //     return { success: false, error: "Failed to decline invitation" }
 //   }
 // }
@@ -330,13 +330,13 @@
 //   const { userId } = await auth()
 //   if (!userId) return { success: false, error: "Unauthorized" }
 
-//   console.log("[v0] Starting team invitation for:", email)
+//   console.log("[builtbycashe] Starting team invitation for:", email)
 
 //   // Check permission to invite team members
 //   try {
 //     await requirePermission(userId, "team", "invite")
 //   } catch (error) {
-//     console.log("[v0] Permission check failed:", error)
+//     console.log("[builtbycashe] Permission check failed:", error)
 //     return { success: false, error: "You don't have permission to invite team members" }
 //   }
 
@@ -345,11 +345,11 @@
 //   })
 
 //   if (!user) {
-//     console.log("[v0] User not found for clerkId:", userId)
+//     console.log("[builtbycashe] User not found for clerkId:", userId)
 //     return { success: false, error: "User not found" }
 //   }
 
-//   console.log("[v0] Found user:", user.email)
+//   console.log("[builtbycashe] Found user:", user.email)
 
 //   try {
 //     // Check if already invited
@@ -375,7 +375,7 @@
 //     const invitationToken = crypto.randomBytes(32).toString("hex")
 //     const invitationExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-//     console.log("[v0] Creating team member record...")
+//     console.log("[builtbycashe] Creating team member record...")
 
 //     const teamMember = await db.teamMember.create({
 //       data: {
@@ -389,12 +389,12 @@
 //       },
 //     })
 
-//     console.log("[v0] Team member created:", teamMember.id)
+//     console.log("[builtbycashe] Team member created:", teamMember.id)
 
 //     const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitationToken}`
-//     console.log("[v0] Invitation URL:", invitationUrl)
+//     console.log("[builtbycashe] Invitation URL:", invitationUrl)
 
-//     console.log("[v0] Rendering email template...")
+//     console.log("[builtbycashe] Rendering email template...")
 //     const emailComponent = TeamInvitationEmail({
 //       inviterName: user.name || user.email,
 //       inviterEmail: user.email,
@@ -409,10 +409,10 @@
 //     })
 
 //     const emailHtml = await render(emailComponent)
-//     console.log("[v0] Email template rendered, length:", emailHtml.length)
+//     console.log("[builtbycashe] Email template rendered, length:", emailHtml.length)
 
-//     console.log("[v0] Sending email to:", email)
-//     console.log("[v0] From:", FROM_EMAIL)
+//     console.log("[builtbycashe] Sending email to:", email)
+//     console.log("[builtbycashe] From:", FROM_EMAIL)
 
 //     const result = await resend.send({
 //       to: email,
@@ -420,12 +420,12 @@
 //       html: emailHtml,
 //     })
 
-//     console.log("[v0] Email sent successfully! Result:", result)
+//     console.log("[builtbycashe] Email sent successfully! Result:", result)
 
 //     revalidatePath("/dashboard/settings")
 //     return { success: true, teamMember }
 //   } catch (error) {
-//     console.error("[v0] Error inviting team member:", error)
+//     console.error("[builtbycashe] Error inviting team member:", error)
 //     return {
 //       success: false,
 //       error:
@@ -462,7 +462,7 @@
 //     revalidatePath("/dashboard/settings")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error removing team member:", error)
+//     console.error("[builtbycashe] Error removing team member:", error)
 //     return { success: false, error: "Failed to remove team member" }
 //   }
 // }
@@ -496,7 +496,7 @@
 //     revalidatePath("/dashboard/settings")
 //     return { success: true, teamMember }
 //   } catch (error) {
-//     console.error("[v0] Error updating team member role:", error)
+//     console.error("[builtbycashe] Error updating team member role:", error)
 //     return { success: false, error: "Failed to update role" }
 //   }
 // }
@@ -505,7 +505,7 @@
 //   const { userId } = await auth()
 //   if (!userId) return { success: false, error: "Unauthorized" }
 
-//   console.log("[v0] Resending invitation for member:", memberId)
+//   console.log("[builtbycashe] Resending invitation for member:", memberId)
 
 //   // Check permission to invite team members
 //   try {
@@ -548,7 +548,7 @@
 
 //     const invitationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite/${invitationToken}`
 
-//     console.log("[v0] Rendering email template for resend...")
+//     console.log("[builtbycashe] Rendering email template for resend...")
 //     const emailComponent = TeamInvitationEmail({
 //       inviterName: user.name || user.email,
 //       inviterEmail: user.email,
@@ -564,7 +564,7 @@
 
 //     const emailHtml = await render(emailComponent)
 
-//     console.log("[v0] Resending email to:", teamMember.email)
+//     console.log("[builtbycashe] Resending email to:", teamMember.email)
 
 //     const result = await resend.send({
 //       to: teamMember.email,
@@ -572,12 +572,12 @@
 //       html: emailHtml,
 //     })
 
-//     console.log("[v0] Email resent successfully! Result:", result)
+//     console.log("[builtbycashe] Email resent successfully! Result:", result)
 
 //     revalidatePath("/dashboard/settings")
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error resending invitation:", error)
+//     console.error("[builtbycashe] Error resending invitation:", error)
 //     return {
 //       success: false,
 //       error:
@@ -629,7 +629,7 @@
 //       role: invitation.role,
 //     }
 //   } catch (error) {
-//     console.error("[v0] Error accepting invitation:", error)
+//     console.error("[builtbycashe] Error accepting invitation:", error)
 //     return { success: false, error: "Failed to accept invitation" }
 //   }
 // }
@@ -658,7 +658,7 @@
 
 //     return { success: true }
 //   } catch (error) {
-//     console.error("[v0] Error declining invitation:", error)
+//     console.error("[builtbycashe] Error declining invitation:", error)
 //     return { success: false, error: "Failed to decline invitation" }
 //   }
 // }

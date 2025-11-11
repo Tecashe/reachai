@@ -9,9 +9,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email address required" }, { status: 400 })
     }
 
-    console.log("[v0] Testing email send to:", to)
-    console.log("[v0] From:", FROM_EMAIL)
-    console.log("[v0] Resend API Key exists:", !!process.env.RESEND_API_KEY)
+    console.log("[builtbycashe] Testing email send to:", to)
+    console.log("[builtbycashe] From:", FROM_EMAIL)
+    console.log("[builtbycashe] Resend API Key exists:", !!process.env.RESEND_API_KEY)
 
     const result = await resend.send({
       to,
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       `,
     })
 
-    console.log("[v0] Email sent successfully:", result)
+    console.log("[builtbycashe] Email sent successfully:", result)
 
     return NextResponse.json({
       success: true,
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       result,
     })
   } catch (error) {
-    console.error("[v0] Error sending test email:", error)
+    console.error("[builtbycashe] Error sending test email:", error)
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to send test email",

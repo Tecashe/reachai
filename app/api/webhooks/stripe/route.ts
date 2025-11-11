@@ -18,7 +18,7 @@
 //   try {
 //     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
 //   } catch (err) {
-//     console.error("[v0] Stripe webhook error:", err)
+//     console.error("[builtbycashe] Stripe webhook error:", err)
 //     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
 //   }
 
@@ -154,7 +154,7 @@ export async function POST(req: Request) {
             },
           })
 
-          console.log(`[v0] Credits added: ${creditAmount} ${creditType} credits for user ${userId}`)
+          console.log(`[builtbycashe] Credits added: ${creditAmount} ${creditType} credits for user ${userId}`)
         }
         break
       }

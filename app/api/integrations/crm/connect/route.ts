@@ -34,7 +34,7 @@
 
 //     return NextResponse.json({ authUrl })
 //   } catch (error) {
-//     console.error("[v0] CRM connect error:", error)
+//     console.error("[builtbycashe] CRM connect error:", error)
 //     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
 //   }
 // }
@@ -51,7 +51,7 @@
 //     const { crmType } = body
 
 //     if (!crmType || !["hubspot", "salesforce", "pipedrive"].includes(crmType)) {
-//       console.error("[v0] Invalid CRM type:", crmType)
+//       console.error("[builtbycashe] Invalid CRM type:", crmType)
 //       return NextResponse.json({ error: "Invalid CRM type" }, { status: 400 })
 //     }
 
@@ -66,7 +66,7 @@
 //       const clientId = process.env.HUBSPOT_CLIENT_ID
 //       missingEnvVar = clientId ? null : "HUBSPOT_CLIENT_ID"
 //       if (!clientId) {
-//         console.error("[v0] HubSpot OAuth not configured - missing HUBSPOT_CLIENT_ID")
+//         console.error("[builtbycashe] HubSpot OAuth not configured - missing HUBSPOT_CLIENT_ID")
 //         return NextResponse.json(
 //           {
 //             error: "HubSpot integration not configured. Please add HUBSPOT_CLIENT_ID to your environment variables.",
@@ -79,7 +79,7 @@
 //     } else if (crmType === "salesforce") {
 //       const clientId = process.env.SALESFORCE_CLIENT_ID
 //       if (!clientId) {
-//         console.error("[v0] Salesforce OAuth not configured - missing SALESFORCE_CLIENT_ID")
+//         console.error("[builtbycashe] Salesforce OAuth not configured - missing SALESFORCE_CLIENT_ID")
 //         return NextResponse.json(
 //           {
 //             error:
@@ -93,7 +93,7 @@
 //     } else {
 //       const clientId = process.env.PIPEDRIVE_CLIENT_ID
 //       if (!clientId) {
-//         console.error("[v0] Pipedrive OAuth not configured - missing PIPEDRIVE_CLIENT_ID")
+//         console.error("[builtbycashe] Pipedrive OAuth not configured - missing PIPEDRIVE_CLIENT_ID")
 //         return NextResponse.json(
 //           {
 //             error:
@@ -106,11 +106,11 @@
 //       authUrl = `https://oauth.pipedrive.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`
 //     }
 
-//     console.log("[v0] CRM auth flow initiated for:", crmType)
+//     console.log("[builtbycashe] CRM auth flow initiated for:", crmType)
 //     return NextResponse.json({ authUrl })
 //   } catch (error) {
-//     console.error("[v0] CRM connect error:", error)
-//     console.error("[v0] Full error object:", {
+//     console.error("[builtbycashe] CRM connect error:", error)
+//     console.error("[builtbycashe] Full error object:", {
 //       message: error instanceof Error ? error.message : "Unknown error",
 //       stack: error instanceof Error ? error.stack : undefined,
 //     })
@@ -131,16 +131,16 @@ export async function POST(req: NextRequest) {
     const { crmType } = body
 
     if (!crmType || !["hubspot", "salesforce", "pipedrive"].includes(crmType)) {
-      console.error("[v0] Invalid CRM type:", crmType)
+      console.error("[builtbycashe] Invalid CRM type:", crmType)
       return NextResponse.json({ error: "Invalid CRM type" }, { status: 400 })
     }
 
     try {
       const authUrl = generateOAuthUrl(crmType as "hubspot" | "salesforce" | "pipedrive", userId)
-      console.log("[v0] CRM auth flow initiated for:", crmType)
+      console.log("[builtbycashe] CRM auth flow initiated for:", crmType)
       return NextResponse.json({ authUrl })
     } catch (error) {
-      console.error("[v0] OAuth generation failed:", error)
+      console.error("[builtbycashe] OAuth generation failed:", error)
 
       if (error instanceof Error && error.message.includes("not configured")) {
         return NextResponse.json(
@@ -166,7 +166,7 @@ export async function POST(req: NextRequest) {
       throw error
     }
   } catch (error) {
-    console.error("[v0] CRM connect error:", error)
+    console.error("[builtbycashe] CRM connect error:", error)
     return NextResponse.json({ error: "Failed to initiate CRM connection. Please try again." }, { status: 500 })
   }
 }

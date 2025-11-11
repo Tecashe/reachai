@@ -372,7 +372,7 @@
 //         const settings = await getResearchSettings()
 //         setScrapingMode(settings.scrapingMode)
 //       } catch (error) {
-//         console.error("[v0] Failed to load research settings:", error)
+//         console.error("[builtbycashe] Failed to load research settings:", error)
 //       } finally {
 //         setLoading(false)
 //       }
@@ -390,7 +390,7 @@
 //         description: "Your research preferences have been updated.",
 //       })
 //     } catch (error) {
-//       console.error("[v0] Failed to save research settings:", error)
+//       console.error("[builtbycashe] Failed to save research settings:", error)
 //       toast({
 //         title: "Error",
 //         description: "Failed to save settings. Please try again.",
@@ -533,7 +533,7 @@ export function ResearchSettings() {
         const settings = await getResearchSettings()
         setScrapingMode(settings.scrapingMode)
       } catch (error) {
-        console.error("[v0] Failed to load research settings:", error)
+        console.error("[builtbycashe] Failed to load research settings:", error)
       } finally {
         setLoading(false)
       }
@@ -551,7 +551,7 @@ export function ResearchSettings() {
         description: "Your research preferences have been updated.",
       })
     } catch (error) {
-      console.error("[v0] Failed to save research settings:", error)
+      console.error("[builtbycashe] Failed to save research settings:", error)
       toast({
         title: "Error",
         description: "Failed to save settings. Please try again.",

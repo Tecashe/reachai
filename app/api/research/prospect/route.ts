@@ -17,7 +17,7 @@
 //       data: result,
 //     })
 //   } catch (error) {
-//     console.error("[v0] Research API error:", error)
+//     console.error("[builtbycashe] Research API error:", error)
 //     return NextResponse.json({ error: "Failed to research prospect" }, { status: 500 })
 //   }
 // }
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       data: result,
     })
   } catch (error) {
-    console.error("[v0] Research API error:", error)
+    console.error("[builtbycashe] Research API error:", error)
     return NextResponse.json({ error: "Failed to research prospect" }, { status: 500 })
   }
 }
