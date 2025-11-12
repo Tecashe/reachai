@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -152,9 +153,6 @@ model Prospect {
   campaignId String?
   campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
 
-  folderId String?
-  folder   ProspectFolder? @relation("ProspectToFolder", fields: [folderId], references: [id], onDelete: SetNull)
-
   // Basic info
   email       String
   firstName   String?
@@ -203,13 +201,15 @@ model Prospect {
   emailLogs        EmailLog[]
   sendingSchedules SendingSchedule[]
   replies          EmailReply[]
-  folders          ProspectInFolder[]
 
   timezone           String?
   timezoneDetectedAt DateTime?
 
   lastReplyAt DateTime?
   replyCount  Int       @default(0)
+
+  folderId String?
+  folder   ProspectFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
 
   isTrashed Boolean   @default(false)
   trashedAt DateTime?
@@ -224,8 +224,8 @@ model Prospect {
   @@index([status])
   @@index([crmId])
   @@index([dealScore])
-  @@index([isTrashed])
   @@index([folderId])
+  @@index([isTrashed])
 }
 
 model EmailTemplate {
@@ -508,6 +508,8 @@ model SendingAccount {
   email    String
   provider String // "resend", "gmail", "outlook"
 
+  domainId String?
+
   // Credentials (encrypted)
   credentials Json // API keys, OAuth tokens, etc.
 
@@ -525,9 +527,6 @@ model SendingAccount {
   warmupDailyLimit Int         @default(20)
   warmupProgress   Int         @default(0) // Days in current stage
 
-  peerWarmupEnabled Boolean @default(false) // Enabled for stages WARM+
-  peerWarmupOptIn   Boolean @default(false) // User opted into peer network
-
   isActive          Boolean   @default(true)
   healthScore       Int       @default(100) // 0-100
   bounceRate        Float     @default(0)
@@ -538,22 +537,20 @@ model SendingAccount {
   pausedReason      String?
   pausedAt          DateTime?
 
-  rotatedAt     DateTime? // Last time account was rotated due to health issues
-  rotationCount Int       @default(0) // Number of times account has been rotated
-
   domainReputation Json? // SPF, DKIM, DMARC status
   lastDomainCheck  DateTime?
   blacklistStatus  Json? // Blacklist check results
 
-  domainId String?
-  domain   Domain? @relation(fields: [domainId], references: [id])
-
   // Relationships
-  emailLogs      EmailLog[]
-  schedules      SendingSchedule[]
-  bounces        EmailBounce[]
-  replies        EmailReply[]
-  warmupSessions WarmupSession[]
+  emailLogs EmailLog[]
+  schedules SendingSchedule[]
+  bounces   EmailBounce[]
+  replies   EmailReply[]
+  domain    Domain?           @relation(fields: [domainId], references: [id])
+
+  ipAddress     String?
+  rotatedAt     DateTime?
+  rotationCount Int       @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -563,7 +560,6 @@ model SendingAccount {
   @@index([isActive])
   @@index([healthScore])
   @@index([domainId])
-  @@index([peerWarmupEnabled])
 }
 
 model EmailBounce {
@@ -893,146 +889,13 @@ model ProspectFolder {
   isTrashed Boolean   @default(false)
   trashedAt DateTime?
 
-  directProspects Prospect[]         @relation("ProspectToFolder")
-  prospects       ProspectInFolder[]
+  prospects Prospect[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([isTrashed])
-}
-
-model ProspectInFolder {
-  id         String         @id @default(cuid())
-  prospectId String
-  prospect   Prospect       @relation(fields: [prospectId], references: [id], onDelete: Cascade)
-  folderId   String
-  folder     ProspectFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([prospectId, folderId])
-  @@index([prospectId])
-  @@index([folderId])
-}
-
-model WarmupEmail {
-  id       String @id @default(cuid())
-  email    String @unique
-  name     String
-  provider String // "gmail", "outlook", "yahoo"
-
-  // Credentials (encrypted)
-  imapHost     String
-  imapPort     Int
-  imapUsername String
-  imapPassword String @db.Text // Encrypted
-
-  smtpHost     String?
-  smtpPort     Int?
-  smtpUsername String?
-  smtpPassword String? @db.Text // Encrypted
-
-  // Health
-  isActive            Boolean   @default(true)
-  lastCheckAt         DateTime?
-  lastEmailSentAt     DateTime?
-  lastEmailReceivedAt DateTime?
-
-  // Stats
-  emailsSent     Int   @default(0)
-  emailsReceived Int   @default(0)
-  inboxPlacement Float @default(100) // Percentage landing in inbox vs spam
-
-  // Rotation
-  lastUsedFor   String? // Which sending account last used this
-  cooldownUntil DateTime?
-
-  // Relationships
-  warmupSessions     WarmupSession[]
-  warmupInteractions WarmupInteraction[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([isActive])
-  @@index([provider])
-  @@index([inboxPlacement])
-}
-
-model WarmupSession {
-  id               String         @id @default(cuid())
-  sendingAccountId String
-  sendingAccount   SendingAccount @relation(fields: [sendingAccountId], references: [id], onDelete: Cascade)
-
-  warmupEmailId String?
-  warmupEmail   WarmupEmail? @relation(fields: [warmupEmailId], references: [id], onDelete: Cascade)
-
-  warmupType       WarmupType @default(POOL) // POOL or PEER
-  peerAccountEmail String? // If PEER, the peer account email
-
-  // Session details
-  status     WarmupSessionStatus @default(ACTIVE)
-  dailyLimit Int                 @default(20)
-
-  // Stats
-  emailsSent         Int   @default(0)
-  emailsOpened       Int   @default(0)
-  emailsReplied      Int   @default(0)
-  inboxPlacementRate Float @default(0)
-
-  // Schedule
-  nextScheduledSend DateTime?
-  lastSentAt        DateTime?
-
-  startedAt DateTime  @default(now())
-  endedAt   DateTime?
-
-  interactions WarmupInteraction[]
-
-  @@index([sendingAccountId])
-  @@index([warmupEmailId])
-  @@index([status])
-  @@index([warmupType])
-}
-
-model WarmupInteraction {
-  id        String        @id @default(cuid())
-  sessionId String
-  session   WarmupSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  sendingAccountId String
-  warmupEmailId    String?
-  warmupEmail      WarmupEmail? @relation(fields: [warmupEmailId], references: [id], onDelete: Cascade)
-
-  // Email details
-  direction WarmupDirection // OUTBOUND or INBOUND
-  subject   String
-  snippet   String?         @db.Text // First 100 chars of body
-
-  // Tracking
-  sentAt      DateTime?
-  deliveredAt DateTime?
-  openedAt    DateTime?
-  repliedAt   DateTime?
-
-  // Inbox placement
-  landedInInbox Boolean @default(true)
-  landedInSpam  Boolean @default(false)
-
-  // Email provider ID (for tracking)
-  messageId String?
-
-  isPending Boolean @default(false)
-
-  createdAt DateTime @default(now())
-
-  @@index([sessionId])
-  @@index([warmupEmailId])
-  @@index([direction])
-  @@index([sentAt])
-  @@index([isPending]) // Index for efficient pending reply queries
 }
 
 // Enums
@@ -1205,21 +1068,4 @@ enum AlertLevel {
   NONE
   WARNING
   CRITICAL
-}
-
-enum WarmupSessionStatus {
-  ACTIVE
-  PAUSED
-  COMPLETED
-  FAILED
-}
-
-enum WarmupDirection {
-  OUTBOUND // Sent from sending account to warmup email
-  INBOUND // Sent from warmup email to sending account
-}
-
-enum WarmupType {
-  POOL // Using 30-email test pool (stages NEW & WARMING)
-  PEER // Using peer-to-peer network (stages WARM, ACTIVE, ESTABLISHED)
 }
