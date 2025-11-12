@@ -54,10 +54,12 @@
 //     return NextResponse.json({ error: "Failed to add warmup email" }, { status: 500 })
 //   }
 // }
+
+
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { db as prisma } from "@/lib/db"
-import { warmupEmailManager } from "@/lib/services/warmup-email-manager"
+import { addWarmupEmail } from "@/lib/actions/warmup-emails"
 
 export async function GET() {
   try {
@@ -95,13 +97,9 @@ export async function POST(request: Request) {
 
     const data = await request.json()
 
-    const result = await warmupEmailManager.addWarmupEmail(data)
+    const result = await addWarmupEmail(data)
 
-    if (!result.success) {
-      return NextResponse.json({ error: result.error }, { status: 400 })
-    }
-
-    return NextResponse.json({ success: true, id: result.warmupEmailId })
+    return NextResponse.json({ success: true, warmupEmail: result })
   } catch (error) {
     return NextResponse.json({ error: "Failed to add warmup email" }, { status: 500 })
   }
