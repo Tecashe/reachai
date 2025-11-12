@@ -233,14 +233,95 @@
 // }
 
 
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Mail, Users, TrendingUp, MousePointerClick } from "lucide-react"
+// import { Button } from "@/components/ui/button"
+// import Link from "next/link"
+// import { RecentCampaigns } from "@/components/dashboard/recent-campaigns"
+// import { ActivityFeed } from "@/components/dashboard/activity-feed"
+// import { getDashboardStats } from "@/lib/actions/dashboard"
+// import { OnboardingProgress } from "@/components/getting-started/onboarding-progress"
+
+// export default async function DashboardPage() {
+//   const stats = await getDashboardStats()
+
+//   const statCards = [
+//     {
+//       title: "Emails Sent",
+//       value: stats.emailsSent.toString(),
+//       change: "+12.5%",
+//       icon: Mail,
+//       trend: "up",
+//     },
+//     {
+//       title: "Active Prospects",
+//       value: stats.activeProspects.toString(),
+//       change: "+8.2%",
+//       icon: Users,
+//       trend: "up",
+//     },
+//     {
+//       title: "Open Rate",
+//       value: `${stats.openRate}%`,
+//       change: "+5.1%",
+//       icon: TrendingUp,
+//       trend: "up",
+//     },
+//     {
+//       title: "Click Rate",
+//       value: `${stats.clickRate}%`,
+//       change: "+3.4%",
+//       icon: MousePointerClick,
+//       trend: "up",
+//     },
+//   ]
+
+//   return (
+//     <div className="space-y-8">
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+//           <p className="text-muted-foreground">Welcome back! Here's your campaign overview.</p>
+//         </div>
+//         <Button asChild>
+//           <Link href="/dashboard/campaigns/new">Create Campaign</Link>
+//         </Button>
+//       </div>
+
+//       <OnboardingProgress />
+
+//       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+//         {statCards.map((stat) => (
+//           <Card key={stat.title}>
+//             <CardHeader className="flex flex-row items-center justify-between pb-2">
+//               <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+//               <stat.icon className="h-4 w-4 text-muted-foreground" />
+//             </CardHeader>
+//             <CardContent>
+//               <div className="text-2xl font-bold">{stat.value}</div>
+//               <p className="text-xs text-green-600 dark:text-green-400">{stat.change} from last month</p>
+//             </CardContent>
+//           </Card>
+//         ))}
+//       </div>
+
+//       <div className="grid gap-6 md:grid-cols-2">
+//         <RecentCampaigns />
+//         <ActivityFeed />
+//       </div>
+//     </div>
+//   )
+// }
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, Users, TrendingUp, MousePointerClick } from "lucide-react"
+import { Mail, Users, TrendingUp, MousePointerClick, Flame, CheckCircle2, BarChart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { RecentCampaigns } from "@/components/dashboard/recent-campaigns"
 import { ActivityFeed } from "@/components/dashboard/activity-feed"
 import { getDashboardStats } from "@/lib/actions/dashboard"
 import { OnboardingProgress } from "@/components/getting-started/onboarding-progress"
+import { Progress } from "@/components/ui/progress"
 
 export default async function DashboardPage() {
   const stats = await getDashboardStats()
@@ -252,6 +333,7 @@ export default async function DashboardPage() {
       change: "+12.5%",
       icon: Mail,
       trend: "up",
+      color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Active Prospects",
@@ -259,6 +341,7 @@ export default async function DashboardPage() {
       change: "+8.2%",
       icon: Users,
       trend: "up",
+      color: "from-purple-500 to-pink-500",
     },
     {
       title: "Open Rate",
@@ -266,6 +349,7 @@ export default async function DashboardPage() {
       change: "+5.1%",
       icon: TrendingUp,
       trend: "up",
+      color: "from-green-500 to-emerald-500",
     },
     {
       title: "Click Rate",
@@ -273,6 +357,7 @@ export default async function DashboardPage() {
       change: "+3.4%",
       icon: MousePointerClick,
       trend: "up",
+      color: "from-orange-500 to-amber-500",
     },
   ]
 
@@ -280,10 +365,12 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's your campaign overview.</p>
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-1">Welcome back! Here's your campaign overview.</p>
         </div>
-        <Button asChild>
+        <Button asChild className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
           <Link href="/dashboard/campaigns/new">Create Campaign</Link>
         </Button>
       </div>
@@ -292,17 +379,88 @@ export default async function DashboardPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
-          <Card key={stat.title}>
+          <Card key={stat.title} className="relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div
+              className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-5 group-hover:opacity-10 transition-opacity`}
+            />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
+              <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                <stat.icon className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-green-600 dark:text-green-400">{stat.change} from last month</p>
+              <div className="text-3xl font-bold">{stat.value}</div>
+              <div className="flex items-center gap-1 mt-1">
+                <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400" />
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium">{stat.change} from last month</p>
+              </div>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="md:col-span-1 border-2 border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-amber-500/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Flame className="h-5 w-5 text-orange-500" />
+                Warmup Status
+              </CardTitle>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/dashboard/warmup">View All</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Domain Health</span>
+                <span className="font-semibold">85%</span>
+              </div>
+              <Progress value={85} className="h-2" />
+            </div>
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Active Accounts</p>
+                <p className="text-2xl font-bold">3</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Inbox Rate</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">94%</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart className="h-5 w-5" />
+              Quick Stats
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2 text-center p-4 rounded-lg bg-muted/50">
+                <CheckCircle2 className="h-8 w-8 mx-auto text-green-500" />
+                <p className="text-2xl font-bold">{stats.emailsSent}</p>
+                <p className="text-xs text-muted-foreground">Total Sent</p>
+              </div>
+              <div className="space-y-2 text-center p-4 rounded-lg bg-muted/50">
+                <Users className="h-8 w-8 mx-auto text-blue-500" />
+                <p className="text-2xl font-bold">{stats.activeProspects}</p>
+                <p className="text-xs text-muted-foreground">Prospects</p>
+              </div>
+              <div className="space-y-2 text-center p-4 rounded-lg bg-muted/50">
+                <TrendingUp className="h-8 w-8 mx-auto text-purple-500" />
+                <p className="text-2xl font-bold">{stats.openRate}%</p>
+                <p className="text-xs text-muted-foreground">Avg. Open</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
