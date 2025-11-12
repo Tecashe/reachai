@@ -1,3 +1,4 @@
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -132,11 +133,10 @@ model Campaign {
   emailsBounced   Int @default(0)
 
   // Relationships
-  prospects           Prospect[]
-  emailSequences      EmailSequence[]
-  analytics           Analytics[]
-  replies             EmailReply[]
-  subsequenceTriggers SubsequenceTrigger[]
+  prospects      Prospect[]
+  emailSequences EmailSequence[]
+  analytics      Analytics[]
+  replies        EmailReply[]
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -623,8 +623,6 @@ model EmailReply {
   repliedAt  DateTime  @default(now())
   analyzedAt DateTime?
 
-  attachments EmailAttachment[]
-
   @@index([prospectId])
   @@index([campaignId])
   @@index([sentiment])
@@ -1038,151 +1036,6 @@ model WarmupInteraction {
   @@index([isPending]) // Index for efficient pending reply queries
 }
 
-model EmailAttachment {
-  id           String     @id @default(cuid())
-  emailReplyId String
-  emailReply   EmailReply @relation(fields: [emailReplyId], references: [id], onDelete: Cascade)
-
-  filename    String
-  contentType String // "application/pdf", "image/png", etc.
-  size        Int // Size in bytes
-
-  // Storage
-  storageUrl String? // Blob storage URL
-  storageKey String? // Storage identifier
-
-  // AI analysis
-  extractedText String? @db.Text // For PDFs/docs
-  isContract    Boolean @default(false)
-  isProposal    Boolean @default(false)
-  aiSummary     String? @db.Text
-
-  // Preview
-  thumbnailUrl     String? // For images/PDFs
-  previewGenerated Boolean @default(false)
-
-  // Metadata
-  analyzed   Boolean   @default(false)
-  analyzedAt DateTime?
-
-  createdAt DateTime @default(now())
-
-  @@index([emailReplyId])
-  @@index([isContract])
-  @@index([isProposal])
-}
-
-model CompanySendLimit {
-  id            String @id @default(cuid())
-  userId        String
-  companyDomain String // e.g., "google.com", "microsoft.com"
-
-  // AI-powered limits
-  dailyLimit  Int @default(2) // Max emails per day to this company
-  weeklyLimit Int @default(5) // Max emails per week
-
-  // AI learning data
-  engagementScore Float     @default(0) // 0-100 based on opens, clicks, replies
-  lastEngagement  DateTime?
-  totalEmailsSent Int       @default(0)
-  totalOpens      Int       @default(0)
-  totalClicks     Int       @default(0)
-  totalReplies    Int       @default(0)
-
-  // Adaptive limits
-  autoAdjust     Boolean @default(true) // AI adjusts limits based on engagement
-  suggestedLimit Int? // AI's recommended limit
-
-  // Tracking
-  emailsSentToday    Int      @default(0)
-  emailsSentThisWeek Int      @default(0)
-  lastResetDate      DateTime @default(now())
-  lastResetWeek      DateTime @default(now())
-
-  // Company insights
-  companySize        String? // "small", "medium", "large", "enterprise"
-  estimatedEmployees Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, companyDomain])
-  @@index([userId])
-  @@index([companyDomain])
-  @@index([engagementScore])
-}
-
-model SubsequenceTrigger {
-  id         String   @id @default(cuid())
-  campaignId String
-  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  name        String
-  description String?
-
-  // Trigger conditions (all must be true)
-  conditions Json // { opened: true, clicked: false, replied: false, minOpens: 2, timeWindow: 48 }
-
-  // Action to take
-  actionType SubsequenceAction @default(SEND_EMAIL)
-  templateId String?
-  delayHours Int               @default(24)
-
-  // AI optimization
-  aiOptimized  Boolean @default(true)
-  bestSendTime Json? // AI determines best time based on prospect activity
-
-  // Stats
-  timesTriggered Int   @default(0)
-  conversionRate Float @default(0)
-
-  isActive Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([campaignId])
-  @@index([isActive])
-}
-
-model RealtimeNotification {
-  id     String @id @default(cuid())
-  userId String
-
-  type    RealtimeNotificationType
-  title   String
-  message String
-
-  // Priority for smart notifications
-  priority NotificationPriority @default(MEDIUM)
-
-  // Related entity
-  entityType String? // "reply", "bounce", "campaign"
-  entityId   String?
-
-  // Delivery
-  delivered   Boolean   @default(false)
-  deliveredAt DateTime?
-
-  // User interaction
-  read      Boolean   @default(false)
-  readAt    DateTime?
-  clicked   Boolean   @default(false)
-  clickedAt DateTime?
-
-  // Sound alert
-  playSound   Boolean @default(false)
-  soundPlayed Boolean @default(false)
-
-  createdAt DateTime  @default(now())
-  expiresAt DateTime? // Auto-delete old notifications
-
-  @@index([userId])
-  @@index([delivered])
-  @@index([priority])
-  @@index([createdAt])
-}
-
 // Enums
 enum UserRole {
   USER
@@ -1370,30 +1223,4 @@ enum WarmupDirection {
 enum WarmupType {
   POOL // Using 30-email test pool (stages NEW & WARMING)
   PEER // Using peer-to-peer network (stages WARM, ACTIVE, ESTABLISHED)
-}
-
-enum SubsequenceAction {
-  SEND_EMAIL
-  PAUSE_CAMPAIGN
-  ADD_TAG
-  UPDATE_CRM
-  NOTIFY_TEAM
-}
-
-enum RealtimeNotificationType {
-  NEW_REPLY
-  HOT_LEAD
-  INTERESTED_PROSPECT
-  QUESTION_RECEIVED
-  BOUNCE_ALERT
-  SPAM_COMPLAINT
-  CAMPAIGN_MILESTONE
-  DAILY_SUMMARY
-}
-
-enum NotificationPriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
 }
