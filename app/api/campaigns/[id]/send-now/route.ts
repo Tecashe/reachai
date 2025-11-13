@@ -347,7 +347,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "No emails pending to send" }, { status: 400 })
     }
 
-    // Check company send limits for each
+    // Check company send limits for each prospect
     const limitsChecked = await Promise.all(
       campaign.prospects.map(async (prospect) => {
         if (!prospect.email) return { canSend: false, reason: "No email", prospectId: prospect.id, email: "" }
