@@ -502,7 +502,7 @@ class SubsequenceManager {
       if (openCount < conditions.minOpens) return false
     }
 
-    // Check minimum clicks
+    // Check minimum click
     if (conditions.minClicks) {
       const clickCount = recentEmails.filter((log: any) => log.clickedAt).length
       if (clickCount < conditions.minClicks) return false
