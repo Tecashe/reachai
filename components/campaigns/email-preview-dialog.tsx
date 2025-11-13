@@ -43,14 +43,14 @@ export function EmailPreviewDialog({ campaignId, prospects }: EmailPreviewDialog
           Preview Emails
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col w-[95vw]">
+      <DialogContent className="max-w-[95vw] w-full lg:max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Email Preview</DialogTitle>
           <DialogDescription>Preview personalized emails that will be sent to your prospects</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col md:flex-row gap-4 flex-1 overflow-hidden">
-          <div className="w-full md:w-72 border-b md:border-b-0 md:border-r pb-4 md:pb-0 md:pr-4 overflow-y-auto max-h-48 md:max-h-none">
+        <div className="flex flex-col lg:flex-row gap-4 flex-1 overflow-hidden">
+          <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r pb-4 lg:pb-0 lg:pr-4 overflow-y-auto max-h-48 lg:max-h-none">
             <h3 className="text-sm font-semibold mb-3">Prospects ({prospects.length})</h3>
             <div className="space-y-2">
               {prospects.slice(0, 15).map((prospect) => (
@@ -91,7 +91,7 @@ export function EmailPreviewDialog({ campaignId, prospects }: EmailPreviewDialog
                     </div>
                     <div className="flex items-center gap-2 mb-1">
                       <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-sm text-muted-foreground truncate">{selectedProspect.email}</span>
+                      <span className="text-sm text-muted-foreground break-all">{selectedProspect.email}</span>
                     </div>
                     {selectedProspect.company && (
                       <div className="flex items-center gap-2">
@@ -108,10 +108,15 @@ export function EmailPreviewDialog({ campaignId, prospects }: EmailPreviewDialog
                 <div className="border rounded-lg overflow-hidden">
                   <div className="bg-muted px-4 py-3 border-b">
                     <p className="text-sm font-medium">Subject:</p>
-                    <p className="text-base mt-1 break-words">{emailData.subject}</p>
+                    <p className="text-base mt-1" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
+                      {emailData.subject}
+                    </p>
                   </div>
                   <div className="p-4 bg-white dark:bg-gray-950">
-                    <div className="prose prose-sm max-w-none break-words" style={{ whiteSpace: "pre-wrap" }}>
+                    <div
+                      className="prose prose-sm max-w-none"
+                      style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", overflowWrap: "break-word" }}
+                    >
                       {emailData.body}
                     </div>
                   </div>
