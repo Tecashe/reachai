@@ -43,14 +43,14 @@ export function EmailPreviewDialog({ campaignId, prospects }: EmailPreviewDialog
           Preview Emails
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-hidden flex flex-col w-[95vw]">
         <DialogHeader>
           <DialogTitle>Email Preview</DialogTitle>
           <DialogDescription>Preview personalized emails that will be sent to your prospects</DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-4 flex-1 overflow-hidden">
-          <div className="w-64 border-r pr-4 overflow-y-auto">
+        <div className="flex flex-col md:flex-row gap-4 flex-1 overflow-hidden">
+          <div className="w-full md:w-72 border-b md:border-b-0 md:border-r pb-4 md:pb-0 md:pr-4 overflow-y-auto max-h-48 md:max-h-none">
             <h3 className="text-sm font-semibold mb-3">Prospects ({prospects.length})</h3>
             <div className="space-y-2">
               {prospects.slice(0, 15).map((prospect) => (
@@ -78,38 +78,40 @@ export function EmailPreviewDialog({ campaignId, prospects }: EmailPreviewDialog
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto min-w-0">
             {selectedProspect && emailData ? (
               <div className="space-y-4">
                 <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
+                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="font-medium truncate">
                         {selectedProspect.firstName} {selectedProspect.lastName}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mb-1">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">{selectedProspect.email}</span>
+                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground truncate">{selectedProspect.email}</span>
                     </div>
                     {selectedProspect.company && (
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{selectedProspect.company}</span>
+                        <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground truncate">{selectedProspect.company}</span>
                       </div>
                     )}
                   </div>
-                  <Badge variant="outline">{selectedProspect.status.toLowerCase()}</Badge>
+                  <Badge variant="outline" className="flex-shrink-0">
+                    {selectedProspect.status.toLowerCase()}
+                  </Badge>
                 </div>
 
                 <div className="border rounded-lg overflow-hidden">
                   <div className="bg-muted px-4 py-3 border-b">
                     <p className="text-sm font-medium">Subject:</p>
-                    <p className="text-base mt-1">{emailData.subject}</p>
+                    <p className="text-base mt-1 break-words">{emailData.subject}</p>
                   </div>
                   <div className="p-4 bg-white dark:bg-gray-950">
-                    <div className="prose prose-sm max-w-none" style={{ whiteSpace: "pre-wrap" }}>
+                    <div className="prose prose-sm max-w-none break-words" style={{ whiteSpace: "pre-wrap" }}>
                       {emailData.body}
                     </div>
                   </div>
