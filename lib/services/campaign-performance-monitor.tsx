@@ -1,5 +1,3 @@
-"use server"
-
 import { db } from "@/lib/db"
 
 /**
@@ -225,6 +223,13 @@ export class CampaignPerformanceMonitor {
 
     // Pause if health is critical
     if (healthScore < 50) {
+      console.log(`[v0] Sending account paused due to low health score`, {
+        accountId,
+        healthScore,
+        bounceRate,
+        spamComplaintRate,
+      })
+
       await db.sendingAccount.update({
         where: { id: accountId },
         data: {
