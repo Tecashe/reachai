@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/sync-replies",
-      "schedule": "*/15 * * * *"
+      "path": "/api/cron/reset-credits",
+      "schedule": "0 0 1 * *"
     }
   ]
 }
