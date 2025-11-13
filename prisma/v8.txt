@@ -1389,8 +1389,6 @@ enum RealtimeNotificationType {
   SPAM_COMPLAINT
   CAMPAIGN_MILESTONE
   DAILY_SUMMARY
-  CAMPAIGN_PAUSED
-  ACCOUNT_PAUSED
 }
 
 enum NotificationPriority {
@@ -1399,3 +1397,6 @@ enum NotificationPriority {
   HIGH
   URGENT
 }
+
+
+
