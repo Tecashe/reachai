@@ -1365,7 +1365,7 @@ export function WarmupDashboard() {
         </CardContent>
       </Card>
 
-      {/* How Warmup Works */}
+      {/* How Warmup Works*/}
       <Card>
         <CardHeader>
           <CardTitle>How Email Warmup Works</CardTitle>
