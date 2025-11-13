@@ -552,7 +552,7 @@ class SubsequenceManager {
   }
 
   /**
-   * Schedule subsequence email
+   * Schedule subsequence 
    */
   private async scheduleSubsequenceEmail(trigger: any, prospectId: string): Promise<void> {
     const prospect = await db.prospect.findUnique({
