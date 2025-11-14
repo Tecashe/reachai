@@ -31,7 +31,6 @@ export async function GET(request: NextRequest, { params }: { params: { emailLog
     return NextResponse.json({ error: "Missing target URL" }, { status: 400 })
   }
 
-  // Get user agent and IP for tracking
   const userAgent = request.headers.get("user-agent") || undefined
   const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || undefined
 
