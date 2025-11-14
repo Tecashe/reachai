@@ -2186,7 +2186,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
               key={item.name}
               href={item.href}
               data-tour={item.tourId}
-              onClick={onNavigate} // Call onNavigate when link is clicked
+              onClick={onNavigate} 
               className={cn(
                 "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
                 isActive
