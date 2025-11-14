@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   try {
     console.log("[v0] Starting performance monitoring cron")
 
-    // Get all active campaigns
+    
     const activeCampaigns = await db.campaign.findMany({
       where: {
         status: "ACTIVE",
