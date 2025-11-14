@@ -2514,7 +2514,7 @@ export class EmailSenderService {
     html: string,
   ): Promise<string> {
     try {
-      // Decrypt SMTP credentials
+   
       const credentials = decrypt(account.credentials)
 
       const transporter = nodemailer.createTransport({

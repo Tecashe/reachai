@@ -48,6 +48,9 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/terms(.*)",
+  "/privacy(.*)",
+  "/(.*)",
   "/api/webhooks(.*)",
   "/api/track(.*)",
   "/api/cron(.*)",        // Add this line - excludes all cron routes
