@@ -2159,7 +2159,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     <>
       <div className={cn("p-6 border-b border-border/50 transition-all duration-300", collapsed && "p-4")}>
         <Link href="/dashboard" className="flex items-center gap-2 group">
-          <div className="relative h-10 w-10 flex items-center justify-center rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+          <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
             <Image
               src="/logo.png"
               alt="mailfra Logo"
@@ -2171,7 +2171,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
           </div>
           {!collapsed && (
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-              mailfra
+              Mailfra
             </span>
           )}
         </Link>
