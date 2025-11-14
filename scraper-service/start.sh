@@ -1,7 +1,7 @@
 #!/bin/bash
 # Startup script for Railway deployment
 
-echo "Starting ReachAI Scraper Service..."
+echo "Starting mailfra Scraper Service..."
 echo "Port: ${PORT:-8000}"
 echo "Environment: ${RAILWAY_ENVIRONMENT:-production}"
 

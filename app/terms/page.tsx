@@ -24,13 +24,13 @@ export default function TermsPage() {
 
             <h2>Agreement to Terms</h2>
             <p>
-              By accessing or using ReachAI, you agree to be bound by these Terms of Service. If you disagree with any
+              By accessing or using mailfra, you agree to be bound by these Terms of Service. If you disagree with any
               part of these terms, you may not access the service.
             </p>
 
             <h2>Use License</h2>
             <p>
-              We grant you a limited, non-exclusive, non-transferable license to use ReachAI for your business purposes,
+              We grant you a limited, non-exclusive, non-transferable license to use mailfra for your business purposes,
               subject to these terms and your subscription plan.
             </p>
 
@@ -66,13 +66,13 @@ export default function TermsPage() {
 
             <h2>Intellectual Property</h2>
             <p>
-              The ReachAI platform, including all content, features, and functionality, is owned by us and protected by
+              The mailfra platform, including all content, features, and functionality, is owned by us and protected by
               copyright, trademark, and other intellectual property laws.
             </p>
 
             <h2>Limitation of Liability</h2>
             <p>
-              ReachAI is provided "as is" without warranties. We are not liable for any indirect, incidental, or
+              mailfra is provided "as is" without warranties. We are not liable for any indirect, incidental, or
               consequential damages arising from your use of the service.
             </p>
 
@@ -98,7 +98,7 @@ export default function TermsPage() {
             <p>
               For questions about these Terms, contact us at:
               <br />
-              Email: legal@reachai.com
+              Email: legal@mailfra.com
               <br />
               Address: 123 AI Street, San Francisco, CA 94105
             </p>

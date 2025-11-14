@@ -1,8 +1,8 @@
-# ReachAI Usage Guide
+# Mailfra Usage Guide
 
-## Getting Started with ReachAI
+## Getting Started with Mailfra
 
-This guide will walk you through the complete workflow of using ReachAI to run successful cold email campaigns.
+This guide will walk you through the complete workflow of using mailfra to run successful cold email campaigns.
 
 ---
 
@@ -243,10 +243,10 @@ Set up multi-touch follow-up sequences:
 
 ## Support & Resources
 
-- **Documentation:** [docs.reachai.com](https://docs.reachai.com)
-- **Support Email:** support@reachai.com
-- **Community:** [community.reachai.com](https://community.reachai.com)
-- **Video Tutorials:** [youtube.com/reachai](https://youtube.com/reachai)
+- **Documentation:** [docs.mailfra.com](https://docs.mailfra.com)
+- **Support Email:** support@mailfra.com
+- **Community:** [community.mailfra.com](https://community.mailfra.com)
+- **Video Tutorials:** [youtube.com/mailfra](https://youtube.com/mailfra)
 
 ---
 

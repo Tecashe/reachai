@@ -12,9 +12,9 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ReachAI - AI-Powered Cold Email Personalization",
+  title: "mailfra - AI-Powered Cold Email Personalization",
   description:
-    "Write cold emails that actually get replies. ReachAI uses AI to research prospects and craft hyper-personalized outreach at scale.",
+    "Write cold emails that actually get replies. mailfra uses AI to research prospects and craft hyper-personalized outreach at scale.",
   generator: "builtbycashe",
 }
 

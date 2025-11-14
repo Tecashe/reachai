@@ -115,7 +115,7 @@ export function InvitationAcceptance({ token }: InvitationAcceptanceProps) {
           <Users className="h-10 w-10 text-primary" />
         </div>
         <CardTitle className="text-2xl">Team Invitation</CardTitle>
-        <CardDescription>You've been invited to join a ReachAI workspace</CardDescription>
+        <CardDescription>You've been invited to join a mailfra workspace</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {!isSignedIn && (
@@ -162,7 +162,7 @@ export function InvitationAcceptance({ token }: InvitationAcceptanceProps) {
         </div>
 
         <p className="text-xs text-center text-muted-foreground">
-          By accepting, you agree to ReachAI's Terms of Service and Privacy Policy
+          By accepting, you agree to mailfra's Terms of Service and Privacy Policy
         </p>
       </CardContent>
     </Card>

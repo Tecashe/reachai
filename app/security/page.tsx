@@ -21,7 +21,7 @@ export default function SecurityPage() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <Shield className="h-16 w-16 text-blue-600 mx-auto mb-6" />
-              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">Security at ReachAI</h1>
+              <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">Security at mailfra</h1>
               <p className="text-xl text-muted-foreground">
                 Your data security is our top priority. Learn how we protect your information.
               </p>
@@ -125,7 +125,7 @@ export default function SecurityPage() {
                     seriously and will respond within 24 hours.
                   </p>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="mailto:security@reachai.com">Report Vulnerability</Link>
+                    <Link href="mailto:security@mailfra.com">Report Vulnerability</Link>
                   </Button>
                 </div>
               </div>

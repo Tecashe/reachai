@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
             <h2>Introduction</h2>
             <p>
-              ReachAI ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how
+              mailfra ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how
               we collect, use, disclose, and safeguard your information when you use our service.
             </p>
 
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
             <p>
               If you have questions about this Privacy Policy, please contact us at:
               <br />
-              Email: privacy@reachai.com
+              Email: privacy@mailfra.com
               <br />
               Address: 123 AI Street, San Francisco, CA 94105
             </p>

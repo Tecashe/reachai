@@ -53,7 +53,7 @@
 //     <div className="space-y-6">
 //       <div>
 //         <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
-//         <p className="text-muted-foreground">Connect ReachAI with your favorite tools</p>
+//         <p className="text-muted-foreground">Connect mailfra with your favorite tools</p>
 //       </div>
 
 //       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -140,7 +140,7 @@
 //     <div className="space-y-6">
 //       <div>
 //         <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
-//         <p className="text-muted-foreground">Connect ReachAI with your favorite tools</p>
+//         <p className="text-muted-foreground">Connect mailfra with your favorite tools</p>
 //       </div>
 
 //       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -248,7 +248,7 @@
 //     <div className="space-y-6">
 //       <div>
 //         <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
-//         <p className="text-muted-foreground">Connect ReachAI with your favorite tools and services</p>
+//         <p className="text-muted-foreground">Connect mailfra with your favorite tools and services</p>
 //       </div>
 
 //       {/* Connected Integrations Summary */}
@@ -346,14 +346,14 @@ export default async function IntegrationsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
-        <p className="text-muted-foreground">Connect ReachAI with your email providers and AI services</p>
+        <p className="text-muted-foreground">Connect mailfra with your email providers and AI services</p>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardHeader>
           <CardTitle>All-in-One Platform</CardTitle>
           <CardDescription>
-            ReachAI includes built-in email warmup, deliverability optimization, A/B testing, advanced analytics, and
+            mailfra includes built-in email warmup, deliverability optimization, A/B testing, advanced analytics, and
             AI-powered email generation. No need for external tools like Lemlist or Instantly.
           </CardDescription>
         </CardHeader>

@@ -13,7 +13,7 @@ export function FeaturesGrid() {
               Everything you need to scale outreach
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              From lead generation to delivery monitoring, Reachai handles your entire email workflow
+              From lead generation to delivery monitoring, mailfra handles your entire email workflow
             </p>
           </div>
 

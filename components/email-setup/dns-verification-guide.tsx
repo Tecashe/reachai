@@ -178,13 +178,13 @@
 //                 <Label className="text-sm font-medium">Value</Label>
 //                 <div className="flex items-center gap-2">
 //                   <code className="flex-1 bg-muted p-3 rounded-md text-sm break-all">
-//                     {spfRecord?.value || "v=spf1 include:_spf.reachai.com ~all"}
+//                     {spfRecord?.value || "v=spf1 include:_spf.mailfra.com ~all"}
 //                   </code>
 //                   <Button
 //                     variant="outline"
 //                     size="sm"
 //                     onClick={() =>
-//                       copyToClipboard(spfRecord?.value || "v=spf1 include:_spf.reachai.com ~all", "SPF record")
+//                       copyToClipboard(spfRecord?.value || "v=spf1 include:_spf.mailfra.com ~all", "SPF record")
 //                     }
 //                   >
 //                     <Copy className="h-4 w-4" />
@@ -194,7 +194,7 @@
 
 //               <Alert>
 //                 <AlertDescription className="text-sm">
-//                   <strong>Note:</strong> If you already have an SPF record, add <code>include:_spf.reachai.com</code> to
+//                   <strong>Note:</strong> If you already have an SPF record, add <code>include:_spf.mailfra.com</code> to
 //                   your existing record instead of creating a new one.
 //                 </AlertDescription>
 //               </Alert>
@@ -225,11 +225,11 @@
 //               <div className="space-y-2">
 //                 <Label className="text-sm font-medium">Host/Name</Label>
 //                 <div className="flex items-center gap-2">
-//                   <code className="flex-1 bg-muted p-3 rounded-md text-sm">reachai._domainkey</code>
+//                   <code className="flex-1 bg-muted p-3 rounded-md text-sm">mailfra._domainkey</code>
 //                   <Button
 //                     variant="outline"
 //                     size="sm"
-//                     onClick={() => copyToClipboard("reachai._domainkey", "DKIM host")}
+//                     onClick={() => copyToClipboard("mailfra._domainkey", "DKIM host")}
 //                   >
 //                     <Copy className="h-4 w-4" />
 //                   </Button>
@@ -357,11 +357,11 @@
 //                 <div className="space-y-2">
 //                   <Label className="text-sm font-medium">Priority 10</Label>
 //                   <div className="flex items-center gap-2">
-//                     <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx1.reachai.com</code>
+//                     <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx1.mailfra.com</code>
 //                     <Button
 //                       variant="outline"
 //                       size="sm"
-//                       onClick={() => copyToClipboard("mx1.reachai.com", "MX record 1")}
+//                       onClick={() => copyToClipboard("mx1.mailfra.com", "MX record 1")}
 //                     >
 //                       <Copy className="h-4 w-4" />
 //                     </Button>
@@ -371,11 +371,11 @@
 //                 <div className="space-y-2">
 //                   <Label className="text-sm font-medium">Priority 20</Label>
 //                   <div className="flex items-center gap-2">
-//                     <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx2.reachai.com</code>
+//                     <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx2.mailfra.com</code>
 //                     <Button
 //                       variant="outline"
 //                       size="sm"
-//                       onClick={() => copyToClipboard("mx2.reachai.com", "MX record 2")}
+//                       onClick={() => copyToClipboard("mx2.mailfra.com", "MX record 2")}
 //                     >
 //                       <Copy className="h-4 w-4" />
 //                     </Button>
@@ -585,13 +585,13 @@ export function DNSVerificationGuide() {
                 <Label className="text-sm font-medium">Value</Label>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 bg-muted p-3 rounded-md text-sm break-all">
-                    {spfRecord?.value || "v=spf1 include:_spf.reachai.com ~all"}
+                    {spfRecord?.value || "v=spf1 include:_spf.mailfra.com ~all"}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      copyToClipboard(spfRecord?.value || "v=spf1 include:_spf.reachai.com ~all", "SPF record")
+                      copyToClipboard(spfRecord?.value || "v=spf1 include:_spf.mailfra.com ~all", "SPF record")
                     }
                   >
                     <Copy className="h-4 w-4" />
@@ -601,7 +601,7 @@ export function DNSVerificationGuide() {
 
               <Alert>
                 <AlertDescription className="text-sm">
-                  <strong>Note:</strong> If you already have an SPF record, add <code>include:_spf.reachai.com</code> to
+                  <strong>Note:</strong> If you already have an SPF record, add <code>include:_spf.mailfra.com</code> to
                   your existing record instead of creating a new one.
                 </AlertDescription>
               </Alert>
@@ -632,11 +632,11 @@ export function DNSVerificationGuide() {
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Host/Name</Label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-muted p-3 rounded-md text-sm">reachai._domainkey</code>
+                  <code className="flex-1 bg-muted p-3 rounded-md text-sm">mailfra._domainkey</code>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard("reachai._domainkey", "DKIM host")}
+                    onClick={() => copyToClipboard("mailfra._domainkey", "DKIM host")}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -764,11 +764,11 @@ export function DNSVerificationGuide() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Priority 10</Label>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx1.reachai.com</code>
+                    <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx1.mailfra.com</code>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => copyToClipboard("mx1.reachai.com", "MX record 1")}
+                      onClick={() => copyToClipboard("mx1.mailfra.com", "MX record 1")}
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
@@ -778,11 +778,11 @@ export function DNSVerificationGuide() {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Priority 20</Label>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx2.reachai.com</code>
+                    <code className="flex-1 bg-muted p-3 rounded-md text-sm">mx2.mailfra.com</code>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => copyToClipboard("mx2.reachai.com", "MX record 2")}
+                      onClick={() => copyToClipboard("mx2.mailfra.com", "MX record 2")}
                     >
                       <Copy className="h-4 w-4" />
                     </Button>

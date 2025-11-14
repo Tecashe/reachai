@@ -150,7 +150,7 @@ export function StatsSection() {
             Trusted by growth teams everywhere
           </h2>
           <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-            Join thousands of companies scaling their outreach with Reachai
+            Join thousands of companies scaling their outreach with mailfra
           </p>
         </div>
 

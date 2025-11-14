@@ -33,7 +33,7 @@ export function Hero() {
             </h1>
 
             <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-              From lead discovery to email delivery. Reachai automates your entire outreach workflow with AI-powered
+              From lead discovery to email delivery. mailfra automates your entire outreach workflow with AI-powered
               personalization and deliverability monitoring.
             </p>
 
@@ -77,7 +77,7 @@ export function Hero() {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-[2rem] blur-3xl" />
             <div className="relative glass-strong rounded-[2rem] p-8 space-y-6">
               <div className="aspect-video rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 overflow-hidden">
-                <img src="/modern-email-dashboard-interface.jpg" alt="Reachai Dashboard" className="w-full h-full object-cover" />
+                <img src="/modern-email-dashboard-interface.jpg" alt="mailfra Dashboard" className="w-full h-full object-cover" />
               </div>
 
               <div className="grid grid-cols-3 gap-4">

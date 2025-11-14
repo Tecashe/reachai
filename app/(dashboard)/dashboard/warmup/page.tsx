@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { WarmupDashboard } from "@/components/warmup/warmup-dashboard"
 
 export const metadata = {
-  title: "Email Warmup - ReachAI",
+  title: "Email Warmup - mailfra",
   description: "Monitor and manage email warmup for optimal deliverability",
 }
 

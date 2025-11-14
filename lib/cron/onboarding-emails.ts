@@ -67,8 +67,8 @@ export async function sendOnboardingReminders() {
 
       const isFirstEmail = user.onboardingEmailsSent === 0
       const subject = isFirstEmail
-        ? "🚀 You're almost there! Complete your ReachAI setup"
-        : "⏰ Final reminder: Unlock the full power of ReachAI"
+        ? "🚀 You're almost there! Complete your mailfra setup"
+        : "⏰ Final reminder: Unlock the full power of mailfra"
 
       try {
         await resend.sendOnboardingReminder(

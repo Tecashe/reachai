@@ -22,7 +22,7 @@ export default function DocsPage() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">Documentation</h1>
-              <p className="text-xl text-muted-foreground mb-8">Everything you need to know about using ReachAI</p>
+              <p className="text-xl text-muted-foreground mb-8">Everything you need to know about using mailfra</p>
               <div className="max-w-md mx-auto relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search documentation..." className="pl-10" />

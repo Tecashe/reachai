@@ -1,4 +1,4 @@
--- Initialize ReachAI Database
+-- Initialize mailfra Database
 -- This script creates the initial database structure
 
 -- Enable UUID extension

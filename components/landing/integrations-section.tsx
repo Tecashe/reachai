@@ -21,7 +21,7 @@ export function IntegrationsSection() {
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900">Integrates with your stack</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Connect Reachai with the tools you already use every day
+              Connect mailfra with the tools you already use every day
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export function IntegrationsSection() {
           <div className="mt-16 bg-white/60 backdrop-blur-sm rounded-3xl p-10 text-center border border-green-200/50 shadow-lg">
             <h3 className="text-2xl font-bold mb-3 text-gray-900">Need a custom integration?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Our API makes it easy to connect Reachai with any tool in your workflow
+              Our API makes it easy to connect mailfra with any tool in your workflow
             </p>
             <button className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300">
               View API Documentation

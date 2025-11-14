@@ -670,7 +670,7 @@ export function ApiKeysSettings() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create New API Key</DialogTitle>
-                  <DialogDescription>Generate a new API key for programmatic access to ReachAI</DialogDescription>
+                  <DialogDescription>Generate a new API key for programmatic access to mailfra</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
@@ -811,7 +811,7 @@ export function ApiKeysSettings() {
       <Card>
         <CardHeader>
           <CardTitle>API Documentation</CardTitle>
-          <CardDescription>Learn how to use the ReachAI API</CardDescription>
+          <CardDescription>Learn how to use the mailfra API</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

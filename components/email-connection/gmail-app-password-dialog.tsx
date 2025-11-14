@@ -113,7 +113,7 @@ export function GmailAppPasswordDialog() {
               <div className="flex-1 space-y-2">
                 <h4 className="font-semibold">Generate App Password</h4>
                 <p className="text-sm text-muted-foreground">
-                  Create a special password for ReachAI to access your Gmail
+                  Create a special password for mailfra to access your Gmail
                 </p>
                 <Button
                   variant="outline"
@@ -126,7 +126,7 @@ export function GmailAppPasswordDialog() {
                 <ol className="text-sm text-muted-foreground space-y-1 mt-3 ml-4 list-decimal">
                   <li>Select "Mail" for the app</li>
                   <li>Select "Other (Custom name)" for the device</li>
-                  <li>Enter "ReachAI" as the name</li>
+                  <li>Enter "mailfra" as the name</li>
                   <li>Click "Generate"</li>
                   <li>Copy the 16-character password shown</li>
                 </ol>

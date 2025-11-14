@@ -120,7 +120,7 @@
 //             <div className="flex items-center gap-2">
 //               <Sparkles className="h-5 w-5 text-primary" />
 //               <div>
-//                 <CardTitle className="text-lg">Get Started with ReachAI</CardTitle>
+//                 <CardTitle className="text-lg">Get Started with mailfra</CardTitle>
 //                 <CardDescription>
 //                   {data.isComplete
 //                     ? "🎉 Congratulations! You've mastered the basics!"
@@ -312,7 +312,7 @@
 //           <div className="flex items-center gap-2">
 //             <Sparkles className="h-4 w-4 text-primary" />
 //             <p className="text-sm text-muted-foreground">
-//               You're {data?.completedCount} of {data?.totalSteps} steps away from mastering ReachAI
+//               You're {data?.completedCount} of {data?.totalSteps} steps away from mastering mailfra
 //             </p>
 //           </div>
 //           <Button variant="ghost" size="sm" onClick={handleRestore}>
@@ -335,7 +335,7 @@
 //             <div className="flex items-center gap-2">
 //               <Sparkles className="h-5 w-5 text-primary" />
 //               <div>
-//                 <CardTitle className="text-lg">Get Started with ReachAI</CardTitle>
+//                 <CardTitle className="text-lg">Get Started with mailfra</CardTitle>
 //                 <CardDescription>
 //                   {data.isComplete
 //                     ? "🎉 Congratulations! You've mastered the basics!"
@@ -552,7 +552,7 @@ export function OnboardingProgress() {
               <div className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
                 <div>
-                  <CardTitle className="text-lg">Get Started with ReachAI</CardTitle>
+                  <CardTitle className="text-lg">Get Started with mailfra</CardTitle>
                   <CardDescription>
                     {data.isComplete
                       ? "🎉 Congratulations! You've mastered the basics!"

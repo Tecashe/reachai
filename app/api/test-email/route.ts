@@ -15,10 +15,10 @@ export async function POST(request: Request) {
 
     const result = await resend.send({
       to,
-      subject: "Test Email from ReachAI",
+      subject: "Test Email from mailfra",
       html: `
         <h1>Test Email</h1>
-        <p>This is a test email from ReachAI to verify email sending is working correctly.</p>
+        <p>This is a test email from mailfra to verify email sending is working correctly.</p>
         <p>If you received this, your email configuration is working!</p>
       `,
     })

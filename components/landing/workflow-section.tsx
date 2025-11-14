@@ -72,7 +72,7 @@ export function WorkflowSection() {
               </div>
               <h3 className="text-3xl font-bold mb-4">All automated. Zero manual work.</h3>
               <p className="text-lg text-muted-foreground mb-8">
-                Reachai handles the entire workflow so you can focus on closing deals, not sending emails
+                mailfra handles the entire workflow so you can focus on closing deals, not sending emails
               </p>
               <div className="flex flex-wrap justify-center gap-8 text-center">
                 <div>

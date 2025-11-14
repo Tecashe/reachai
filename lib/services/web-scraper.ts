@@ -182,7 +182,7 @@
 //     // Fallback: Basic fetch for meta tags
 //     const response = await fetch(url, {
 //       headers: {
-//         "User-Agent": "Mozilla/5.0 (compatible; ReachAI/1.0; +https://reachai.com)",
+//         "User-Agent": "Mozilla/5.0 (compatible; mailfra/1.0; +https://mailfra.com)",
 //       },
 //     })
 
@@ -362,7 +362,7 @@
 //     // Fallback: Basic detection from HTML
 //     const response = await fetch(companyWebsite, {
 //       headers: {
-//         "User-Agent": "Mozilla/5.0 (compatible; ReachAI/1.0)",
+//         "User-Agent": "Mozilla/5.0 (compatible; mailfra/1.0)",
 //       },
 //     })
 
@@ -532,7 +532,7 @@ export async function scrapeWebsite(url: string): Promise<ScrapedData> {
     // Fallback: Basic fetch for meta tags
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ReachAI/1.0; +https://reachai.com)",
+        "User-Agent": "Mozilla/5.0 (compatible; mailfra/1.0; +https://mailfra.com)",
       },
     })
 
@@ -712,7 +712,7 @@ export async function findCompetitorTools(companyWebsite: string): Promise<strin
     // Fallback: Basic detection from HTML
     const response = await fetch(companyWebsite, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ReachAI/1.0)",
+        "User-Agent": "Mozilla/5.0 (compatible; mailfra/1.0)",
       },
     })
 

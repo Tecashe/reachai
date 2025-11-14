@@ -17,7 +17,7 @@ interface TourStep {
 const tourSteps: TourStep[] = [
   {
     target: "[data-tour='dashboard']",
-    title: "Welcome to ReachAI!",
+    title: "Welcome to mailfra!",
     description: "Let's take a quick tour to help you get started with AI-powered cold email outreach.",
     placement: "auto",
   },
@@ -84,7 +84,7 @@ export function OnboardingTour() {
 
   // Check if tour has been completed
   useEffect(() => {
-    const hasSeenTour = localStorage.getItem("reachai-tour-completed")
+    const hasSeenTour = localStorage.getItem("mailfra-tour-completed")
     if (!hasSeenTour) {
       setTimeout(() => setIsOpen(true), 1500)
     }
@@ -241,12 +241,12 @@ export function OnboardingTour() {
 
   const handleSkip = () => {
     setIsOpen(false)
-    localStorage.setItem("reachai-tour-completed", "true")
+    localStorage.setItem("mailfra-tour-completed", "true")
   }
 
   const handleComplete = () => {
     setIsOpen(false)
-    localStorage.setItem("reachai-tour-completed", "true")
+    localStorage.setItem("mailfra-tour-completed", "true")
   }
 
   const step = tourSteps[currentStep]
@@ -386,7 +386,7 @@ export function TourTrigger() {
   const [isOpen, setIsOpen] = useState(false)
 
   const startTour = () => {
-    localStorage.removeItem("reachai-tour-completed")
+    localStorage.removeItem("mailfra-tour-completed")
     setIsOpen(true)
     // Reload to restart tour
     window.location.reload()

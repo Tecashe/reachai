@@ -1,4 +1,4 @@
-# ReachAI - AI-Powered Cold Email Personalization Platform
+# mailfra - AI-Powered Cold Email Personalization Platform
 
 A production-ready SaaS platform for writing cold emails that actually get replies. Built with Next.js 14, TypeScript, Clerk, Prisma, and OpenAI.
 

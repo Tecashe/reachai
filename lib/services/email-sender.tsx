@@ -25,7 +25,7 @@
 
 //   constructor() {
 //     this.apiKey = process.env.RESEND_API_KEY || ""
-//     this.fromEmail = process.env.FROM_EMAIL || "noreply@reachai.com"
+//     this.fromEmail = process.env.FROM_EMAIL || "noreply@mailfra.com"
 //   }
 
 //   async sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
@@ -185,7 +185,7 @@
 
 //   constructor() {
 //     this.apiKey = process.env.RESEND_API_KEY || ""
-//     this.fromEmail = process.env.FROM_EMAIL || "noreply@reachai.com"
+//     this.fromEmail = process.env.FROM_EMAIL || "noreply@mailfra.com"
 //   }
 
 //   async sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
@@ -390,7 +390,7 @@
 //       prospectId,
 //       campaignId,
 //       fromEmail = env.RESEND_FROM_EMAIL,
-//       fromName = "ReachAI",
+//       fromName = "mailfra",
 //     } = params
 
 //     try {
@@ -723,7 +723,7 @@
 //       prospectId,
 //       campaignId,
 //       fromEmail,
-//       fromName = "ReachAI",
+//       fromName = "mailfra",
 //       skipValidation = false,
 //       recipientName,
 //       recipientCompany,
@@ -1149,7 +1149,7 @@
 //       prospectId,
 //       campaignId,
 //       fromEmail,
-//       fromName = "ReachAI",
+//       fromName = "mailfra",
 //       skipValidation = false,
 //       recipientName,
 //       recipientCompany,

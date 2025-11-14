@@ -1,5 +1,5 @@
 """
-ReachAI Scrapers Package
+mailfra Scrapers Package
 """
 
 from .linkedin_scraper import UltimateLinkedInScraper

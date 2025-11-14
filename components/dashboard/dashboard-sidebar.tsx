@@ -39,7 +39,7 @@
 //           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
 //             <Sparkles className="h-5 w-5 text-white" />
 //           </div>
-//           <span className="text-xl font-bold">ReachAI</span>
+//           <span className="text-xl font-bold">mailfra</span>
 //         </Link>
 //       </div>
 
@@ -122,7 +122,7 @@
 //             <Sparkles className="h-5 w-5 text-white" />
 //           </div>
 //           <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-//             ReachAI
+//             mailfra
 //           </span>
 //         </Link>
 //       </div>
@@ -217,7 +217,7 @@
 //             <Sparkles className="h-5 w-5 text-white" />
 //           </div>
 //           <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-//             ReachAI
+//             mailfra
 //           </span>
 //         </Link>
 //       </div>
@@ -350,7 +350,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -525,7 +525,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -700,7 +700,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -875,7 +875,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -1054,7 +1054,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -1232,7 +1232,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -1409,7 +1409,7 @@
 //           <div className="relative h-10 w-10 flex items-center justify-center rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
 //             <Image
 //               src="/logo.png"
-//               alt="ReachAI Logo"
+//               alt="mailfra Logo"
 //               width={40}
 //               height={40}
 //               className="object-contain"
@@ -1418,7 +1418,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -1600,7 +1600,7 @@
 //           <div className="relative h-10 w-10 flex items-center justify-center rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
 //             <Image
 //               src="/logo.png"
-//               alt="ReachAI Logo"
+//               alt="mailfra Logo"
 //               width={40}
 //               height={40}
 //               className="object-contain"
@@ -1609,7 +1609,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -1792,7 +1792,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -1976,7 +1976,7 @@
 //           </div>
 //           {!collapsed && (
 //             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-//               ReachAI
+//               mailfra
 //             </span>
 //           )}
 //         </Link>
@@ -2162,7 +2162,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
           <div className="relative h-10 w-10 flex items-center justify-center rounded-xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
             <Image
               src="/logo.png"
-              alt="ReachAI Logo"
+              alt="mailfra Logo"
               width={40}
               height={40}
               className="object-contain"
@@ -2171,7 +2171,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
           </div>
           {!collapsed && (
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-              ReachAI
+              mailfra
             </span>
           )}
         </Link>

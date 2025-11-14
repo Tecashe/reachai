@@ -83,7 +83,7 @@
 //     await resend.emails.send({
 //       from: FROM_EMAIL,
 //       to: email,
-//       subject: `You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
+//       subject: `You've been invited to join ${user.name || user.email}'s mailfra workspace`,
 //       html: emailHtml,
 //     })
 
@@ -225,7 +225,7 @@
 //     await resend.emails.send({
 //       from: FROM_EMAIL,
 //       to: teamMember.email,
-//       subject: `Reminder: You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
+//       subject: `Reminder: You've been invited to join ${user.name || user.email}'s mailfra workspace`,
 //       html: emailHtml,
 //     })
 
@@ -416,7 +416,7 @@
 
 //     const result = await resend.send({
 //       to: email,
-//       subject: `You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
+//       subject: `You've been invited to join ${user.name || user.email}'s mailfra workspace`,
 //       html: emailHtml,
 //     })
 
@@ -568,7 +568,7 @@
 
 //     const result = await resend.send({
 //       to: teamMember.email,
-//       subject: `Reminder: You've been invited to join ${user.name || user.email}'s ReachAI workspace`,
+//       subject: `Reminder: You've been invited to join ${user.name || user.email}'s mailfra workspace`,
 //       html: emailHtml,
 //     })
 
@@ -723,11 +723,11 @@
 
 //     try {
 //       await resend.emails.send({
-//         from: "ReachAI <noreply@reachai.com>",
+//         from: "mailfra <noreply@mailfra.com>",
 //         to: email,
-//         subject: `${user.name || user.email} invited you to join their ReachAI team`,
+//         subject: `${user.name || user.email} invited you to join their mailfra team`,
 //         html: `
-//           <h2>You've been invited to join ${user.name || user.email}'s team on ReachAI</h2>
+//           <h2>You've been invited to join ${user.name || user.email}'s team on mailfra</h2>
 //           <p>You've been invited as a <strong>${role.toLowerCase()}</strong>.</p>
 //           <p>Click the link below to accept the invitation:</p>
 //           <a href="${invitationUrl}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Accept Invitation</a>
@@ -825,11 +825,11 @@
 
 //     try {
 //       await resend.emails.send({
-//         from: "ReachAI <noreply@reachai.com>",
+//         from: "mailfra <noreply@mailfra.com>",
 //         to: teamMember.email,
-//         subject: `Reminder: ${user.name || user.email} invited you to join their ReachAI team`,
+//         subject: `Reminder: ${user.name || user.email} invited you to join their mailfra team`,
 //         html: `
-//           <h2>You've been invited to join ${user.name || user.email}'s team on ReachAI</h2>
+//           <h2>You've been invited to join ${user.name || user.email}'s team on mailfra</h2>
 //           <p>You've been invited as a <strong>${teamMember.role.toLowerCase()}</strong>.</p>
 //           <p>Click the link below to accept the invitation:</p>
 //           <a href="${invitationUrl}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Accept Invitation</a>
@@ -1000,11 +1000,11 @@ export async function inviteTeamMember(email: string, role: "MEMBER" | "ADMIN") 
 
     try {
       const emailResult = await resend.emails.send({
-        from: "ReachAI <noreply@reachai.com>",
+        from: "mailfra <noreply@mailfra.com>",
         to: email,
-        subject: `${user.name || user.email} invited you to join their ReachAI team`,
+        subject: `${user.name || user.email} invited you to join their mailfra team`,
         html: `
-          <h2>You've been invited to join ${user.name || user.email}'s team on ReachAI</h2>
+          <h2>You've been invited to join ${user.name || user.email}'s team on mailfra</h2>
           <p>You've been invited as a <strong>${role.toLowerCase()}</strong>.</p>
           <p>Click the link below to accept the invitation:</p>
           <a href="${invitationUrl}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Accept Invitation</a>
@@ -1112,11 +1112,11 @@ export async function resendInvitation(memberId: string) {
 
     try {
       const emailResult = await resend.emails.send({
-        from: "ReachAI <noreply@reachai.com>",
+        from: "mailfra <noreply@mailfra.com>",
         to: teamMember.email,
-        subject: `Reminder: ${user.name || user.email} invited you to join their ReachAI team`,
+        subject: `Reminder: ${user.name || user.email} invited you to join their mailfra team`,
         html: `
-          <h2>You've been invited to join ${user.name || user.email}'s team on ReachAI</h2>
+          <h2>You've been invited to join ${user.name || user.email}'s team on mailfra</h2>
           <p>You've been invited as a <strong>${teamMember.role.toLowerCase()}</strong>.</p>
           <p>Click the link below to accept the invitation:</p>
           <a href="${invitationUrl}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Accept Invitation</a>

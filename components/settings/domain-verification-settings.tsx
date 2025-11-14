@@ -35,26 +35,26 @@ export function DomainVerification() {
     const dnsRecords: DnsRecord[] = [
       {
         type: "TXT",
-        name: `_reachai-verification.${domain}`,
-        value: `reachai-verification=${Math.random().toString(36).substring(7)}`,
+        name: `_mailfra-verification.${domain}`,
+        value: `mailfra-verification=${Math.random().toString(36).substring(7)}`,
         status: "pending",
       },
       {
         type: "TXT",
         name: domain,
-        value: "v=spf1 include:reachai.io ~all",
+        value: "v=spf1 include:mailfra.io ~all",
         status: "pending",
       },
       {
         type: "TXT",
         name: `_dmarc.${domain}`,
-        value: "v=DMARC1; p=quarantine; rua=mailto:dmarc@reachai.io",
+        value: "v=DMARC1; p=quarantine; rua=mailto:dmarc@mailfra.io",
         status: "pending",
       },
       {
         type: "CNAME",
-        name: `reachai._domainkey.${domain}`,
-        value: "dkim.reachai.io",
+        name: `mailfra._domainkey.${domain}`,
+        value: "dkim.mailfra.io",
         status: "pending",
       },
     ]
@@ -211,7 +211,7 @@ export function DomainVerification() {
                   <strong>What these records do:</strong>
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     <li>
-                      <strong>SPF (TXT):</strong> Authorizes ReachAI to send emails on your behalf
+                      <strong>SPF (TXT):</strong> Authorizes mailfra to send emails on your behalf
                     </li>
                     <li>
                       <strong>DKIM (CNAME):</strong> Adds a digital signature to verify email authenticity

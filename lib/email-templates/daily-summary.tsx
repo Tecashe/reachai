@@ -114,7 +114,7 @@ const DailySummaryEmail: React.FC<DailySummaryEmailProps> = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              This is your daily summary from ReachAI. You can manage your notification preferences in your account
+              This is your daily summary from mailfra. You can manage your notification preferences in your account
               settings.
             </Text>
           </Section>

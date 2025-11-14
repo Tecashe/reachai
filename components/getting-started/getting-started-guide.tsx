@@ -90,7 +90,7 @@
 //             <div className="flex items-start justify-between">
 //               <div>
 //                 <CardTitle className="text-lg">Getting Started</CardTitle>
-//                 <CardDescription>Complete these steps to master ReachAI</CardDescription>
+//                 <CardDescription>Complete these steps to master mailfra</CardDescription>
 //               </div>
 //               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
 //                 <X className="h-4 w-4" />
@@ -276,7 +276,7 @@ export function GettingStartedGuide() {
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="text-lg">Getting Started</CardTitle>
-                <CardDescription>Complete these steps to master ReachAI</CardDescription>
+                <CardDescription>Complete these steps to master mailfra</CardDescription>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
                 <X className="h-4 w-4" />

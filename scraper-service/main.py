@@ -1,5 +1,5 @@
 """
-ReachAI Advanced Scraper Service
+mailfra Advanced Scraper Service
 FastAPI service for production-grade web scraping with AI extraction
 """
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI
 app = FastAPI(
-    title="ReachAI Scraper Service",
+    title="mailfra Scraper Service",
     description="Advanced web scraping with AI-powered extraction",
     version="1.0.0"
 )
@@ -219,7 +219,7 @@ async def get_news_intelligence(
 async def root():
     """Root endpoint"""
     return {
-        "service": "ReachAI Scraper Service",
+        "service": "mailfra Scraper Service",
         "version": "1.0.0",
         "status": "operational",
         "endpoints": {

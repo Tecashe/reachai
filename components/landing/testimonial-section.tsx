@@ -6,7 +6,7 @@ export function TestimonialSection() {
   const testimonials = [
     {
       quote:
-        "Reachai completely transformed our sales process. We scaled from 200 to 3,000 qualified conversations per month. The AI personalization is genuinely mind-blowing.",
+        "mailfra completely transformed our sales process. We scaled from 200 to 3,000 qualified conversations per month. The AI personalization is genuinely mind-blowing.",
       author: "Marcus Chen",
       role: "VP of Sales",
       company: "CloudScale",
@@ -15,7 +15,7 @@ export function TestimonialSection() {
     },
     {
       quote:
-        "I was skeptical about another email tool, but Reachai proved me wrong in week one. Our response rates jumped from 3% to 23%. The deliverability monitoring saved our domain twice.",
+        "I was skeptical about another email tool, but mailfra proved me wrong in week one. Our response rates jumped from 3% to 23%. The deliverability monitoring saved our domain twice.",
       author: "Rachel Morrison",
       role: "Director of Growth",
       company: "Quantum Labs",
@@ -42,7 +42,7 @@ export function TestimonialSection() {
     },
     {
       quote:
-        "We tested 7 different platforms. Reachai was the only one that didn't compromise on personalization OR deliverability. The DKIM setup wizard is brilliantly simple.",
+        "We tested 7 different platforms. mailfra was the only one that didn't compromise on personalization OR deliverability. The DKIM setup wizard is brilliantly simple.",
       author: "David Kim",
       role: "Chief Marketing Officer",
       company: "ScaleUp Inc",
@@ -51,7 +51,7 @@ export function TestimonialSection() {
     },
     {
       quote:
-        "The health monitoring alerts prevented our domain from getting blacklisted twice. Reachai essentially pays for itself by protecting our sender reputation.",
+        "The health monitoring alerts prevented our domain from getting blacklisted twice. mailfra essentially pays for itself by protecting our sender reputation.",
       author: "Amanda Foster",
       role: "Email Marketing Lead",
       company: "Innovate Co",
@@ -103,7 +103,7 @@ export function TestimonialSection() {
             Real results from real teams
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            See how companies are transforming their outreach with Reachai
+            See how companies are transforming their outreach with mailfra
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export function TestimonialSection() {
 
         {/* Bottom CTA */}
         <div className="text-center mt-20">
-          <p className="text-lg text-muted-foreground mb-6">Join thousands of teams already using Reachai</p>
+          <p className="text-lg text-muted-foreground mb-6">Join thousands of teams already using mailfra</p>
           <a
             href="/dashboard"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold hover:shadow-2xl hover:shadow-violet-500/50 hover:scale-105 transition-all duration-300"

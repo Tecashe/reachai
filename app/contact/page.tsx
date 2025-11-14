@@ -65,7 +65,7 @@ export default function ContactPage() {
                       <Mail className="h-6 w-6 text-blue-600 flex-shrink-0" />
                       <div>
                         <h3 className="font-semibold mb-1">Email</h3>
-                        <p className="text-muted-foreground">support@reachai.com</p>
+                        <p className="text-muted-foreground">support@mailfra.com</p>
                         <p className="text-sm text-muted-foreground mt-1">We'll respond within 24 hours</p>
                       </div>
                     </div>

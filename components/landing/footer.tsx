@@ -21,7 +21,7 @@ export function Footer() {
                   />
                 </svg>
               </div>
-              <span className="text-xl font-bold">Reachai</span>
+              <span className="text-xl font-bold">mailfra</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               AI-powered email outreach platform for modern growth teams
@@ -103,7 +103,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 Reachai. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2025 mailfra. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               <span className="sr-only">Twitter</span>

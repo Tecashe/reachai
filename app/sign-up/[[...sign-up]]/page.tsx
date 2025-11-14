@@ -6,7 +6,7 @@
 //       <div className="w-full max-w-md">
 //         <div className="mb-8 text-center">
 //           <h1 className="text-3xl font-bold text-gray-900">Get started</h1>
-//           <p className="mt-2 text-gray-600">Create your ReachAI account and start writing better emails</p>
+//           <p className="mt-2 text-gray-600">Create your mailfra account and start writing better emails</p>
 //         </div>
 //         <SignUp
 //           appearance={{
@@ -44,7 +44,7 @@
 //             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
 //               <Sparkles className="h-7 w-7" />
 //             </div>
-//             <span className="text-3xl font-bold">ReachAI</span>
+//             <span className="text-3xl font-bold">mailfra</span>
 //           </div>
 
 //           <div className="space-y-6">
@@ -79,7 +79,7 @@
 
 //           <div className="p-6 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
 //             <p className="text-sm text-blue-100 mb-4">
-//               "ReachAI increased our reply rate from 8% to 24% in just two weeks. Best investment we've made this year."
+//               "mailfra increased our reply rate from 8% to 24% in just two weeks. Best investment we've made this year."
 //             </p>
 //             <div className="flex items-center gap-3">
 //               <div className="h-10 w-10 rounded-full bg-white/20" />
@@ -91,7 +91,7 @@
 //           </div>
 //         </div>
 
-//         <div className="relative z-10 text-sm text-blue-100">© 2025 ReachAI. All rights reserved.</div>
+//         <div className="relative z-10 text-sm text-blue-100">© 2025 mailfra. All rights reserved.</div>
 //       </div>
 
 //       {/* Right side - Sign up form */}
@@ -109,7 +109,7 @@
 //               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
 //                 <Sparkles className="h-6 w-6 text-white" />
 //               </div>
-//               <span className="text-2xl font-bold">ReachAI</span>
+//               <span className="text-2xl font-bold">mailfra</span>
 //             </div>
 //           </div>
 

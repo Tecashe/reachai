@@ -63,7 +63,7 @@ export const ReplyNotificationEmail: React.FC<ReplyNotificationEmailProps> = ({
             <Hr style={hr} />
 
             <Text style={footer}>
-              This is an automated notification from ReachAI. You can manage your notification preferences in your
+              This is an automated notification from mailfra. You can manage your notification preferences in your
               account settings.
             </Text>
           </Section>

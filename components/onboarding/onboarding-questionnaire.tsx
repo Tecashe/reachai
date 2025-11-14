@@ -32,7 +32,7 @@
 //     const result = await submitOnboardingQuestionnaire(formData)
 
 //     if (result.success) {
-//       toast.success("Welcome to ReachAI! Let's get started.")
+//       toast.success("Welcome to mailfra! Let's get started.")
 //       router.push("/dashboard")
 //     } else {
 //       toast.error(result.error || "Failed to save your information")
@@ -47,7 +47,7 @@
 //       <CardHeader className="text-center space-y-2">
 //         <div className="flex items-center justify-center gap-2 mb-2">
 //           <Sparkles className="h-6 w-6 text-primary" />
-//           <CardTitle className="text-3xl">Welcome to ReachAI</CardTitle>
+//           <CardTitle className="text-3xl">Welcome to mailfra</CardTitle>
 //         </div>
 //         <CardDescription className="text-base">
 //           Let's personalize your experience. This will only take 2 minutes.
@@ -271,7 +271,7 @@
 //   }
 
 //   const handleSkipEmailSetup = () => {
-//     toast.success("Welcome to ReachAI! You can connect your email later from Settings.")
+//     toast.success("Welcome to mailfra! You can connect your email later from Settings.")
 //     router.push("/dashboard")
 //   }
 
@@ -288,7 +288,7 @@
 //       <CardHeader className="text-center space-y-2">
 //         <div className="flex items-center justify-center gap-2 mb-2">
 //           <Sparkles className="h-6 w-6 text-primary" />
-//           <CardTitle className="text-3xl">Welcome to ReachAI</CardTitle>
+//           <CardTitle className="text-3xl">Welcome to mailfra</CardTitle>
 //         </div>
 //         <CardDescription className="text-base">
 //           {step < 5
@@ -516,7 +516,7 @@
 //                     </p>
 //                     <Button
 //                       onClick={() => {
-//                         toast.success("Welcome to ReachAI! Complete email setup from Settings.")
+//                         toast.success("Welcome to mailfra! Complete email setup from Settings.")
 //                         router.push("/dashboard/email-setup")
 //                       }}
 //                       variant="outline"
@@ -590,7 +590,7 @@
 //   }
 
 //   const handleSkipEmailSetup = () => {
-//     toast.success("Welcome to ReachAI! You can connect your email later from Settings.")
+//     toast.success("Welcome to mailfra! You can connect your email later from Settings.")
 //     router.push("/dashboard")
 //   }
 
@@ -607,7 +607,7 @@
 //       <CardHeader className="text-center space-y-2">
 //         <div className="flex items-center justify-center gap-2 mb-2">
 //           <Sparkles className="h-6 w-6 text-primary" />
-//           <CardTitle className="text-3xl">Welcome to ReachAI</CardTitle>
+//           <CardTitle className="text-3xl">Welcome to mailfra</CardTitle>
 //         </div>
 //         <CardDescription className="text-base">
 //           {step < 5
@@ -835,7 +835,7 @@
 //                     </p>
 //                     <Button
 //                       onClick={() => {
-//                         toast.success("Welcome to ReachAI! Complete email setup from Settings.")
+//                         toast.success("Welcome to mailfra! Complete email setup from Settings.")
 //                         router.push("/dashboard/email-setup")
 //                       }}
 //                       variant="outline"
@@ -905,7 +905,7 @@
 
 //     if (result.success) {
 //       console.log("[v0] Questionnaire completed, redirecting to dashboard")
-//       toast.success("Welcome to ReachAI!")
+//       toast.success("Welcome to mailfra!")
 //       router.push("/dashboard")
 //     } else {
 //       toast.error(result.error || "Failed to save your information")
@@ -930,7 +930,7 @@
 //       <CardHeader className="text-center space-y-2">
 //         <div className="flex items-center justify-center gap-2 mb-2">
 //           <Sparkles className="h-6 w-6 text-primary" />
-//           <CardTitle className="text-3xl">Welcome to ReachAI</CardTitle>
+//           <CardTitle className="text-3xl">Welcome to mailfra</CardTitle>
 //         </div>
 //         <CardDescription className="text-base">
 //           {step < 5
@@ -1158,7 +1158,7 @@
 //                     </p>
 //                     <Button
 //                       onClick={() => {
-//                         toast.success("Welcome to ReachAI! Complete email setup from Settings.")
+//                         toast.success("Welcome to mailfra! Complete email setup from Settings.")
 //                         router.push("/dashboard/email-setup")
 //                       }}
 //                       variant="outline"
@@ -1229,7 +1229,7 @@ export function OnboardingQuestionnaire() {
 
     if (result.success) {
       console.log("[v0] Questionnaire completed, redirecting to dashboard")
-      toast.success("Welcome to ReachAI!")
+      toast.success("Welcome to mailfra!")
       router.push("/dashboard")
     } else {
       toast.error(result.error || "Failed to save your information")
@@ -1254,7 +1254,7 @@ export function OnboardingQuestionnaire() {
       <CardHeader className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Sparkles className="h-6 w-6 text-primary" />
-          <CardTitle className="text-3xl">Welcome to ReachAI</CardTitle>
+          <CardTitle className="text-3xl">Welcome to mailfra</CardTitle>
         </div>
         <CardDescription className="text-base">
           {step < 5
@@ -1488,7 +1488,7 @@ export function OnboardingQuestionnaire() {
                     </p>
                     <Button
                       onClick={() => {
-                        toast.success("Welcome to ReachAI! Complete email setup from Settings.")
+                        toast.success("Welcome to mailfra! Complete email setup from Settings.")
                         router.push("/dashboard/email-setup")
                       }}
                       variant="outline"

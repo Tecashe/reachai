@@ -293,9 +293,9 @@ export async function POST(req: Request) {
 //   // Send welcome email
 //   await sendTransactionalEmail({
 //     to: user.email,
-//     subject: `Welcome to ReachAI ${tier}!`,
+//     subject: `Welcome to mailfra ${tier}!`,
 //     html: `
-//       <h1>Welcome to ReachAI ${tier}!</h1>
+//       <h1>Welcome to mailfra ${tier}!</h1>
 //       <p>Your subscription is now active. You have:</p>
 //       <ul>
 //         <li>${emailCredits} email credits</li>
@@ -357,7 +357,7 @@ export async function POST(req: Request) {
 
 //     await sendTransactionalEmail({
 //       to: sub.user.email,
-//       subject: "Your ReachAI subscription has been cancelled",
+//       subject: "Your mailfra subscription has been cancelled",
 //       html: `
 //         <h1>Subscription Cancelled</h1>
 //         <p>Your subscription has been cancelled. You've been moved to the FREE plan.</p>
@@ -427,7 +427,7 @@ export async function POST(req: Request) {
 //       html: `
 //         <h1>Payment Failed</h1>
 //         <p>We couldn't process your payment of $${(invoice.amount_due / 100).toFixed(2)}.</p>
-//         <p>Please update your payment method to continue using ReachAI.</p>
+//         <p>Please update your payment method to continue using mailfra.</p>
 //         <a href="${env.NEXT_PUBLIC_APP_URL}/dashboard/billing">Update Payment Method</a>
 //       `,
 //     })

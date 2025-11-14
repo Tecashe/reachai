@@ -69,21 +69,21 @@
 //     </head>
 //     <body>
 //       <div className="header">
-//         <h1>You've been invited to join ReachAI</h1>
+//         <h1>You've been invited to join mailfra</h1>
 //       </div>
 //       <div className="content">
 //         <p>Hi there,</p>
 //         <p>
-//           <strong>{inviterName}</strong> ({inviterEmail}) has invited you to join their ReachAI workspace as a{" "}
+//           <strong>{inviterName}</strong> ({inviterEmail}) has invited you to join their mailfra workspace as a{" "}
 //           <strong>{role}</strong>.
 //         </p>
 
 //         <div className="info-box">
 //           <p>
-//             <strong>What is ReachAI?</strong>
+//             <strong>What is mailfra?</strong>
 //           </p>
 //           <p>
-//             ReachAI is an AI-powered cold email platform that helps teams generate personalized outreach campaigns,
+//             mailfra is an AI-powered cold email platform that helps teams generate personalized outreach campaigns,
 //             research prospects, and track engagement.
 //           </p>
 //         </div>
@@ -138,13 +138,13 @@
 //         </p>
 //       </div>
 //       <div className="footer">
-//         <p>© 2025 ReachAI. All rights reserved.</p>
+//         <p>© 2025 mailfra. All rights reserved.</p>
 //         <p>
-//           <a href="https://reachai.com/privacy" style={{ color: "#667eea", textDecoration: "none" }}>
+//           <a href="https://mailfra.com/privacy" style={{ color: "#667eea", textDecoration: "none" }}>
 //             Privacy Policy
 //           </a>
 //           {" · "}
-//           <a href="https://reachai.com/terms" style={{ color: "#667eea", textDecoration: "none" }}>
+//           <a href="https://mailfra.com/terms" style={{ color: "#667eea", textDecoration: "none" }}>
 //             Terms of Service
 //           </a>
 //         </p>
@@ -177,23 +177,23 @@ export const TeamInvitationEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={headerText}>You've been invited to join ReachAI</Text>
+          <Text style={headerText}>You've been invited to join mailfra</Text>
         </Section>
 
         <Section style={content}>
           <Text style={paragraph}>Hi there,</Text>
 
           <Text style={paragraph}>
-            <strong>{inviterName}</strong> ({inviterEmail}) has invited you to join their ReachAI workspace as a{" "}
+            <strong>{inviterName}</strong> ({inviterEmail}) has invited you to join their mailfra workspace as a{" "}
             <strong>{role}</strong>.
           </Text>
 
           <Section style={infoBox}>
             <Text style={paragraph}>
-              <strong>What is ReachAI?</strong>
+              <strong>What is mailfra?</strong>
             </Text>
             <Text style={paragraph}>
-              ReachAI is an AI-powered cold email platform that helps teams generate personalized outreach campaigns,
+              mailfra is an AI-powered cold email platform that helps teams generate personalized outreach campaigns,
               research prospects, and track engagement.
             </Text>
           </Section>
@@ -227,13 +227,13 @@ export const TeamInvitationEmail = ({
         <Hr style={hr} />
 
         <Section style={footer}>
-          <Text style={footerText}>© 2025 ReachAI. All rights reserved.</Text>
+          <Text style={footerText}>© 2025 mailfra. All rights reserved.</Text>
           <Text style={footerText}>
-            <Link href="https://reachai.com/privacy" style={link}>
+            <Link href="https://mailfra.com/privacy" style={link}>
               Privacy Policy
             </Link>
             {" · "}
-            <Link href="https://reachai.com/terms" style={link}>
+            <Link href="https://mailfra.com/terms" style={link}>
               Terms of Service
             </Link>
           </Text>

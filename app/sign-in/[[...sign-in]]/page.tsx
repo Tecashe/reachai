@@ -6,7 +6,7 @@
 //       <div className="w-full max-w-md">
 //         <div className="mb-8 text-center">
 //           <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
-//           <p className="mt-2 text-gray-600">Sign in to your ReachAI account</p>
+//           <p className="mt-2 text-gray-600">Sign in to your mailfra account</p>
 //         </div>
 //         <SignIn
 //           appearance={{
@@ -44,7 +44,7 @@
 //             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm">
 //               <Sparkles className="h-7 w-7" />
 //             </div>
-//             <span className="text-3xl font-bold">ReachAI</span>
+//             <span className="text-3xl font-bold">mailfra</span>
 //           </div>
 
 //           <div className="space-y-6">
@@ -85,7 +85,7 @@
 //           </div>
 //         </div>
 
-//         <div className="relative z-10 text-sm text-blue-100">© 2025 ReachAI. All rights reserved.</div>
+//         <div className="relative z-10 text-sm text-blue-100">© 2025 mailfra. All rights reserved.</div>
 //       </div>
 
 //       {/* Right side - Sign in form */}
@@ -103,13 +103,13 @@
 //               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
 //                 <Sparkles className="h-6 w-6 text-white" />
 //               </div>
-//               <span className="text-2xl font-bold">ReachAI</span>
+//               <span className="text-2xl font-bold">mailfra</span>
 //             </div>
 //           </div>
 
 //           <div className="text-center space-y-2">
 //             <h1 className="text-3xl font-bold">Welcome back</h1>
-//             <p className="text-muted-foreground">Sign in to your ReachAI account</p>
+//             <p className="text-muted-foreground">Sign in to your mailfra account</p>
 //           </div>
 
 //           <SignIn
@@ -166,13 +166,13 @@
 //               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500">
 //                 <Sparkles className="h-6 w-6 text-white" />
 //               </div>
-//               <span className="text-2xl font-bold text-white">ReachAI</span>
+//               <span className="text-2xl font-bold text-white">mailfra</span>
 //             </div>
 //           </div>
 
 //           <div className="text-center space-y-2">
 //             <h1 className="text-3xl font-bold text-white">Welcome back</h1>
-//             <p className="text-gray-400">Sign in to your ReachAI account</p>
+//             <p className="text-gray-400">Sign in to your mailfra account</p>
 //           </div>
 
 //           <SignIn

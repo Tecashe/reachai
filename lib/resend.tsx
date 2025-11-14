@@ -45,7 +45,7 @@ class ResendService {
   }
 
   async sendWelcomeEmail(to: string, name: string) {
-    const subject = "Welcome to ReachAI! 🚀"
+    const subject = "Welcome to mailfra! 🚀"
     const html = `
       <!DOCTYPE html>
       <html>
@@ -56,14 +56,14 @@ class ResendService {
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to ReachAI!</h1>
+            <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to mailfra!</h1>
           </div>
           
           <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
             <h2 style="color: #1f2937; margin-top: 0;">Hi ${name}! 👋</h2>
             
             <p style="font-size: 16px; color: #4b5563;">
-              Welcome to ReachAI - the most powerful AI-powered cold email personalization platform.
+              Welcome to mailfra - the most powerful AI-powered cold email personalization platform.
             </p>
             
             <p style="font-size: 16px; color: #4b5563;">
@@ -90,7 +90,7 @@ class ResendService {
           </div>
           
           <div style="text-align: center; margin-top: 30px; color: #9ca3af; font-size: 12px;">
-            <p>ReachAI - AI-Powered Cold Email Personalization</p>
+            <p>mailfra - AI-Powered Cold Email Personalization</p>
           </div>
         </body>
       </html>
@@ -171,8 +171,8 @@ class ResendService {
     isFirstEmail: boolean,
   ) {
     const subject = isFirstEmail
-      ? "🚀 You're almost there! Complete your ReachAI setup"
-      : "⏰ Final reminder: Unlock the full power of ReachAI"
+      ? "🚀 You're almost there! Complete your mailfra setup"
+      : "⏰ Final reminder: Unlock the full power of mailfra"
 
     const html = `
       <!DOCTYPE html>
@@ -184,7 +184,7 @@ class ResendService {
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">ReachAI</h1>
+            <h1 style="color: white; margin: 0; font-size: 28px;">mailfra</h1>
           </div>
           
           <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
@@ -194,7 +194,7 @@ class ResendService {
               isFirstEmail
                 ? `
               <p style="font-size: 16px; color: #4b5563;">
-                We noticed you started setting up your ReachAI account but haven't completed all the steps yet. 
+                We noticed you started setting up your mailfra account but haven't completed all the steps yet. 
                 You're <strong>${progress}% of the way there</strong>!
               </p>
             `
@@ -237,7 +237,7 @@ class ResendService {
           </div>
           
           <div style="text-align: center; margin-top: 30px; color: #9ca3af; font-size: 12px;">
-            <p>ReachAI - AI-Powered Cold Email Personalization</p>
+            <p>mailfra - AI-Powered Cold Email Personalization</p>
             <p>
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/privacy" style="color: #9ca3af; text-decoration: none;">Privacy Policy</a> • 
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/terms" style="color: #9ca3af; text-decoration: none;">Terms of Service</a>
@@ -258,7 +258,7 @@ class ResendService {
 
 export const resend = new ResendService()
 
-export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "ReachAI <noreply@reachai.app>"
+export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "mailfra <noreply@mailfra.app>"
 
 export async function sendTransactionalEmail({
   to,

@@ -1,8 +1,8 @@
-export const APP_NAME = "ReachAI"
+export const APP_NAME = "mailfra"
 export const APP_DESCRIPTION = "AI-Powered Cold Email Personalization Platform"
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
-// Pricing
+// Pricer
 export const PRICING_PLANS = [
   {
     tier: "FREE",

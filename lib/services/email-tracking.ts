@@ -7,7 +7,7 @@
 //    * Generate tracking pixel URL for open tracking
 //    */
 //   generateTrackingPixel(emailLogId: string): string {
-//     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.reachai.com"
+//     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.mailfra.com"
 //     return `${baseUrl}/api/track/open/${emailLogId}/pixel.gif`
 //   }
 
@@ -15,7 +15,7 @@
 //    * Generate tracked link for click tracking
 //    */
 //   generateTrackedLink(emailLogId: string, originalUrl: string): string {
-//     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.reachai.com"
+//     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.mailfra.com"
 //     const encoded = encodeURIComponent(originalUrl)
 //     return `${baseUrl}/api/track/click/${emailLogId}?url=${encoded}`
 //   }
@@ -167,7 +167,7 @@ import { logger } from "@/lib/logger"
  * Generate tracking pixel URL for open tracking
  */
 export function generateTrackingPixelUrl(emailLogId: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.reachai.com"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.mailfra.com"
   return `${baseUrl}/api/track/open/${emailLogId}/pixel.gif`
 }
 
@@ -175,7 +175,7 @@ export function generateTrackingPixelUrl(emailLogId: string): string {
  * Wrap URL with click tracking
  */
 export function wrapLinkWithTracking(emailLogId: string, originalUrl: string): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.reachai.com"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.mailfra.com"
   const encodedUrl = encodeURIComponent(originalUrl)
   return `${baseUrl}/api/track/click/${emailLogId}?url=${encodedUrl}`
 }

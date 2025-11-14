@@ -20,7 +20,7 @@ export default function AboutPage() {
           </Button>
 
           <div className="max-w-3xl">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">About ReachAI</h1>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-6">About mailfra</h1>
             <p className="text-xl text-muted-foreground">
               We're on a mission to revolutionize cold email outreach with AI-powered personalization that actually
               works.
@@ -38,7 +38,7 @@ export default function AboutPage() {
                 sales teams waste hours on research that leads nowhere.
               </p>
               <p className="text-lg text-muted-foreground mb-4">
-                ReachAI changes that. We combine cutting-edge AI with deep prospect research to generate emails that
+                mailfra changes that. We combine cutting-edge AI with deep prospect research to generate emails that
                 feel personal, relevant, and human—at scale.
               </p>
               <p className="text-lg text-muted-foreground">
@@ -85,7 +85,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold mb-6">Built by Sales People, for Sales People</h2>
             <p className="text-lg text-muted-foreground mb-8">
               Our team has spent years in the trenches of B2B sales, experiencing firsthand the pain of cold outreach.
-              We built ReachAI to solve our own problems—and now we're sharing it with the world.
+              We built mailfra to solve our own problems—and now we're sharing it with the world.
             </p>
             <Button size="lg" asChild>
               <Link href="/sign-up">Join Us Today</Link>

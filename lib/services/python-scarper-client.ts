@@ -233,7 +233,7 @@
 import { logger } from "@/lib/logger"
 import { env } from "@/lib/env"
 
-const SCRAPER_SERVICE_URL = env.PYTHON_SCRAPER_URL || "https://reachaimail.up.railway.app"
+const SCRAPER_SERVICE_URL = env.PYTHON_SCRAPER_URL || "https://mailframail.up.railway.app"
 const SCRAPER_API_KEY = env.PYTHON_SCRAPER_API_KEY || "cc98376807e2d56770c6f06913441eb6f46507cb6d52b3fbfd6ecc195408a6c4"
 
 export interface LinkedInProfile {
