@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { type gmail_v1, google } from "googleapis"
 import { decrypt } from "@/lib/encryption"
@@ -6,14 +6,17 @@ import { decrypt } from "@/lib/encryption"
 export const dynamic = "force-dynamic"
 export const maxDuration = 300
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     console.log("[v0] Starting reply sync...")
 
-    // Get all active Gmail sending accounts
+    // Get all active Gmail sending accounts (case-insensitive)
     const sendingAccounts = await db.sendingAccount.findMany({
       where: {
-        provider: "GMAIL",
+        provider: {
+          equals: "gmail",
+          mode: "insensitive"  // This will match "gmail", "Gmail", "GMAIL"
+        },
         isActive: true,
       },
     })
@@ -23,6 +26,7 @@ export async function GET() {
     let totalReplies = 0
 
     for (const account of sendingAccounts) {
+      console.log("[v0] Syncing account:", account.email)
       const replies = await syncAccountReplies(account)
       totalReplies += replies
     }
@@ -36,9 +40,46 @@ export async function GET() {
     })
   } catch (error) {
     console.error("[v0] Reply sync error:", error)
-    return NextResponse.json({ error: "Failed to sync replies" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Failed to sync replies",
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 })
   }
 }
+
+// export async function GET() {
+//   try {
+//     console.log("[v0] Starting reply sync...")
+
+//     // Get all active Gmail sending accounts
+//     const sendingAccounts = await db.sendingAccount.findMany({
+//       where: {
+//         provider: "GMAIL",
+//         isActive: true,
+//       },
+//     })
+
+//     console.log("[v0] Found", sendingAccounts.length, "Gmail accounts to sync")
+
+//     let totalReplies = 0
+
+//     for (const account of sendingAccounts) {
+//       const replies = await syncAccountReplies(account)
+//       totalReplies += replies
+//     }
+
+//     console.log("[v0] Reply sync complete. Total replies:", totalReplies)
+
+//     return NextResponse.json({
+//       success: true,
+//       accountsSynced: sendingAccounts.length,
+//       totalReplies,
+//     })
+//   } catch (error) {
+//     console.error("[v0] Reply sync error:", error)
+//     return NextResponse.json({ error: "Failed to sync replies" }, { status: 500 })
+//   }
+// }
 
 async function syncAccountReplies(sendingAccount: any): Promise<number> {
   try {
