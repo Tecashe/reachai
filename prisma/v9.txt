@@ -1,3 +1,5 @@
+
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -616,10 +618,6 @@ model EmailReply {
   isArchived Boolean   @default(false)
   archivedAt DateTime?
 
-  isStarred Boolean   @default(false)
-  starredAt DateTime?
-  notes     String?   @db.Text
-
   // Actions taken
   campaignPaused  Boolean @default(false)
   prospectUpdated Boolean @default(false)
@@ -635,7 +633,6 @@ model EmailReply {
   @@index([repliedAt])
   @@index([isRead])
   @@index([isArchived])
-  @@index([isStarred])
 }
 
 model EmailValidationResult {

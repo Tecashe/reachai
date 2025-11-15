@@ -4,7 +4,18 @@ import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { unifiedInbox } from "@/lib/services/unified-inbox"
 
-export async function getInboxMessages(filters?: { category?: string; isRead?: boolean }) {
+// export async function getInboxMessages(filters?: { category?: string; isRead?: boolean; isArchived?: boolean }) {
+//   const { userId } = await auth()
+//   if (!userId) throw new Error("Unauthorized")
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+//   if (!user) throw new Error("User not found")
+
+//   return await unifiedInbox.getInboxMessages(user.id, filters)
+// }
+export async function getInboxMessages(filters?: { category?: string; isRead?: boolean; isArchived?: boolean }) {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorized")
 

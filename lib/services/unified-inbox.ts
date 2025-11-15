@@ -515,7 +515,7 @@ interface InboxMessage {
 }
 
 class UnifiedInbox {
-  async getInboxMessages(userId: string, filters?: { category?: string; isRead?: boolean }): Promise<InboxMessage[]> {
+  async getInboxMessages(userId: string, filters?: { category?: string; isRead?: boolean; isArchived?: boolean }): Promise<InboxMessage[]> {
     const replies = await db.emailReply.findMany({
       where: {
         prospect: {
@@ -523,6 +523,7 @@ class UnifiedInbox {
         },
         ...(filters?.category && { category: filters.category as any }),
         ...(filters?.isRead !== undefined && { isRead: filters.isRead }),
+        ...(filters?.isArchived !== undefined && { isArchived: filters.isArchived }),
       },
       include: {
         prospect: {
