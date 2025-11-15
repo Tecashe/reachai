@@ -33,12 +33,22 @@ export function SequenceSelectorDialog({ isOpen, onClose, replyIds, onSuccess }:
     setIsLoading(true)
     try {
       const response = await fetch("/api/campaigns")
-      if (!response.ok) throw new Error()
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("[v0] Failed to load campaigns:", response.status, errorText)
+        throw new Error(`Failed to load campaigns: ${response.status}`)
+      }
 
       const data = await response.json()
+      console.log("[v0] Loaded campaigns:", data.campaigns?.length || 0)
       setCampaigns(data.campaigns || [])
+      
+      if (!data.campaigns || data.campaigns.length === 0) {
+        toast.error("No active campaigns with sequences found. Please create a campaign with email sequences first.")
+      }
     } catch (error) {
-      toast.error("Failed to load campaigns")
+      console.error("[v0] Error loading campaigns:", error)
+      toast.error("Failed to load campaigns. Please try again.")
     } finally {
       setIsLoading(false)
     }
