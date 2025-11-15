@@ -42,3 +42,4 @@ export async function GET(request: NextRequest, { params }: { params: { emailLog
   // Redirect to target URL immediately
   return NextResponse.redirect(targetUrl)
 }
+

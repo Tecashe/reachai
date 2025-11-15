@@ -249,62 +249,200 @@
 // }
 
 
+// "use server"
+
+// import { auth } from "@clerk/nextjs/server"
+// import { db } from "@/lib/db"
+
+// async function ensureUserExists(userId: string, userEmail: string) {
+//   let user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) {
+//     // Try to create the user
+//     try {
+//       user = await db.user.create({
+//         data: {
+//           clerkId: userId,
+//           email: userEmail,
+//           // Add other required fields from Clerk
+//         },
+//       })
+//     } catch (error: any) {
+//       // If user already exists with this email, try to find by email
+//       if (error.code === 'P2002') {
+//         user = await db.user.findUnique({
+//           where: { email: userEmail },
+//         })
+        
+//         // Update with clerkId if found
+//         if (user && !user.clerkId) {
+//           user = await db.user.update({
+//             where: { id: user.id },
+//             data: { clerkId: userId },
+//           })
+//         }
+//       } else {
+//         throw error
+//       }
+//     }
+//   }
+
+//   return user
+// }
+
+// export async function getDashboardStats() {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     // Get user email from Clerk
+//     const { sessionClaims } = await auth()
+//     const userEmail = sessionClaims?.email as string
+
+//     const user = await ensureUserExists(userId, userEmail)
+
+//     if (!user) {
+//       console.error("[builtbycashe] Could not create or find user")
+//       return {
+//         emailsSent: 0,
+//         activeProspects: 0,
+//         openRate: "0.0",
+//         clickRate: "0.0",
+//         replyRate: "0.0",
+//       }
+//     }
+
+//     // Rest of your code remains the same...
+//     const campaigns = await db.campaign.findMany({
+//       where: { userId: user.id },
+//       include: {
+//         prospects: {
+//           select: {
+//             emailsReceived: true,
+//             emailsOpened: true,
+//             emailsClicked: true,
+//             emailsReplied: true,
+//             status: true,
+//           },
+//         },
+//       },
+//     })
+
+//     let totalEmailsSent = 0
+//     let totalEmailsOpened = 0
+//     let totalEmailsClicked = 0
+//     let totalEmailsReplied = 0
+//     let activeProspects = 0
+
+//     campaigns.forEach((campaign) => {
+//       campaign.prospects.forEach((prospect) => {
+//         totalEmailsSent += prospect.emailsReceived
+//         totalEmailsOpened += prospect.emailsOpened
+//         totalEmailsClicked += prospect.emailsClicked
+//         totalEmailsReplied += prospect.emailsReplied
+//         if (prospect.status === "ACTIVE" || prospect.status === "CONTACTED") {
+//           activeProspects++
+//         }
+//       })
+//     })
+
+//     const openRate = totalEmailsSent > 0 ? (totalEmailsOpened / totalEmailsSent) * 100 : 0
+//     const clickRate = totalEmailsSent > 0 ? (totalEmailsClicked / totalEmailsSent) * 100 : 0
+//     const replyRate = totalEmailsSent > 0 ? (totalEmailsReplied / totalEmailsSent) * 100 : 0
+
+//     return {
+//       emailsSent: totalEmailsSent,
+//       activeProspects,
+//       openRate: openRate.toFixed(1),
+//       clickRate: clickRate.toFixed(1),
+//       replyRate: replyRate.toFixed(1),
+//     }
+//   } catch (error) {
+//     console.error("[builtbycashe] Error getting dashboard stats:", error)
+//     return {
+//       emailsSent: 0,
+//       activeProspects: 0,
+//       openRate: "0.0",
+//       clickRate: "0.0",
+//       replyRate: "0.0",
+//     }
+//   }
+// }
+
+// export async function getRecentActivity() {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const { sessionClaims } = await auth()
+//     const userEmail = sessionClaims?.email as string
+
+//     const user = await ensureUserExists(userId, userEmail)
+
+//     if (!user) {
+//       console.error("[builtbycashe] Could not create or find user")
+//       return []
+//     }
+
+//     const recentLogs = await db.emailLog.findMany({
+//       where: {
+//         prospect: {
+//           campaign: {
+//             userId: user.id,
+//           },
+//         },
+//       },
+//       include: {
+//         prospect: {
+//           select: {
+//             firstName: true,
+//             lastName: true,
+//             email: true,
+//             company: true,
+//           },
+//         },
+//       },
+//       orderBy: { createdAt: "desc" },
+//       take: 10,
+//     })
+
+//     return recentLogs.map((log) => ({
+//       id: log.id,
+//       type: log.status === "DELIVERED" ? "email_sent" : log.status === "BOUNCED" ? "email_bounced" : "email_opened",
+//       message:
+//         log.status === "DELIVERED"
+//           ? `Email sent to ${log.prospect.firstName} ${log.prospect.lastName}`
+//           : log.status === "BOUNCED"
+//             ? `Email bounced for ${log.prospect.email}`
+//             : `${log.prospect.firstName} opened your email`,
+//       timestamp: log.createdAt,
+//       prospect: log.prospect,
+//     }))
+//   } catch (error) {
+//     console.error("[builtbycashe] Error getting recent activity:", error)
+//     return []
+//   }
+// }
+
+
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
-
-async function ensureUserExists(userId: string, userEmail: string) {
-  let user = await db.user.findUnique({
-    where: { clerkId: userId },
-  })
-
-  if (!user) {
-    // Try to create the user
-    try {
-      user = await db.user.create({
-        data: {
-          clerkId: userId,
-          email: userEmail,
-          // Add other required fields from Clerk
-        },
-      })
-    } catch (error: any) {
-      // If user already exists with this email, try to find by email
-      if (error.code === 'P2002') {
-        user = await db.user.findUnique({
-          where: { email: userEmail },
-        })
-        
-        // Update with clerkId if found
-        if (user && !user.clerkId) {
-          user = await db.user.update({
-            where: { id: user.id },
-            data: { clerkId: userId },
-          })
-        }
-      } else {
-        throw error
-      }
-    }
-  }
-
-  return user
-}
 
 export async function getDashboardStats() {
   try {
     const { userId } = await auth()
     if (!userId) throw new Error("Unauthorized")
 
-    // Get user email from Clerk
-    const { sessionClaims } = await auth()
-    const userEmail = sessionClaims?.email as string
-
-    const user = await ensureUserExists(userId, userEmail)
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+    })
 
     if (!user) {
-      console.error("[builtbycashe] Could not create or find user")
+      console.error("[v0] User not found in database")
       return {
         emailsSent: 0,
         activeProspects: 0,
@@ -314,7 +452,7 @@ export async function getDashboardStats() {
       }
     }
 
-    // Rest of your code remains the same...
+    // Get all campaigns for this user
     const campaigns = await db.campaign.findMany({
       where: { userId: user.id },
       include: {
@@ -330,6 +468,7 @@ export async function getDashboardStats() {
       },
     })
 
+    // Calculate aggregate stats
     let totalEmailsSent = 0
     let totalEmailsOpened = 0
     let totalEmailsClicked = 0
@@ -360,7 +499,7 @@ export async function getDashboardStats() {
       replyRate: replyRate.toFixed(1),
     }
   } catch (error) {
-    console.error("[builtbycashe] Error getting dashboard stats:", error)
+    console.error("[v0] Error getting dashboard stats:", error)
     return {
       emailsSent: 0,
       activeProspects: 0,
@@ -376,16 +515,16 @@ export async function getRecentActivity() {
     const { userId } = await auth()
     if (!userId) throw new Error("Unauthorized")
 
-    const { sessionClaims } = await auth()
-    const userEmail = sessionClaims?.email as string
-
-    const user = await ensureUserExists(userId, userEmail)
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+    })
 
     if (!user) {
-      console.error("[builtbycashe] Could not create or find user")
+      console.error("[v0] User not found in database")
       return []
     }
 
+    // Get recent email logs
     const recentLogs = await db.emailLog.findMany({
       where: {
         prospect: {
@@ -421,7 +560,67 @@ export async function getRecentActivity() {
       prospect: log.prospect,
     }))
   } catch (error) {
-    console.error("[builtbycashe] Error getting recent activity:", error)
+    console.error("[v0] Error getting recent activity:", error)
     return []
+  }
+}
+
+export async function getWarmupStats() {
+  try {
+    const { userId } = await auth()
+    if (!userId) throw new Error("Unauthorized")
+
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+    })
+
+    if (!user) {
+      return {
+        avgHealthScore: 0,
+        activeAccounts: 0,
+        avgInboxRate: 0,
+      }
+    }
+
+    const accounts = await db.sendingAccount.findMany({
+      where: {
+        userId: user.id,
+        isActive: true,
+      },
+      select: {
+        healthScore: true,
+        openRate: true,
+        warmupStage: true,
+      },
+    })
+
+    if (accounts.length === 0) {
+      return {
+        avgHealthScore: 0,
+        activeAccounts: 0,
+        avgInboxRate: 0,
+      }
+    }
+
+    // Calculate average health score
+    const totalHealth = accounts.reduce((sum, acc) => sum + acc.healthScore, 0)
+    const avgHealthScore = Math.round(totalHealth / accounts.length)
+
+    // Calculate average inbox rate from open rates
+    const totalInboxRate = accounts.reduce((sum, acc) => sum + acc.openRate, 0)
+    const avgInboxRate = Math.round(totalInboxRate / accounts.length)
+
+    return {
+      avgHealthScore,
+      activeAccounts: accounts.length,
+      avgInboxRate,
+    }
+  } catch (error) {
+    console.error("[v0] Error getting warmup stats:", error)
+    return {
+      avgHealthScore: 0,
+      activeAccounts: 0,
+      avgInboxRate: 0,
+    }
   }
 }
