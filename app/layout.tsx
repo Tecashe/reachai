@@ -14,7 +14,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "mailfra - AI-Powered Cold Email Personalization",
   description:
-    "Write cold emails that actually get replies. mailfra uses AI to research prospects and craft hyper-personalized outreach at scale.",
+    "Write cold emails that actually get replies. Mailfra uses AI to research prospects and craft hyper-personalized outreach at scale.",
   generator: "builtbycashe",
 }
 
@@ -27,7 +27,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={`font-sans antialiased`}>
-          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
             {children}
             <Toaster position="top-right" richColors />
           </ThemeProvider>

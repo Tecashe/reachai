@@ -15,7 +15,7 @@ export async function sendOnboardingReminders() {
       where: {
         onboardingCompletedAt: null,
         OR: [
-          // Day 3 reminder - haven't received any emails yet
+          // Day 3 reminder -haven't received any emails yet
           {
             createdAt: {
               lte: threeDaysAgo,
@@ -46,10 +46,6 @@ export async function sendOnboardingReminders() {
         onboardingEmailsSent: true,
         createdAt: true,
       },
-    })
-
-    logger.info("Processing onboarding reminders", undefined, {
-      usersFound: incompleteUsers.length,
     })
 
     for (const user of incompleteUsers) {
@@ -87,12 +83,7 @@ export async function sendOnboardingReminders() {
           },
         })
 
-        logger.info("Sent onboarding reminder", undefined, {
-          userId: user.id,
-          email: user.email,
-          progress,
-          emailNumber: user.onboardingEmailsSent + 1,
-        })
+       
       } catch (error) {
         logger.error("Failed to send onboarding reminder", error as Error, {
           userId: user.id,

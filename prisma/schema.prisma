@@ -236,31 +236,64 @@ model EmailTemplate {
 
   name        String
   description String?
-  category    String? // "cold_outreach", "follow_up", "meeting_request"
+  category    String? // Will be deprecated in favor of categories relation
 
   subject String
   body    String @db.Text
 
-  // Template variables
-  variables Json? // [{ name: "company", required: true }]
+  // NEW: Visual enhancements
+  thumbnailUrl    String? // Template preview image
+  previewImageUrl String? // Full template visualization
+  colorScheme     Json? // { primary: "#...", secondary: "#...", accent: "#..." }
 
-  // AI generation settings
-  aiGenerated Boolean @default(false)
-  basePrompt  String? @db.Text
+  // NEW: Industry & advanced categorization
+  industry String? // "saas", "ecommerce", "real_estate", "recruiting", "healthcare", "finance", "education", "nonprofit", "technology", "consulting"
+  tags     String[] @default([]) // ["b2b", "enterprise", "follow-up", "cold-outreach"]
 
-  // Stats
-  timesUsed    Int    @default(0)
-  avgOpenRate  Float?
-  avgReplyRate Float?
+  // NEW: Template type & structure
+  isSystemTemplate Boolean      @default(false) // Built-in vs user-created
+  templateType     TemplateType @default(TEXT) // TEXT, VISUAL, HTML
 
-  // Relationships
+  // NEW: Drag-and-drop editor data
+  editorBlocks  Json? // Block-based editor structure with blocks array
+  editorVersion String? @default("1.0")
+
+  // NEW: AI generation metadata
+  aiGenerated    Boolean @default(false)
+  basePrompt     String? @db.Text // Original prompt used to generate
+  aiModel        String? // Model used (e.g., "gpt-4", "claude-3")
+  aiPrompt       String? @db.Text // Full prompt with context
+  aiGenerationId String? // Track generation session
+
+  // Template variables (existing but enhanced)
+  variables Json? // [{ name: "company", required: true, defaultValue: "", description: "" }]
+
+  // NEW: Enhanced stats and engagement
+  timesUsed      Int       @default(0)
+  avgOpenRate    Float?
+  avgReplyRate   Float?
+  lastUsedAt     DateTime?
+  isFavorite     Boolean   @default(false)
+  viewCount      Int       @default(0)
+  duplicateCount Int       @default(0) // How many times it's been duplicated
+
+  // NEW: Template categories (many-to-many)
+  templateCategories TemplateInCategory[]
+
+  // Existing relationships
   emailSequences EmailSequence[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  TemplateBlock TemplateBlock[]
 
   @@index([userId])
   @@index([category])
+  @@index([industry])
+  @@index([isSystemTemplate])
+  @@index([isFavorite])
+  @@index([templateType])
+  @@index([timesUsed])
 }
 
 model EmailSequence {
@@ -1403,4 +1436,123 @@ enum NotificationPriority {
   MEDIUM
   HIGH
   URGENT
+}
+
+// PRODUCTION-READY SCHEMA MIGRATION
+// This file shows the changes needed for your existing schema.prisma
+// Add these models and update the EmailTemplate model as shown below
+
+// NEW: Template type enum
+enum TemplateType {
+  TEXT // Plain text with variables
+  VISUAL // Rich visual with drag-and-drop blocks
+  HTML // Custom HTML code
+}
+
+// NEW: Template categories for organization
+model TemplateCategory {
+  id          String  @id @default(cuid())
+  name        String  @unique // "Cold Outreach", "Follow Up", "Meeting Request"
+  slug        String  @unique // "cold-outreach", "follow-up", "meeting-request"
+  description String?
+  icon        String? // Lucide icon name: "Mail", "Calendar", "Users"
+  color       String  @default("#3b82f6") // Hex color for UI
+  order       Int     @default(0) // Display order
+
+  // Industry grouping
+  industry String? // Group categories by industry: "saas", "ecommerce", etc.
+
+  // Category can have templates
+  templates TemplateInCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([industry])
+  @@index([slug])
+}
+
+// NEW: Many-to-many relationship between templates and categories
+model TemplateInCategory {
+  id         String           @id @default(cuid())
+  templateId String
+  template   EmailTemplate    @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   TemplateCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([templateId, categoryId])
+  @@index([templateId])
+  @@index([categoryId])
+}
+
+// NEW: Block-based template building
+model TemplateBlock {
+  id         String        @id @default(cuid())
+  templateId String
+  template   EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  blockType BlockType
+  order     Int // Order in the template
+  content   Json // Block-specific content (text, image URL, button text, etc.)
+  styling   Json? // Block-specific styles (colors, fonts, spacing)
+
+  // Configuration
+  config Json? // Additional block configuration
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([templateId])
+  @@index([order])
+}
+
+// NEW: Block types for drag-and-drop editor
+enum BlockType {
+  HEADER // Hero header with title and subtitle
+  PARAGRAPH // Text content with rich formatting
+  IMAGE // Image with optional caption
+  BUTTON // Call-to-action button
+  DIVIDER // Horizontal line separator
+  SIGNATURE // Email signature block
+  PERSONALIZATION // Dynamic personalization field {{firstName}}
+  SOCIAL_LINKS // Social media icons/links
+  SPACER // Vertical spacing
+  COLUMNS // Multi-column layout
+  LIST // Bullet or numbered list
+  QUOTE // Blockquote styling
+  CODE // Code snippet
+}
+
+// NEW: AI template generation history
+model TemplateGenerationHistory {
+  id     String @id @default(cuid())
+  userId String
+
+  // Generation details
+  prompt   String  @db.Text // User's prompt
+  industry String? // Selected industry
+  purpose  String? // "cold-outreach", "follow-up", etc.
+  tone     String? // "professional", "casual", "friendly"
+
+  // AI response
+  aiModel          String // "gpt-4", "claude-3"
+  generatedName    String // AI-generated template name
+  generatedSubject String
+  generatedBody    String @db.Text
+
+  // Metadata
+  templateId String? // If user saved the generated template
+  saved      Boolean @default(false)
+  quality    Int? // 1-5 star rating from user
+
+  // Generation context
+  context Json? // Additional context like company info, recipient details
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([saved])
+  @@index([createdAt])
 }
