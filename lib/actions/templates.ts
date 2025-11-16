@@ -2007,7 +2007,7 @@ export async function duplicateTemplate(templateId: string) {
 
     if (!original) return { success: false, error: "Template not found" }
 
-    // Increment duplicate count on original
+  
     if (original.isSystemTemplate) {
       await db.emailTemplate.update({
         where: { id: templateId },
