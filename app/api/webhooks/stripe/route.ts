@@ -554,7 +554,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     },
   })
 
-  // Send welcome emails
+  // Send welcome emailse
   await sendTransactionalEmail({
     to: user.email,
     subject: `Welcome to ReachAI ${tier}!`,
