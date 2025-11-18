@@ -75,9 +75,6 @@ model User {
   creditPurchases    CreditPurchase[]
   domains            Domain[]
 
-  // Last time we sent low credit warning
-  lastCreditWarning DateTime?
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
