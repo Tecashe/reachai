@@ -208,7 +208,8 @@ const envSchema = z.object({
 
   // Resend
   RESEND_API_KEY: z.string().min(1),
-  RESEND_FROM_EMAIL: z.string().email(),
+  // RESEND_FROM_EMAIL: z.string().email(),
+  RESEND_FROM_EMAIL: z.string().min(1),
 
   // Stripe
   STRIPE_SECRET_KEY: z.string().min(1),
