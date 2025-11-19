@@ -30,7 +30,7 @@ export async function GET() {
     }
 
     const stats = await warmupEmailManager.getWarmupPoolStats()
-    //redlights
+  
     return NextResponse.json({
       totalEmails: stats.poolSize,
       activeEmails: stats.poolActive,

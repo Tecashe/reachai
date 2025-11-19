@@ -1,6 +1,6 @@
 import { Resend as ResendClient } from "resend"
-import { env } from "@/lib/env"
-import { logger } from "@/lib/logger"
+import { env } from "./env"
+import { logger } from "./logger"
 
 class ResendService {
   private client: ResendClient
@@ -258,7 +258,7 @@ class ResendService {
 
 export const resend = new ResendService()
 
-export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "mailfra <noreply@mailfra.app>"
+export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "Mailfra <noreply@mailfra.app>"
 
 export async function sendTransactionalEmail({
   to,
