@@ -257,7 +257,6 @@ class ResendService {
 }
 
 export const resend = new ResendService()
-//canjust
 
 export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "Mailfra <noreply@mailfra.app>"
 
