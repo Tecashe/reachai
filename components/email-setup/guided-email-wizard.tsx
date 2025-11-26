@@ -4549,6 +4549,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
+import { useRouter } from "next/navigation"
 import {
   CheckCircle2,
   XCircle,
@@ -4584,16 +4585,20 @@ interface GuidedEmailWizardProps {
     dnsRecords: any
     deliverabilityHealth?: any
   }>
+  existingAccounts?: any[]
 }
 
-export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardProps) {
+export function GuidedEmailWizard({ existingDomains = [], existingAccounts = [] }: GuidedEmailWizardProps) {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState<SetupStep>("welcome")
-  const [domain, setDomain] = useState("")
-  const [domainId, setDomainId] = useState("")
-  const [dnsRecords, setDnsRecords] = useState<DNSRecord[]>([])
+  const [completedSteps, setCompletedSteps] = useState<Set<SetupStep>>(new Set())
+  const [domainId, setDomainId] = useState<string | null>(null)
+  const [domainName, setDomainName] = useState("")
   const [loading, setLoading] = useState(false)
   const [verificationResults, setVerificationResults] = useState<any>(null)
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set())
+  const [dnsRecords, setDnsRecords] = useState<any[]>([])
+  const [isManualNavigation, setIsManualNavigation] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
 
   const steps: { id: SetupStep; title: string; icon: any }[] = [
     { id: "welcome", title: "Welcome", icon: CheckCheck },
@@ -4611,12 +4616,12 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
   const progress = ((currentStepIndex + 1) / steps.length) * 100
 
   const handleAddDomain = async () => {
-    if (!domain) {
+    if (!domainName) {
       toast.error("Please enter a domain name")
       return
     }
 
-    const existingDomain = existingDomains?.find((d) => d.domain.toLowerCase() === domain.toLowerCase())
+    const existingDomain = existingDomains?.find((d) => d.domain.toLowerCase() === domainName.toLowerCase())
 
     if (existingDomain) {
       if (existingDomain.isVerified) {
@@ -4633,7 +4638,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
         ) {
           setDnsRecords((existingDomain.dnsRecords as any).records || [])
         }
-        setCompletedSteps((prev) => new Set(prev).add("add-domain"))
+        setCompletedSteps((prev) => new Set([...prev, "add-domain"]))
         toast.info("Resuming configuration", {
           description: "This domain was added before. Continue with DNS setup.",
         })
@@ -4644,7 +4649,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
 
     setLoading(true)
     try {
-      const result = await addDomain(domain)
+      const result = await addDomain(domainName)
 
       if (result.success === false) {
         toast.error(result.error || "Failed to add domain")
@@ -4654,7 +4659,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
       if (result.success && result.domainId && result.dnsRecords) {
         setDomainId(result.domainId)
         setDnsRecords(result.dnsRecords.records)
-        setCompletedSteps((prev) => new Set(prev).add("add-domain"))
+        setCompletedSteps((prev) => new Set([...prev, "add-domain"]))
         toast.success("Domain added! Let's configure your DNS records")
         setCurrentStep("spf")
       }
@@ -4671,8 +4676,9 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
 
   const handleVerifyStep = async (step: SetupStep) => {
     setLoading(true)
+    setIsManualNavigation(true)
     try {
-      const result = await verifyDomain(domainId)
+      const result = await verifyDomain(domainId||"")
       setVerificationResults(result)
 
       const spfValid = result.results.find((r: any) => r.type === "SPF")?.valid
@@ -4682,7 +4688,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
 
       if (step === "spf") {
         if (spfValid) {
-          setCompletedSteps((prev) => new Set(prev).add("spf"))
+          setCompletedSteps((prev) => new Set([...prev, "spf"]))
           toast.success("SPF record verified!")
           setCurrentStep("dkim")
         } else {
@@ -4690,13 +4696,16 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
             description: "DNS changes can take up to 48 hours to propagate. You can skip and come back later.",
             action: {
               label: "Skip for now",
-              onClick: () => setCurrentStep("dkim"),
+              onClick: () => {
+                setIsManualNavigation(true)
+                setCurrentStep("dkim")
+              },
             },
           })
         }
       } else if (step === "dkim") {
         if (dkimValid) {
-          setCompletedSteps((prev) => new Set(prev).add("dkim"))
+          setCompletedSteps((prev) => new Set([...prev, "dkim"]))
           toast.success("DKIM key verified!")
           setCurrentStep("dmarc")
         } else {
@@ -4704,13 +4713,16 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
             description: "DNS changes can take up to 48 hours to propagate. You can skip and come back later.",
             action: {
               label: "Skip for now",
-              onClick: () => setCurrentStep("dmarc"),
+              onClick: () => {
+                setIsManualNavigation(true)
+                setCurrentStep("dmarc")
+              },
             },
           })
         }
       } else if (step === "dmarc") {
         if (dmarcValid) {
-          setCompletedSteps((prev) => new Set(prev).add("dmarc"))
+          setCompletedSteps((prev) => new Set([...prev, "dmarc"]))
           toast.success("DMARC policy verified!")
           setCurrentStep("mx")
         } else {
@@ -4718,29 +4730,38 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
             description: "DNS changes can take up to 48 hours to propagate. You can skip and come back later.",
             action: {
               label: "Skip for now",
-              onClick: () => setCurrentStep("mx"),
+              onClick: () => {
+                setIsManualNavigation(true)
+                setCurrentStep("mx")
+              },
             },
           })
         }
       } else if (step === "mx") {
         if (mxValid) {
-          setCompletedSteps((prev) => new Set(prev).add("mx"))
+          setCompletedSteps((prev) => new Set([...prev, "mx"]))
           toast.success("MX records verified!")
           setCurrentStep("verify")
         } else {
-          toast.error("MX records not found", {
-            description: "Your domain needs MX records to receive email. Check with your email provider.",
+          toast.error("MX records not verified yet", {
+            description: "DNS changes can take up to 48 hours to propagate. You can skip and come back later.",
             action: {
               label: "Skip for now",
-              onClick: () => setCurrentStep("verify"),
+              onClick: () => {
+                setIsManualNavigation(true)
+                setCurrentStep("verify")
+              },
             },
           })
         }
       }
-    } catch (error: any) {
-      toast.error(error.message || "Verification failed")
+    } catch (error) {
+      toast.error("Verification failed", {
+        description: "Please try again later",
+      })
     } finally {
       setLoading(false)
+      setTimeout(() => setIsManualNavigation(false), 1000)
     }
   }
 
@@ -4767,15 +4788,18 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
   const dmarcRecord = dnsRecords.find((r) => r.type === "TXT" && r.name === "_dmarc") || {
     type: "TXT",
     name: "_dmarc",
-    value: `v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@${domain || "yourdomain.com"}`,
+    value: `v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@${domainName || "yourdomain.com"}`,
   }
 
   useEffect(() => {
+    if (isManualNavigation || hasInitialized) return
+
     if (existingDomains.length > 0) {
       const unconfigured = existingDomains.find((d) => !d.isVerified)
       if (unconfigured) {
-        setDomain(unconfigured.domain)
         setDomainId(unconfigured.id)
+        setDomainName(unconfigured.domain)
+        setCompletedSteps(new Set(["add-domain"]))
 
         if (
           unconfigured.dnsRecords &&
@@ -4828,9 +4852,14 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
         } else {
           setCurrentStep("add-domain")
         }
+      } else {
+        setCurrentStep("connect-accounts")
+        setCompletedSteps(new Set(["add-domain", "spf", "dkim", "dmarc", "mx", "verify"]))
       }
     }
-  }, [existingDomains])
+
+    setHasInitialized(true)
+  }, [existingDomains, isManualNavigation, hasInitialized])
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -4935,8 +4964,8 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
               <Input
                 id="domain"
                 placeholder="yourbusiness.com"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value.trim().toLowerCase())}
+                value={domainName}
+                onChange={(e) => setDomainName(e.target.value.trim().toLowerCase())}
                 disabled={loading}
               />
               <p className="text-sm text-muted-foreground">
@@ -4974,7 +5003,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
               <ChevronLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <Button onClick={handleAddDomain} disabled={!domain || loading} className="flex-1">
+            <Button onClick={handleAddDomain} disabled={!domainName || loading} className="flex-1">
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add Domain & Generate DNS Records
               <ChevronRight className="ml-2 h-4 w-4" />
@@ -5400,7 +5429,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
               <Button
                 variant="outline"
                 className="h-auto justify-start p-4 bg-transparent"
-                onClick={() => (window.location.href = "/dashboard/settings?tab=sending-accounts")}
+                onClick={() => router.push("/dashboard/settings?tab=sending-accounts")}
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
@@ -5416,7 +5445,7 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
               <Button
                 variant="outline"
                 className="h-auto justify-start p-4 bg-transparent"
-                onClick={() => (window.location.href = "/dashboard/settings?tab=sending-accounts")}
+                onClick={() => router.push("/dashboard/settings?tab=sending-accounts")}
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900">
@@ -5465,10 +5494,10 @@ export function GuidedEmailWizard({ existingDomains = [] }: GuidedEmailWizardPro
             </div>
           </CardContent>
           <CardFooter className="flex gap-2">
-            <Button variant="outline" onClick={() => (window.location.href = "/dashboard/warmup")}>
+            <Button variant="outline" onClick={() => router.push("/dashboard/warmup")}>
               Start Warmup
             </Button>
-            <Button onClick={() => (window.location.href = "/dashboard/campaigns/new")} className="flex-1">
+            <Button onClick={() => router.push("/dashboard/campaigns/new")} className="flex-1">
               Create Campaign
               <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
