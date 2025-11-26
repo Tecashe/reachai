@@ -594,6 +594,339 @@
 // export const domainHealthChecker = new DomainHealthChecker()
 
 
+// import { db } from "../db"
+// import { logger } from "../logger"
+// import dns from "dns/promises"
+
+// interface DomainHealth {
+//   domain: string
+//   spf: { valid: boolean; record?: string; error?: string; status?: string }
+//   dkim: { valid: boolean; selector?: string; error?: string; status?: string }
+//   dmarc: { valid: boolean; policy?: string; error?: string; status?: string }
+//   blacklisted: boolean
+//   blacklists: string[]
+//   mxRecords: string[]
+//   score: number
+//   reputation?: { overall: number }
+//   issues?: Array<{ severity: string; message: string }>
+// }
+
+// class DomainHealthChecker {
+//   // Major blacklist providers
+//   private readonly BLACKLIST_PROVIDERS = [
+//     "zen.spamhaus.org",
+//     "bl.spamcop.net",
+//     "b.barracudacentral.org",
+//     "dnsbl.sorbs.net",
+//     "spam.dnsbl.sorbs.net",
+//     "bl.mailspike.net",
+//     "psbl.surriel.com",
+//     "ubl.unsubscore.com",
+//   ]
+
+//   async checkDomainHealth(email: string): Promise<DomainHealth> {
+//     const domain = email.split("@")[1]
+
+//     try {
+//       // Run all checks in parallel for speed
+//       const [spf, dkim, dmarc, mxRecords, blacklistResults] = await Promise.all([
+//         this.checkSPF(domain),
+//         this.checkDKIM(domain),
+//         this.checkDMARC(domain),
+//         this.checkMXRecords(domain),
+//         this.checkBlacklists(domain),
+//       ])
+
+//       const health: DomainHealth = {
+//         domain,
+//         spf: { ...spf, status: spf.valid ? "VALID" : "INVALID" },
+//         dkim: { ...dkim, status: dkim.valid ? "VALID" : "INVALID" },
+//         dmarc: { ...dmarc, status: dmarc.valid ? "VALID" : "INVALID" },
+//         blacklisted: blacklistResults.blacklisted,
+//         blacklists: blacklistResults.listedOn,
+//         mxRecords,
+//         score: 0,
+//       }
+
+//       // Calculate overall score
+//       health.score = this.calculateHealthScore(health)
+//       health.reputation = { overall: health.score }
+
+//       // Collect issues
+//       health.issues = []
+//       if (!spf.valid) {
+//         health.issues.push({
+//           severity: "warning",
+//           message: `SPF record issue: ${spf.error || "Not found"}`,
+//         })
+//       }
+//       if (!dkim.valid) {
+//         health.issues.push({
+//           severity: "warning",
+//           message: `DKIM record issue: ${dkim.error || "Not found"}`,
+//         })
+//       }
+//       if (!dmarc.valid) {
+//         health.issues.push({
+//           severity: "info",
+//           message: `DMARC policy issue: ${dmarc.error || "Not found"}`,
+//         })
+//       }
+//       if (blacklistResults.blacklisted) {
+//         health.issues.push({
+//           severity: "critical",
+//           message: `Domain blacklisted on: ${blacklistResults.listedOn.join(", ")}`,
+//         })
+//       }
+
+//       return health
+//     } catch (error) {
+//       logger.error("Domain health check failed", error as Error, { domain })
+
+//       return {
+//         domain,
+//         spf: { valid: false, error: "Check failed", status: "UNKNOWN" },
+//         dkim: { valid: false, error: "Check failed", status: "UNKNOWN" },
+//         dmarc: { valid: false, error: "Check failed", status: "UNKNOWN" },
+//         blacklisted: false,
+//         blacklists: [],
+//         mxRecords: [],
+//         score: 0,
+//         reputation: { overall: 0 },
+//         issues: [{ severity: "critical", message: "Health check failed" }],
+//       }
+//     }
+//   }
+
+//   private async checkSPF(domain: string): Promise<{ valid: boolean; record?: string; error?: string }> {
+//     try {
+//       const txtRecords = await dns.resolveTxt(domain)
+//       const spfRecord = txtRecords.find((record) => record.join("").startsWith("v=spf1"))
+
+//       if (!spfRecord) {
+//         return {
+//           valid: false,
+//           error: "No SPF record found",
+//         }
+//       }
+
+//       const spfString = spfRecord.join("")
+
+//       // Validate SPF record format
+//       const hasValidMechanism = /\b(include|a|mx|ip4|ip6|all)\b/.test(spfString)
+//       const hasValidQualifier = /[~\-+?]all/.test(spfString)
+
+//       return {
+//         valid: hasValidMechanism && hasValidQualifier,
+//         record: spfString,
+//         error: !hasValidMechanism || !hasValidQualifier ? "Invalid SPF format" : undefined,
+//       }
+//     } catch (error) {
+//       return {
+//         valid: false,
+//         error: "DNS lookup failed",
+//       }
+//     }
+//   }
+
+//   private async checkDKIM(domain: string): Promise<{ valid: boolean; selector?: string; error?: string }> {
+//     // Common DKIM selectors to check
+//     const commonSelectors = ["default", "google", "k1", "s1", "s2", "dkim", "mail", "smtp"]
+
+//     try {
+//       // Check each common selector
+//       for (const selector of commonSelectors) {
+//         try {
+//           const dkimDomain = `${selector}._domainkey.${domain}`
+//           const txtRecords = await dns.resolveTxt(dkimDomain)
+
+//           // Check if any record contains DKIM signature
+//           const hasDKIM = txtRecords.some((record) => record.join("").includes("v=DKIM1"))
+
+//           if (hasDKIM) {
+//             return {
+//               valid: true,
+//               selector,
+//             }
+//           }
+//         } catch {
+//           // Selector not found, continue to next
+//           continue
+//         }
+//       }
+
+//       return {
+//         valid: false,
+//         error: "No DKIM record found for common selectors",
+//       }
+//     } catch (error) {
+//       return {
+//         valid: false,
+//         error: "DNS lookup failed",
+//       }
+//     }
+//   }
+
+//   private async checkDMARC(domain: string): Promise<{ valid: boolean; policy?: string; error?: string }> {
+//     try {
+//       const dmarcDomain = `_dmarc.${domain}`
+//       const txtRecords = await dns.resolveTxt(dmarcDomain)
+
+//       const dmarcRecord = txtRecords.find((record) => record.join("").startsWith("v=DMARC1"))
+
+//       if (!dmarcRecord) {
+//         return {
+//           valid: false,
+//           error: "No DMARC record found",
+//         }
+//       }
+
+//       const dmarcString = dmarcRecord.join("")
+
+//       // Extract policy
+//       const policyMatch = dmarcString.match(/p=(none|quarantine|reject)/)
+//       const policy = policyMatch ? policyMatch[1] : undefined
+
+//       return {
+//         valid: !!policy,
+//         policy,
+//         error: !policy ? "Invalid DMARC policy" : undefined,
+//       }
+//     } catch (error) {
+//       return {
+//         valid: false,
+//         error: "DNS lookup failed",
+//       }
+//     }
+//   }
+
+//   private async checkMXRecords(domain: string): Promise<string[]> {
+//     try {
+//       const mxRecords = await dns.resolveMx(domain)
+//       return mxRecords.sort((a, b) => a.priority - b.priority).map((mx) => mx.exchange)
+//     } catch (error) {
+//       logger.error("MX record lookup failed", error as Error, { domain })
+//       return []
+//     }
+//   }
+
+//   private async checkBlacklists(domain: string): Promise<{ blacklisted: boolean; listedOn: string[] }> {
+//     try {
+//       // Get domain IP addresses
+//       const ipAddresses = await dns.resolve4(domain).catch(() => [])
+
+//       if (ipAddresses.length === 0) {
+//         return { blacklisted: false, listedOn: [] }
+//       }
+
+//       // Check first IP against all blacklists
+//       const ip = ipAddresses[0]
+//       const reversedIP = ip.split(".").reverse().join(".")
+
+//       const blacklistChecks = this.BLACKLIST_PROVIDERS.map(async (provider) => {
+//         try {
+//           const query = `${reversedIP}.${provider}`
+//           await dns.resolve4(query)
+//           // If resolve succeeds, IP is listed
+//           return provider
+//         } catch {
+//           // If resolve fails, IP is not listed
+//           return null
+//         }
+//       })
+
+//       const results = await Promise.all(blacklistChecks)
+//       const listedOn = results.filter((r): r is string => r !== null)
+
+//       return {
+//         blacklisted: listedOn.length > 0,
+//         listedOn,
+//       }
+//     } catch (error) {
+//       logger.error("Blacklist check failed", error as Error, { domain })
+//       return { blacklisted: false, listedOn: [] }
+//     }
+//   }
+
+//   private calculateHealthScore(health: DomainHealth): number {
+//     let score = 100
+
+//     // SPF check (30 points)
+//     if (!health.spf.valid) score -= 30
+
+//     // DKIM check (30 points)
+//     if (!health.dkim.valid) score -= 30
+
+//     // DMARC check (20 points)
+//     if (!health.dmarc.valid) score -= 20
+
+//     // MX records (10 points)
+//     if (health.mxRecords.length === 0) score -= 10
+
+//     // Blacklist check (50 points - critical)
+//     if (health.blacklisted) {
+//       score -= 50
+//       // Additional penalty for multiple blacklists
+//       score -= Math.min(30, health.blacklists.length * 10)
+//     }
+
+//     return Math.max(0, score)
+//   }
+
+//   async updateAccountDomainHealth(accountId: string): Promise<void> {
+//     const account = await db.sendingAccount.findUnique({
+//       where: { id: accountId },
+//     })
+
+//     if (!account) return
+
+//     const health = await this.checkDomainHealth(account.email)
+
+//     await db.sendingAccount.update({
+//       where: { id: accountId },
+//       data: {
+//         domainReputation: health as any,
+//         lastDomainCheck: new Date(),
+//       },
+//     })
+
+//     // Alert on critical issues
+//     if (health.blacklisted) {
+//       const error = new Error("Domain is blacklisted")
+//       logger.error("Domain is blacklisted", error, {
+//         accountId,
+//         email: account.email,
+//         blacklists: health.blacklists,
+//       })
+//     }
+
+//     if (health.score < 70) {
+//       logger.warn("Poor domain health detected", {
+//         accountId,
+//         email: account.email,
+//         score: health.score,
+//         issues: {
+//           spf: !health.spf.valid,
+//           dkim: !health.dkim.valid,
+//           dmarc: !health.dmarc.valid,
+//           blacklisted: health.blacklisted,
+//         },
+//       })
+//     }
+
+//     logger.info("Domain health updated", {
+//       accountId,
+//       domain: health.domain,
+//       score: health.score,
+//     })
+//   }
+// }
+
+// export const domainHealthChecker = new DomainHealthChecker()
+
+// export async function checkDomainHealth(domain: string): Promise<DomainHealth> {
+//   return domainHealthChecker.checkDomainHealth(domain)
+// }
 import { db } from "../db"
 import { logger } from "../logger"
 import dns from "dns/promises"
@@ -624,8 +957,44 @@ class DomainHealthChecker {
     "ubl.unsubscore.com",
   ]
 
-  async checkDomainHealth(email: string): Promise<DomainHealth> {
-    const domain = email.split("@")[1]
+  private extractDomain(input: string): string | null {
+    if (!input || typeof input !== "string") {
+      return null
+    }
+
+    const trimmed = input.trim().toLowerCase()
+    if (!trimmed) {
+      return null
+    }
+
+    // If it contains @, it's an email - extract domain part
+    if (trimmed.includes("@")) {
+      const parts = trimmed.split("@")
+      return parts[1] || null
+    }
+
+    // Otherwise assume it's already a domain
+    return trimmed
+  }
+
+  async checkDomainHealth(emailOrDomain: string): Promise<DomainHealth> {
+    const domain = this.extractDomain(emailOrDomain)
+
+    if (!domain) {
+      logger.warn("Invalid domain provided for health check", { input: emailOrDomain })
+      return {
+        domain: emailOrDomain || "unknown",
+        spf: { valid: false, error: "Invalid domain", status: "UNKNOWN" },
+        dkim: { valid: false, error: "Invalid domain", status: "UNKNOWN" },
+        dmarc: { valid: false, error: "Invalid domain", status: "UNKNOWN" },
+        blacklisted: false,
+        blacklists: [],
+        mxRecords: [],
+        score: 0,
+        reputation: { overall: 0 },
+        issues: [{ severity: "critical", message: "Invalid domain provided" }],
+      }
+    }
 
     try {
       // Run all checks in parallel for speed
@@ -802,18 +1171,36 @@ class DomainHealthChecker {
 
   private async checkMXRecords(domain: string): Promise<string[]> {
     try {
-      const mxRecords = await dns.resolveMx(domain)
+      if (!domain || typeof domain !== "string" || domain.trim() === "") {
+        logger.warn("Invalid domain for MX lookup", { domain })
+        return []
+      }
+
+      const cleanDomain = domain.trim().toLowerCase()
+      const mxRecords = await dns.resolveMx(cleanDomain)
       return mxRecords.sort((a, b) => a.priority - b.priority).map((mx) => mx.exchange)
-    } catch (error) {
-      logger.error("MX record lookup failed", error as Error, { domain })
+    } catch (error: any) {
+      // Don't log as error for common cases like ENOTFOUND
+      if (error.code === "ENOTFOUND" || error.code === "ENODATA") {
+        logger.info("No MX records found", { domain })
+      } else {
+        logger.warn("MX record lookup failed", { domain, error: error.message })
+      }
       return []
     }
   }
 
   private async checkBlacklists(domain: string): Promise<{ blacklisted: boolean; listedOn: string[] }> {
     try {
+      if (!domain || typeof domain !== "string" || domain.trim() === "") {
+        logger.warn("Invalid domain for blacklist check", { domain })
+        return { blacklisted: false, listedOn: [] }
+      }
+
+      const cleanDomain = domain.trim().toLowerCase()
+
       // Get domain IP addresses
-      const ipAddresses = await dns.resolve4(domain).catch(() => [])
+      const ipAddresses = await dns.resolve4(cleanDomain).catch(() => [])
 
       if (ipAddresses.length === 0) {
         return { blacklisted: false, listedOn: [] }
@@ -842,8 +1229,11 @@ class DomainHealthChecker {
         blacklisted: listedOn.length > 0,
         listedOn,
       }
-    } catch (error) {
-      logger.error("Blacklist check failed", error as Error, { domain })
+    } catch (error: any) {
+      // Don't log as error for common DNS failures
+      if (error.code !== "ENOTFOUND" && error.code !== "ENODATA") {
+        logger.warn("Blacklist check failed", { domain, error: error.message })
+      }
       return { blacklisted: false, listedOn: [] }
     }
   }
