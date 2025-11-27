@@ -2,38 +2,46 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-@custom-variant light (&:is(.light, .light *));
 
 :root {
-  /* Enhanced color palette with better contrast and modern feel */
-  --background: oklch(1 0 0);
+  /* Enhanced color palette with success/warning states for wizard */
+  --background: oklch(0.995 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.22 245);
+  --primary: oklch(0.55 0.22 250);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.97 0.005 250);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.7 0.15 195);
-  --accent-foreground: oklch(1 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --accent: oklch(0.97 0.01 250);
+  --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.55 0.22 245);
-  --chart-1: oklch(0.55 0.22 245);
-  --chart-2: oklch(0.7 0.15 195);
+  --border: oklch(0.92 0 0);
+  --input: oklch(0.92 0 0);
+  --ring: oklch(0.55 0.22 250);
+
+  /* New success/warning tokens for wizard states */
+  --success: oklch(0.55 0.18 145);
+  --success-foreground: oklch(1 0 0);
+  --success-muted: oklch(0.95 0.03 145);
+  --warning: oklch(0.7 0.15 70);
+  --warning-foreground: oklch(0.3 0.1 70);
+  --warning-muted: oklch(0.96 0.04 70);
+
+  --chart-1: oklch(0.55 0.22 250);
+  --chart-2: oklch(0.55 0.18 145);
   --chart-3: oklch(0.6 0.18 160);
   --chart-4: oklch(0.65 0.2 280);
   --chart-5: oklch(0.7 0.15 320);
-  --radius: 0.75rem;
+  --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.55 0.22 245);
+  --sidebar-primary: oklch(0.55 0.22 250);
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -42,44 +50,52 @@
 }
 
 .dark {
-  /* Improved dark mode with better contrast and depth */
-  --background: oklch(0.12 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.15 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.15 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.65 0.22 245);
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.22 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.75 0.15 195);
-  --accent-foreground: oklch(0.12 0 0);
+  --background: oklch(0.1 0 0);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.13 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.13 0 0);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.65 0.2 250);
+  --primary-foreground: oklch(0.1 0 0);
+  --secondary: oklch(0.2 0.01 250);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.22 0.015 250);
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.5 0.2 27);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.65 0.22 245);
-  --chart-1: oklch(0.65 0.22 245);
-  --chart-2: oklch(0.75 0.15 195);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.65 0.2 250);
+
+  /* Dark mode success/warning tokens */
+  --success: oklch(0.65 0.18 145);
+  --success-foreground: oklch(0.1 0 0);
+  --success-muted: oklch(0.2 0.04 145);
+  --warning: oklch(0.75 0.15 70);
+  --warning-foreground: oklch(0.1 0 0);
+  --warning-muted: oklch(0.22 0.04 70);
+
+  --chart-1: oklch(0.65 0.2 250);
+  --chart-2: oklch(0.65 0.18 145);
   --chart-3: oklch(0.7 0.18 160);
   --chart-4: oklch(0.7 0.2 280);
   --chart-5: oklch(0.75 0.15 320);
-  --sidebar: oklch(0.18 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.65 0.22 245);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.22 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0 0);
+  --sidebar: oklch(0.15 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.65 0.2 250);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.2 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.22 0 0);
   --sidebar-ring: oklch(0.439 0 0);
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -99,6 +115,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  /* Add success/warning to theme */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -123,49 +146,120 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
-  }
-
-
-
-  
-  /* Subtle scrollbar styling */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: oklch(0.556 0 0 / 0.2);
-    border-radius: 3px;
-  }
-
-  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-    background: oklch(0.556 0 0 / 0.4);
-  }
-
-  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: oklch(0.708 0 0 / 0.2);
-  }
-
-  .dark .scrollbar-thin:hover::-webkit-scrollbar-thumb {
-    background: oklch(0.708 0 0 / 0.4);
-  }
-
-  /* Firefox scrollbar */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: oklch(0.556 0 0 / 0.2) transparent;
-  }
-
-  .dark .scrollbar-thin {
-    scrollbar-color: oklch(0.708 0 0 / 0.2) transparent;
+    @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Custom animations for wizard */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-success {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.55 0.18 145 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px oklch(0.55 0.18 145 / 0);
+  }
+}
+
+@keyframes slide-up-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-checkmark {
+  animation: checkmark-draw 0.3s ease-out forwards;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+}
+
+.animate-pulse-success {
+  animation: pulse-success 2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up-fade 0.3s ease-out forwards;
+}
+
+/* Scrollbar styling */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0 0 / 0.15);
+  border-radius: 3px;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0 0 / 0.3);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0 / 0.15);
+}
+
+.dark .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0 / 0.3);
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.5 0 0 / 0.15) transparent;
+}
+
+.dark .scrollbar-thin {
+  scrollbar-color: oklch(0.7 0 0 / 0.15) transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Custom glassmorphism and 3D utilities */
 @layer utilities {
