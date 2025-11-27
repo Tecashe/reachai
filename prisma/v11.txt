@@ -820,8 +820,6 @@ model Domain {
   healthScore          Int                   @default(100) // 0-100
   deliverabilityHealth DeliverabilityHealth?
 
-  lastHealthCheck DateTime?
-
   // Blacklist status
   isBlacklisted    Boolean   @default(false)
   blacklistedOn    String[]  @default([]) // Which blacklists
@@ -861,7 +859,6 @@ model DeliverabilityHealth {
 
   dkimStatus    DNSStatus @default(UNKNOWN)
   dkimValid     Boolean   @default(false)
-  dkimSelector  String? // Added single dkimSelector field
   dkimSelectors Json? // Array of DKIM selectors
 
   dmarcStatus DNSStatus @default(UNKNOWN)
@@ -871,8 +868,6 @@ model DeliverabilityHealth {
 
   mxRecordsValid Boolean @default(false)
   mxRecords      Json?
-
-  blacklists String[] @default([]) // Added blacklists field
 
   // Reputation metrics
   senderReputation  Int @default(0) // 0-100
