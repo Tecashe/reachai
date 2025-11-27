@@ -6562,7 +6562,7 @@ import {
 import { addDomain, verifyDomain } from "@/lib/actions/domain-action"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Progress } from "@/components/ui/progress"
 
 type SetupStep = "welcome" | "add-domain" | "spf" | "dkim" | "dmarc" | "verify" | "complete"
@@ -6635,6 +6635,36 @@ export function GuidedEmailWizard({ existingDomains = [], existingAccounts = [] 
 
   const currentStepIndex = steps.findIndex((s) => s.id === state.currentStep)
   const progress = Math.round((currentStepIndex / (steps.length - 1)) * 100)
+
+  useEffect(() => {
+    const handleSelectDomain = (event: CustomEvent<{ domainId: string; domainName: string }>) => {
+      const { domainId, domainName } = event.detail
+
+      // Find the domain in existing domains to get its data
+      const domain = existingDomains.find((d) => d.id === domainId)
+
+      if (domain) {
+        setState((prev) => ({
+          ...prev,
+          domainId: domain.id,
+          domainName: domain.domain,
+          dnsRecords: domain.dnsRecords?.records || [],
+          stepStatuses: {
+            ...prev.stepStatuses,
+            "add-domain": { completed: true, verified: true, skipped: false },
+          },
+          currentStep: "spf", // Start at SPF since domain is already added
+        }))
+
+        toast.info(`Configuring ${domain.domain}`, {
+          description: "Continue with DNS setup below",
+        })
+      }
+    }
+
+    window.addEventListener("select-domain", handleSelectDomain as EventListener)
+    return () => window.removeEventListener("select-domain", handleSelectDomain as EventListener)
+  }, [existingDomains])
 
   // Load saved state from localStorage
   useEffect(() => {
