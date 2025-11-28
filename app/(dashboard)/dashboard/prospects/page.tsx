@@ -715,6 +715,16 @@
 // }
 
 
+// import { ProspectsPageClient } from "@/components/prospects/prospects-page-client"
+// import { getFolders, getTrashedCount } from "@/lib/actions/prospect-folders"
+
+// export default async function ProspectsPage() {
+//   const folders = await getFolders()
+//   const trashedCount = await getTrashedCount()
+
+//   return <ProspectsPageClient initialFolders={folders} initialTrashedCount={trashedCount} />
+// }
+
 import { ProspectsPageClient } from "@/components/prospects/prospects-page-client"
 import { getFolders, getTrashedCount } from "@/lib/actions/prospect-folders"
 
