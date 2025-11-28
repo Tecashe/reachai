@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check subscription limits
+    // Check subscription limits - only count non-trashed prospects
     const prospectCount = prospects.length
     const currentProspects = await db.prospect.count({
       where: {
@@ -71,7 +71,11 @@ export async function POST(request: NextRequest) {
     if (currentProspects + prospectCount > limit) {
       return NextResponse.json(
         {
-          error: `Subscription limit exceeded. Your ${user!.subscriptionTier} plan allows ${limit} prospects. You currently have ${currentProspects}.`,
+          error: `Subscription limit exceeded`,
+          currentCount: currentProspects,
+          limit: limit,
+          plan: user!.subscriptionTier,
+          message: `Your ${user!.subscriptionTier} plan allows ${limit} prospects. You currently have ${currentProspects}.`,
         },
         { status: 402 },
       )

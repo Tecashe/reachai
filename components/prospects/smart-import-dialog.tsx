@@ -68,9 +68,10 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
     removeDisposableEmails: false,
   })
   const [importProgress, setImportProgress] = useState(0)
-  const [importResult, setImportResult] = useState<{ success: number; failed: number } | null>(null)
+  const [importResult, setImportResult] = useState<{ success: number; failed: number; skipped: number } | null>(null)
   const [existingDuplicates, setExistingDuplicates] = useState<string[]>([])
   const [upgradeInfo, setUpgradeInfo] = useState<{ current: number; limit: number; plan: string } | null>(null)
+  const [checkingDuplicates, setCheckingDuplicates] = useState(false)
 
   // Reset state when dialog closes
   const handleOpenChange = (isOpen: boolean) => {
@@ -88,6 +89,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
       setImportResult(null)
       setExistingDuplicates([])
       setUpgradeInfo(null)
+      setCheckingDuplicates(false)
     }
   }
 
@@ -166,25 +168,38 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
     const result = cleanAndValidateData(transformedRecords, cleaningOptions)
     setCleaningResult(result)
 
-    // Check for duplicates against existing database
+    setCheckingDuplicates(true)
     try {
-      const emails = result.validRecords.map((r) => r.email).filter(Boolean)
+      const emails = transformedRecords.map((r) => r.email).filter(Boolean) as string[]
+
+      if (emails.length === 0) {
+        setExistingDuplicates([])
+        setCheckingDuplicates(false)
+        setStep("cleaning")
+        return
+      }
+
       const response = await fetch("/api/prospects/check-duplicates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emails, folderId }),
+        body: JSON.stringify({ emails }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        setExistingDuplicates(data.duplicates || [])
+        const duplicates = data.duplicates || []
+        setExistingDuplicates(duplicates)
 
-        if (data.duplicates && data.duplicates.length > 0) {
-          toast.warning(`${data.duplicates.length} prospects already exist in your database`)
+        if (duplicates.length > 0) {
+          toast.warning(`Found ${duplicates.length} prospects that already exist in your database`)
         }
+      } else {
+        console.error("Failed to check duplicates:", await response.text())
       }
     } catch (err) {
       console.error("Failed to check duplicates:", err)
+    } finally {
+      setCheckingDuplicates(false)
     }
 
     setStep("cleaning")
@@ -205,12 +220,20 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
     setImportProgress(0)
 
     try {
-      // Filter out existing duplicates if user chose to skip them
+      // Filter out existing duplicates
       let recordsToImport = cleaningResult.validRecords
       if (existingDuplicates.length > 0) {
         const existingSet = new Set(existingDuplicates.map((e) => e.toLowerCase()))
         recordsToImport = recordsToImport.filter((r) => !existingSet.has(r.email?.toLowerCase()))
       }
+
+      if (recordsToImport.length === 0) {
+        toast.error("No new prospects to import after removing duplicates")
+        setStep("cleaning")
+        return
+      }
+
+      setImportProgress(30)
 
       // Send to API
       const response = await fetch("/api/prospects/import", {
@@ -226,11 +249,10 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
       const data = await response.json()
 
       if (response.status === 402) {
-        // Subscription limit exceeded
         setUpgradeInfo({
-          current: data.currentCount || 0,
-          limit: data.limit || 50,
-          plan: data.plan || "FREE",
+          current: data.currentCount ?? 0,
+          limit: data.limit ?? 50,
+          plan: data.plan ?? "FREE",
         })
         setStep("upgrade")
         return
@@ -244,6 +266,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
       setImportResult({
         success: data.imported || 0,
         failed: data.failed || 0,
+        skipped: data.skipped || 0,
       })
       setStep("complete")
 
@@ -279,7 +302,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
         {trigger || (
           <Button variant="outline" size="sm">
             <Upload className="mr-2 h-4 w-4" />
@@ -287,7 +310,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />
@@ -319,7 +342,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
           ))}
         </div>
 
-        <ScrollArea className="flex-1 pr-4">
+        <div className="flex-1 overflow-y-auto pr-2">
           {/* Step 1: Upload */}
           {step === "upload" && (
             <div className="space-y-4 py-4">
@@ -372,7 +395,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                 <div>
                   <h3 className="font-medium">Map Your Fields</h3>
                   <p className="text-sm text-muted-foreground">
-                    We detected {headers.length} columns. Review and adjust the mappings below.
+                    We detected {headers.length} columns and {rows.length} rows. Review and adjust the mappings below.
                   </p>
                 </div>
                 <Badge variant={mappingResult.confidence > 0.7 ? "default" : "secondary"}>
@@ -411,7 +434,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                           <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
 
                           <Select value={currentMapping} onValueChange={(value) => updateMapping(header, value)}>
-                            <SelectTrigger className="w-48">
+                            <SelectTrigger className="w-56">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -473,11 +496,12 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                 <TabsList>
                   <TabsTrigger value="summary">Summary</TabsTrigger>
                   <TabsTrigger value="issues">Issues ({getAllIssues().length})</TabsTrigger>
+                  <TabsTrigger value="duplicates">Existing Duplicates ({existingDuplicates.length})</TabsTrigger>
                   <TabsTrigger value="options">Options</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="summary" className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <Card>
                       <CardContent className="pt-4">
                         <div className="text-2xl font-bold">{cleaningResult.summary.total}</div>
@@ -501,7 +525,13 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                         <div className="text-2xl font-bold text-yellow-600">
                           {cleaningResult.summary.duplicatesRemoved}
                         </div>
-                        <p className="text-sm text-muted-foreground">Duplicates</p>
+                        <p className="text-sm text-muted-foreground">File Duplicates</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="pt-4">
+                        <div className="text-2xl font-bold text-orange-600">{existingDuplicates.length}</div>
+                        <p className="text-sm text-muted-foreground">Already Exist</p>
                       </CardContent>
                     </Card>
                   </div>
@@ -521,8 +551,17 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Existing Duplicates Found</AlertTitle>
                       <AlertDescription>
-                        {existingDuplicates.length} prospects already exist in your database and will be skipped.
+                        {existingDuplicates.length} prospects already exist in your database and will be skipped during
+                        import.
                       </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {checkingDuplicates && (
+                    <Alert>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <AlertTitle>Checking for duplicates...</AlertTitle>
+                      <AlertDescription>Comparing against your existing prospects database.</AlertDescription>
                     </Alert>
                   )}
                 </TabsContent>
@@ -531,7 +570,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                   {getAllIssues().length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-green-500" />
-                      No issues found!
+                      <p>No issues found!</p>
                     </div>
                   ) : (
                     <ScrollArea className="h-64">
@@ -554,12 +593,44 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                   )}
                 </TabsContent>
 
+                <TabsContent value="duplicates" className="space-y-2">
+                  {existingDuplicates.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-green-500" />
+                      <p>No existing duplicates found!</p>
+                      <p className="text-sm mt-1">All prospects in your file are new.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          These {existingDuplicates.length} email addresses already exist in your database and will be
+                          skipped:
+                        </AlertDescription>
+                      </Alert>
+                      <ScrollArea className="h-64 border rounded-md p-2">
+                        <div className="space-y-1">
+                          {existingDuplicates.map((email, idx) => (
+                            <div key={idx} className="flex items-center gap-2 p-2 bg-muted/50 rounded text-sm">
+                              <XCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                              <span className="truncate">{email}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </>
+                  )}
+                </TabsContent>
+
                 <TabsContent value="options" className="space-y-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label>Remove duplicates</Label>
-                        <p className="text-sm text-muted-foreground">Skip rows with duplicate email addresses</p>
+                        <Label>Remove duplicates within file</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Skip rows with duplicate email addresses in the uploaded file
+                        </p>
                       </div>
                       <Switch
                         checked={cleaningOptions.removeDuplicates}
@@ -634,8 +705,13 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
-                <Button onClick={performImport} disabled={cleaningResult.summary.valid === 0}>
-                  Import {cleaningResult.summary.valid} Prospects
+                <Button
+                  onClick={performImport}
+                  disabled={
+                    cleaningResult.summary.valid === 0 || cleaningResult.summary.valid - existingDuplicates.length <= 0
+                  }
+                >
+                  Import {Math.max(0, cleaningResult.summary.valid - existingDuplicates.length)} New Prospects
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -662,6 +738,12 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                   <div className="text-3xl font-bold text-green-600">{importResult.success}</div>
                   <p className="text-sm text-muted-foreground">Imported</p>
                 </div>
+                {importResult.skipped > 0 && (
+                  <div>
+                    <div className="text-3xl font-bold text-yellow-600">{importResult.skipped}</div>
+                    <p className="text-sm text-muted-foreground">Skipped (duplicates)</p>
+                  </div>
+                )}
                 {importResult.failed > 0 && (
                   <div>
                     <div className="text-3xl font-bold text-red-600">{importResult.failed}</div>
@@ -679,9 +761,9 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
               <AlertTriangle className="h-16 w-16 mx-auto text-yellow-500" />
               <h3 className="text-lg font-medium">Upgrade Required</h3>
               <p className="text-muted-foreground">
-                Your {upgradeInfo.plan} plan allows {upgradeInfo.limit} prospects.
+                Your <strong>{upgradeInfo.plan}</strong> plan allows <strong>{upgradeInfo.limit}</strong> prospects.
                 <br />
-                You currently have {upgradeInfo.current} prospects.
+                You currently have <strong>{upgradeInfo.current}</strong> prospects.
               </p>
               <div className="flex items-center justify-center gap-4">
                 <Button variant="outline" onClick={() => handleOpenChange(false)}>
@@ -691,7 +773,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
               </div>
             </div>
           )}
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   )
