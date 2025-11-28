@@ -648,12 +648,12 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
   const [folders, setFolders] = useState(initialFolders)
   const [isCreating, setIsCreating] = useState(false)
   const [newFolderName, setNewFolderName] = useState("")
-  const [newFolderColor, setNewFolderColor] = useState("#3B82F6") // Blue
+  const [newFolderColor, setNewFolderColor] = useState("#3B82F6")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
   const [editColor, setEditColor] = useState("")
   const [hoveredFolderId, setHoveredFolderId] = useState<string | null>(null)
-  const [importDialogFolderId, setImportDialogFolderId] = useState<string | null>(null)
+  const [dropdownOpenFolderId, setDropdownOpenFolderId] = useState<string | null>(null)
 
   const [draggedFolder, setDraggedFolder] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
@@ -680,7 +680,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
     if (result.success && result.folder) {
       setFolders([...folders, result.folder])
       setNewFolderName("")
-      setNewFolderColor("#3B82F6") // Blue
+      setNewFolderColor("#3B82F6")
       setIsCreating(false)
       toast.success("Folder created!")
     } else {
@@ -710,8 +710,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
     }
   }
 
-  const handleTrashFolder = async (folderId: string, folderName: string, e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleTrashFolder = async (folderId: string, folderName: string) => {
     if (!confirm(`Move "${folderName}" to trash? Prospects will be moved to "All Prospects".`)) return
 
     const result = await trashFolder(folderId)
@@ -806,9 +805,10 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
   }
 
   const handleCardClick = (folderId: string) => {
-    if (!editingId && importDialogFolderId !== folderId) {
-      onSelectFolder(folderId)
+    if (editingId || dropdownOpenFolderId === folderId) {
+      return
     }
+    onSelectFolder(folderId)
   }
 
   const sourceFolder = mergeSource ? folders.find((f) => f.id === mergeSource) : null
@@ -842,30 +842,21 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
                     folderId={folder.id}
                     folderName={folder.name}
                     onImportComplete={() => {
-                      setImportDialogFolderId(null)
                       onImportComplete?.()
                     }}
                     trigger={
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setImportDialogFolderId(folder.id)
-                        }}
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
                         <Upload className="h-4 w-4" />
                       </Button>
                     }
                   />
-                  <DropdownMenu>
+                  <DropdownMenu onOpenChange={(open) => setDropdownOpenFolderId(open ? folder.id : null)}>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuContent align="end">
                       <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation()
@@ -880,7 +871,10 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
-                        onClick={(e) => handleTrashFolder(folder.id, folder.name, e)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleTrashFolder(folder.id, folder.name)
+                        }}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Move to Trash
