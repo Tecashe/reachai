@@ -338,7 +338,16 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
     if (trigger) {
       // Clone the trigger element and add our click handler
       return (
-        <div onClick={handleTriggerClick} className="cursor-pointer">
+        <div
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            setOpen(true)
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          className="cursor-pointer inline-block"
+        >
           {trigger}
         </div>
       )
@@ -355,7 +364,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
     <>
       {renderTrigger()}
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-7xl w-[98vw] max-h-[90vh] flex flex-col overflow-hidden">
+        <DialogContent className="!max-w-7xl w-[98vw] max-h-[90vh] flex flex-col overflow-hidden">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <FileSpreadsheet className="h-5 w-5" />

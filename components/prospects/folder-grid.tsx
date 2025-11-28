@@ -838,49 +838,53 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
             <CardContent className="p-6 relative">
               {hoveredFolderId === folder.id && !editingId && (
                 <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <SmartImportDialog
-                    folderId={folder.id}
-                    folderName={folder.name}
-                    onImportComplete={() => {
-                      onImportComplete?.()
-                    }}
-                    trigger={
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Upload className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
-                  <DropdownMenu onOpenChange={(open) => setDropdownOpenFolderId(open ? folder.id : null)}>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setEditingId(folder.id)
-                          setEditName(folder.name)
-                          setEditColor(folder.color)
-                        }}
-                      >
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleTrashFolder(folder.id, folder.name)
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Move to Trash
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                    <SmartImportDialog
+                      folderId={folder.id}
+                      folderName={folder.name}
+                      onImportComplete={() => {
+                        onImportComplete?.()
+                      }}
+                      trigger={
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Upload className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                    <DropdownMenu onOpenChange={(open) => setDropdownOpenFolderId(open ? folder.id : null)}>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingId(folder.id)
+                            setEditName(folder.name)
+                            setEditColor(folder.color)
+                          }}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleTrashFolder(folder.id, folder.name)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Move to Trash
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               )}
 

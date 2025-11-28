@@ -4,17 +4,20 @@ import { protectApiRoute } from "@/lib/api-protection"
 
 export async function POST(request: NextRequest) {
   const authResult = await protectApiRoute()
-  if (!authResult.user || !authResult.userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (authResult.error || !authResult.user) {
+    return authResult.error || NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  const userId = authResult.user.id
 
   try {
     const body = await request.json()
     const { emails, folderId } = body
 
-    console.log("[v0] Check duplicates request - emails count:", emails?.length, "folderId:", folderId)
+    console.log("[v0] Check duplicates - userId:", userId, "emails count:", emails?.length)
 
     if (!Array.isArray(emails) || emails.length === 0) {
+      console.log("[v0] No emails provided")
       return NextResponse.json({ duplicates: [], total: 0, found: 0 })
     }
 
@@ -23,16 +26,16 @@ export async function POST(request: NextRequest) {
       .filter((e): e is string => typeof e === "string" && e.length > 0)
       .map((e) => e.toLowerCase().trim())
 
-    console.log("[v0] Normalized emails count:", normalizedEmails.length)
+    console.log("[v0] Normalized emails:", normalizedEmails.slice(0, 3), "...")
 
     if (normalizedEmails.length === 0) {
       return NextResponse.json({ duplicates: [], total: 0, found: 0 })
     }
 
-    // Check ALL user's prospects, not just in the specific folder
+    // Check ALL user's prospects for duplicates
     const existingProspects = await db.prospect.findMany({
       where: {
-        userId: authResult.userId,
+        userId: userId,
         email: {
           in: normalizedEmails,
           mode: "insensitive",
@@ -44,7 +47,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("[v0] Found existing prospects:", existingProspects.length)
+    console.log("[v0] Found existing prospects with matching emails:", existingProspects.length)
 
     const duplicateEmails = existingProspects.map((p) => p.email.toLowerCase())
 
