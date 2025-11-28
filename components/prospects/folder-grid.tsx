@@ -593,7 +593,6 @@
 
 
 
-
 "use client"
 
 import type React from "react"
@@ -653,7 +652,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
   const [editName, setEditName] = useState("")
   const [editColor, setEditColor] = useState("")
   const [hoveredFolderId, setHoveredFolderId] = useState<string | null>(null)
-  const [dropdownOpenFolderId, setDropdownOpenFolderId] = useState<string | null>(null)
+  const [activeFolderId, setActiveFolderId] = useState<string | null>(null)
 
   const [draggedFolder, setDraggedFolder] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<string | null>(null)
@@ -765,6 +764,8 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
   const handleMergeFolders = async () => {
     if (!mergeSource || !mergeTarget) return
 
+    const targetFolder = folders.find((f) => f.id === mergeTarget)
+
     const result = await mergeFolders(
       [mergeSource, mergeTarget],
       mergedFolderName || targetFolder?.name || "Merged Folder",
@@ -805,7 +806,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
   }
 
   const handleCardClick = (folderId: string) => {
-    if (editingId || dropdownOpenFolderId === folderId) {
+    if (editingId || activeFolderId === folderId) {
       return
     }
     onSelectFolder(folderId)
@@ -837,12 +838,23 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
           >
             <CardContent className="p-6 relative">
               {hoveredFolderId === folder.id && !editingId && (
-                <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      setActiveFolderId(folder.id)
+                    }}
+                  >
                     <SmartImportDialog
                       folderId={folder.id}
                       folderName={folder.name}
                       onImportComplete={() => {
+                        setActiveFolderId(null)
                         onImportComplete?.()
                       }}
                       trigger={
@@ -852,8 +864,21 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
                       }
                     />
                   </div>
-                  <div onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-                    <DropdownMenu onOpenChange={(open) => setDropdownOpenFolderId(open ? folder.id : null)}>
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                    }}
+                  >
+                    <DropdownMenu
+                      onOpenChange={(open) => {
+                        setActiveFolderId(open ? folder.id : null)
+                      }}
+                    >
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <MoreHorizontal className="h-4 w-4" />
@@ -866,6 +891,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
                             setEditingId(folder.id)
                             setEditName(folder.name)
                             setEditColor(folder.color)
+                            setActiveFolderId(null)
                           }}
                         >
                           <Pencil className="h-4 w-4 mr-2" />
@@ -877,6 +903,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportCo
                           onClick={(e) => {
                             e.stopPropagation()
                             handleTrashFolder(folder.id, folder.name)
+                            setActiveFolderId(null)
                           }}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
