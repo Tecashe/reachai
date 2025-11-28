@@ -718,7 +718,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
             <CRMImportDialog />
             <ApolloLeadFinderDialog subscriptionTier="FREE" researchCredits={0} />
             <SmartImportDialog
-              folderId={selectedFolderId}
+              folderId={selectedFolderId||""}
               folderName={selectedFolder?.name}
               onImportComplete={handleRefreshData}
               trigger={

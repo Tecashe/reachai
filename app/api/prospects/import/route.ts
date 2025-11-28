@@ -54,7 +54,10 @@ export async function POST(request: NextRequest) {
     // Check subscription limits
     const prospectCount = prospects.length
     const currentProspects = await db.prospect.count({
-      where: { userId: user!.id },
+      where: {
+        userId: user!.id,
+        isTrashed: false,
+      },
     })
 
     const limits: Record<string, number> = {

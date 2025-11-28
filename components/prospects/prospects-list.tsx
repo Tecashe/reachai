@@ -475,7 +475,7 @@ export function ProspectsList({
             {!isTrashed && (
               <div className="flex items-center justify-center gap-3">
                 <SmartImportDialog
-                  folderId={folderId}
+                  folderId={folderId||""}
                   trigger={
                     <Button variant="outline">
                       <Upload className="h-4 w-4 mr-2" />
