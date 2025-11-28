@@ -236,9 +236,10 @@
 //     </div>
 //   )
 // }
+
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -260,6 +261,7 @@ interface ProspectsListProps {
   onToggleSelect: (id: string) => void
   onToggleSelectAll: (ids: string[]) => void
   duplicateProspectIds?: string[]
+  refreshKey?: number
 }
 
 export function ProspectsList({
@@ -271,34 +273,36 @@ export function ProspectsList({
   onToggleSelect,
   onToggleSelectAll,
   duplicateProspectIds = [],
+  refreshKey = 0,
 }: ProspectsListProps) {
   const [prospects, setProspects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [qualityData, setQualityData] = useState<Map<string, any>>(new Map())
 
-  useEffect(() => {
-    async function fetchProspects() {
-      setLoading(true)
-      try {
-        const data = await getProspects(status, folderId, isTrashed, searchQuery)
-        setProspects(data)
+  const fetchProspects = useCallback(async () => {
+    setLoading(true)
+    try {
+      console.log("[v0] Fetching prospects for folder:", folderId, "status:", status)
+      const data = await getProspects(status, folderId, isTrashed, searchQuery)
+      console.log("[v0] Fetched prospects:", data.length)
+      setProspects(data)
 
-        // Analyze quality for each prospect
-        const qualityMap = new Map()
-        data.forEach((prospect) => {
-          const quality = analyzeProspectQuality(prospect)
-          qualityMap.set(prospect.id, quality)
-        })
-        setQualityData(qualityMap)
-      } catch (error) {
-        console.error("Failed to fetch prospects:", error)
-      } finally {
-        setLoading(false)
-      }
+      const qualityMap = new Map()
+      data.forEach((prospect) => {
+        const quality = analyzeProspectQuality(prospect)
+        qualityMap.set(prospect.id, quality)
+      })
+      setQualityData(qualityMap)
+    } catch (error) {
+      console.error("[v0] Failed to fetch prospects:", error)
+    } finally {
+      setLoading(false)
     }
-
-    fetchProspects()
   }, [status, folderId, isTrashed, searchQuery])
+
+  useEffect(() => {
+    fetchProspects()
+  }, [fetchProspects, refreshKey])
 
   const getStatusColor = (status: string) => {
     switch (status) {

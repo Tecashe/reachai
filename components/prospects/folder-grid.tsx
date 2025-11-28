@@ -635,24 +635,14 @@ interface Folder {
 interface FolderGridProps {
   folders: Folder[]
   onSelectFolder: (folderId: string | null) => void
+  onImportComplete?: () => void | Promise<void>
 }
 
-const FOLDER_COLORS = [
-  "#3B82F6", // Blue
-  "#10B981", // Green
-  "#F59E0B", // Amber
-  "#EF4444", // Red
-  "#8B5CF6", // Purple
-  "#EC4899", // Pink
-  "#06B6D4", // Cyan
-  "#F97316", // Orange
-]
-
-export function FolderGrid({ folders: initialFolders, onSelectFolder }: FolderGridProps) {
+export function FolderGrid({ folders: initialFolders, onSelectFolder, onImportComplete }: FolderGridProps) {
   const [folders, setFolders] = useState(initialFolders)
   const [isCreating, setIsCreating] = useState(false)
   const [newFolderName, setNewFolderName] = useState("")
-  const [newFolderColor, setNewFolderColor] = useState(FOLDER_COLORS[0])
+  const [newFolderColor, setNewFolderColor] = useState("#3B82F6") // Blue
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
   const [editColor, setEditColor] = useState("")
@@ -684,7 +674,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder }: FolderGr
     if (result.success && result.folder) {
       setFolders([...folders, result.folder])
       setNewFolderName("")
-      setNewFolderColor(FOLDER_COLORS[0])
+      setNewFolderColor("#3B82F6") // Blue
       setIsCreating(false)
       toast.success("Folder created!")
     } else {
@@ -839,6 +829,7 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder }: FolderGr
                   <SmartImportDialog
                     folderId={folder.id}
                     folderName={folder.name}
+                    onImportComplete={onImportComplete}
                     trigger={
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
                         <Upload className="h-4 w-4" />
@@ -885,17 +876,19 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder }: FolderGr
                     autoFocus
                   />
                   <div className="flex flex-wrap gap-2">
-                    {FOLDER_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        className={cn(
-                          "w-6 h-6 rounded-full transition-transform hover:scale-110",
-                          editColor === color && "ring-2 ring-offset-2 ring-primary",
-                        )}
-                        style={{ backgroundColor: color }}
-                        onClick={() => setEditColor(color)}
-                      />
-                    ))}
+                    {["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"].map(
+                      (color) => (
+                        <button
+                          key={color}
+                          className={cn(
+                            "w-6 h-6 rounded-full transition-transform hover:scale-110",
+                            editColor === color && "ring-2 ring-offset-2 ring-primary",
+                          )}
+                          style={{ backgroundColor: color }}
+                          onClick={() => setEditColor(color)}
+                        />
+                      ),
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={() => handleSaveEdit(folder.id)}>
@@ -952,17 +945,19 @@ export function FolderGrid({ folders: initialFolders, onSelectFolder }: FolderGr
               <div>
                 <Label className="text-xs text-muted-foreground mb-2 block">Color</Label>
                 <div className="flex flex-wrap gap-2">
-                  {FOLDER_COLORS.map((color) => (
-                    <button
-                      key={color}
-                      className={cn(
-                        "w-6 h-6 rounded-full transition-transform hover:scale-110",
-                        newFolderColor === color && "ring-2 ring-offset-2 ring-primary",
-                      )}
-                      style={{ backgroundColor: color }}
-                      onClick={() => setNewFolderColor(color)}
-                    />
-                  ))}
+                  {["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899", "#06B6D4", "#F97316"].map(
+                    (color) => (
+                      <button
+                        key={color}
+                        className={cn(
+                          "w-6 h-6 rounded-full transition-transform hover:scale-110",
+                          newFolderColor === color && "ring-2 ring-offset-2 ring-primary",
+                        )}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setNewFolderColor(color)}
+                      />
+                    ),
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">

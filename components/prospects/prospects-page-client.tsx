@@ -511,7 +511,7 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Plus, Download, Wand2, FolderInput, Trash2, ArrowLeft, Upload } from "lucide-react"
@@ -525,6 +525,7 @@ import { FolderGrid } from "@/components/prospects/folder-grid"
 import { DuplicateDetectorDialog } from "@/components/prospects/duplicate-detector-dialog"
 import { findDuplicates } from "@/lib/services/duplicate-detector"
 import { bulkMoveToFolder, bulkDeleteProspects, bulkRestoreProspects } from "@/lib/actions/prospects"
+import { getFolders } from "@/lib/actions/prospect-folders"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -561,9 +562,27 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
   const [showDuplicates, setShowDuplicates] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
 
+  const [refreshKey, setRefreshKey] = useState(0)
+
   const showFolderGrid = !selectedFolderId && !showTrash
 
   const selectedFolder = folders.find((f) => f.id === selectedFolderId)
+
+  const handleRefreshData = useCallback(async () => {
+    console.log("[v0] Refreshing data after import...")
+    try {
+      // Refresh folders to get updated counts
+      const updatedFolders = await getFolders()
+      setFolders(updatedFolders)
+
+      // Increment refresh key to trigger ProspectsList re-fetch
+      setRefreshKey((prev) => prev + 1)
+
+      console.log("[v0] Data refreshed successfully")
+    } catch (error) {
+      console.error("[v0] Failed to refresh data:", error)
+    }
+  }, [])
 
   const handleToggleSelect = (id: string) => {
     setSelectedProspects((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]))
@@ -605,7 +624,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
     if (result.success) {
       toast.success(`Moved ${selectedProspects.length} prospect(s)`)
       setSelectedProspects([])
-      window.location.reload()
+      handleRefreshData()
     } else {
       toast.error("Failed to move prospects")
     }
@@ -626,7 +645,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
     if (result.success) {
       toast.success(`Moved ${selectedProspects.length} prospect(s) to trash`)
       setSelectedProspects([])
-      window.location.reload()
+      handleRefreshData()
     } else {
       toast.error("Failed to delete prospects")
     }
@@ -643,7 +662,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
     if (result.success) {
       toast.success(`Restored ${selectedProspects.length} prospect(s)`)
       setSelectedProspects([])
-      window.location.reload()
+      handleRefreshData()
     } else {
       toast.error("Failed to restore prospects")
     }
@@ -682,7 +701,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 ? "Deleted items can be restored or permanently deleted"
                 : selectedFolderId
                   ? `${selectedFolder?.prospectCount || 0} prospects`
-                  : `${folders.length} folders • ${folders.reduce((sum, f) => sum + f.prospectCount, 0)} total prospects`}
+                  : `${folders.length} folders - ${folders.reduce((sum, f) => sum + f.prospectCount, 0)} total prospects`}
             </p>
           </div>
         </div>
@@ -701,6 +720,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
             <SmartImportDialog
               folderId={selectedFolderId}
               folderName={selectedFolder?.name}
+              onImportComplete={handleRefreshData}
               trigger={
                 <Button variant="outline">
                   <Upload className="h-4 w-4 mr-2" />
@@ -759,7 +779,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                   <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => handleBulkMoveToFolder(null)}>All Prospects</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    {initialFolders.map((folder) => (
+                    {folders.map((folder) => (
                       <DropdownMenuItem key={folder.id} onClick={() => handleBulkMoveToFolder(folder.id)}>
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded" style={{ backgroundColor: folder.color }} />
@@ -781,7 +801,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
 
       {showFolderGrid && (
         <div className="space-y-6">
-          <FolderGrid folders={folders} onSelectFolder={setSelectedFolderId} />
+          <FolderGrid folders={folders} onSelectFolder={setSelectedFolderId} onImportComplete={handleRefreshData} />
 
           <Card className="border-dashed">
             <CardContent className="p-6">
@@ -793,7 +813,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                   <div>
                     <h3 className="font-semibold text-lg">Trash</h3>
                     <p className="text-sm text-muted-foreground">
-                      {trashedProspectsCount} deleted prospects • {trashedFolders.length} deleted folders
+                      {trashedProspectsCount} deleted prospects - {trashedFolders.length} deleted folders
                     </p>
                   </div>
                 </div>
@@ -844,7 +864,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                             const result = await restoreFolder(folder.id)
                             if (result.success) {
                               toast.success("Folder restored!")
-                              window.location.reload()
+                              handleRefreshData()
                             } else {
                               toast.error("Failed to restore folder")
                             }
@@ -862,7 +882,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                               const result = await permanentlyDeleteFolder(folder.id)
                               if (result.success) {
                                 toast.success("Folder deleted permanently")
-                                window.location.reload()
+                                handleRefreshData()
                               } else {
                                 toast.error("Failed to delete folder")
                               }
@@ -893,6 +913,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 onToggleSelect={handleToggleSelect}
                 onToggleSelectAll={handleToggleSelectAll}
                 duplicateProspectIds={duplicateProspectIds}
+                refreshKey={refreshKey}
                 key={`trash-${searchQuery}`}
               />
             </div>
@@ -943,6 +964,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 onToggleSelect={handleToggleSelect}
                 onToggleSelectAll={handleToggleSelectAll}
                 duplicateProspectIds={duplicateProspectIds}
+                refreshKey={refreshKey}
                 key={`all-${selectedFolderId}-${searchQuery}`}
               />
             </TabsContent>
@@ -956,6 +978,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 onToggleSelect={handleToggleSelect}
                 onToggleSelectAll={handleToggleSelectAll}
                 duplicateProspectIds={duplicateProspectIds}
+                refreshKey={refreshKey}
                 key={`active-${selectedFolderId}-${searchQuery}`}
               />
             </TabsContent>
@@ -969,6 +992,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 onToggleSelect={handleToggleSelect}
                 onToggleSelectAll={handleToggleSelectAll}
                 duplicateProspectIds={duplicateProspectIds}
+                refreshKey={refreshKey}
                 key={`contacted-${selectedFolderId}-${searchQuery}`}
               />
             </TabsContent>
@@ -982,6 +1006,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 onToggleSelect={handleToggleSelect}
                 onToggleSelectAll={handleToggleSelectAll}
                 duplicateProspectIds={duplicateProspectIds}
+                refreshKey={refreshKey}
                 key={`replied-${selectedFolderId}-${searchQuery}`}
               />
             </TabsContent>
@@ -995,6 +1020,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
                 onToggleSelect={handleToggleSelect}
                 onToggleSelectAll={handleToggleSelectAll}
                 duplicateProspectIds={duplicateProspectIds}
+                refreshKey={refreshKey}
                 key={`unsubscribed-${selectedFolderId}-${searchQuery}`}
               />
             </TabsContent>
@@ -1008,7 +1034,7 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
         duplicateGroups={duplicateGroups}
         onResolved={() => {
           setDuplicateGroups([])
-          window.location.reload()
+          handleRefreshData()
         }}
       />
     </div>

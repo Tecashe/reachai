@@ -18,6 +18,7 @@ export interface MappingResult {
   suggestedMappings: FieldMapping[]
   unmappedColumns: string[]
   customFields: string[]
+  confidence: number // Overall confidence score (0-1)
 }
 
 // Standard prospect fields that we want to map to
@@ -269,11 +270,34 @@ export function analyzeImportData(headers: string[], rows: string[][]): MappingR
       .replace(/_+/g, "_")
   })
 
+  // Calculate overall confidence
+  const totalConfidence = suggestedMappings.reduce((sum, m) => sum + m.confidence, 0)
+  const avgConfidence = suggestedMappings.length > 0 ? totalConfidence / suggestedMappings.length : 0
+
   return {
     columns,
     suggestedMappings,
     unmappedColumns,
     customFields,
+    confidence: avgConfidence,
+  }
+}
+
+export function detectFieldMappings(
+  headers: string[],
+): MappingResult & { mappings: FieldMapping[]; confidence: number } {
+  // Get sample rows (empty for now, we'll use header-based detection)
+  const emptyRows: string[][] = []
+  const result = analyzeImportData(headers, emptyRows)
+
+  // Calculate overall confidence
+  const totalConfidence = result.suggestedMappings.reduce((sum, m) => sum + m.confidence, 0)
+  const avgConfidence = result.suggestedMappings.length > 0 ? totalConfidence / result.suggestedMappings.length : 0
+
+  return {
+    ...result,
+    mappings: result.suggestedMappings,
+    confidence: avgConfidence,
   }
 }
 
