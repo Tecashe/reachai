@@ -1000,6 +1000,56 @@ import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { updateOnboardingStep } from "./onboarding"
 
+
+
+
+export async function updateCampaignWizardProgress(
+  campaignId: string,
+  step: string,
+  completedSteps: string[],
+  data?: any,
+) {
+  try {
+    const { userId } = await auth()
+    if (!userId) throw new Error("Unauthorized")
+
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+    })
+
+    if (!user) throw new Error("User not found")
+
+    console.log("[v0] updateCampaignWizardProgress saving:", {
+      campaignId,
+      step,
+      completedSteps,
+    })
+
+    await db.campaign.update({
+      where: { id: campaignId, userId: user.id },
+      data: {
+        wizardStep: step,
+        wizardCompletedSteps: completedSteps,
+        wizardData: data || {},
+        updatedAt: new Date(),
+      },
+    })
+
+    revalidatePath(`/dashboard/campaigns/${campaignId}`)
+    revalidatePath(`/dashboard/campaigns/${campaignId}/wizard`)
+
+    return { success: true }
+  } catch (error) {
+    console.error("[builtbycashe] Error updating wizard progress:", error)
+    return { success: false, error: "Failed to update wizard progress" }
+  }
+}
+
+
+
+
+
+
 export async function getCampaigns(status?: string) {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorized")
@@ -1199,7 +1249,7 @@ export async function getCampaignById(campaignId: string) {
   return { ...campaign, stats }
 }
 
-export async function updateCampaignWizardProgress(
+export async function updateCampaignWizardProgressE(
   campaignId: string,
   step: string,
   completedSteps: string[],
