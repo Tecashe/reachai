@@ -893,21 +893,50 @@
 //     </div>
 //   )
 // }
-import { DNSVerificationGuide } from "@/components/email-setup/dns-verification-guide"
+
+
+
+// import { DNSVerificationGuide } from "@/components/email-setup/dns-verification-guide"
+
+// export default function Page() {
+//   return (
+//     <main className="container mx-auto py-8 px-4 max-w-4xl">
+//       <div className="space-y-6">
+//         <div className="space-y-2">
+//           <h1 className="text-3xl font-bold tracking-tight">Domain DNS Configuration</h1>
+//           <p className="text-muted-foreground">
+//             Configure your domain's email authentication records for maximum deliverability
+//           </p>
+//         </div>
+
+//         <DNSVerificationGuide />
+//       </div>
+//     </main>
+//   )
+// }
+
+
+import { Suspense } from "react"
+import { EmailSetupDashboard } from "@/components/email-setup/email-setup-dashboard"
+import { Spinner } from "@/components/ui/spinner"
+
+export const metadata = {
+  title: "Domain Setup | Cold Email",
+  description: "Configure your domains for maximum email deliverability",
+}
 
 export default function Page() {
   return (
-    <main className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Domain DNS Configuration</h1>
-          <p className="text-muted-foreground">
-            Configure your domain's email authentication records for maximum deliverability
-          </p>
-        </div>
-
-        <DNSVerificationGuide />
-      </div>
+    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center">
+            <Spinner />
+          </div>
+        }
+      >
+        <EmailSetupDashboard />
+      </Suspense>
     </main>
   )
 }
