@@ -807,24 +807,28 @@ model Domain {
   domain     String // e.g., mail.company.com
   recordType String @default("subdomain") // "subdomain" or "main"
 
+  // ADD THESE TWO FIELDS:
+  emailProviderId String? // "resend", "gmail", "outlook", "custom", etc.
+  dkimSelector    String? // DKIM selector (e.g., "default", "k1", "selector1")
+
   // DNS Records
   dnsRecords Json? // { spf: {...}, dkim: {...}, dmarc: {...} }
 
-  // Verification status
+  // ... rest of your existing fields remain the same
   isVerified            Boolean   @default(false)
   verifiedAt            DateTime?
   verificationAttempts  Int       @default(0)
   lastVerificationCheck DateTime?
 
   // Health status
-  healthScore          Int                   @default(100) // 0-100
+  healthScore          Int                   @default(100)
   deliverabilityHealth DeliverabilityHealth?
 
   lastHealthCheck DateTime?
 
   // Blacklist status
   isBlacklisted    Boolean   @default(false)
-  blacklistedOn    String[]  @default([]) // Which blacklists
+  blacklistedOn    String[]  @default([])
   blacklistCheckAt DateTime?
 
   // Bounce tracking
@@ -847,6 +851,7 @@ model Domain {
   @@index([isVerified])
   @@index([isBlacklisted])
   @@index([healthScore])
+  @@index([emailProviderId]) // Add index for faster queries
 }
 
 model DeliverabilityHealth {
@@ -917,6 +922,9 @@ model DomainVerificationRecord {
   // Verification
   isVerified Boolean   @default(false)
   verifiedAt DateTime?
+  
+  // ADD THIS FIELD:
+  lastMessage String? // Last verification message/error
 
   // Metadata
   selector String? // For DKIM

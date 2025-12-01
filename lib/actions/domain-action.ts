@@ -765,6 +765,7 @@
 //   }
 // }
 
+
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
@@ -773,79 +774,71 @@ import { revalidatePath } from "next/cache"
 import {
   generateDNSRecords,
   verifyDNSRecords,
-  preValidateDomain,
-  detectDNSProvider,
+  getEmailProviders,
+  getEmailProvider,
+  checkCustomDKIMSelector,
 } from "@/lib/services/dns-verification"
 import { updateDeliverabilityHealth } from "@/lib/services/deliverability-alerts"
 
-/**
- * Pre-validate domain before adding
- */
-export async function validateDomain(domain: string) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+// =============================================================================
+// TYPES
+// =============================================================================
 
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
+interface AddDomainResult {
+  success: boolean
+  domainId?: string
+  dnsRecords?: ReturnType<typeof generateDNSRecords>
+  error?: string
+  code?: string
+}
 
-  // Clean domain
-  const cleanDomain = domain
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "")
-    .replace(/\/.*$/, "")
-
-  // Check if already exists
-  const existing = await db.domain.findUnique({
-    where: { userId_domain: { userId: user.id, domain: cleanDomain } },
-  })
-
-  if (existing) {
-    return {
-      success: false,
-      error: existing.isVerified
-        ? "Domain already verified and active"
-        : "Domain already added but not verified. Continue setup below.",
-      code: existing.isVerified ? "DOMAIN_VERIFIED" : "DOMAIN_EXISTS",
-      domainId: existing.id,
-    }
-  }
-
-  // Validate domain has MX records
-  const validation = await preValidateDomain(cleanDomain)
-  if (!validation.canProceed) {
-    return {
-      success: false,
-      error: validation.error,
-      code: "VALIDATION_FAILED",
-    }
-  }
-
-  // Detect DNS provider
-  const dnsProvider = await detectDNSProvider(cleanDomain)
-
-  return {
-    success: true,
-    domain: cleanDomain,
-    dnsProvider,
+interface VerifyDomainResult {
+  success: boolean
+  verified: boolean
+  results: Array<{
+    type: string
+    valid: boolean
+    message?: string
+    details?: string
+  }>
+  healthScore: number
+  dkimSelector?: string
+  diagnostics?: {
+    timestamp: Date
+    dnsLookupTime: number
+    selectorsChecked: number
   }
 }
 
-/**
- * Add a new domain with provider-specific DNS setup guidance
- */
-export async function addDomain(
-  domain: string,
-  emailProvider: string = "sendgrid",
-  recordType: "subdomain" | "main" = "subdomain",
-) {
+// =============================================================================
+// AUTH HELPER
+// =============================================================================
+
+async function getAuthUser() {
   const { userId } = await auth()
   if (!userId) throw new Error("Unauthorized")
 
   const user = await db.user.findUnique({ where: { clerkId: userId } })
   if (!user) throw new Error("User not found")
 
+  return user
+}
+
+// =============================================================================
+// DOMAIN MANAGEMENT
+// =============================================================================
+
+/**
+ * Add a new domain with email provider selection
+ */
+export async function addDomain(
+  domain: string,
+  providerId = "custom",
+  recordType: "subdomain" | "main" = "subdomain",
+): Promise<AddDomainResult> {
+  const user = await getAuthUser()
+
+  // Check domain limit
   const domainCount = await db.domain.count({ where: { userId: user.id } })
   const domainLimit = getDomainLimit(user.subscriptionTier)
 
@@ -857,54 +850,36 @@ export async function addDomain(
     }
   }
 
-  const cleanDomain = domain
-    .trim()
+  // Normalize domain
+  const normalizedDomain = domain
     .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "")
-    .replace(/\/.*$/, "")
+    .trim()
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
 
   // Check if domain already exists
   const existing = await db.domain.findUnique({
-    where: { userId_domain: { userId: user.id, domain: cleanDomain } },
-  })
+    where: { userId_domain: { userId: user.id, domain: normalizedDomain } },
+  } as any)
 
   if (existing) {
     return {
       success: false,
-      error: `Domain "${cleanDomain}" is already added to your account. You can manage it in your settings.`,
+      error: `Domain "${normalizedDomain}" is already added to your account.`,
       code: "DOMAIN_EXISTS",
-      domainId: existing.id,
     }
   }
 
-  // Pre-validate domain
-  const validation = await preValidateDomain(cleanDomain)
-  if (!validation.canProceed) {
-    return {
-      success: false,
-      error: validation.error || "Domain validation failed",
-      code: "VALIDATION_FAILED",
-    }
-  }
-
-  // Generate DNS records based on email provider
-  const dnsRecords = await generateDNSRecords(cleanDomain, emailProvider)
-
-  // Detect DNS provider for custom instructions
-  const dnsProvider = await detectDNSProvider(cleanDomain)
+  // Generate DNS records based on provider
+  const dnsRecords = generateDNSRecords(normalizedDomain, providerId)
 
   // Create domain
   const newDomain = await db.domain.create({
     data: {
       userId: user.id,
-      domain: cleanDomain,
+      domain: normalizedDomain,
       recordType,
-      dnsRecords: {
-        ...dnsRecords,
-        dnsProvider: dnsProvider?.provider,
-        dnsProviderNotes: dnsProvider?.notes,
-      } as any,
+      emailProviderId: providerId,
+      dnsRecords: dnsRecords as any,
       isVerified: false,
     },
   })
@@ -914,7 +889,7 @@ export async function addDomain(
     await db.domainVerificationRecord.create({
       data: {
         userId: user.id,
-        domain: cleanDomain,
+        domain: normalizedDomain,
         recordType: record.type,
         recordName: record.name,
         recordValue: record.value,
@@ -926,41 +901,23 @@ export async function addDomain(
   revalidatePath("/dashboard/deliverability")
   revalidatePath("/dashboard/settings")
 
-  return {
-    success: true,
-    domainId: newDomain.id,
-    dnsRecords,
-    dnsProvider,
-  }
+  return { success: true, domainId: newDomain.id, dnsRecords }
 }
 
 /**
- * Verify domain DNS records with enhanced feedback
+ * Verify domain DNS records with provider-aware checking
  */
-export async function verifyDomain(domainId: string) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
+export async function verifyDomain(domainId: string, customSelector?: string): Promise<VerifyDomainResult> {
+  const user = await getAuthUser()
 
   const domain = await db.domain.findUnique({
     where: { id: domainId, userId: user.id },
-  })
+  } as any)
 
   if (!domain) throw new Error("Domain not found")
 
-  // Get the selector from stored DNS records
-  const storedDNSRecords = domain.dnsRecords as any
-  const dkimSelector = storedDNSRecords?.selector || "default"
-
-  // Verify DNS records with user's specific selector
-  const verification = await verifyDNSRecords(domain.domain, dkimSelector)
-
-  // Calculate verification progress
-  const verifiedCount = verification.results.filter((r) => r.valid).length
-  const totalCount = verification.results.length
-  const progressPercentage = Math.round((verifiedCount / totalCount) * 100)
+  // Verify DNS records with provider-specific selector priority
+  const verification = await verifyDNSRecords(domain.domain, domain.emailProviderId || undefined, customSelector)
 
   // Update domain
   await db.domain.update({
@@ -968,14 +925,10 @@ export async function verifyDomain(domainId: string) {
     data: {
       isVerified: verification.allValid,
       verifiedAt: verification.allValid ? new Date() : null,
-      verificationAttempts: domain.verificationAttempts + 1,
+      verificationAttempts: (domain.verificationAttempts || 0) + 1,
       lastVerificationCheck: new Date(),
       healthScore: verification.healthScore,
-      dnsRecords: {
-        ...storedDNSRecords,
-        lastVerificationResult: verification,
-        propagationStatus: verification.propagationStatus,
-      } as any,
+      dkimSelector: verification.dkim.selector,
     },
   })
 
@@ -990,11 +943,12 @@ export async function verifyDomain(domainId: string) {
       data: {
         isVerified: result.valid,
         verifiedAt: result.valid ? new Date() : null,
+        lastMessage: result.message,
       },
-    })
+    } as any)
   }
 
-  // Create or update deliverability health
+  // Update deliverability health
   await updateDeliverabilityHealth(domainId)
 
   revalidatePath("/dashboard/deliverability")
@@ -1005,57 +959,77 @@ export async function verifyDomain(domainId: string) {
     verified: verification.allValid,
     results: verification.results,
     healthScore: verification.healthScore,
-    progressPercentage,
-    propagationStatus: verification.propagationStatus,
-    allValid: verification.allValid,
+    dkimSelector: verification.dkim.selector,
+    diagnostics: verification.diagnostics,
   }
 }
 
 /**
- * Poll domain verification (for auto-retry)
+ * Check a custom DKIM selector for a domain
  */
-export async function pollDomainVerification(domainId: string, maxAttempts: number = 3) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+export async function checkDKIMSelector(domainId: string, selector: string) {
+  const user = await getAuthUser()
 
-  let lastResult = null
+  const domain = await db.domain.findUnique({
+    where: { id: domainId, userId: user.id },
+  } as any)
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    lastResult = await verifyDomain(domainId)
+  if (!domain) throw new Error("Domain not found")
 
-    if (lastResult.verified) {
-      return {
-        // success: true,
-        // verified: true,
-        attempts: attempt,
-        ...lastResult,
-      }
-    }
+  const result = await checkCustomDKIMSelector(domain.domain, selector)
 
-    // Wait 10 seconds before next attempt (except on last attempt)
-    if (attempt < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 10000))
-    }
+  if (result.valid) {
+    // Update domain with found selector
+    await db.domain.update({
+      where: { id: domainId },
+      data: { dkimSelector: selector },
+    })
   }
 
-  return {
-    success: false,
-    verified: false,
-    attempts: maxAttempts,
-    message: "DNS records still propagating. This can take 1-4 hours. You can check back later.",
-    ...lastResult,
-  }
+  return result
 }
 
 /**
- * Get domain with DNS records and provider info
+ * Update domain's email provider
+ */
+export async function updateDomainProvider(domainId: string, providerId: string) {
+  const user = await getAuthUser()
+
+  const domain = await db.domain.findUnique({
+    where: { id: domainId, userId: user.id },
+  } as any)
+
+  if (!domain) throw new Error("Domain not found")
+
+  // Regenerate DNS records for new provider
+  const dnsRecords = generateDNSRecords(domain.domain, providerId)
+
+  await db.domain.update({
+    where: { id: domainId },
+    data: {
+      emailProviderId: providerId,
+      dnsRecords: dnsRecords as any,
+    },
+  })
+
+  revalidatePath("/dashboard/deliverability")
+  revalidatePath("/dashboard/settings")
+
+  return { success: true, dnsRecords }
+}
+
+/**
+ * Get list of supported email providers
+ */
+export async function getProviders() {
+  return getEmailProviders()
+}
+
+/**
+ * Get domain with DNS records
  */
 export async function getDomainDetails(domainId: string) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
+  const user = await getAuthUser()
 
   const domain = await db.domain.findUnique({
     where: { id: domainId, userId: user.id },
@@ -1063,98 +1037,46 @@ export async function getDomainDetails(domainId: string) {
       deliverabilityHealth: true,
       sendingAccounts: true,
     },
-  })
+  } as any)
 
   if (!domain) throw new Error("Domain not found")
 
   const verificationRecords = await db.domainVerificationRecord.findMany({
     where: { userId: user.id, domain: domain.domain },
-  })
+  } as any)
 
-  // Get DNS provider info
-  const dnsRecords = domain.dnsRecords as any
-  const dnsProvider = dnsRecords?.dnsProvider
-  const dnsProviderNotes = dnsRecords?.dnsProviderNotes
+  // Get provider info if set
+  const provider = domain.emailProviderId ? getEmailProvider(domain.emailProviderId) : null
 
-  return {
-    domain,
-    verificationRecords,
-    dnsProvider,
-    dnsProviderNotes,
-  }
-}
-
-/**
- * Re-check a specific DNS record
- */
-export async function recheckDNSRecord(domainId: string, recordType: "SPF" | "DKIM" | "DMARC") {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
-
-  const domain = await db.domain.findUnique({
-    where: { id: domainId, userId: user.id },
-  })
-
-  if (!domain) throw new Error("Domain not found")
-
-  const storedDNSRecords = domain.dnsRecords as any
-  const dkimSelector = storedDNSRecords?.selector || "default"
-
-  // Verify only the specific record
-  const verification = await verifyDNSRecords(domain.domain, dkimSelector)
-  const recordResult = verification.results.find((r) => r.type === recordType)
-
-  if (recordResult) {
-    // Update only this record
-    await db.domainVerificationRecord.updateMany({
-      where: {
-        userId: user.id,
-        domain: domain.domain,
-        recordType: recordType,
-      },
-      data: {
-        isVerified: recordResult.valid,
-        verifiedAt: recordResult.valid ? new Date() : null,
-      },
-    })
-  }
-
-  revalidatePath("/dashboard/deliverability")
-  revalidatePath("/dashboard/settings")
-
-  return {
-    success: true,
-    recordType,
-    valid: recordResult?.valid || false,
-    message: recordResult?.message,
-  }
+  return { domain, verificationRecords, provider }
 }
 
 /**
  * Delete domain
  */
 export async function deleteDomain(domainId: string) {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
+  const user = await getAuthUser()
 
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
-
-  // Check if domain has active sending accounts
+  // Check for active sending accounts
   const accountsCount = await db.sendingAccount.count({
     where: { domainId, isActive: true },
-  })
+  } as any)
 
   if (accountsCount > 0) {
     throw new Error("Cannot delete domain with active sending accounts. Please deactivate them first.")
   }
 
+  // Delete verification records first
+  const domain = await db.domain.findUnique({ where: { id: domainId } } as any)
+  if (domain) {
+    await db.domainVerificationRecord.deleteMany({
+      where: { domain: domain.domain, userId: user.id },
+    } as any)
+  }
+
   await db.domain.delete({
     where: { id: domainId, userId: user.id },
-  })
+  } as any)
 
   revalidatePath("/dashboard/deliverability")
   revalidatePath("/dashboard/settings")
@@ -1162,85 +1084,16 @@ export async function deleteDomain(domainId: string) {
   return { success: true }
 }
 
-/**
- * Get DNS troubleshooting tips
- */
-export async function getDNSTroubleshootingTips(domainId: string, recordType: "SPF" | "DKIM" | "DMARC") {
-  const { userId } = await auth()
-  if (!userId) throw new Error("Unauthorized")
-
-  const user = await db.user.findUnique({ where: { clerkId: userId } })
-  if (!user) throw new Error("User not found")
-
-  const domain = await db.domain.findUnique({
-    where: { id: domainId, userId: user.id },
-  })
-
-  if (!domain) throw new Error("Domain not found")
-
-  const dnsRecords = domain.dnsRecords as any
-  const dnsProvider = dnsRecords?.dnsProvider
-  const providerNotes = dnsRecords?.dnsProviderNotes
-
-  const tips: Record<string, any> = {
-    SPF: {
-      title: "SPF Record Troubleshooting",
-      commonIssues: [
-        "Record not added yet - verify in your DNS dashboard",
-        "DNS hasn't propagated (wait 1-4 hours, up to 48 hours worst case)",
-        "Wrong record type (should be TXT, not A or CNAME)",
-        "Typo in the value - must start with 'v=spf1'",
-      ],
-      providerSpecific: providerNotes?.spf || "Use @ or leave Name blank for root domain",
-      checkTools: [
-        { name: "MXToolbox SPF Check", url: `https://mxtoolbox.com/spf.aspx` },
-        { name: "WhatsmyDNS", url: `https://www.whatsmydns.net/#TXT/${domain.domain}` },
-      ],
-    },
-    DKIM: {
-      title: "DKIM Record Troubleshooting",
-      commonIssues: [
-        "Record not added yet - verify in your DNS dashboard",
-        "Wrong selector name - must match exactly (including underscore)",
-        "DNS provider added domain suffix automatically - try removing it",
-        "DNS hasn't propagated yet (wait 1-4 hours)",
-        "Email provider hasn't generated DKIM key yet - check provider dashboard",
-      ],
-      providerSpecific:
-        providerNotes?.dkim || "Enter subdomain with _domainkey (e.g., selector._domainkey.yourdomain.com)",
-      checkTools: [
-        { name: "MXToolbox DKIM Check", url: `https://mxtoolbox.com/dkim.aspx` },
-        {
-          name: "WhatsmyDNS",
-          url: `https://www.whatsmydns.net/#TXT/${dnsRecords?.selector || "default"}._domainkey.${domain.domain}`,
-        },
-      ],
-    },
-    DMARC: {
-      title: "DMARC Record Troubleshooting",
-      commonIssues: [
-        "Record not added yet - verify in your DNS dashboard",
-        "Wrong name - must be exactly '_dmarc' (with underscore)",
-        "Invalid policy value - must be p=none, p=quarantine, or p=reject",
-        "DNS hasn't propagated yet (wait 1-4 hours)",
-      ],
-      providerSpecific: providerNotes?.dmarc || "Name should be _dmarc (with underscore)",
-      checkTools: [
-        { name: "MXToolbox DMARC Check", url: `https://mxtoolbox.com/dmarc.aspx` },
-        { name: "WhatsmyDNS", url: `https://www.whatsmydns.net/#TXT/_dmarc.${domain.domain}` },
-      ],
-    },
-  }
-
-  return tips[recordType] || null
-}
+// =============================================================================
+// HELPERS
+// =============================================================================
 
 function getDomainLimit(tier: string): number {
   switch (tier) {
     case "FREE":
-      return 1
+      return 2
     case "STARTER":
-      return 3
+      return 4
     case "PRO":
       return 10
     case "AGENCY":

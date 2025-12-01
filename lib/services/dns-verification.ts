@@ -2701,8 +2701,145 @@
 // export const verifyDNSRecords = (domain: string, userDkimSelector?: string) => 
 //   dnsVerificationService.verifyDNSRecords(domain, userDkimSelector)
 
+
+
+
 import { db } from "../db"
+import { DNSStatus } from "@prisma/client"
 import dns from "dns/promises"
+import crypto from "crypto"
+
+// =============================================================================
+// EMAIL PROVIDER DEFINITIONS
+// =============================================================================
+
+export interface EmailProvider {
+  id: string
+  name: string
+  icon: string
+  dkimSelectors: string[]
+  spfInclude: string
+  setupUrl: string
+  instructions: string[]
+  estimatedTime: string
+}
+
+export const EMAIL_PROVIDERS: EmailProvider[] = [
+  {
+    id: "google",
+    name: "Google Workspace",
+    icon: "google",
+    dkimSelectors: ["google", "google1", "google2", "20230601", "20210112"],
+    spfInclude: "include:_spf.google.com",
+    setupUrl: "https://admin.google.com/ac/apps/gmail/authenticateemail",
+    instructions: [
+      "Go to Google Admin Console → Apps → Google Workspace → Gmail",
+      "Click 'Authenticate email' under 'Setup'",
+      "Click 'Generate new record' to create your DKIM key",
+      "Add the TXT record to your DNS (Google will provide exact values)",
+      "Return to Admin Console and click 'Start authentication'",
+    ],
+    estimatedTime: "5-10 minutes",
+  },
+  {
+    id: "microsoft",
+    name: "Microsoft 365 / Outlook",
+    icon: "microsoft",
+    dkimSelectors: ["selector1", "selector2"],
+    spfInclude: "include:spf.protection.outlook.com",
+    setupUrl: "https://security.microsoft.com/dkimv2",
+    instructions: [
+      "Go to Microsoft 365 Defender → Email & collaboration → Policies → DKIM",
+      "Select your domain and click 'Create DKIM keys'",
+      "Add both CNAME records Microsoft provides to your DNS",
+      "Wait for DNS propagation (5-60 minutes)",
+      "Return and click 'Enable' to activate DKIM signing",
+    ],
+    estimatedTime: "10-15 minutes",
+  },
+  {
+    id: "sendgrid",
+    name: "SendGrid",
+    icon: "sendgrid",
+    dkimSelectors: ["s1", "s2", "smtpapi", "sendgrid"],
+    spfInclude: "include:sendgrid.net",
+    setupUrl: "https://app.sendgrid.com/settings/sender_auth",
+    instructions: [
+      "Go to SendGrid → Settings → Sender Authentication",
+      "Click 'Authenticate Your Domain'",
+      "Enter your domain and choose DNS host",
+      "Add the 3 CNAME records SendGrid provides to your DNS",
+      "Return to SendGrid and click 'Verify'",
+    ],
+    estimatedTime: "10-15 minutes",
+  },
+  {
+    id: "mailgun",
+    name: "Mailgun",
+    icon: "mailgun",
+    dkimSelectors: ["smtp", "k1", "mailo", "mailgun"],
+    spfInclude: "include:mailgun.org",
+    setupUrl: "https://app.mailgun.com/app/sending/domains",
+    instructions: [
+      "Go to Mailgun → Sending → Domains → Add New Domain",
+      "Enter your domain name",
+      "Add all DNS records Mailgun provides (SPF, DKIM, MX)",
+      "Click 'Verify DNS Settings' after adding records",
+    ],
+    estimatedTime: "10-15 minutes",
+  },
+  {
+    id: "amazon_ses",
+    name: "Amazon SES",
+    icon: "aws",
+    dkimSelectors: ["amazonses", "ses"],
+    spfInclude: "include:amazonses.com",
+    setupUrl: "https://console.aws.amazon.com/ses/home#/verified-identities",
+    instructions: [
+      "Go to Amazon SES Console → Verified identities",
+      "Click 'Create identity' and choose 'Domain'",
+      "Enable 'Easy DKIM' with 2048-bit key",
+      "Add all 3 CNAME records AWS provides to your DNS",
+      "Wait for 'Verified' status (usually 1-72 hours)",
+    ],
+    estimatedTime: "15-20 minutes",
+  },
+  {
+    id: "zoho",
+    name: "Zoho Mail",
+    icon: "zoho",
+    dkimSelectors: ["zoho", "zmail", "default._domainkey"],
+    spfInclude: "include:zoho.com",
+    setupUrl: "https://mail.zoho.com/cpanel/index.do#mail/settings/dkim",
+    instructions: [
+      "Go to Zoho Mail Admin Console → Email Authentication → DKIM",
+      "Click 'Add Selector' for your domain",
+      "Copy the TXT record value Zoho provides",
+      "Add the TXT record to your DNS",
+      "Return and click 'Verify'",
+    ],
+    estimatedTime: "5-10 minutes",
+  },
+  {
+    id: "custom",
+    name: "Other / Custom SMTP",
+    icon: "server",
+    dkimSelectors: ["default", "dkim", "mail", "smtp", "k1", "s1"],
+    spfInclude: "",
+    setupUrl: "",
+    instructions: [
+      "Contact your email provider for DKIM setup instructions",
+      "They will provide a selector name and TXT record value",
+      "Add the TXT record to your DNS",
+      "Verify with your provider",
+    ],
+    estimatedTime: "Varies",
+  },
+]
+
+// =============================================================================
+// DNS RECORD TYPES
+// =============================================================================
 
 interface DNSRecord {
   type: "TXT" | "CNAME" | "MX"
@@ -2710,27 +2847,34 @@ interface DNSRecord {
   value: string
   ttl?: number
   selector?: string
+  priority?: number
 }
 
 interface GeneratedDNSRecords {
   records: DNSRecord[]
-  selector: string
-  provider: string
+  providerId: string
+  providerName: string
+  selector?: string
 }
 
 interface DNSVerificationResult {
   domain: string
+  providerId?: string
   spf: {
     found: boolean
     record?: string
     valid: boolean
     issues: string[]
+    includes: string[]
   }
   dkim: {
     found: boolean
+    selector?: string
     selectors: string[]
+    record?: string
     valid: boolean
     issues: string[]
+    checkedSelectors: string[]
   }
   dmarc: {
     found: boolean
@@ -2751,296 +2895,211 @@ interface DNSVerificationResult {
     type: string
     valid: boolean
     message?: string
+    details?: string
   }>
-  propagationStatus?: {
-    spf: boolean
-    dkim: boolean
-    dmarc: boolean
+  diagnostics: {
+    timestamp: Date
+    dnsLookupTime: number
+    selectorsChecked: number
   }
 }
 
-interface EmailProvider {
-  id: string
-  name: string
-  dkimType: "CNAME" | "TXT"
-  spfInclude?: string
-  defaultSelector: string
-  setupUrl?: string
-  instructions: string
-}
+// =============================================================================
+// DNS VERIFICATION SERVICE
+// =============================================================================
 
 class DNSVerificationService {
-  private readonly EMAIL_PROVIDERS: Record<string, EmailProvider> = {
-    sendgrid: {
-      id: "sendgrid",
-      name: "SendGrid",
-      dkimType: "CNAME",
-      spfInclude: "sendgrid.net",
-      defaultSelector: "s1",
-      setupUrl: "https://app.sendgrid.com/settings/sender_auth",
-      instructions: "Complete SendGrid domain authentication first, then copy the records here",
-    },
-    gmail: {
-      id: "gmail",
-      name: "Google Workspace",
-      dkimType: "TXT",
-      spfInclude: "_spf.google.com",
-      defaultSelector: "google",
-      setupUrl: "https://admin.google.com",
-      instructions: "Generate DKIM key in Google Admin Console under Apps > Google Workspace > Gmail > Authenticate email",
-    },
-    outlook: {
-      id: "outlook",
-      name: "Microsoft 365",
-      dkimType: "CNAME",
-      spfInclude: "spf.protection.outlook.com",
-      defaultSelector: "selector1",
-      setupUrl: "https://admin.microsoft.com",
-      instructions: "Enable DKIM signing in Microsoft 365 admin center under Threat management > DKIM",
-    },
-    mailgun: {
-      id: "mailgun",
-      name: "Mailgun",
-      dkimType: "TXT",
-      spfInclude: "mailgun.org",
-      defaultSelector: "mx",
-      setupUrl: "https://app.mailgun.com/app/sending/domains",
-      instructions: "Get DKIM records from Mailgun dashboard under Sending > Domains",
-    },
-    postmark: {
-      id: "postmark",
-      name: "Postmark",
-      dkimType: "TXT",
-      spfInclude: "spf.mtasv.net",
-      defaultSelector: "pm",
-      setupUrl: "https://account.postmarkapp.com/signature_domains",
-      instructions: "Get DKIM records from Postmark Sender Signatures page",
-    },
-    ses: {
-      id: "ses",
-      name: "Amazon SES",
-      dkimType: "CNAME",
-      spfInclude: "amazonses.com",
-      defaultSelector: "amazonses",
-      setupUrl: "https://console.aws.amazon.com/ses",
-      instructions: "Enable Easy DKIM in AWS SES console for your verified domain",
-    },
-    custom: {
-      id: "custom",
-      name: "Custom / Other",
-      dkimType: "TXT",
-      defaultSelector: "default",
-      instructions: "Contact your email service provider for specific DNS records",
-    },
-  }
+  // Extended list of common DKIM selectors across all providers
+  private readonly COMMON_DKIM_SELECTORS = [
+    // Google
+    "google",
+    "google1",
+    "google2",
+    "20230601",
+    "20210112",
+    "20161025",
+    // Microsoft
+    "selector1",
+    "selector2",
+    // SendGrid
+    "s1",
+    "s2",
+    "smtpapi",
+    "sendgrid",
+    // Mailgun
+    "k1",
+    "mailo",
+    "mailgun",
+    "smtp",
+    // Amazon SES
+    "amazonses",
+    // Zoho
+    "zoho",
+    "zmail",
+    // Generic
+    "default",
+    "dkim",
+    "mail",
+    "email",
+    "mx",
+    // Postmark
+    "pm",
+    "20200720091950pm",
+    // Mailchimp/Mandrill
+    "k2",
+    "k3",
+    "mandrill",
+    "mcsv",
+    // HubSpot
+    "hs1",
+    "hs2",
+    "hubspot",
+    // Salesforce
+    "sf",
+    "sf1",
+    "sf2",
+    // Custom/Other
+    "mail1",
+    "mail2",
+  ]
 
-  private readonly DNS_PROVIDERS = {
-    cloudflare: {
-      nameservers: ["cloudflare.com"],
-      notes: {
-        dkim: "Enter the full subdomain including your domain (e.g., selector._domainkey.yourdomain.com)",
-        spf: "Use @ for root domain",
-        flatten: true,
-      },
-    },
-    godaddy: {
-      nameservers: ["domaincontrol.com"],
-      notes: {
-        dkim: "DO NOT include your domain in the Name field - GoDaddy adds it automatically",
-        spf: "Use @ for root domain",
-        flatten: false,
-      },
-    },
-    namecheap: {
-      nameservers: ["namecheaphosting.com", "registrar-servers.com"],
-      notes: {
-        dkim: "Enter only the subdomain part (e.g., selector._domainkey) - Namecheap adds the domain",
-        spf: "Use @ for root domain",
-        flatten: false,
-      },
-    },
-    route53: {
-      nameservers: ["awsdns"],
-      notes: {
-        dkim: "Enter the full FQDN with trailing dot (e.g., selector._domainkey.yourdomain.com.)",
-        spf: "Use the domain name itself for root domain",
-        flatten: false,
-      },
-    },
+  /**
+   * Get provider by ID
+   */
+  getProvider(providerId: string): EmailProvider | undefined {
+    return EMAIL_PROVIDERS.find((p) => p.id === providerId)
   }
 
   /**
-   * Detect DNS provider from nameservers
+   * Get all supported providers
    */
-  async detectDNSProvider(domain: string): Promise<{ provider: string; notes: any } | null> {
-    try {
-      const nameservers = await dns.resolveNs(domain)
-      const nsString = nameservers.join(" ").toLowerCase()
-
-      for (const [provider, config] of Object.entries(this.DNS_PROVIDERS)) {
-        if (config.nameservers.some((ns) => nsString.includes(ns))) {
-          return { provider, notes: config.notes }
-        }
-      }
-
-      return null
-    } catch (error) {
-      console.warn(`Could not detect DNS provider for ${domain}`)
-      return null
-    }
+  getAllProviders(): EmailProvider[] {
+    return EMAIL_PROVIDERS
   }
 
   /**
-   * Generate provider-specific DNS records
+   * Generate DNS records based on email provider
+   * NOTE: For DKIM, we now guide users to their provider instead of generating fake records
    */
-  generateDNSRecords(
-    domain: string,
-    emailProvider: string = "sendgrid",
-    customSelector?: string,
-  ): GeneratedDNSRecords {
-    const provider = this.EMAIL_PROVIDERS[emailProvider] || this.EMAIL_PROVIDERS.custom
-    const selector = customSelector || provider.defaultSelector
+  generateDNSRecords(domain: string, providerId = "custom"): GeneratedDNSRecords {
+    const provider = this.getProvider(providerId) || EMAIL_PROVIDERS.find((p) => p.id === "custom")!
 
     const records: DNSRecord[] = []
 
-    // SPF Record
+    // SPF Record - customize based on provider
+    let spfValue = "v=spf1"
     if (provider.spfInclude) {
-      records.push({
-        type: "TXT",
-        name: "@",
-        value: `v=spf1 include:${provider.spfInclude} ~all`,
-        ttl: 3600,
-      })
-    } else {
-      records.push({
-        type: "TXT",
-        name: "@",
-        value: `v=spf1 ~all`,
-        ttl: 3600,
-      })
+      spfValue += ` ${provider.spfInclude}`
     }
+    spfValue += " ~all"
 
-    // DKIM Record
-    if (provider.dkimType === "CNAME" && provider.spfInclude) {
-      records.push({
-        type: "CNAME",
-        name: `${selector}._domainkey`,
-        value: `${selector}.${provider.spfInclude}`,
-        ttl: 3600,
-        selector,
-      })
-    } else {
-      records.push({
-        type: "TXT",
-        name: `${selector}._domainkey`,
-        value: `v=DKIM1; k=rsa; p=PASTE_YOUR_PUBLIC_KEY_HERE`,
-        ttl: 3600,
-        selector,
-      })
-    }
-
-    // DMARC Record
     records.push({
       type: "TXT",
-      name: "_dmarc",
-      value: `v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}; pct=100; fo=1`,
+      name: "@",
+      value: spfValue,
       ttl: 3600,
     })
 
+    // DMARC Record - standard for all providers
+    records.push({
+      type: "TXT",
+      name: "_dmarc",
+      value: `v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@${domain}; pct=100`,
+      ttl: 3600,
+    })
+
+    // NOTE: We no longer generate fake DKIM CNAME records
+    // Instead, users must get DKIM from their email provider
+
     return {
       records,
-      selector,
-      provider: emailProvider,
+      selector: provider.dkimSelectors[0] || "default",
+      providerId: provider.id,
+      providerName: provider.name,
     }
   }
 
   /**
-   * Check DNS propagation across multiple servers
+   * Comprehensive DNS verification with provider-aware DKIM checking
    */
-  async checkDNSPropagation(domain: string, recordType: string, recordName: string): Promise<boolean> {
-    const dnsServers = [
-      "8.8.8.8", // Google
-      "1.1.1.1", // Cloudflare
-      "208.67.222.222", // OpenDNS
-    ]
+  async verifyDNSRecords(domain: string, providerId?: string, customSelector?: string): Promise<DNSVerificationResult> {
+    const startTime = Date.now()
 
-    const results = await Promise.allSettled(
-      dnsServers.map(async (server) => {
-        try {
-          dns.setServers([server])
-          if (recordType === "TXT") {
-            await dns.resolveTxt(recordName)
-          } else if (recordType === "CNAME") {
-            await dns.resolveCname(recordName)
-          }
-          return true
-        } catch {
-          return false
-        }
-      }),
-    )
+    // Determine which selectors to check first based on provider
+    const provider = providerId ? this.getProvider(providerId) : undefined
+    let prioritizedSelectors: string[] = []
 
-    // Reset to default DNS servers
-    dns.setServers([])
+    if (customSelector) {
+      // User provided a specific selector - check it first
+      prioritizedSelectors = [customSelector, ...this.COMMON_DKIM_SELECTORS.filter((s) => s !== customSelector)]
+    } else if (provider) {
+      // Provider-specific selectors first, then common ones
+      prioritizedSelectors = [
+        ...provider.dkimSelectors,
+        ...this.COMMON_DKIM_SELECTORS.filter((s) => !provider.dkimSelectors.includes(s)),
+      ]
+    } else {
+      prioritizedSelectors = this.COMMON_DKIM_SELECTORS
+    }
 
-    const successCount = results.filter((r) => r.status === "fulfilled" && r.value).length
-    return successCount >= 2 // Propagated if 2+ servers can see it
-  }
-
-  /**
-   * Comprehensive DNS verification with propagation status
-   */
-  async verifyDNSRecords(domain: string, userDkimSelector?: string): Promise<DNSVerificationResult> {
+    // Run all verifications in parallel
     const [spfResult, dkimResult, dmarcResult, mxResult] = await Promise.all([
-      this.verifySPF(domain),
-      this.verifyDKIM(domain, userDkimSelector),
+      this.verifySPF(domain, provider),
+      this.verifyDKIM(domain, prioritizedSelectors),
       this.verifyDMARC(domain),
       this.verifyMXRecords(domain),
     ])
 
-    // Check propagation status
-    const propagationStatus = {
-      spf: await this.checkDNSPropagation(domain, "TXT", domain),
-      dkim: userDkimSelector
-        ? await this.checkDNSPropagation(domain, "TXT", `${userDkimSelector}._domainkey.${domain}`)
-        : false,
-      dmarc: await this.checkDNSPropagation(domain, "TXT", `_dmarc.${domain}`),
-    }
+    // For cold outreach, MX is optional (sending-only domains)
+    // But SPF, DKIM, and DMARC are important
+    const overallValid = spfResult.valid && dkimResult.valid && dmarcResult.valid
 
-    const overallValid = spfResult.valid && dkimResult.valid && dmarcResult.valid && mxResult.found
-
+    // Calculate score (0-100)
     let score = 0
-    if (spfResult.valid) score += 25
-    if (dkimResult.valid) score += 25
+    if (spfResult.valid) score += 30
+    if (dkimResult.valid) score += 35 // DKIM is most important for deliverability
     if (dmarcResult.valid) score += 25
-    if (mxResult.found) score += 25
+    if (mxResult.found) score += 10 // MX is nice to have but not critical for sending
 
+    const dnsLookupTime = Date.now() - startTime
+
+    // Build results array for backwards compatibility
     const results = [
       {
         type: "SPF",
         valid: spfResult.valid,
-        message: spfResult.issues.join(", ") || "SPF configured correctly",
+        message: spfResult.valid ? "SPF configured correctly" : "SPF not configured or invalid",
+        details: spfResult.record || "No SPF record found",
       },
       {
         type: "DKIM",
         valid: dkimResult.valid,
-        message:
-          dkimResult.issues.join(", ") || `DKIM verified for selector(s): ${dkimResult.selectors.join(", ")}`,
+        message: dkimResult.valid
+          ? `DKIM found with selector: ${dkimResult.selector}`
+          : "DKIM not found - complete setup in your email provider",
+        details: dkimResult.valid
+          ? `Selector: ${dkimResult.selector}`
+          : `Checked ${dkimResult.checkedSelectors.length} selectors`,
       },
       {
         type: "DMARC",
         valid: dmarcResult.valid,
-        message: dmarcResult.issues.join(", ") || "DMARC configured correctly",
+        message: dmarcResult.valid ? `DMARC policy: ${dmarcResult.policy}` : "DMARC not configured",
+        details: dmarcResult.record || "No DMARC record found",
       },
       {
         type: "MX",
         valid: mxResult.found,
-        message: mxResult.found ? `MX records found: ${mxResult.records.slice(0, 2).join(", ")}` : "No MX records",
+        message: mxResult.found
+          ? `${mxResult.records.length} MX record(s) found`
+          : "No MX records (optional for sending)",
+        details: mxResult.records.join(", ") || "No MX records",
       },
     ]
 
     return {
       domain,
+      providerId,
       spf: spfResult,
       dkim: dkimResult,
       dmarc: dmarcResult,
@@ -3050,153 +3109,143 @@ class DNSVerificationService {
       allValid: overallValid,
       healthScore: score,
       results,
-      propagationStatus,
+      diagnostics: {
+        timestamp: new Date(),
+        dnsLookupTime,
+        selectorsChecked: dkimResult.checkedSelectors.length,
+      },
     }
   }
 
-  private async verifySPF(domain: string) {
+  /**
+   * Verify SPF record with provider-specific validation
+   */
+  private async verifySPF(domain: string, provider?: EmailProvider) {
     const issues: string[] = []
+    const includes: string[] = []
     let found = false
     let record: string | undefined
     let valid = false
 
     try {
       const txtRecords = await dns.resolveTxt(domain)
-      const spfRecord = txtRecords.find((r) => r.join("").startsWith("v=spf1"))
+      const spfRecord = txtRecords.find((r) => r.join("").toLowerCase().startsWith("v=spf1"))
 
       if (spfRecord) {
         found = true
         record = spfRecord.join("")
 
-        if (!record.includes("~all") && !record.includes("-all") && !record.includes("+all")) {
-          issues.push("SPF record should end with ~all (soft fail) or -all (hard fail)")
+        // Extract all includes
+        const includeMatches = record.match(/include:([^\s]+)/g)
+        if (includeMatches) {
+          includes.push(...includeMatches.map((m) => m.replace("include:", "")))
         }
 
-        const mechanisms = record.split(" ").filter((m) => m.startsWith("include:") || m.startsWith("a:"))
-        if (mechanisms.length > 10) {
-          issues.push(`SPF has ${mechanisms.length} lookups (max 10 recommended to avoid "permerror")`)
+        // Validate SPF structure
+        if (!record.includes("~all") && !record.includes("-all") && !record.includes("?all")) {
+          issues.push("SPF should end with ~all (softfail) or -all (hardfail)")
         }
 
-        if (record.includes("+all")) {
-          issues.push("SPF uses +all which allows anyone to send - this is insecure")
+        // Check for provider-specific include
+        if (provider?.spfInclude && !record.includes(provider.spfInclude)) {
+          issues.push(`Missing ${provider.name} SPF include: ${provider.spfInclude}`)
         }
 
-        valid = issues.length === 0
+        // Warn about too many DNS lookups (SPF limit is 10)
+        const lookupCount = (record.match(/include:|a:|mx:|ptr:|exists:/g) || []).length
+        if (lookupCount > 10) {
+          issues.push(`SPF has ${lookupCount} DNS lookups (max 10 allowed)`)
+        } else if (lookupCount > 7) {
+          issues.push(`SPF has ${lookupCount} DNS lookups (approaching limit of 10)`)
+        }
+
+        valid = issues.length === 0 || issues.every((i) => i.includes("approaching") || i.includes("Missing"))
       } else {
-        issues.push("No SPF record found - add a TXT record with v=spf1")
+        issues.push("No SPF record found for this domain")
       }
     } catch (error) {
-      issues.push(`DNS lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`)
-    }
-
-    return { found, record, valid, issues }
-  }
-
-  private async verifyDKIM(domain: string, userSelector?: string) {
-    const issues: string[] = []
-    const selectors: string[] = []
-    let valid = false
-
-    // Priority 1: Check user's specific selector FIRST
-    if (userSelector) {
-      try {
-        const dkimDomain = `${userSelector}._domainkey.${domain}`
-        
-        // Try CNAME first
-        try {
-          await dns.resolveCname(dkimDomain)
-          selectors.push(userSelector)
-          valid = true
-          console.log(`✅ DKIM CNAME found for selector: ${userSelector}`)
-        } catch {
-          // Try TXT
-          const txtRecords = await dns.resolveTxt(dkimDomain)
-          const dkimRecord = txtRecords.find((r) => {
-            const record = r.join("")
-            return record.includes("v=DKIM1") || record.includes("k=rsa") || record.includes("p=")
-          })
-
-          if (dkimRecord) {
-            selectors.push(userSelector)
-            valid = true
-            console.log(`✅ DKIM TXT found for selector: ${userSelector}`)
-          }
-        }
-
-        if (!valid) {
-          issues.push(
-            `DKIM record not found for '${userSelector}._domainkey.${domain}'. Check: 1) Record was added, 2) Name field is correct, 3) DNS has propagated (wait 1-4 hours)`,
-          )
-        }
-      } catch (error) {
-        issues.push(
-          `Cannot verify DKIM for selector '${userSelector}': ${error instanceof Error ? error.message : "Unknown error"}`,
-        )
+      if ((error as NodeJS.ErrnoException).code === "ENOTFOUND") {
+        issues.push("Domain not found - check if domain exists and DNS is configured")
+      } else if ((error as NodeJS.ErrnoException).code === "ENODATA") {
+        issues.push("No TXT records found for this domain")
+      } else {
+        issues.push(`DNS lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`)
       }
     }
 
-    // Priority 2: If user's selector failed, scan common selectors
-    if (!valid) {
-      const commonSelectors = [
-        "default",
-        "google",
-        "selector1",
-        "selector2",
-        "s1",
-        "s2",
-        "k1",
-        "mail",
-        "dkim",
-        "mx",
-        "pm",
-      ]
+    return { found, record, valid, issues, includes }
+  }
 
-      const results = await Promise.allSettled(
-        commonSelectors.map(async (selector) => {
-          try {
-            const dkimDomain = `${selector}._domainkey.${domain}`
+  /**
+   * Verify DKIM with prioritized selector checking
+   */
+  private async verifyDKIM(domain: string, selectors: string[]) {
+    const issues: string[] = []
+    const foundSelectors: string[] = []
+    const checkedSelectors: string[] = []
+    let valid = false
+    let foundSelector: string | undefined
+    let foundRecord: string | undefined
 
-            // Try CNAME
-            try {
-              await dns.resolveCname(dkimDomain)
-              return { selector, found: true }
-            } catch {
-              // Try TXT
-              const txtRecords = await dns.resolveTxt(dkimDomain)
-              const dkimRecord = txtRecords.find((r) => {
-                const record = r.join("")
-                return record.includes("v=DKIM1") || record.includes("k=rsa") || record.includes("p=")
-              })
+    // Check selectors in order (prioritized based on provider)
+    for (const selector of selectors) {
+      checkedSelectors.push(selector)
 
-              if (dkimRecord) return { selector, found: true }
+      try {
+        const dkimDomain = `${selector}._domainkey.${domain}`
+        const txtRecords = await dns.resolveTxt(dkimDomain)
+        const dkimRecord = txtRecords.find((r) => r.join("").toLowerCase().includes("v=dkim1"))
+
+        if (dkimRecord) {
+          const record = dkimRecord.join("")
+          foundSelectors.push(selector)
+
+          // Validate DKIM record structure
+          if (record.includes("p=")) {
+            // Found a valid DKIM record
+            if (!foundSelector) {
+              foundSelector = selector
+              foundRecord = record
             }
 
-            return { selector, found: false }
-          } catch {
-            return { selector, found: false }
+            // Check key length (2048-bit recommended)
+            const publicKey = record.match(/p=([^;]+)/)?.[1]
+            if (publicKey && publicKey.length < 200) {
+              issues.push(`DKIM key for ${selector} may be too short (recommend 2048-bit)`)
+            }
           }
-        }),
-      )
-
-      for (const result of results) {
-        if (result.status === "fulfilled" && result.value.found) {
-          selectors.push(result.value.selector)
-          valid = true
         }
+      } catch {
+        // Selector not found, continue to next
       }
 
-      if (!valid && selectors.length === 0) {
-        issues.push(
-          userSelector
-            ? `No DKIM found for '${userSelector}' or common selectors. Verify your email provider's DKIM setup.`
-            : "No DKIM records found. Configure DKIM with your email provider first, then add DNS records.",
-        )
+      // Early exit if we found a valid selector
+      if (foundSelector && foundSelectors.length > 0) {
+        valid = true
+        break
       }
     }
 
-    return { found: selectors.length > 0, selectors, valid, issues }
+    if (foundSelectors.length === 0) {
+      issues.push("No DKIM records found")
+      issues.push("Complete DKIM setup in your email provider first")
+      issues.push("Then return here to verify")
+    }
+
+    return {
+      found: foundSelectors.length > 0,
+      selector: foundSelector,
+      selectors: foundSelectors,
+      record: foundRecord,
+      valid,
+      issues,
+      checkedSelectors,
+    }
   }
 
+  /**
+   * Verify DMARC record
+   */
   private async verifyDMARC(domain: string) {
     const issues: string[] = []
     let found = false
@@ -3207,7 +3256,7 @@ class DNSVerificationService {
     try {
       const dmarcDomain = `_dmarc.${domain}`
       const txtRecords = await dns.resolveTxt(dmarcDomain)
-      const dmarcRecord = txtRecords.find((r) => r.join("").startsWith("v=DMARC1"))
+      const dmarcRecord = txtRecords.find((r) => r.join("").toLowerCase().startsWith("v=dmarc1"))
 
       if (dmarcRecord) {
         found = true
@@ -3216,156 +3265,231 @@ class DNSVerificationService {
         const policyMatch = record.match(/p=(none|quarantine|reject)/i)
         if (policyMatch) {
           policy = policyMatch[1].toLowerCase()
-          valid = true
 
           if (policy === "none") {
-            issues.push(
-              "DMARC policy is 'none' (monitoring only). Consider 'quarantine' for better protection once you verify legitimate emails work.",
-            )
+            issues.push("DMARC policy is 'none' - emails won't be rejected but you can monitor")
           }
-        } else {
-          issues.push("DMARC record found but policy (p=) is missing or invalid")
-        }
 
-        if (!record.includes("rua=")) {
-          issues.push("Consider adding rua= to receive aggregate reports about your email authentication")
+          // Check for rua (aggregate reports)
+          if (!record.includes("rua=")) {
+            issues.push("Consider adding rua= for DMARC reports")
+          }
+
+          valid = true
+        } else {
+          issues.push("Invalid DMARC policy - must be none, quarantine, or reject")
         }
       } else {
-        issues.push("No DMARC record found at _dmarc.{domain} - add a TXT record with v=DMARC1")
+        issues.push("No DMARC record found")
       }
     } catch (error) {
-      issues.push(`DNS lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`)
+      if ((error as NodeJS.ErrnoException).code === "ENODATA") {
+        issues.push("No DMARC record found - add a TXT record at _dmarc.yourdomain.com")
+      } else {
+        issues.push(`DNS lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`)
+      }
     }
 
     return { found, record, valid, policy, issues }
   }
 
+  /**
+   * Verify MX records
+   */
   private async verifyMXRecords(domain: string) {
     const records: string[] = []
 
     try {
-      if (!domain || typeof domain !== "string" || domain.trim() === "") {
-        return { found: false, records: [] }
-      }
-
-      const cleanDomain = domain.trim().toLowerCase()
-      const mxRecords = await dns.resolveMx(cleanDomain)
-
+      const mxRecords = await dns.resolveMx(domain)
       if (mxRecords.length > 0) {
-        records.push(...mxRecords.sort((a, b) => a.priority - b.priority).map((mx) => mx.exchange))
+        records.push(...mxRecords.sort((a, b) => a.priority - b.priority).map((mx) => `${mx.priority} ${mx.exchange}`))
       }
-    } catch (error: any) {
-      console.warn(`[DNS] MX lookup failed for ${domain}: ${error.message}`)
+    } catch {
+      // MX records are optional for sending-only domains
     }
 
-    return { found: records.length > 0, records }
+    return {
+      found: records.length > 0,
+      records,
+    }
   }
 
   /**
-   * Pre-validation before full verification
+   * Check a specific DKIM selector (for manual input)
    */
-  async preValidateDomain(domain: string): Promise<{ canProceed: boolean; error?: string }> {
+  async checkCustomSelector(
+    domain: string,
+    selector: string,
+  ): Promise<{
+    found: boolean
+    valid: boolean
+    record?: string
+    error?: string
+  }> {
     try {
-      // Check if domain exists in DNS
-      const mxRecords = await this.verifyMXRecords(domain)
+      const dkimDomain = `${selector}._domainkey.${domain}`
+      const txtRecords = await dns.resolveTxt(dkimDomain)
+      const dkimRecord = txtRecords.find((r) => r.join("").toLowerCase().includes("v=dkim1"))
 
-      if (!mxRecords.found) {
+      if (dkimRecord) {
+        const record = dkimRecord.join("")
+        const hasPublicKey = record.includes("p=")
         return {
-          canProceed: false,
-          error:
-            "No MX records found. This domain may not be set up for email. Please verify this is the correct domain.",
+          found: true,
+          valid: hasPublicKey,
+          record,
         }
       }
 
-      return { canProceed: true }
+      return { found: false, valid: false }
     } catch (error) {
       return {
-        canProceed: false,
-        error: "Domain not found in DNS. Please check the domain name and try again.",
+        found: false,
+        valid: false,
+        error: error instanceof Error ? error.message : "Lookup failed",
       }
     }
   }
 
-  async saveVerificationResult(userId: string, domain: string, result: DNSVerificationResult): Promise<void> {
+  /**
+   * Generate a unique DKIM selector (for future self-hosted email)
+   */
+  generateDKIMSelector(): string {
+    return `reach${crypto.randomBytes(4).toString("hex")}`
+  }
+
+  /**
+   * Store verification result in database
+   */
+  async saveVerificationResult(
+    userId: string,
+    domain: string,
+    result: DNSVerificationResult,
+    providerId?: string,
+  ): Promise<void> {
+    // Create or update Domain record
     await db.domain.upsert({
-      where: { userId_domain: { userId, domain } },
+      where: {
+        userId_domain: { userId, domain },
+      },
       create: {
         userId,
         domain,
         isVerified: result.overallValid,
         verifiedAt: result.overallValid ? new Date() : null,
         healthScore: result.score,
+        emailProviderId: providerId,
         dnsRecords: {
           spf: result.spf,
           dkim: result.dkim,
           dmarc: result.dmarc,
           mx: result.mx,
-          propagationStatus: result.propagationStatus,
-        } as any,
+        },
       },
       update: {
         isVerified: result.overallValid,
         verifiedAt: result.overallValid ? new Date() : null,
         healthScore: result.score,
+        emailProviderId: providerId,
         dnsRecords: {
           spf: result.spf,
           dkim: result.dkim,
           dmarc: result.dmarc,
           mx: result.mx,
-          propagationStatus: result.propagationStatus,
-        } as any,
+        },
         lastVerificationCheck: new Date(),
         verificationAttempts: { increment: 1 },
       },
     })
 
+    // Update deliverability health
     const domainRecord = await db.domain.findUnique({
       where: { userId_domain: { userId, domain } },
       include: { deliverabilityHealth: true },
     })
 
-    if (domainRecord && !domainRecord.deliverabilityHealth) {
-      await db.deliverabilityHealth.create({
-        data: {
-          domainId: domainRecord.id,
-          spfStatus: result.spf.valid ? "VALID" : result.spf.found ? "INVALID" : "MISSING",
-          spfValid: result.spf.valid,
-          spfRecord: result.spf.record,
-          dkimStatus: result.dkim.valid ? "VALID" : result.dkim.found ? "INVALID" : "MISSING",
-          dkimValid: result.dkim.valid,
-          dkimSelectors: result.dkim.selectors,
-          dmarcStatus: result.dmarc.valid ? "VALID" : result.dmarc.found ? "INVALID" : "MISSING",
-          dmarcValid: result.dmarc.valid,
-          dmarcRecord: result.dmarc.record,
-          dmarcPolicy: result.dmarc.policy,
-          mxRecordsValid: result.mx.found,
-          mxRecords: result.mx.records,
-        },
-      })
+    // if (domainRecord) {
+    //   const healthData = {
+    //     spfStatus: result.spf.valid ? "VALID" : result.spf.found ? "INVALID" : "MISSING",
+    //     spfValid: result.spf.valid,
+    //     spfRecord: result.spf.record,
+    //     dkimStatus: result.dkim.valid ? "VALID" : result.dkim.found ? "INVALID" : "MISSING",
+    //     dkimValid: result.dkim.valid,
+    //     dkimSelectors: result.dkim.selectors,
+    //     dmarcStatus: result.dmarc.valid ? "VALID" : result.dmarc.found ? "INVALID" : "MISSING",
+    //     dmarcValid: result.dmarc.valid,
+    //     dmarcRecord: result.dmarc.record,
+    //     dmarcPolicy: result.dmarc.policy,
+    //     mxRecordsValid: result.mx.found,
+    //     mxRecords: result.mx.records,
+    //     lastFullCheck: new Date(),
+    //   }
+
+    //   if (domainRecord.deliverabilityHealth) {
+    //     await db.deliverabilityHealth.update({
+    //       where: { domainId: domainRecord.id },
+    //       data: healthData,
+    //     })
+    //   } else {
+    //     await db.deliverabilityHealth.create({
+    //       data: { domainId: domainRecord.id, ...healthData },
+    //     })
+    //   }
+    // }
+    
+
+    // ... then later in the code:
+
+    if (domainRecord) {
+      const healthData = {
+        spfStatus: result.spf.valid ? DNSStatus.VALID : result.spf.found ? DNSStatus.INVALID : DNSStatus.MISSING,
+        spfValid: result.spf.valid,
+        spfRecord: result.spf.record,
+        dkimStatus: result.dkim.valid ? DNSStatus.VALID : result.dkim.found ? DNSStatus.INVALID : DNSStatus.MISSING,
+        dkimValid: result.dkim.valid,
+        dkimSelectors: result.dkim.selectors,
+        dmarcStatus: result.dmarc.valid ? DNSStatus.VALID : result.dmarc.found ? DNSStatus.INVALID : DNSStatus.MISSING,
+        dmarcValid: result.dmarc.valid,
+        dmarcRecord: result.dmarc.record,
+        dmarcPolicy: result.dmarc.policy,
+        mxRecordsValid: result.mx.found,
+        mxRecords: result.mx.records,
+        lastFullCheck: new Date(),
+      }
+
+      if (domainRecord.deliverabilityHealth) {
+        await db.deliverabilityHealth.update({
+          where: { domainId: domainRecord.id },
+          data: healthData,
+        })
+      } else {
+        await db.deliverabilityHealth.create({
+          data: { domainId: domainRecord.id, ...healthData },
+        })
+      }
     }
-  }
-
-  getEmailProviders(): EmailProvider[] {
-    return Object.values(this.EMAIL_PROVIDERS)
-  }
-
-  getEmailProvider(id: string): EmailProvider | undefined {
-    return this.EMAIL_PROVIDERS[id]
   }
 }
 
 export const dnsVerificationService = new DNSVerificationService()
 
-export const generateDNSRecords = (domain: string, emailProvider = "sendgrid", customSelector?: string) =>
-  dnsVerificationService.generateDNSRecords(domain, emailProvider, customSelector)
+// Export helper functions for backwards compatibility
+export function generateDNSRecords(domain: string, providerId?: string) {
+  return dnsVerificationService.generateDNSRecords(domain, providerId)
+}
 
-export const verifyDNSRecords = (domain: string, userDkimSelector?: string) =>
-  dnsVerificationService.verifyDNSRecords(domain, userDkimSelector)
+export function verifyDNSRecords(domain: string, providerId?: string, customSelector?: string) {
+  return dnsVerificationService.verifyDNSRecords(domain, providerId, customSelector)
+}
 
-export const preValidateDomain = (domain: string) => dnsVerificationService.preValidateDomain(domain)
+export function getEmailProviders() {
+  return dnsVerificationService.getAllProviders()
+}
 
-export const detectDNSProvider = (domain: string) => dnsVerificationService.detectDNSProvider(domain)
+export function getEmailProvider(providerId: string) {
+  return dnsVerificationService.getProvider(providerId)
+}
 
-export const getEmailProviders = () => dnsVerificationService.getEmailProviders()
-
-export const getEmailProvider = (id: string) => dnsVerificationService.getEmailProvider(id)
+export function checkCustomDKIMSelector(domain: string, selector: string) {
+  return dnsVerificationService.checkCustomSelector(domain, selector)
+}

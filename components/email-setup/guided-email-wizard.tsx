@@ -9181,11 +9181,15 @@ export function GuidedEmailWizard({ existingDomains = [], existingAccounts = [] 
       }
 
       if (result.success && result.domainId && result.dnsRecords) {
+        const domainId = result.domainId
+        const dnsRecords = result.dnsRecords.records
+        const dkimSelector = result.dnsRecords.selector || "default"
+        
         setState((prev) => ({
           ...prev,
-          domainId: result.domainId,
-          dnsRecords: result.dnsRecords.records,
-          dkimSelector: result.dnsRecords.selector || "default",
+          domainId,
+          dnsRecords,
+          dkimSelector,
         }))
         updateStepStatus("add-domain", { completed: true, verified: true })
         toast.success("Domain added successfully!")
