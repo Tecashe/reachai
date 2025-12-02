@@ -576,10 +576,18 @@ export function OnboardingTour() {
 
   // Cleanup highlighted element styles when tour closes
   useEffect(() => {
+    return () => {
+      if (highlightedElementRef.current) {
+        highlightedElementRef.current.style.cssText = highlightedElementRef.current.dataset.originalStyle || ""
+        delete highlightedElementRef.current.dataset.originalStyle
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     if (!isOpen && highlightedElementRef.current) {
-      highlightedElementRef.current.style.backgroundColor = ""
-      highlightedElementRef.current.style.boxShadow = ""
-      highlightedElementRef.current.style.borderRadius = ""
+      highlightedElementRef.current.style.cssText = highlightedElementRef.current.dataset.originalStyle || ""
+      delete highlightedElementRef.current.dataset.originalStyle
       highlightedElementRef.current = null
     }
   }, [isOpen])
@@ -616,9 +624,8 @@ export function OnboardingTour() {
 
     // Reset previous highlighted element
     if (highlightedElementRef.current) {
-      highlightedElementRef.current.style.backgroundColor = ""
-      highlightedElementRef.current.style.boxShadow = ""
-      highlightedElementRef.current.style.borderRadius = ""
+      highlightedElementRef.current.style.cssText = highlightedElementRef.current.dataset.originalStyle || ""
+      delete highlightedElementRef.current.dataset.originalStyle
     }
 
     // Expand parent group if needed
@@ -632,9 +639,17 @@ export function OnboardingTour() {
     }
 
     highlightedElementRef.current = targetElement
-    targetElement.style.backgroundColor = "hsl(var(--primary) / 0.15)"
-    targetElement.style.boxShadow = "0 0 0 2px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.3)"
-    targetElement.style.borderRadius = "8px"
+    targetElement.dataset.originalStyle = targetElement.style.cssText
+
+    // Apply highlight styles with !important to override Tailwind
+    targetElement.style.cssText += `
+      background-color: hsl(217, 91%, 60%, 0.2) !important;
+      box-shadow: 0 0 0 3px hsl(217, 91%, 60%), 0 0 30px 5px hsl(217, 91%, 60%, 0.4) !important;
+      border-radius: 8px !important;
+      position: relative !important;
+      z-index: 10002 !important;
+      transition: all 0.3s ease !important;
+    `
 
     // Scroll the element into view within the sidebar
     targetElement.scrollIntoView({
