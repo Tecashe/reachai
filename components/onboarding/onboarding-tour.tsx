@@ -569,6 +569,7 @@ export function OnboardingTour() {
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({})
   const [isTransitioning, setIsTransitioning] = useState(false)
   const observerRef = useRef<MutationObserver | null>(null)
+  const highlightedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem("mailfra-tour-completed")
@@ -576,6 +577,17 @@ export function OnboardingTour() {
       setTimeout(() => setIsOpen(true), 800)
     }
   }, [])
+
+  useEffect(() => {
+    if (!isOpen && highlightedElementRef.current) {
+      highlightedElementRef.current.style.position = ""
+      highlightedElementRef.current.style.zIndex = ""
+      highlightedElementRef.current.style.backgroundColor = ""
+      highlightedElementRef.current.style.borderRadius = ""
+      highlightedElementRef.current.style.boxShadow = ""
+      highlightedElementRef.current = null
+    }
+  }, [isOpen])
 
   const expandParentGroup = useCallback((groupName: string | undefined): Promise<void> => {
     return new Promise((resolve) => {
@@ -590,13 +602,11 @@ export function OnboardingTour() {
         return
       }
 
-      // Check if group is already expanded by looking at the chevron rotation
       const chevron = groupButton.querySelector("svg:last-child")
       const isExpanded = chevron?.classList.contains("rotate-180")
 
       if (!isExpanded) {
         groupButton.click()
-        // Wait for animation to complete
         setTimeout(resolve, 250)
       } else {
         resolve()
@@ -609,10 +619,15 @@ export function OnboardingTour() {
 
     const step = tourSteps[currentStep]
 
-    // First, expand the parent group if needed
-    await expandParentGroup(step.parentGroup)
+    if (highlightedElementRef.current) {
+      highlightedElementRef.current.style.position = ""
+      highlightedElementRef.current.style.zIndex = ""
+      highlightedElementRef.current.style.backgroundColor = ""
+      highlightedElementRef.current.style.borderRadius = ""
+      highlightedElementRef.current.style.boxShadow = ""
+    }
 
-    // Small delay to let DOM update after expansion
+    await expandParentGroup(step.parentGroup)
     await new Promise((r) => setTimeout(r, 50))
 
     const targetElement = document.querySelector(step.target) as HTMLElement | null
@@ -620,6 +635,13 @@ export function OnboardingTour() {
       console.log("[v0] Tour target not found:", step.target)
       return
     }
+
+    highlightedElementRef.current = targetElement
+    targetElement.style.position = "relative"
+    targetElement.style.zIndex = "10002"
+    targetElement.style.backgroundColor = "hsl(var(--background))"
+    targetElement.style.borderRadius = "8px"
+    targetElement.style.boxShadow = "0 0 0 4px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--primary) / 0.2)"
 
     const sidebar =
       document.querySelector('[data-sidebar="sidebar"]') ||
@@ -633,11 +655,9 @@ export function OnboardingTour() {
       sidebar
 
     if (scrollableContainer) {
-      // Get the target's position relative to the scrollable container
       const containerRect = scrollableContainer.getBoundingClientRect()
       const targetRect = targetElement.getBoundingClientRect()
 
-      // Check if element is outside visible area
       const isAboveView = targetRect.top < containerRect.top
       const isBelowView = targetRect.bottom > containerRect.bottom
 
@@ -652,25 +672,20 @@ export function OnboardingTour() {
           behavior: "smooth",
         })
 
-        // Wait for scroll to complete before updating highlight position
         await new Promise((r) => setTimeout(r, 350))
       }
     }
 
-    // Fallback: use native scrollIntoView if custom scroll didn't work
     targetElement.scrollIntoView({
       behavior: "smooth",
       block: "center",
       inline: "nearest",
     })
 
-    // Wait a bit more for scroll to settle
     await new Promise((r) => setTimeout(r, 100))
 
-    // Now get the updated rect after scrolling
     const rect = targetElement.getBoundingClientRect()
 
-    // Set highlight rectangle around the target
     setHighlightRect({
       top: rect.top,
       left: rect.left,
@@ -678,8 +693,6 @@ export function OnboardingTour() {
       height: rect.height,
     })
 
-    // Position tooltip to the right of the sidebar (sidebar is ~256px wide)
-    // Account for different screen sizes
     const sidebarWidth = 256
     const tooltipWidth = 360
     const padding = 24
@@ -687,7 +700,6 @@ export function OnboardingTour() {
     const tooltipLeft = sidebarWidth + padding
     let tooltipTop = rect.top
 
-    // Ensure tooltip doesn't go off screen vertically
     const viewportHeight = window.innerHeight
     const estimatedTooltipHeight = 280
     if (tooltipTop + estimatedTooltipHeight > viewportHeight - 20) {
@@ -715,7 +727,6 @@ export function OnboardingTour() {
       setIsTransitioning(false)
     }, 100)
 
-    // Watch for DOM changes
     observerRef.current = new MutationObserver(() => {
       updateHighlight()
     })
@@ -774,34 +785,20 @@ export function OnboardingTour() {
         onClick={handleSkip}
       />
 
-      {/* Highlight cutout - creates a "hole" in the overlay */}
+      {/* Animated highlight ring around the elevated element */}
       {highlightRect && (
-        <>
-          {/* Clear area around target */}
-          <div
-            className="fixed z-[10001] bg-background rounded-lg transition-all duration-300 ease-out"
-            style={{
-              top: highlightRect.top - 6,
-              left: highlightRect.left - 6,
-              width: highlightRect.width + 12,
-              height: highlightRect.height + 12,
-            }}
-          />
-          {/* Animated border ring */}
-          <div
-            className="fixed z-[10002] rounded-lg border-2 border-primary transition-all duration-300 ease-out"
-            style={{
-              top: highlightRect.top - 6,
-              left: highlightRect.left - 6,
-              width: highlightRect.width + 12,
-              height: highlightRect.height + 12,
-              boxShadow: "0 0 0 4px rgba(var(--primary), 0.2), 0 0 20px rgba(var(--primary), 0.3)",
-            }}
-          >
-            {/* Pulse animation */}
-            <div className="absolute inset-0 rounded-lg border-2 border-primary animate-ping opacity-30" />
-          </div>
-        </>
+        <div
+          className="fixed z-[10001] rounded-lg pointer-events-none transition-all duration-300 ease-out"
+          style={{
+            top: highlightRect.top - 4,
+            left: highlightRect.left - 4,
+            width: highlightRect.width + 8,
+            height: highlightRect.height + 8,
+            border: "2px solid hsl(var(--primary))",
+          }}
+        >
+          <div className="absolute inset-0 rounded-lg border-2 border-primary animate-ping opacity-20" />
+        </div>
       )}
 
       {/* Tooltip card */}
