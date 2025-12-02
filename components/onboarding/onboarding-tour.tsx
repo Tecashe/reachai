@@ -399,16 +399,28 @@
 //     </Button>
 //   )
 // }
+
+
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { X, ArrowRight, Sparkles, Zap, CheckCircle2 } from "lucide-react"
+import {
+  X,
+  ArrowRight,
+  ArrowLeft,
+  Sparkles,
+  Zap,
+  CheckCircle2,
+  Mail,
+  Users,
+  Shield,
+  Flame,
+  Server,
+  BarChart3,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
 
 interface TourStep {
   target: string
@@ -420,132 +432,113 @@ interface TourStep {
 const tourSteps: TourStep[] = [
   {
     target: "[data-tour='dashboard']",
-    title: "Welcome to MailFra",
+    title: "Welcome to Your Dashboard",
     description:
-      "Your AI-powered cold email platform. Let's take a quick tour to show you the essential features that will transform your outreach.",
+      "This is your command center. See all your key metrics, recent campaigns, and quick actions at a glance.",
     icon: Sparkles,
   },
   {
     target: "[data-tour='campaigns']",
     title: "Campaign Management",
-    description:
-      "Create, schedule, and monitor your email campaigns with real-time analytics. Track opens, clicks, and replies all in one place.",
-    icon: Zap,
+    description: "Create, schedule, and monitor your email campaigns. Track opens, clicks, and replies in real-time.",
+    icon: Mail,
   },
   {
     target: "[data-tour='prospects']",
-    title: "Intelligent Prospect Organization",
-    description:
-      "Organize your contacts into smart folders. Our AI researches each prospect and personalizes every message automatically.",
-    icon: CheckCircle2,
+    title: "Prospect Management",
+    description: "Organize your contacts into smart lists. Import from CSV or add them manually.",
+    icon: Users,
   },
   {
     target: "[data-tour='warmup']",
     title: "Email Warmup",
     description:
-      "Warm up your sending accounts with our hybrid system. Start with test emails, then scale with peer network.",
-    icon: Zap,
+      "Build sender reputation gradually. Our system warms up your email accounts to improve deliverability.",
+    icon: Flame,
   },
   {
     target: "[data-tour='email-setup']",
     title: "Email Setup",
-    description: "Configure your domains with SPF, DKIM, and DMARC records for optimal deliverability.",
-    icon: Zap,
+    description: "Configure SPF, DKIM, and DMARC records for your domains to maximize inbox placement.",
+    icon: Server,
+  },
+  {
+    target: "[data-tour='deliverability']",
+    title: "Deliverability Hub",
+    description: "Monitor your domain health, check blacklist status, and optimize your sending reputation.",
+    icon: Shield,
   },
   {
     target: "[data-tour='ai-generator']",
-    title: "AI Generator",
-    description: "Generate personalized emails using AI. Create variations and test different approaches.",
+    title: "AI Email Generator",
+    description: "Generate personalized, high-converting emails using AI. Create multiple variations instantly.",
     icon: Zap,
   },
   {
     target: "[data-tour='analytics']",
-    title: "Analytics",
-    description: "Track your campaign performance with detailed analytics and insights.",
-    icon: Zap,
+    title: "Analytics & Insights",
+    description: "Deep dive into your campaign performance with detailed charts and actionable insights.",
+    icon: BarChart3,
   },
 ]
+
+interface TooltipPosition {
+  top: number
+  left: number
+}
 
 export function OnboardingTour() {
   const [isOpen, setIsOpen] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
-  const [highlightedElement, setHighlightedElement] = useState<Element | null>(null)
+  const [tooltipPosition, setTooltipPosition] = useState<TooltipPosition>({ top: 100, left: 280 })
+  const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null)
 
   useEffect(() => {
     const hasSeenTour = localStorage.getItem("mailfra-tour-completed")
     if (!hasSeenTour) {
-      setTimeout(() => setIsOpen(true), 1500)
+      setTimeout(() => setIsOpen(true), 1000)
     }
   }, [])
 
-  const calculatePosition = useCallback((targetElement: Element) => {
+  const updateHighlight = useCallback(() => {
+    if (!isOpen || !tourSteps[currentStep]) return
+
+    const targetElement = document.querySelector(tourSteps[currentStep].target)
+    if (!targetElement) return
+
     const rect = targetElement.getBoundingClientRect()
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
+    setHighlightRect(rect)
 
-    const top = rect.top + window.scrollY
-    const left = rect.left + window.scrollX
+    // Position tooltip to the RIGHT of the sidebar item
+    // Sidebar is ~256px wide, so position tooltip starting at ~280px from left
+    const tooltipLeft = Math.max(rect.right + 20, 280)
+    const tooltipTop = Math.max(rect.top - 10, 20)
 
-    return { top, left }
-  }, [])
+    setTooltipPosition({
+      top: tooltipTop,
+      left: tooltipLeft,
+    })
+
+    // Scroll the element into view if needed
+    targetElement.scrollIntoView({ behavior: "smooth", block: "nearest" })
+  }, [isOpen, currentStep])
 
   useEffect(() => {
-    if (isOpen && tourSteps[currentStep]) {
-      const updatePosition = () => {
-        const targetElement = document.querySelector(tourSteps[currentStep].target)
-        if (targetElement) {
-          const newPosition = calculatePosition(targetElement)
-          setHighlightedElement(targetElement)
+    updateHighlight()
 
-          targetElement.classList.add(
-            "!ring-4",
-            "!ring-blue-500",
-            "!ring-offset-4",
-            "!ring-offset-background",
-            "rounded-lg",
-            "!relative",
-            "!z-[60]",
-            "transition-all",
-            "duration-300",
-          )
+    // Update on resize/scroll
+    window.addEventListener("resize", updateHighlight)
+    window.addEventListener("scroll", updateHighlight, true)
 
-          setTimeout(() => {
-            targetElement.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-              inline: "center",
-            })
-          }, 100)
+    // Also update after a small delay for animations
+    const timer = setTimeout(updateHighlight, 100)
 
-          return () => {
-            targetElement.classList.remove(
-              "!ring-4",
-              "!ring-blue-500",
-              "!ring-offset-4",
-              "!ring-offset-background",
-              "rounded-lg",
-              "!relative",
-              "!z-[60]",
-              "transition-all",
-              "duration-300",
-            )
-          }
-        }
-      }
-
-      const cleanup = updatePosition()
-
-      window.addEventListener("resize", updatePosition)
-      window.addEventListener("scroll", updatePosition, true)
-
-      return () => {
-        cleanup?.()
-        setHighlightedElement(null)
-        window.removeEventListener("resize", updatePosition)
-        window.removeEventListener("scroll", updatePosition, true)
-      }
+    return () => {
+      window.removeEventListener("resize", updateHighlight)
+      window.removeEventListener("scroll", updateHighlight, true)
+      clearTimeout(timer)
     }
-  }, [isOpen, currentStep, calculatePosition])
+  }, [updateHighlight])
 
   const handleNext = () => {
     if (currentStep < tourSteps.length - 1) {
@@ -571,147 +564,162 @@ export function OnboardingTour() {
     localStorage.setItem("mailfra-tour-completed", "true")
   }
 
+  if (!isOpen) return null
+
   const step = tourSteps[currentStep]
   const StepIcon = step.icon
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-black/80 backdrop-blur-md"
-            onClick={handleSkip}
-          />
+    <>
+      {/* Dark overlay with cutout for highlighted element */}
+      <div className="fixed inset-0 z-[100] pointer-events-none">
+        <svg className="w-full h-full">
+          <defs>
+            <mask id="tour-mask">
+              <rect x="0" y="0" width="100%" height="100%" fill="white" />
+              {highlightRect && (
+                <rect
+                  x={highlightRect.left - 4}
+                  y={highlightRect.top - 4}
+                  width={highlightRect.width + 8}
+                  height={highlightRect.height + 8}
+                  rx="8"
+                  fill="black"
+                />
+              )}
+            </mask>
+          </defs>
+          <rect x="0" y="0" width="100%" height="100%" fill="rgba(0, 0, 0, 0.75)" mask="url(#tour-mask)" />
+        </svg>
+      </div>
 
-          {highlightedElement && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed z-50 pointer-events-none"
-              style={{
-                top: highlightedElement.getBoundingClientRect().top - 12,
-                left: highlightedElement.getBoundingClientRect().left - 12,
-                width: highlightedElement.getBoundingClientRect().width + 24,
-                height: highlightedElement.getBoundingClientRect().height + 24,
-                boxShadow: `
-                  0 0 0 4px rgba(99, 102, 241, 0.4),
-                  0 0 0 2000px rgba(0, 0, 0, 0.8),
-                  0 0 60px rgba(99, 102, 241, 0.3)
-                `,
-                borderRadius: "16px",
-              }}
+      {/* Highlight ring around target element */}
+      {highlightRect && (
+        <div
+          className="fixed z-[101] pointer-events-none rounded-lg ring-2 ring-primary ring-offset-2 ring-offset-background"
+          style={{
+            top: highlightRect.top - 4,
+            left: highlightRect.left - 4,
+            width: highlightRect.width + 8,
+            height: highlightRect.height + 8,
+          }}
+        >
+          {/* Animated pulse effect */}
+          <div className="absolute inset-0 rounded-lg animate-pulse bg-primary/20" />
+        </div>
+      )}
+
+      {/* Clickable overlay to allow skip */}
+      <div className="fixed inset-0 z-[102] cursor-pointer" onClick={handleSkip} aria-label="Click to skip tour" />
+
+      {/* Tooltip positioned next to highlighted element */}
+      <div
+        className="fixed z-[103] w-[340px] animate-in fade-in slide-in-from-left-2 duration-300"
+        style={{
+          top: tooltipPosition.top,
+          left: tooltipPosition.left,
+        }}
+      >
+        {/* Arrow pointing to the highlighted element */}
+        <div
+          className="absolute -left-2 top-6 w-0 h-0"
+          style={{
+            borderTop: "8px solid transparent",
+            borderBottom: "8px solid transparent",
+            borderRight: "8px solid hsl(var(--card))",
+          }}
+        />
+
+        <div className="bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+          {/* Progress bar at top */}
+          <div className="h-1 bg-muted">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${((currentStep + 1) / tourSteps.length) * 100}%` }}
             />
-          )}
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 30 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 30 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed z-[70] max-w-lg"
-            style={{
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "calc(100vw - 32px)",
-              maxWidth: "480px",
-            }}
-          >
-            <Card className="relative overflow-hidden border-0 bg-background/95 backdrop-blur-2xl shadow-2xl">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
-
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-4 z-10 h-8 w-8 rounded-full hover:bg-muted"
-                onClick={handleSkip}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-
-              <div className="p-8">
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-                    <StepIcon className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold tracking-tight">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Step {currentStep + 1} of {tourSteps.length}
-                    </p>
-                  </div>
+          <div className="p-5">
+            {/* Header with icon and step counter */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <StepIcon className="h-5 w-5 text-primary" />
                 </div>
-
-                <p className="text-base leading-relaxed text-muted-foreground mb-6">{step.description}</p>
-
-                <div className="mb-6">
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${((currentStep + 1) / tourSteps.length) * 100}%` }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                    {tourSteps.map((_, index) => (
-                      <div
-                        key={index}
-                        className={cn(
-                          "w-2 h-2 rounded-full transition-colors",
-                          index <= currentStep ? "bg-indigo-500" : "bg-muted",
-                        )}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3">
-                  <Button variant="ghost" onClick={handleSkip} className="text-muted-foreground hover:text-foreground">
-                    Skip Tour
-                  </Button>
-                  <div className="flex gap-2">
-                    {currentStep > 0 && (
-                      <Button variant="outline" onClick={handlePrevious} className="rounded-xl bg-transparent">
-                        Back
-                      </Button>
-                    )}
-                    <Button
-                      onClick={handleNext}
-                      className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20"
-                    >
-                      {currentStep < tourSteps.length - 1 ? (
-                        <>
-                          Next
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </>
-                      ) : (
-                        "Get Started"
-                      )}
-                    </Button>
-                  </div>
+                <div>
+                  <h3 className="font-semibold text-base">{step.title}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Step {currentStep + 1} of {tourSteps.length}
+                  </p>
                 </div>
               </div>
-            </Card>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+              <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-1" onClick={handleSkip}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Description */}
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">{step.description}</p>
+
+            {/* Step indicators */}
+            <div className="flex items-center gap-1.5 mb-4">
+              {tourSteps.map((_, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-200",
+                    index === currentStep
+                      ? "w-6 bg-primary"
+                      : index < currentStep
+                        ? "w-1.5 bg-primary/60"
+                        : "w-1.5 bg-muted",
+                  )}
+                />
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSkip}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Skip
+              </Button>
+              <div className="flex gap-2">
+                {currentStep > 0 && (
+                  <Button variant="outline" size="sm" onClick={handlePrevious}>
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Back
+                  </Button>
+                )}
+                <Button size="sm" onClick={handleNext}>
+                  {currentStep < tourSteps.length - 1 ? (
+                    <>
+                      Next
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                      Done
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
 
 export function TourTrigger() {
-  const [isOpen, setIsOpen] = useState(false)
-
   const startTour = () => {
     localStorage.removeItem("mailfra-tour-completed")
-    setIsOpen(true)
     window.location.reload()
   }
 
