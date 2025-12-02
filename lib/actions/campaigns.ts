@@ -993,15 +993,333 @@
 // }
 
 
+// "use server"
+
+// import { auth } from "@clerk/nextjs/server"
+// import { db } from "@/lib/db"
+// import { revalidatePath } from "next/cache"
+// import { updateOnboardingStep } from "./onboarding"
+
+
+
+
+// export async function updateCampaignWizardProgress(
+//   campaignId: string,
+//   step: string,
+//   completedSteps: string[],
+//   data?: any,
+// ) {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//     })
+
+//     if (!user) throw new Error("User not found")
+
+//     console.log("[v0] updateCampaignWizardProgress saving:", {
+//       campaignId,
+//       step,
+//       completedSteps,
+//     })
+
+//     await db.campaign.update({
+//       where: { id: campaignId, userId: user.id },
+//       data: {
+//         wizardStep: step,
+//         wizardCompletedSteps: completedSteps,
+//         wizardData: data || {},
+//         updatedAt: new Date(),
+//       },
+//     })
+
+//     revalidatePath(`/dashboard/campaigns/${campaignId}`)
+//     revalidatePath(`/dashboard/campaigns/${campaignId}/wizard`)
+
+//     return { success: true }
+//   } catch (error) {
+//     console.error("[builtbycashe] Error updating wizard progress:", error)
+//     return { success: false, error: "Failed to update wizard progress" }
+//   }
+// }
+
+
+
+
+
+
+// export async function getCampaigns(status?: string) {
+//   const { userId } = await auth()
+//   if (!userId) throw new Error("Unauthorized")
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) throw new Error("User not found")
+
+//   const where: any = { userId: user.id }
+//   if (status) {
+//     where.status = status.toUpperCase()
+//   }
+
+//   const campaigns = await db.campaign.findMany({
+//     where,
+//     include: {
+//       _count: {
+//         select: {
+//           prospects: true,
+//         },
+//       },
+//     },
+//     orderBy: { createdAt: "desc" },
+//   })
+
+//   // Get email stats for each campaign
+//   const campaignsWithStats = await Promise.all(
+//     campaigns.map(async (campaign) => {
+//       const prospects = await db.prospect.findMany({
+//         where: { campaignId: campaign.id },
+//         select: {
+//           emailsReceived: true,
+//           emailsOpened: true,
+//           emailsReplied: true,
+//         },
+//       })
+
+//       const totalSent = prospects.reduce((sum, p) => sum + p.emailsReceived, 0)
+//       const totalOpened = prospects.reduce((sum, p) => sum + p.emailsOpened, 0)
+//       const totalReplied = prospects.reduce((sum, p) => sum + p.emailsReplied, 0)
+
+//       return {
+//         ...campaign,
+//         totalProspects: campaign._count.prospects,
+//         emailsSent: totalSent,
+//         emailsOpened: totalOpened,
+//         emailsReplied: totalReplied,
+//       }
+//     }),
+//   )
+
+//   return campaignsWithStats
+// }
+
+// export async function createCampaign(formData: FormData) {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) return { success: false, error: "Unauthorized" }
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//     })
+
+//     if (!user) return { success: false, error: "User not found" }
+
+//     const name = formData.get("name") as string
+//     const description = formData.get("description") as string
+//     const researchDepth = formData.get("researchDepth") as string
+//     const personalizationLevel = formData.get("personalizationLevel") as string
+//     const toneOfVoice = formData.get("tone") as string
+//     const dailySendLimit = Number.parseInt(formData.get("dailyLimit") as string)
+//     const trackOpens = formData.get("trackOpens") === "true"
+//     const trackClicks = formData.get("trackClicks") === "true"
+
+//     const campaign = await db.campaign.create({
+//       data: {
+//         userId: user.id,
+//         name,
+//         description,
+//         status: "DRAFT",
+//         researchDepth: researchDepth as any,
+//         personalizationLevel: personalizationLevel as any,
+//         toneOfVoice,
+//         dailySendLimit,
+//         trackOpens,
+//         trackClicks,
+//       },
+//     })
+
+//     await updateOnboardingStep("hasCreatedCampaign")
+
+//     revalidatePath("/dashboard/campaigns")
+//     return { success: true, campaignId: campaign.id }
+//   } catch (error) {
+//     console.error("[builtbycashe] Error creating campaign:", error)
+//     return { success: false, error: "Failed to create campaign" }
+//   }
+// }
+
+// export async function updateCampaignStatus(formData: FormData) {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//     })
+
+//     if (!user) throw new Error("User not found")
+
+//     const campaignId = formData.get("campaignId") as string
+//     const status = formData.get("status") as string
+
+//     await db.campaign.update({
+//       where: { id: campaignId, userId: user.id },
+//       data: { status: status as any },
+//     })
+
+//     revalidatePath("/dashboard/campaigns")
+//     revalidatePath(`/dashboard/campaigns/${campaignId}`)
+//   } catch (error) {
+//     console.error("[builtbycashe] Error updating campaign status:", error)
+//     throw error
+//   }
+// }
+
+// export async function deleteCampaign(campaignId: string) {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//     })
+
+//     if (!user) throw new Error("User not found")
+
+//     await db.campaign.delete({
+//       where: { id: campaignId, userId: user.id },
+//     })
+
+//     revalidatePath("/dashboard/campaigns")
+//     return { success: true }
+//   } catch (error) {
+//     console.error("[builtbycashe] Error deleting campaign:", error)
+//     return { success: false, error: "Failed to delete campaign" }
+//   }
+// }
+
+// export async function getCampaignById(campaignId: string) {
+//   const { userId } = await auth()
+//   if (!userId) throw new Error("Unauthorized")
+
+//   const user = await db.user.findUnique({
+//     where: { clerkId: userId },
+//   })
+
+//   if (!user) throw new Error("User not found")
+
+//   const campaign = await db.campaign.findUnique({
+//     where: { id: campaignId, userId: user.id },
+//     include: {
+//       prospects: {
+//         orderBy: { createdAt: "desc" },
+//         take: 10,
+//       },
+//       _count: {
+//         select: { prospects: true },
+//       },
+//     },
+//   })
+
+//   if (!campaign) throw new Error("Campaign not found")
+
+//   // Calculate stats
+//   const allProspects = await db.prospect.findMany({
+//     where: { campaignId: campaign.id },
+//     select: {
+//       emailsReceived: true,
+//       emailsOpened: true,
+//       emailsClicked: true,
+//       emailsReplied: true,
+//     },
+//   })
+
+//   const stats = {
+//     totalProspects: campaign._count.prospects,
+//     emailsSent: allProspects.reduce((sum, p) => sum + p.emailsReceived, 0),
+//     emailsDelivered: allProspects.reduce((sum, p) => sum + p.emailsReceived, 0),
+//     emailsOpened: allProspects.reduce((sum, p) => sum + p.emailsOpened, 0),
+//     emailsClicked: allProspects.reduce((sum, p) => sum + p.emailsClicked, 0),
+//     emailsReplied: allProspects.reduce((sum, p) => sum + p.emailsReplied, 0),
+//   }
+
+//   return { ...campaign, stats }
+// }
+
+// export async function updateCampaignWizardProgressE(
+//   campaignId: string,
+//   step: string,
+//   completedSteps: string[],
+//   data?: any,
+// ) {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//     })
+
+//     if (!user) throw new Error("User not found")
+
+//     await db.campaign.update({
+//       where: { id: campaignId, userId: user.id },
+//       data: {
+//         wizardStep: step,
+//         wizardCompletedSteps: completedSteps,
+//         wizardData: data || {},
+//         updatedAt: new Date(),
+//       },
+//     })
+
+//     return { success: true }
+//   } catch (error) {
+//     console.error("[builtbycashe] Error updating wizard progress:", error)
+//     return { success: false, error: "Failed to update wizard progress" }
+//   }
+// }
+
+// export async function getDraftCampaigns() {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//     })
+
+//     if (!user) throw new Error("User not found")
+
+//     const draftCampaigns = await db.campaign.findMany({
+//       where: {
+//         userId: user.id,
+//         status: "DRAFT",
+//       },
+//       include: {
+//         _count: {
+//           select: {
+//             prospects: true,
+//           },
+//         },
+//       },
+//       orderBy: { updatedAt: "desc" },
+//     })
+
+//     return draftCampaigns
+//   } catch (error) {
+//     console.error("[builtbycashe] Error fetching draft campaigns:", error)
+//     return []
+//   }
+// }
 "use server"
 
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { updateOnboardingStep } from "./onboarding"
-
-
-
 
 export async function updateCampaignWizardProgress(
   campaignId: string,
@@ -1044,11 +1362,6 @@ export async function updateCampaignWizardProgress(
     return { success: false, error: "Failed to update wizard progress" }
   }
 }
-
-
-
-
-
 
 export async function getCampaigns(status?: string) {
   const { userId } = await auth()
@@ -1126,6 +1439,9 @@ export async function createCampaign(formData: FormData) {
     const trackOpens = formData.get("trackOpens") === "true"
     const trackClicks = formData.get("trackClicks") === "true"
 
+    const copyFromSequenceId = formData.get("copyFromSequenceId") as string
+    const importProspects = formData.get("importProspects") === "true"
+
     const campaign = await db.campaign.create({
       data: {
         userId: user.id,
@@ -1140,6 +1456,98 @@ export async function createCampaign(formData: FormData) {
         trackClicks,
       },
     })
+
+    if (copyFromSequenceId && copyFromSequenceId !== "none") {
+      const sourceCampaign = await db.campaign.findFirst({
+        where: { id: copyFromSequenceId, userId: user.id },
+        include: {
+          emailSequences: {
+            include: { template: true },
+            orderBy: { stepNumber: "asc" },
+          },
+          prospects: importProspects ? true : false,
+          sequenceAutomationRules: true,
+        },
+      })
+
+      if (sourceCampaign) {
+        // Copy email sequences
+        for (const sequence of sourceCampaign.emailSequences) {
+          await db.emailSequence.create({
+            data: {
+              campaignId: campaign.id,
+              templateId: sequence.templateId,
+              stepNumber: sequence.stepNumber,
+              delayDays: sequence.delayDays,
+              sendOnlyIfNotReplied: sequence.sendOnlyIfNotReplied,
+              sendOnlyIfNotOpened: sequence.sendOnlyIfNotOpened,
+            },
+          })
+        }
+
+        // Copy automation rules
+        for (const rule of sourceCampaign.sequenceAutomationRules) {
+          await db.sequenceAutomationRule.create({
+            data: {
+              campaignId: campaign.id,
+              name: rule.name,
+              description: rule.description,
+              triggerType: rule.triggerType,
+              triggerValue: rule.triggerValue,
+              timeWindowHours: rule.timeWindowHours,
+              conditions: rule.conditions || {},
+              actions: rule.actions || [],
+              isActive: rule.isActive,
+              priority: rule.priority,
+            },
+          })
+        }
+
+        // Import prospects if requested
+        if (importProspects && sourceCampaign.prospects) {
+          let importedCount = 0
+          for (const prospect of sourceCampaign.prospects) {
+            const existing = await db.prospect.findFirst({
+              where: {
+                email: prospect.email,
+                campaignId: campaign.id,
+              },
+            })
+
+            if (!existing) {
+              await db.prospect.create({
+                data: {
+                  userId: user.id,
+                  campaignId: campaign.id,
+                  email: prospect.email,
+                  firstName: prospect.firstName,
+                  lastName: prospect.lastName,
+                  company: prospect.company,
+                  jobTitle: prospect.jobTitle,
+                  linkedinUrl: prospect.linkedinUrl,
+                  websiteUrl: prospect.websiteUrl,
+                  companySize: prospect.companySize,
+                  industry: prospect.industry,
+                  location: prospect.location,
+                  phoneNumber: prospect.phoneNumber,
+                  researchData: prospect.researchData||"",
+                  qualityScore: prospect.qualityScore,
+                  personalizationTokens: prospect.personalizationTokens||"",
+                  status: "ACTIVE",
+                  currentStep: 0,
+                },
+              })
+              importedCount++
+            }
+          }
+
+          await db.campaign.update({
+            where: { id: campaign.id },
+            data: { totalProspects: importedCount },
+          })
+        }
+      }
+    }
 
     await updateOnboardingStep("hasCreatedCampaign")
 

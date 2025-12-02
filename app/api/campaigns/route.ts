@@ -1,8 +1,52 @@
+// import { NextResponse } from "next/server"
+// import { getCurrentUserFromDb } from "@/lib/auth"
+// import { db } from "@/lib/db"
+
+// export async function GET() {
+//   try {
+//     const user = await getCurrentUserFromDb()
+
+//     if (!user) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+//     }
+
+//     const campaigns = await db.campaign.findMany({
+//       where: {
+//         userId: user.id,
+//         status: {
+//           in: ["ACTIVE", "PAUSED"],
+//         },
+//       },
+//       include: {
+//         emailSequences: {
+//           orderBy: {
+//             stepNumber: "asc",
+//           },
+//         },
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     })
+
+//     // Filter to only campaigns that have sequences defined
+//     const campaignsWithSequences = campaigns.filter(
+//       (c) => c.emailSequences && c.emailSequences.length > 0
+//     )
+
+//     return NextResponse.json({
+//       campaigns: campaignsWithSequences,
+//     })
+//   } catch (error) {
+//     console.error("[v0] Error fetching campaigns:", error)
+//     return NextResponse.json({ error: "Failed to fetch campaigns" }, { status: 500 })
+//   }
+// }
 import { NextResponse } from "next/server"
 import { getCurrentUserFromDb } from "@/lib/auth"
 import { db } from "@/lib/db"
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const user = await getCurrentUserFromDb()
 
@@ -10,17 +54,23 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { searchParams } = new URL(req.url)
+    const hasSequences = searchParams.get("hasSequences") === "true"
+
     const campaigns = await db.campaign.findMany({
       where: {
         userId: user.id,
-        status: {
-          in: ["ACTIVE", "PAUSED"],
-        },
+        status: hasSequences ? undefined : { in: ["ACTIVE", "PAUSED"] },
       },
       include: {
         emailSequences: {
           orderBy: {
             stepNumber: "asc",
+          },
+        },
+        _count: {
+          select: {
+            prospects: true,
           },
         },
       },
@@ -29,13 +79,28 @@ export async function GET() {
       },
     })
 
-    // Filter to only campaigns that have sequences defined
-    const campaignsWithSequences = campaigns.filter(
-      (c) => c.emailSequences && c.emailSequences.length > 0
-    )
+    let filteredCampaigns = campaigns
+    if (hasSequences) {
+      // Only return campaigns that have sequences
+      filteredCampaigns = campaigns.filter((c) => c.emailSequences && c.emailSequences.length > 0)
+    } else {
+      // Default behavior: filter to only campaigns with sequences
+      filteredCampaigns = campaigns.filter((c) => c.emailSequences && c.emailSequences.length > 0)
+    }
+
+    const mappedCampaigns = filteredCampaigns.map((c) => ({
+      id: c.id,
+      name: c.name,
+      status: c.status,
+      totalProspects: c._count.prospects,
+      emailSequences: c.emailSequences.map((seq) => ({
+        id: seq.id,
+        stepNumber: seq.stepNumber,
+      })),
+    }))
 
     return NextResponse.json({
-      campaigns: campaignsWithSequences,
+      campaigns: mappedCampaigns,
     })
   } catch (error) {
     console.error("[v0] Error fetching campaigns:", error)

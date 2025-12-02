@@ -120,10 +120,14 @@ model Campaign {
   trackOpens      Boolean @default(true)
   trackClicks     Boolean @default(true)
 
+  sequenceAutomationRules SequenceAutomationRule[]
+
   // AI settings
   researchDepth        ResearchDepth        @default(STANDARD)
   personalizationLevel PersonalizationLevel @default(MEDIUM)
   toneOfVoice          String               @default("professional")
+
+  automationRules Json?
 
   // Stats
   totalProspects  Int @default(0)
@@ -922,7 +926,7 @@ model DomainVerificationRecord {
   // Verification
   isVerified Boolean   @default(false)
   verifiedAt DateTime?
-  
+
   // ADD THIS FIELD:
   lastMessage String? // Last verification message/error
 
@@ -1199,6 +1203,41 @@ model SubsequenceTrigger {
   @@index([isActive])
 }
 
+model SequenceAutomationRule {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+
+  // Trigger definition
+  triggerType     AutomationTriggerType
+  triggerValue    String? // e.g., URL for link_clicked, number of days for time-based
+  timeWindowHours Int? // Time window for condition evaluation
+
+  // Conditions (optional additional filters)
+  conditions Json? // { minOpens: 2, industry: "tech", etc. }
+
+  // Actions to execute (in order)
+  actions Json // Array of { type, value, delayHours }
+
+  // Execution stats
+  timesEvaluated  Int       @default(0)
+  timesTriggered  Int       @default(0)
+  lastTriggeredAt DateTime?
+
+  // Status
+  isActive Boolean @default(true)
+  priority Int     @default(0) // Higher priority rules evaluated first
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@index([isActive])
+}
+
 model RealtimeNotification {
   id     String @id @default(cuid())
   userId String
@@ -1432,6 +1471,17 @@ enum SubsequenceAction {
   ADD_TAG
   UPDATE_CRM
   NOTIFY_TEAM
+}
+
+enum AutomationTriggerType {
+  EMAIL_OPENED
+  EMAIL_CLICKED
+  LINK_CLICKED
+  EMAIL_REPLIED
+  NOT_OPENED
+  NOT_REPLIED
+  TIME_ELAPSED
+  ENGAGEMENT_SCORE
 }
 
 enum RealtimeNotificationType {
