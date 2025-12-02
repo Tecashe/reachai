@@ -2294,7 +2294,7 @@
 
 // import type React from "react"
 
-// import Link from "next/link"
+
 // import { usePathname } from "next/navigation"
 // import { cn } from "@/lib/utils"
 // // import Link from "next/link"
@@ -2710,7 +2710,9 @@
 
 import type React from "react"
 
+
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -2942,14 +2944,25 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
   return (
     <>
       {/* Logo */}
-      <div className={cn("p-4 border-b border-border/50 transition-all duration-300", collapsed && "p-3")}>
-        <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-sm group-hover:shadow-md transition-all duration-200">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
-          </div>
-          {!collapsed && <span className="text-lg font-semibold tracking-tight">ReachAI</span>}
-        </Link>
-      </div>
+      <div className={cn("p-6 border-b border-border/50 transition-all duration-300", collapsed && "p-4")}>
+         <Link href="/dashboard" className="flex items-center gap-2 group">
+           <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+             <Image
+               src="/logo.png"
+               alt="mailfra Logo"
+               width={40}
+               height={40}
+               className="object-contain"
+               priority
+             />
+           </div>
+           {!collapsed && (
+             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
+               Mailfra
+             </span>
+           )}
+         </Link>
+       </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
