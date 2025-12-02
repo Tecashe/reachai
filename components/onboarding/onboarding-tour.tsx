@@ -400,7 +400,6 @@
 //   )
 // }
 
-
 "use client"
 
 import type React from "react"
@@ -430,38 +429,31 @@ import { cn } from "@/lib/utils"
 
 interface TourStep {
   target: string
-  parentGroup?: string // Group that needs to be expanded first
+  parentGroup?: string
   title: string
   description: string
   icon: React.ComponentType<{ className?: string }>
-  position?: "right" | "bottom" // Where to position tooltip relative to target
 }
 
-// Steps follow the visual order: top items -> groups (expanded) -> bottom items
 const tourSteps: TourStep[] = [
-  // Top level items (always visible)
   {
     target: "[data-tour='dashboard']",
     title: "Your Dashboard",
     description: "Your command center. View key metrics, recent activity, and quick actions all in one place.",
     icon: LayoutDashboard,
-    position: "right",
   },
   {
     target: "[data-tour='inbox']",
     title: "Unified Inbox",
     description: "All your email replies in one place. Reply, categorize, and manage conversations efficiently.",
     icon: Inbox,
-    position: "right",
   },
-  // Campaigns group
   {
     target: "[data-tour='campaigns']",
     parentGroup: "campaigns",
     title: "All Campaigns",
     description: "View and manage all your email campaigns. Track performance, pause, or edit campaigns anytime.",
     icon: Mail,
-    position: "right",
   },
   {
     target: "[data-tour='analytics']",
@@ -469,16 +461,13 @@ const tourSteps: TourStep[] = [
     title: "Campaign Analytics",
     description: "Deep insights into opens, clicks, replies, and conversions. A/B test results and trends over time.",
     icon: BarChart3,
-    position: "right",
   },
-  // Outreach group
   {
     target: "[data-tour='prospects']",
     parentGroup: "outreach",
     title: "Your Prospects",
     description: "Manage your contact lists. Import from CSV, segment by criteria, and track engagement history.",
     icon: Users,
-    position: "right",
   },
   {
     target: "[data-tour='sequences']",
@@ -486,7 +475,6 @@ const tourSteps: TourStep[] = [
     title: "Email Sequences",
     description: "Automate follow-ups with smart sequences. Set triggers, delays, and conditional logic.",
     icon: GitBranch,
-    position: "right",
   },
   {
     target: "[data-tour='templates']",
@@ -494,16 +482,13 @@ const tourSteps: TourStep[] = [
     title: "Email Templates",
     description: "Save time with reusable templates. Use variables for personalization at scale.",
     icon: FileText,
-    position: "right",
   },
-  // Deliverability group
   {
     target: "[data-tour='deliverability']",
     parentGroup: "deliverability",
     title: "Deliverability Hub",
     description: "Monitor domain health, check blacklists, and optimize your sender reputation score.",
     icon: Shield,
-    position: "right",
   },
   {
     target: "[data-tour='warmup']",
@@ -511,7 +496,6 @@ const tourSteps: TourStep[] = [
     title: "Email Warmup",
     description: "Gradually build sender reputation. Our system sends and receives emails to warm up your accounts.",
     icon: Flame,
-    position: "right",
   },
   {
     target: "[data-tour='email-setup']",
@@ -519,16 +503,13 @@ const tourSteps: TourStep[] = [
     title: "Email Setup",
     description: "Configure SPF, DKIM, and DMARC records. Our wizard guides you through each step.",
     icon: Server,
-    position: "right",
   },
-  // AI Tools group
   {
     target: "[data-tour='ai-generator']",
     parentGroup: "ai tools",
     title: "AI Email Generator",
     description: "Generate personalized emails with AI. Create compelling subject lines and body copy instantly.",
     icon: Sparkles,
-    position: "right",
   },
   {
     target: "[data-tour='ai-predictor']",
@@ -536,22 +517,18 @@ const tourSteps: TourStep[] = [
     title: "AI Predictor",
     description: "Predict email performance before sending. Get scores for deliverability, spam risk, and engagement.",
     icon: Target,
-    position: "right",
   },
-  // Bottom items (always visible)
   {
     target: "[data-tour='integrations']",
     title: "Integrations",
     description: "Connect your favorite tools - CRMs, calendars, and more. Sync data automatically.",
     icon: Zap,
-    position: "right",
   },
   {
     target: "[data-tour='settings']",
     title: "Settings",
     description: "Configure your account, email sending settings, team members, and preferences.",
     icon: Settings,
-    position: "right",
   },
 ]
 
@@ -568,7 +545,7 @@ export function OnboardingTour() {
   const [highlightRect, setHighlightRect] = useState<HighlightRect | null>(null)
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({})
   const [isTransitioning, setIsTransitioning] = useState(false)
-  const observerRef = useRef<MutationObserver | null>(null)
+  const sidebarRef = useRef<HTMLElement | null>(null)
   const highlightedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -579,12 +556,30 @@ export function OnboardingTour() {
   }, [])
 
   useEffect(() => {
+    const sidebar = document.querySelector("aside") as HTMLElement
+    sidebarRef.current = sidebar
+
+    if (isOpen && sidebar) {
+      // Elevate the entire sidebar above the overlay
+      sidebar.style.position = "relative"
+      sidebar.style.zIndex = "10001"
+    }
+
+    return () => {
+      // Reset sidebar z-index when tour closes
+      if (sidebar) {
+        sidebar.style.position = ""
+        sidebar.style.zIndex = ""
+      }
+    }
+  }, [isOpen])
+
+  // Cleanup highlighted element styles when tour closes
+  useEffect(() => {
     if (!isOpen && highlightedElementRef.current) {
-      highlightedElementRef.current.style.position = ""
-      highlightedElementRef.current.style.zIndex = ""
       highlightedElementRef.current.style.backgroundColor = ""
-      highlightedElementRef.current.style.borderRadius = ""
       highlightedElementRef.current.style.boxShadow = ""
+      highlightedElementRef.current.style.borderRadius = ""
       highlightedElementRef.current = null
     }
   }, [isOpen])
@@ -607,7 +602,7 @@ export function OnboardingTour() {
 
       if (!isExpanded) {
         groupButton.click()
-        setTimeout(resolve, 250)
+        setTimeout(resolve, 300)
       } else {
         resolve()
       }
@@ -619,16 +614,16 @@ export function OnboardingTour() {
 
     const step = tourSteps[currentStep]
 
+    // Reset previous highlighted element
     if (highlightedElementRef.current) {
-      highlightedElementRef.current.style.position = ""
-      highlightedElementRef.current.style.zIndex = ""
       highlightedElementRef.current.style.backgroundColor = ""
-      highlightedElementRef.current.style.borderRadius = ""
       highlightedElementRef.current.style.boxShadow = ""
+      highlightedElementRef.current.style.borderRadius = ""
     }
 
+    // Expand parent group if needed
     await expandParentGroup(step.parentGroup)
-    await new Promise((r) => setTimeout(r, 50))
+    await new Promise((r) => setTimeout(r, 100))
 
     const targetElement = document.querySelector(step.target) as HTMLElement | null
     if (!targetElement) {
@@ -637,53 +632,19 @@ export function OnboardingTour() {
     }
 
     highlightedElementRef.current = targetElement
-    targetElement.style.position = "relative"
-    targetElement.style.zIndex = "10002"
-    targetElement.style.backgroundColor = "hsl(var(--background))"
+    targetElement.style.backgroundColor = "hsl(var(--primary) / 0.15)"
+    targetElement.style.boxShadow = "0 0 0 2px hsl(var(--primary)), 0 0 20px hsl(var(--primary) / 0.3)"
     targetElement.style.borderRadius = "8px"
-    targetElement.style.boxShadow = "0 0 0 4px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--primary) / 0.2)"
 
-    const sidebar =
-      document.querySelector('[data-sidebar="sidebar"]') ||
-      document.querySelector(".sidebar-content") ||
-      targetElement.closest("aside") ||
-      targetElement.closest('[role="navigation"]')
-
-    const scrollableContainer =
-      sidebar?.querySelector("[data-radix-scroll-area-viewport]") ||
-      sidebar?.querySelector(".overflow-y-auto") ||
-      sidebar
-
-    if (scrollableContainer) {
-      const containerRect = scrollableContainer.getBoundingClientRect()
-      const targetRect = targetElement.getBoundingClientRect()
-
-      const isAboveView = targetRect.top < containerRect.top
-      const isBelowView = targetRect.bottom > containerRect.bottom
-
-      if (isAboveView || isBelowView) {
-        const elementTop = targetElement.offsetTop
-        const containerHeight = scrollableContainer.clientHeight
-        const elementHeight = targetElement.clientHeight || 40
-        const scrollTo = elementTop - containerHeight / 2 + elementHeight / 2
-
-        scrollableContainer.scrollTo({
-          top: Math.max(0, scrollTo),
-          behavior: "smooth",
-        })
-
-        await new Promise((r) => setTimeout(r, 350))
-      }
-    }
-
+    // Scroll the element into view within the sidebar
     targetElement.scrollIntoView({
       behavior: "smooth",
       block: "center",
-      inline: "nearest",
     })
 
-    await new Promise((r) => setTimeout(r, 100))
+    await new Promise((r) => setTimeout(r, 150))
 
+    // Get position for highlight overlay
     const rect = targetElement.getBoundingClientRect()
 
     setHighlightRect({
@@ -693,15 +654,16 @@ export function OnboardingTour() {
       height: rect.height,
     })
 
-    const sidebarWidth = 256
-    const tooltipWidth = 360
-    const padding = 24
+    // Position tooltip to the right of sidebar
+    const sidebarWidth = sidebarRef.current?.offsetWidth || 256
+    const tooltipWidth = 380
+    const padding = 20
 
-    const tooltipLeft = sidebarWidth + padding
-    let tooltipTop = rect.top
+    let tooltipTop = rect.top - 20
 
+    // Keep tooltip in viewport
     const viewportHeight = window.innerHeight
-    const estimatedTooltipHeight = 280
+    const estimatedTooltipHeight = 300
     if (tooltipTop + estimatedTooltipHeight > viewportHeight - 20) {
       tooltipTop = viewportHeight - estimatedTooltipHeight - 20
     }
@@ -712,7 +674,7 @@ export function OnboardingTour() {
     setTooltipStyle({
       position: "fixed",
       top: tooltipTop,
-      left: tooltipLeft,
+      left: sidebarWidth + padding,
       width: tooltipWidth,
       zIndex: 10003,
     })
@@ -725,18 +687,12 @@ export function OnboardingTour() {
     const timer = setTimeout(() => {
       updateHighlight()
       setIsTransitioning(false)
-    }, 100)
-
-    observerRef.current = new MutationObserver(() => {
-      updateHighlight()
-    })
-    observerRef.current.observe(document.body, { childList: true, subtree: true })
+    }, 150)
 
     window.addEventListener("resize", updateHighlight)
 
     return () => {
       clearTimeout(timer)
-      observerRef.current?.disconnect()
       window.removeEventListener("resize", updateHighlight)
     }
   }, [isOpen, currentStep, updateHighlight])
@@ -779,56 +735,40 @@ export function OnboardingTour() {
 
   return (
     <>
-      {/* Dark overlay */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] transition-opacity duration-300"
-        onClick={handleSkip}
-      />
+      {/* Dark overlay - covers everything EXCEPT the sidebar which has higher z-index */}
+      <div className="fixed inset-0 bg-black/70 z-[10000]" onClick={handleSkip} />
 
-      {/* Animated highlight ring around the elevated element */}
-      {highlightRect && (
-        <div
-          className="fixed z-[10001] rounded-lg pointer-events-none transition-all duration-300 ease-out"
-          style={{
-            top: highlightRect.top - 4,
-            left: highlightRect.left - 4,
-            width: highlightRect.width + 8,
-            height: highlightRect.height + 8,
-            border: "2px solid hsl(var(--primary))",
-          }}
-        >
-          <div className="absolute inset-0 rounded-lg border-2 border-primary animate-ping opacity-20" />
-        </div>
-      )}
-
-      {/* Tooltip card */}
+      {/* Tooltip card positioned to the right of sidebar */}
       <div
         className={cn(
           "transition-all duration-300 ease-out",
-          isTransitioning ? "opacity-0 translate-x-2" : "opacity-100 translate-x-0",
+          isTransitioning ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0",
         )}
         style={tooltipStyle}
       >
-        {/* Arrow pointing left to the sidebar */}
-        <div
-          className="absolute -left-3 top-8 w-0 h-0"
-          style={{
-            borderTop: "10px solid transparent",
-            borderBottom: "10px solid transparent",
-            borderRight: "12px solid hsl(var(--card))",
-            filter: "drop-shadow(-2px 0 2px rgba(0,0,0,0.1))",
-          }}
-        />
+        {/* Arrow pointing to the sidebar item */}
+        {highlightRect && (
+          <div
+            className="absolute w-4 h-4 bg-card border-l border-t border-border rotate-[-45deg]"
+            style={{
+              left: -8,
+              top: Math.max(
+                30,
+                Math.min(highlightRect.top - (tooltipStyle.top as number) + highlightRect.height / 2 - 8, 250),
+              ),
+            }}
+          />
+        )}
 
         <div className="bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
           {/* Gradient accent bar */}
-          <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/60" />
+          <div className="h-1.5 bg-gradient-to-r from-primary via-primary/80 to-primary/50" />
 
           <div className="p-6">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 shadow-sm">
                   <StepIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
@@ -846,21 +786,21 @@ export function OnboardingTour() {
             {/* Description */}
             <p className="text-sm text-muted-foreground leading-relaxed mb-6">{step.description}</p>
 
-            {/* Progress dots - clickable */}
-            <div className="flex items-center justify-center gap-2 mb-6">
+            {/* Progress dots */}
+            <div className="flex items-center justify-center gap-1.5 mb-6">
               {tourSteps.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToStep(index)}
                   className={cn(
-                    "transition-all duration-200 rounded-full",
+                    "transition-all duration-200 rounded-full hover:scale-110",
                     index === currentStep
-                      ? "w-8 h-2 bg-primary"
+                      ? "w-6 h-2 bg-primary"
                       : index < currentStep
-                        ? "w-2 h-2 bg-primary/50 hover:bg-primary/70"
-                        : "w-2 h-2 bg-muted hover:bg-muted-foreground/30",
+                        ? "w-2 h-2 bg-primary/60"
+                        : "w-2 h-2 bg-muted-foreground/30",
                   )}
-                  title={`Go to step ${index + 1}: ${tourSteps[index].title}`}
+                  title={`Step ${index + 1}: ${tourSteps[index].title}`}
                 />
               ))}
             </div>
