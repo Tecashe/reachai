@@ -1,1294 +1,432 @@
-// "use client"
-
-// import { useState, useEffect } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { Badge } from "@/components/ui/badge"
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-// import { Search, Plus, Sparkles, Grid3x3, List, Star, Filter } from 'lucide-react'
-// import { INDUSTRIES } from "@/lib/types"
-// import { getTemplates, getTemplatesByIndustry, getFavoriteTemplates, duplicateTemplate, toggleFavorite } from "@/lib/actions/templates"
-// import { useToast } from "@/hooks/use-toast"
-// import { TemplateCard } from "./template-card"
-// import { AITemplateGenerator } from "./ai-template-generator"
-// import { useRouter } from 'next/navigation'
-
-// export function TemplateLibrary() {
-//   const [templates, setTemplates] = useState<any[]>([])
-//   const [filteredTemplates, setFilteredTemplates] = useState<any[]>([])
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [selectedIndustry, setSelectedIndustry] = useState<string>("all")
-//   const [selectedCategory, setSelectedCategory] = useState<string>("all")
-//   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-//   const [activeTab, setActiveTab] = useState<'all' | 'system' | 'my-templates' | 'favorites'>('all')
-//   const [isLoading, setIsLoading] = useState(true)
-//   const [showAIDialog, setShowAIDialog] = useState(false)
-//   const { toast } = useToast()
-//   const router = useRouter()
-
-//   useEffect(() => {
-//     loadTemplates()
-//   }, [activeTab])
-
-//   useEffect(() => {
-//     filterTemplates()
-//   }, [templates, searchQuery, selectedIndustry, selectedCategory])
-
-//   const loadTemplates = async () => {
-//     setIsLoading(true)
-//     try {
-//       let result
-//       if (activeTab === 'favorites') {
-//         result = await getFavoriteTemplates()
-//       } else {
-//         result = { success: true, templates: await getTemplates() }
-//       }
-
-//       if (result.success && result.templates) {
-//         setTemplates(result.templates)
-//       }
-//     } catch (error) {
-//       toast({
-//         title: "Error loading templates",
-//         description: "Failed to load templates. Please try again.",
-//         variant: "destructive"
-//       })
-//     } finally {
-//       setIsLoading(false)
-//     }
-//   }
-
-//   const filterTemplates = () => {
-//     let filtered = templates
-
-//     // Filter by tab
-//     if (activeTab === 'system') {
-//       filtered = filtered.filter(t => t.isSystemTemplate)
-//     } else if (activeTab === 'my-templates') {
-//       filtered = filtered.filter(t => !t.isSystemTemplate)
-//     }
-
-//     // Filter by search
-//     if (searchQuery) {
-//       const query = searchQuery.toLowerCase()
-//       filtered = filtered.filter(t => 
-//         t.name.toLowerCase().includes(query) ||
-//         t.subject.toLowerCase().includes(query) ||
-//         t.description?.toLowerCase().includes(query)
-//       )
-//     }
-
-//     // Filter by industry
-//     if (selectedIndustry && selectedIndustry !== 'all') {
-//       filtered = filtered.filter(t => t.industry === selectedIndustry)
-//     }
-
-//     // Filter by category
-//     if (selectedCategory && selectedCategory !== 'all') {
-//       filtered = filtered.filter(t => t.category === selectedCategory)
-//     }
-
-//     setFilteredTemplates(filtered)
-//   }
-
-//   const handleDuplicate = async (templateId: string) => {
-//     const result = await duplicateTemplate(templateId)
-//     if (result.success) {
-//       toast({
-//         title: "Template duplicated",
-//         description: "The template has been added to your library"
-//       })
-//       loadTemplates()
-//     } else {
-//       toast({
-//         title: "Duplication failed",
-//         description: result.error,
-//         variant: "destructive"
-//       })
-//     }
-//   }
-
-//   const handleToggleFavorite = async (templateId: string) => {
-//     const result = await toggleFavorite(templateId)
-//     if (result.success) {
-//       loadTemplates()
-//     }
-//   }
-
-//   const handleUseTemplate = (templateId: string) => {
-//     router.push(`/dashboard/templates/${templateId}`)
-//   }
-
-//   // Get unique categories
-//   const categories = Array.from(new Set(templates.map(t => t.category).filter(Boolean)))
-
-//   return (
-//     <div className="space-y-6">
-//       {/* Header Actions */}
-//       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-//         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full sm:w-auto">
-//           <TabsList className="grid w-full grid-cols-4 sm:w-auto">
-//             <TabsTrigger value="all">All</TabsTrigger>
-//             <TabsTrigger value="system">Premium</TabsTrigger>
-//             <TabsTrigger value="my-templates">My Templates</TabsTrigger>
-//             <TabsTrigger value="favorites">
-//               <Star className="h-4 w-4" />
-//             </TabsTrigger>
-//           </TabsList>
-//         </Tabs>
-
-//         <div className="flex gap-2">
-//           <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
-//             <DialogTrigger asChild>
-//               <Button>
-//                 <Sparkles className="mr-2 h-4 w-4" />
-//                 Generate with AI
-//               </Button>
-//             </DialogTrigger>
-//             <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-//               <DialogHeader>
-//                 <DialogTitle>AI Template Generator</DialogTitle>
-//                 <DialogDescription>
-//                   Create custom email templates powered by AI
-//                 </DialogDescription>
-//               </DialogHeader>
-//               <AITemplateGenerator />
-//             </DialogContent>
-//           </Dialog>
-
-//           <Button variant="outline" onClick={() => router.push('/dashboard/templates/new')}>
-//             <Plus className="mr-2 h-4 w-4" />
-//             Create Manual
-//           </Button>
-//         </div>
-//       </div>
-
-//       {/* Filters */}
-//       <Card>
-//         <CardContent className="pt-6">
-//           <div className="grid gap-4 md:grid-cols-[1fr_200px_200px_auto]">
-//             <div className="relative">
-//               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-//               <Input
-//                 placeholder="Search templates..."
-//                 value={searchQuery}
-//                 onChange={(e) => setSearchQuery(e.target.value)}
-//                 className="pl-9"
-//               />
-//             </div>
-
-//             <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Industry" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Industries</SelectItem>
-//                 {INDUSTRIES.map((ind) => (
-//                   <SelectItem key={ind.value} value={ind.value}>
-//                     {ind.label}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-
-//             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Category" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Categories</SelectItem>
-//                 {categories.map((cat) => (
-//                   <SelectItem key={cat} value={cat}>
-//                     {cat}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-
-//             <div className="flex gap-1 border rounded-md">
-//               <Button
-//                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-//                 size="sm"
-//                 onClick={() => setViewMode('grid')}
-//               >
-//                 <Grid3x3 className="h-4 w-4" />
-//               </Button>
-//               <Button
-//                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-//                 size="sm"
-//                 onClick={() => setViewMode('list')}
-//               >
-//                 <List className="h-4 w-4" />
-//               </Button>
-//             </div>
-//           </div>
-//         </CardContent>
-//       </Card>
-
-//       {/* Results Count */}
-//       <div className="flex items-center justify-between text-sm">
-//         <p className="text-muted-foreground">
-//           {filteredTemplates.length} {filteredTemplates.length === 1 ? 'template' : 'templates'} found
-//         </p>
-//         {(searchQuery || selectedIndustry !== 'all' || selectedCategory !== 'all') && (
-//           <Button
-//             variant="ghost"
-//             size="sm"
-//             onClick={() => {
-//               setSearchQuery("")
-//               setSelectedIndustry("all")
-//               setSelectedCategory("all")
-//             }}
-//           >
-//             Clear filters
-//           </Button>
-//         )}
-//       </div>
-
-//       {/* Templates Grid/List */}
-//       {isLoading ? (
-//         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-//           {[...Array(6)].map((_, i) => (
-//             <Card key={i} className="animate-pulse">
-//               <CardHeader>
-//                 <div className="h-40 bg-muted rounded-md" />
-//                 <div className="h-4 bg-muted rounded w-3/4 mt-4" />
-//                 <div className="h-3 bg-muted rounded w-1/2 mt-2" />
-//               </CardHeader>
-//             </Card>
-//           ))}
-//         </div>
-//       ) : filteredTemplates.length === 0 ? (
-//         <Card>
-//           <CardContent className="flex flex-col items-center justify-center py-12">
-//             <Filter className="h-12 w-12 text-muted-foreground mb-4" />
-//             <h3 className="font-semibold text-lg mb-2">No templates found</h3>
-//             <p className="text-muted-foreground text-center mb-4">
-//               Try adjusting your filters or create a new template
-//             </p>
-//             <Button onClick={() => setShowAIDialog(true)}>
-//               <Sparkles className="mr-2 h-4 w-4" />
-//               Generate with AI
-//             </Button>
-//           </CardContent>
-//         </Card>
-//       ) : (
-//         <div className={viewMode === 'grid' 
-//           ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
-//           : 'space-y-4'
-//         }>
-//           {filteredTemplates.map((template) => (
-//             <TemplateCard
-//               key={template.id}
-//               template={template}
-//               viewMode={viewMode}
-//               onDuplicate={() => handleDuplicate(template.id)}
-//               onToggleFavorite={() => handleToggleFavorite(template.id)}
-//               onUse={() => handleUseTemplate(template.id)}
-//             />
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
-
-
-
-
-
-// "use client"
-
-// import { useState, useEffect } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { Badge } from "@/components/ui/badge"
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-// import { Search, Plus, Sparkles, Grid3x3, List, Star, Filter } from 'lucide-react'
-// import { INDUSTRIES } from "@/lib/types"
-// import { getTemplates, getSystemTemplates, cloneSystemTemplate, getFavoriteTemplates, duplicateTemplate, toggleFavorite } from "@/lib/actions/templates"
-// import { useToast } from "@/hooks/use-toast"
-// import { TemplateCard } from "./template-card"
-// import { AITemplateGenerator } from "./ai-template-generator"
-// import { useRouter } from 'next/navigation'
-
-// export function TemplateLibrary() {
-//   const [templates, setTemplates] = useState<any[]>([])
-//   const [filteredTemplates, setFilteredTemplates] = useState<any[]>([])
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [selectedIndustry, setSelectedIndustry] = useState<string>("all")
-//   const [selectedCategory, setSelectedCategory] = useState<string>("all")
-//   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-//   const [activeTab, setActiveTab] = useState<'all' | 'system' | 'my-templates' | 'favorites'>('all')
-//   const [isLoading, setIsLoading] = useState(true)
-//   const [showAIDialog, setShowAIDialog] = useState(false)
-//   const { toast } = useToast()
-//   const router = useRouter()
-
-//   useEffect(() => {
-//     loadTemplates()
-//   }, [activeTab])
-
-//   useEffect(() => {
-//     filterTemplates()
-//   }, [templates, searchQuery, selectedIndustry, selectedCategory])
-
-//   const loadTemplates = async () => {
-//     setIsLoading(true)
-//     try {
-//       let result: any[] = []
-      
-//       if (activeTab === 'favorites') {
-//         const favResult = await getFavoriteTemplates()
-//         if (favResult.success && favResult.templates) {
-//           result = favResult.templates
-//         }
-//       } else if (activeTab === 'system') {
-//         // Fetch only system templates
-//         result = await getSystemTemplates()
-//       } else if (activeTab === 'my-templates') {
-//         // Fetch only user templates (non-system)
-//         const allTemplates = await getTemplates()
-//         result = allTemplates.filter(t => !t.isSystemTemplate)
-//       } else {
-//         // Fetch all templates (both system and user)
-//         result = await getTemplates()
-//       }
-
-//       setTemplates(result)
-//     } catch (error) {
-//       toast({
-//         title: "Error loading templates",
-//         description: "Failed to load templates. Please try again.",
-//         variant: "destructive"
-//       })
-//     } finally {
-//       setIsLoading(false)
-//     }
-//   }
-
-//   const filterTemplates = () => {
-//     let filtered = templates
-
-//     // Filter by search
-//     if (searchQuery) {
-//       const query = searchQuery.toLowerCase()
-//       filtered = filtered.filter(t => 
-//         t.name.toLowerCase().includes(query) ||
-//         t.subject.toLowerCase().includes(query) ||
-//         t.description?.toLowerCase().includes(query)
-//       )
-//     }
-
-//     // Filter by industry
-//     if (selectedIndustry && selectedIndustry !== 'all') {
-//       filtered = filtered.filter(t => t.industry === selectedIndustry)
-//     }
-
-//     // Filter by category
-//     if (selectedCategory && selectedCategory !== 'all') {
-//       filtered = filtered.filter(t => t.category === selectedCategory)
-//     }
-
-//     setFilteredTemplates(filtered)
-//   }
-
-//   const handleDuplicate = async (templateId: string, isSystemTemplate: boolean) => {
-//     const result = isSystemTemplate 
-//       ? await cloneSystemTemplate(templateId)
-//       : await duplicateTemplate(templateId)
-      
-//     if (result.success) {
-//       toast({
-//         title: "Template added",
-//         description: "The template has been added to your library"
-//       })
-//       // Navigate to the new template
-//       if (result.template) {
-//         router.push(`/dashboard/templates/${result.template.id}`)
-//       }
-//       loadTemplates()
-//     } else {
-//       toast({
-//         title: "Failed to add template",
-//         description: result.error,
-//         variant: "destructive"
-//       })
-//     }
-//   }
-
-//   const handleToggleFavorite = async (templateId: string) => {
-//     const result = await toggleFavorite(templateId)
-//     if (result.success) {
-//       loadTemplates()
-//     }
-//   }
-
-//   const handleUseTemplate = (templateId: string) => {
-//     router.push(`/dashboard/templates/${templateId}`)
-//   }
-
-//   // Get unique categories
-//   const categories = Array.from(new Set(templates.map(t => t.category).filter(Boolean)))
-
-//   return (
-//     <div className="space-y-6">
-//       {/* Header Actions */}
-//       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-//         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full sm:w-auto">
-//           <TabsList className="grid w-full grid-cols-4 sm:w-auto">
-//             <TabsTrigger value="all">All</TabsTrigger>
-//             <TabsTrigger value="system">Premium</TabsTrigger>
-//             <TabsTrigger value="my-templates">My Templates</TabsTrigger>
-//             <TabsTrigger value="favorites">
-//               <Star className="h-4 w-4" />
-//             </TabsTrigger>
-//           </TabsList>
-//         </Tabs>
-
-//         <div className="flex gap-2">
-//           <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
-//             <DialogTrigger asChild>
-//               <Button>
-//                 <Sparkles className="mr-2 h-4 w-4" />
-//                 Generate with AI
-//               </Button>
-//             </DialogTrigger>
-//             <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-//               <DialogHeader>
-//                 <DialogTitle>AI Template Generator</DialogTitle>
-//                 <DialogDescription>
-//                   Create custom email templates powered by AI
-//                 </DialogDescription>
-//               </DialogHeader>
-//               <AITemplateGenerator />
-//             </DialogContent>
-//           </Dialog>
-
-//           <Button variant="outline" onClick={() => router.push('/dashboard/templates/new')}>
-//             <Plus className="mr-2 h-4 w-4" />
-//             Create Manual
-//           </Button>
-//         </div>
-//       </div>
-
-//       {/* Filters */}
-//       <Card>
-//         <CardContent className="pt-6">
-//           <div className="grid gap-4 md:grid-cols-[1fr_200px_200px_auto]">
-//             <div className="relative">
-//               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-//               <Input
-//                 placeholder="Search templates..."
-//                 value={searchQuery}
-//                 onChange={(e) => setSearchQuery(e.target.value)}
-//                 className="pl-9"
-//               />
-//             </div>
-
-//             <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Industry" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Industries</SelectItem>
-//                 {INDUSTRIES.map((ind) => (
-//                   <SelectItem key={ind.value} value={ind.value}>
-//                     {ind.label}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-
-//             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Category" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Categories</SelectItem>
-//                 {categories.map((cat) => (
-//                   <SelectItem key={cat} value={cat}>
-//                     {cat}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-
-//             <div className="flex gap-1 border rounded-md">
-//               <Button
-//                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-//                 size="sm"
-//                 onClick={() => setViewMode('grid')}
-//               >
-//                 <Grid3x3 className="h-4 w-4" />
-//               </Button>
-//               <Button
-//                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-//                 size="sm"
-//                 onClick={() => setViewMode('list')}
-//               >
-//                 <List className="h-4 w-4" />
-//               </Button>
-//             </div>
-//           </div>
-//         </CardContent>
-//       </Card>
-
-//       {/* Results Count */}
-//       <div className="flex items-center justify-between text-sm">
-//         <p className="text-muted-foreground">
-//           {filteredTemplates.length} {filteredTemplates.length === 1 ? 'template' : 'templates'} found
-//         </p>
-//         {(searchQuery || selectedIndustry !== 'all' || selectedCategory !== 'all') && (
-//           <Button
-//             variant="ghost"
-//             size="sm"
-//             onClick={() => {
-//               setSearchQuery("")
-//               setSelectedIndustry("all")
-//               setSelectedCategory("all")
-//             }}
-//           >
-//             Clear filters
-//           </Button>
-//         )}
-//       </div>
-
-//       {/* Templates Grid/List */}
-//       {isLoading ? (
-//         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-//           {[...Array(6)].map((_, i) => (
-//             <Card key={i} className="animate-pulse">
-//               <CardHeader>
-//                 <div className="h-40 bg-muted rounded-md" />
-//                 <div className="h-4 bg-muted rounded w-3/4 mt-4" />
-//                 <div className="h-3 bg-muted rounded w-1/2 mt-2" />
-//               </CardHeader>
-//             </Card>
-//           ))}
-//         </div>
-//       ) : filteredTemplates.length === 0 ? (
-//         <Card>
-//           <CardContent className="flex flex-col items-center justify-center py-12">
-//             <Filter className="h-12 w-12 text-muted-foreground mb-4" />
-//             <h3 className="font-semibold text-lg mb-2">No templates found</h3>
-//             <p className="text-muted-foreground text-center mb-4">
-//               Try adjusting your filters or create a new template
-//             </p>
-//             <Button onClick={() => setShowAIDialog(true)}>
-//               <Sparkles className="mr-2 h-4 w-4" />
-//               Generate with AI
-//             </Button>
-//           </CardContent>
-//         </Card>
-//       ) : (
-//         <div className={viewMode === 'grid' 
-//           ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
-//           : 'space-y-4'
-//         }>
-//           {filteredTemplates.map((template) => (
-//             <TemplateCard
-//               key={template.id}
-//               template={template}
-//               viewMode={viewMode}
-//               onDuplicate={() => handleDuplicate(template.id, template.isSystemTemplate)}
-//               onToggleFavorite={() => handleToggleFavorite(template.id)}
-//               onUse={() => handleUseTemplate(template.id)}
-//             />
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
-
-
-// "use client"
-
-// import { useState, useEffect } from "react"
-// import { Button } from "@/components/ui/button"
-// import { Input } from "@/components/ui/input"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { Badge } from "@/components/ui/badge"
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-// import { Search, Plus, Sparkles, Grid3x3, List, Star, Filter } from 'lucide-react'
-// import { INDUSTRIES } from "@/lib/types"
-// import { getTemplates, getSystemTemplates, cloneSystemTemplate, getFavoriteTemplates, duplicateTemplate, toggleFavorite } from "@/lib/actions/templates"
-// import { useToast } from "@/hooks/use-toast"
-// import { TemplateCard } from "./template-card"
-// import { AITemplateGenerator } from "./ai-template-generator"
-// import { useRouter } from 'next/navigation'
-
-// export function TemplateLibrary() {
-//   const [templates, setTemplates] = useState<any[]>([])
-//   const [filteredTemplates, setFilteredTemplates] = useState<any[]>([])
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [selectedIndustry, setSelectedIndustry] = useState<string>("all")
-//   const [selectedCategory, setSelectedCategory] = useState<string>("all")
-//   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-//   const [activeTab, setActiveTab] = useState<'all' | 'system' | 'my-templates' | 'favorites'>('all')
-//   const [isLoading, setIsLoading] = useState(true)
-//   const [showAIDialog, setShowAIDialog] = useState(false)
-//   const { toast } = useToast()
-//   const router = useRouter()
-
-//   useEffect(() => {
-//     loadTemplates()
-//   }, [activeTab])
-
-//   useEffect(() => {
-//     filterTemplates()
-//   }, [templates, searchQuery, selectedIndustry, selectedCategory])
-
-//   const loadTemplates = async () => {
-//     console.log("[v0] TemplateLibrary: Starting to load templates for tab:", activeTab)
-//     setIsLoading(true)
-//     try {
-//       let result: any[] = []
-      
-//       if (activeTab === 'favorites') {
-//         console.log("[v0] TemplateLibrary: Loading favorites...")
-//         const favResult = await getFavoriteTemplates()
-//         if (favResult.success && favResult.templates) {
-//           result = favResult.templates
-//         }
-//       } else if (activeTab === 'system') {
-//         console.log("[v0] TemplateLibrary: Loading system templates...")
-//         const systemTemplates = await getSystemTemplates()
-//         result = systemTemplates as any[]
-//       } else if (activeTab === 'my-templates') {
-//         console.log("[v0] TemplateLibrary: Loading user templates...")
-//         // Fetch only user templates (non-system)
-//         const allTemplates = await getTemplates()
-//         result = allTemplates.filter(t => !t.isSystemTemplate)
-//       } else {
-//         console.log("[v0] TemplateLibrary: Loading all templates...")
-//         // Fetch all templates (both system and user)
-//         result = await getTemplates()
-//       }
-
-//       console.log(`[v0] TemplateLibrary: Loaded ${result.length} templates`)
-//       if (result.length > 0) {
-//         console.log("[v0] TemplateLibrary: First template sample:", {
-//           id: result[0].id,
-//           name: result[0].name,
-//           industry: result[0].industry,
-//           isSystemTemplate: result[0].isSystemTemplate,
-//           hasThumbnail: !!result[0].thumbnailUrl,
-//           thumbnailUrl: result[0].thumbnailUrl
-//         })
-//       } else {
-//         console.log("[v0] TemplateLibrary: WARNING - No templates loaded!")
-//       }
-
-//       setTemplates(result)
-//     } catch (error) {
-//       console.error("[v0] TemplateLibrary: Error loading templates:", error)
-//       toast({
-//         title: "Error loading templates",
-//         description: "Failed to load templates. Please try again.",
-//         variant: "destructive"
-//       })
-//     } finally {
-//       setIsLoading(false)
-//     }
-//   }
-
-//   const filterTemplates = () => {
-//     console.log("[v0] TemplateLibrary: Filtering templates with:", {
-//       searchQuery,
-//       selectedIndustry,
-//       selectedCategory,
-//       totalTemplates: templates.length
-//     })
-    
-//     let filtered = templates
-
-//     // Filter by search
-//     if (searchQuery) {
-//       const query = searchQuery.toLowerCase()
-//       filtered = filtered.filter(t => 
-//         t.name.toLowerCase().includes(query) ||
-//         t.subject.toLowerCase().includes(query) ||
-//         t.description?.toLowerCase().includes(query)
-//       )
-//     }
-
-//     // Filter by industry
-//     if (selectedIndustry && selectedIndustry !== 'all') {
-//       filtered = filtered.filter(t => t.industry === selectedIndustry)
-//     }
-
-//     // Filter by category
-//     if (selectedCategory && selectedCategory !== 'all') {
-//       filtered = filtered.filter(t => t.category === selectedCategory)
-//     }
-
-//     console.log(`[v0] TemplateLibrary: After filtering: ${filtered.length} templates`)
-//     setFilteredTemplates(filtered)
-//   }
-
-//   const handleDuplicate = async (templateId: string, isSystemTemplate: boolean) => {
-//     const result = isSystemTemplate 
-//       ? await cloneSystemTemplate(templateId)
-//       : await duplicateTemplate(templateId)
-      
-//     if (result.success) {
-//       toast({
-//         title: "Template added",
-//         description: "The template has been added to your library"
-//       })
-//       // Navigate to the new template
-//       if (result.template) {
-//         router.push(`/dashboard/templates/${result.template.id}`)
-//       }
-//       loadTemplates()
-//     } else {
-//       toast({
-//         title: "Failed to add template",
-//         description: result.error,
-//         variant: "destructive"
-//       })
-//     }
-//   }
-
-//   const handleToggleFavorite = async (templateId: string) => {
-//     const result = await toggleFavorite(templateId)
-//     if (result.success) {
-//       loadTemplates()
-//     }
-//   }
-
-//   const handleUseTemplate = (templateId: string) => {
-//     router.push(`/dashboard/templates/${templateId}`)
-//   }
-
-//   // Get unique categories
-//   const categories = Array.from(new Set(templates.map(t => t.category).filter(Boolean)))
-
-//   return (
-//     <div className="space-y-6">
-//       {/* Header Actions */}
-//       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-//         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full sm:w-auto">
-//           <TabsList className="grid w-full grid-cols-4 sm:w-auto">
-//             <TabsTrigger value="all">All</TabsTrigger>
-//             <TabsTrigger value="system">Premium</TabsTrigger>
-//             <TabsTrigger value="my-templates">My Templates</TabsTrigger>
-//             <TabsTrigger value="favorites">
-//               <Star className="h-4 w-4" />
-//             </TabsTrigger>
-//           </TabsList>
-//         </Tabs>
-
-//         <div className="flex gap-2">
-//           <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
-//             <DialogTrigger asChild>
-//               <Button>
-//                 <Sparkles className="mr-2 h-4 w-4" />
-//                 Generate with AI
-//               </Button>
-//             </DialogTrigger>
-//             <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-//               <DialogHeader>
-//                 <DialogTitle>AI Template Generator</DialogTitle>
-//                 <DialogDescription>
-//                   Create custom email templates powered by AI
-//                 </DialogDescription>
-//               </DialogHeader>
-//               <AITemplateGenerator />
-//             </DialogContent>
-//           </Dialog>
-
-//           <Button variant="outline" onClick={() => router.push('/dashboard/templates/new')}>
-//             <Plus className="mr-2 h-4 w-4" />
-//             Create Manual
-//           </Button>
-//         </div>
-//       </div>
-
-//       {/* Filters */}
-//       <Card>
-//         <CardContent className="pt-6">
-//           <div className="grid gap-4 md:grid-cols-[1fr_200px_200px_auto]">
-//             <div className="relative">
-//               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-//               <Input
-//                 placeholder="Search templates..."
-//                 value={searchQuery}
-//                 onChange={(e) => setSearchQuery(e.target.value)}
-//                 className="pl-9"
-//               />
-//             </div>
-
-//             <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Industry" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Industries</SelectItem>
-//                 {INDUSTRIES.map((ind) => (
-//                   <SelectItem key={ind.value} value={ind.value}>
-//                     {ind.label}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-
-//             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-//               <SelectTrigger>
-//                 <SelectValue placeholder="Category" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Categories</SelectItem>
-//                 {categories.map((cat) => (
-//                   <SelectItem key={cat} value={cat}>
-//                     {cat}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-
-//             <div className="flex gap-1 border rounded-md">
-//               <Button
-//                 variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-//                 size="sm"
-//                 onClick={() => setViewMode('grid')}
-//               >
-//                 <Grid3x3 className="h-4 w-4" />
-//               </Button>
-//               <Button
-//                 variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-//                 size="sm"
-//                 onClick={() => setViewMode('list')}
-//               >
-//                 <List className="h-4 w-4" />
-//               </Button>
-//             </div>
-//           </div>
-//         </CardContent>
-//       </Card>
-
-//       {/* Results Count */}
-//       <div className="flex items-center justify-between text-sm">
-//         <p className="text-muted-foreground">
-//           {filteredTemplates.length} {filteredTemplates.length === 1 ? 'template' : 'templates'} found
-//         </p>
-//         {(searchQuery || selectedIndustry !== 'all' || selectedCategory !== 'all') && (
-//           <Button
-//             variant="ghost"
-//             size="sm"
-//             onClick={() => {
-//               setSearchQuery("")
-//               setSelectedIndustry("all")
-//               setSelectedCategory("all")
-//             }}
-//           >
-//             Clear filters
-//           </Button>
-//         )}
-//       </div>
-
-//       {/* Templates Grid/List */}
-//       {isLoading ? (
-//         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-//           {[...Array(6)].map((_, i) => (
-//             <Card key={i} className="animate-pulse">
-//               <CardHeader>
-//                 <div className="h-40 bg-muted rounded-md" />
-//                 <div className="h-4 bg-muted rounded w-3/4 mt-4" />
-//                 <div className="h-3 bg-muted rounded w-1/2 mt-2" />
-//               </CardHeader>
-//             </Card>
-//           ))}
-//         </div>
-//       ) : filteredTemplates.length === 0 ? (
-//         <Card>
-//           <CardContent className="flex flex-col items-center justify-center py-12">
-//             <Filter className="h-12 w-12 text-muted-foreground mb-4" />
-//             <h3 className="font-semibold text-lg mb-2">No templates found</h3>
-//             <p className="text-muted-foreground text-center mb-4">
-//               Try adjusting your filters or create a new template
-//             </p>
-//             <Button onClick={() => setShowAIDialog(true)}>
-//               <Sparkles className="mr-2 h-4 w-4" />
-//               Generate with AI
-//             </Button>
-//           </CardContent>
-//         </Card>
-//       ) : (
-//         <div className={viewMode === 'grid' 
-//           ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
-//           : 'space-y-4'
-//         }>
-//           {filteredTemplates.map((template) => (
-//             <TemplateCard
-//               key={template.id}
-//               template={template}
-//               viewMode={viewMode}
-//               onDuplicate={() => handleDuplicate(template.id, template.isSystemTemplate)}
-//               onToggleFavorite={() => handleToggleFavorite(template.id)}
-//               onUse={() => handleUseTemplate(template.id)}
-//             />
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState, useCallback, useMemo, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import {
+  Search,
+  Plus,
+  LayoutGrid,
+  List,
+  SlidersHorizontal,
+  Star,
+  Sparkles,
+  X,
+  ChevronDown,
+  FolderOpen,
+  Clock,
+  TrendingUp,
+  AlertCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Search, Plus, Sparkles, Grid3x3, List, Star, Filter } from 'lucide-react'
-import { INDUSTRIES } from "@/lib/types"
-import { getTemplates, getSystemTemplates, cloneSystemTemplate, getFavoriteTemplates, duplicateTemplate, toggleFavorite } from "@/lib/actions/templates"
-import { useToast } from "@/hooks/use-toast"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
 import { TemplateCard } from "./template-card"
-import { AITemplateGenerator } from "./ai-template-generator"
-import { useRouter } from 'next/navigation'
+import { TemplatePreviewDialog } from "./template-preview-dialog"
+import { TemplateLibrarySkeleton } from "./template-library-skeleton"
+import type { EnhancedEmailTemplate, TemplateCategory } from "@/lib/types"
+import { deleteTemplate, duplicateTemplate, toggleFavorite } from "@/lib/actions/templates"
+import { toast } from "sonner"
 
-export function TemplateLibrary() {
-  const [templates, setTemplates] = useState<any[]>([])
-  const [filteredTemplates, setFilteredTemplates] = useState<any[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedIndustry, setSelectedIndustry] = useState<string>("all")
-  const [selectedCategory, setSelectedCategory] = useState<string>("all")
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [activeTab, setActiveTab] = useState<'all' | 'system' | 'my-templates' | 'favorites'>('all')
-  const [isLoading, setIsLoading] = useState(true)
-  const [showAIDialog, setShowAIDialog] = useState(false)
-  const { toast } = useToast()
+interface TemplateLibraryProps {
+  templates: EnhancedEmailTemplate[]
+  categories: TemplateCategory[]
+  isLoading?: boolean
+  onRefresh?: () => void
+}
+
+type SortOption = "recent" | "name" | "performance" | "favorites"
+type FilterTab = "all" | "favorites" | "ai-generated"
+
+export function TemplateLibrary({ templates, categories, isLoading = false, onRefresh }: TemplateLibraryProps) {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
 
-  useEffect(() => {
-    loadTemplates()
-  }, [activeTab])
+  // UI State
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<SortOption>("recent")
+  const [filterTab, setFilterTab] = useState<FilterTab>("all")
+  const [previewTemplate, setPreviewTemplate] = useState<EnhancedEmailTemplate | null>(null)
 
-  useEffect(() => {
-    filterTemplates()
-  }, [templates, searchQuery, selectedIndustry, selectedCategory])
+  // Filter and sort templates
+  const filteredTemplates = useMemo(() => {
+    let result = [...templates]
 
-  const loadTemplates = async () => {
-    console.log("[v0] TemplateLibrary: Starting to load templates for tab:", activeTab)
-    setIsLoading(true)
-    try {
-      let result: any[] = []
-      
-      if (activeTab === 'favorites') {
-        console.log("[v0] TemplateLibrary: Loading favorites...")
-        const favResult = await getFavoriteTemplates()
-        if (favResult.success && favResult.templates) {
-          result = favResult.templates
-        }
-      } else if (activeTab === 'system') {
-        console.log("[v0] TemplateLibrary: Loading system templates...")
-        const systemTemplates = await getSystemTemplates()
-        result = systemTemplates as any[]
-      } else if (activeTab === 'my-templates') {
-        console.log("[v0] TemplateLibrary: Loading user templates...")
-        // Fetch only user templates (non-system)
-        const allTemplates = await getTemplates()
-        result = allTemplates.filter(t => !t.isSystemTemplate)
-      } else {
-        console.log("[v0] TemplateLibrary: Loading all templates...")
-        // Fetch all templates (both system and 
-        result = await getTemplates()
-      }
-
-      console.log(`[v0] TemplateLibrary: Loaded ${result.length} templates`)
-      if (result.length > 0) {
-        console.log("[v0] TemplateLibrary: First template sample:", {
-          id: result[0].id,
-          name: result[0].name,
-          industry: result[0].industry,
-          isSystemTemplate: result[0].isSystemTemplate,
-          hasThumbnail: !!result[0].thumbnailUrl,
-          thumbnailUrl: result[0].thumbnailUrl
-        })
-      } else {
-        console.log("[v0] TemplateLibrary: WARNING - No templates loaded!")
-      }
-
-      setTemplates(result)
-    } catch (error) {
-      console.error("[v0] TemplateLibrary: Error loading templates:", error)
-      toast({
-        title: "Error loading templates",
-        description: "Failed to load templates. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsLoading(false)
+    // Tab filter - use aiGenerated instead of isAiGenerated
+    if (filterTab === "favorites") {
+      result = result.filter((t) => t.isFavorite)
+    } else if (filterTab === "ai-generated") {
+      result = result.filter((t) => t.aiGenerated)
     }
-  }
 
-  const filterTemplates = () => {
-    console.log("[v0] TemplateLibrary: Filtering templates with:", {
-      searchQuery,
-      selectedIndustry,
-      selectedCategory,
-      totalTemplates: templates.length
-    })
-    
-    let filtered = templates
+    // Category filter
+    if (selectedCategory) {
+      result = result.filter((t) => t.category?.toLowerCase() === selectedCategory.toLowerCase())
+    }
 
-    // Filter by search
+    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(t => 
-        t.name.toLowerCase().includes(query) ||
-        t.subject.toLowerCase().includes(query) ||
-        t.description?.toLowerCase().includes(query)
+      result = result.filter(
+        (t) =>
+          t.name.toLowerCase().includes(query) ||
+          t.subject?.toLowerCase().includes(query) ||
+          t.category?.toLowerCase().includes(query),
       )
     }
 
-    // Filter by industry
-    if (selectedIndustry && selectedIndustry !== 'all') {
-      filtered = filtered.filter(t => t.industry === selectedIndustry)
-    }
-
-    // Filter by category
-    if (selectedCategory && selectedCategory !== 'all') {
-      filtered = filtered.filter(t => t.category === selectedCategory)
-    }
-
-    console.log(`[v0] TemplateLibrary: After filtering: ${filtered.length} templates`)
-    setFilteredTemplates(filtered)
-  }
-
-  const handleDuplicate = async (templateId: string, isSystemTemplate: boolean) => {
-    const result = isSystemTemplate 
-      ? await cloneSystemTemplate(templateId)
-      : await duplicateTemplate(templateId)
-      
-    if (result.success) {
-      toast({
-        title: "Template added to your library",
-        description: "You can now customize and use this template"
-      })
-      loadTemplates()
-    } else {
-      toast({
-        title: "Failed to add template",
-        description: result.error,
-        variant: "destructive"
-      })
-    }
-  }
-
-  const handleUseTemplate = async (templateId: string, isSystemTemplate: boolean) => {
-    if (isSystemTemplate) {
-      // Clone system template first, then navigate to editor
-      const result = await cloneSystemTemplate(templateId)
-      if (result.success && result.template) {
-        toast({
-          title: "Template ready to customize",
-          description: "Opening editor..."
+    // Sort - use avgOpenRate/avgReplyRate instead of stats
+    switch (sortBy) {
+      case "name":
+        result.sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case "performance":
+        result.sort((a, b) => {
+          const aScore = ((a.avgOpenRate ?? 0) + (a.avgReplyRate ?? 0)) / 2
+          const bScore = ((b.avgOpenRate ?? 0) + (b.avgReplyRate ?? 0)) / 2
+          return bScore - aScore
         })
-        router.push(`/dashboard/templates/${result.template.id}/edit`)
-      } else {
-        toast({
-          title: "Failed to load template",
-          description: result.error,
-          variant: "destructive"
+        break
+      case "favorites":
+        result.sort((a, b) => {
+          if (a.isFavorite && !b.isFavorite) return -1
+          if (!a.isFavorite && b.isFavorite) return 1
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
         })
-      }
-    } else {
-      // User template - just open in editor
-      router.push(`/dashboard/templates/${templateId}/edit`)
+        break
+      case "recent":
+      default:
+        result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     }
+
+    return result
+  }, [templates, filterTab, selectedCategory, searchQuery, sortBy])
+
+  // Handlers
+  const handleToggleFavorite = useCallback(
+    async (id: string) => {
+      startTransition(async () => {
+        const result = await toggleFavorite(id)
+        if (result.error) {
+          toast.error(result.error)
+        } else {
+          onRefresh?.()
+        }
+      })
+    },
+    [onRefresh],
+  )
+
+  const handleDuplicate = useCallback(
+    async (id: string) => {
+      startTransition(async () => {
+        const result = await duplicateTemplate(id)
+        if (result.error) {
+          toast.error(result.error)
+        } else {
+          toast.success("Template duplicated")
+          onRefresh?.()
+        }
+      })
+    },
+    [onRefresh],
+  )
+
+  const handleDelete = useCallback(
+    async (id: string) => {
+      startTransition(async () => {
+        const result = await deleteTemplate(id)
+        if (result.error) {
+          toast.error(result.error)
+        } else {
+          toast.success("Template deleted")
+          onRefresh?.()
+        }
+      })
+    },
+    [onRefresh],
+  )
+
+  const clearFilters = () => {
+    setSearchQuery("")
+    setSelectedCategory(null)
+    setFilterTab("all")
+    setSortBy("recent")
   }
 
-  const handleToggleFavorite = async (templateId: string) => {
-    const result = await toggleFavorite(templateId)
-    if (result.success) {
-      loadTemplates()
-    }
-  }
+  const hasActiveFilters = searchQuery || selectedCategory || filterTab !== "all" || sortBy !== "recent"
 
-  // Get unique categories
-  const categories = Array.from(new Set(templates.map(t => t.category).filter(Boolean)))
+  const sortOptions: { value: SortOption; label: string; icon: React.ReactNode }[] = [
+    { value: "recent", label: "Most Recent", icon: <Clock className="w-4 h-4" /> },
+    { value: "name", label: "Name A-Z", icon: <span className="w-4 h-4 text-xs font-bold">Az</span> },
+    { value: "performance", label: "Best Performance", icon: <TrendingUp className="w-4 h-4" /> },
+    { value: "favorites", label: "Favorites First", icon: <Star className="w-4 h-4" /> },
+  ]
+
+  if (isLoading) {
+    return <TemplateLibrarySkeleton />
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header Actions */}
+      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full sm:w-auto">
-          <TabsList className="grid w-full grid-cols-4 sm:w-auto">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="system">Premium</TabsTrigger>
-            <TabsTrigger value="my-templates">My Templates</TabsTrigger>
-            <TabsTrigger value="favorites">
-              <Star className="h-4 w-4" />
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className="flex gap-2">
-          <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate with AI
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>AI Template Generator</DialogTitle>
-                <DialogDescription>
-                  Create custom email templates powered by AI
-                </DialogDescription>
-              </DialogHeader>
-              <AITemplateGenerator />
-            </DialogContent>
-          </Dialog>
-
-          <Button variant="outline" onClick={() => router.push('/dashboard/templates/new')}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Manual
-          </Button>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Templates</h1>
+          <p className="text-muted-foreground mt-1">
+            {filteredTemplates.length} template{filteredTemplates.length !== 1 && "s"}
+            {hasActiveFilters && " found"}
+          </p>
         </div>
+        <Button
+          onClick={() => router.push("/dashboard/templates/new")}
+          className="shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Template
+        </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-[1fr_200px_200px_auto]">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+      {/* Filter Bar */}
+      <div className="flex flex-col gap-3">
+        {/* Top row: Tabs and View Toggle */}
+        <div className="flex items-center justify-between">
+          <Tabs value={filterTab} onValueChange={(v) => setFilterTab(v as FilterTab)}>
+            <TabsList className="h-9 p-1 bg-muted/50">
+              <TabsTrigger value="all" className="text-xs px-3 h-7 rounded-md">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="text-xs px-3 h-7 rounded-md">
+                <Star className="w-3 h-3 mr-1.5" />
+                Favorites
+              </TabsTrigger>
+              <TabsTrigger value="ai-generated" className="text-xs px-3 h-7 rounded-md">
+                <Sparkles className="w-3 h-3 mr-1.5" />
+                AI Generated
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-            <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-              <SelectTrigger>
-                <SelectValue placeholder="Industry" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Industries</SelectItem>
-                {INDUSTRIES.map((ind) => (
-                  <SelectItem key={ind.value} value={ind.value}>
-                    {ind.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="flex gap-1 border rounded-md">
-              <Button
-                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-              >
-                <Grid3x3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/50">
+            <Button
+              variant={viewMode === "grid" ? "secondary" : "ghost"}
+              size="icon"
+              className="h-7 w-7 rounded-md"
+              onClick={() => setViewMode("grid")}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "secondary" : "ghost"}
+              size="icon"
+              className="h-7 w-7 rounded-md"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="w-4 h-4" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Results Count */}
-      <div className="flex items-center justify-between text-sm">
-        <p className="text-muted-foreground">
-          {filteredTemplates.length} {filteredTemplates.length === 1 ? 'template' : 'templates'} found
-        </p>
-        {(searchQuery || selectedIndustry !== 'all' || selectedCategory !== 'all') && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setSearchQuery("")
-              setSelectedIndustry("all")
-              setSelectedCategory("all")
-            }}
-          >
-            Clear filters
-          </Button>
+        {/* Bottom row: Search, Category, Sort */}
+        <div className="flex flex-col sm:flex-row gap-2">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search templates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 bg-background/50 border-border/50 focus:bg-background"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            )}
+          </div>
+
+          {/* Category Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "h-9 px-3 justify-between min-w-[140px]",
+                  "bg-background/50 border-border/50 hover:bg-background",
+                  selectedCategory && "border-primary/50",
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <FolderOpen className="w-4 h-4" />
+                  {selectedCategory || "Category"}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {categories.map((category) => (
+                <DropdownMenuCheckboxItem
+                  key={category.id}
+                  checked={selectedCategory === category.name}
+                  onCheckedChange={() => setSelectedCategory(selectedCategory === category.name ? null : category.name)}
+                >
+                  {category.name}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="h-9 px-3 justify-between min-w-[160px] bg-background/50 border-border/50 hover:bg-background"
+              >
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  {sortOptions.find((o) => o.value === sortBy)?.label}
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {sortOptions.map((option) => (
+                <DropdownMenuCheckboxItem
+                  key={option.value}
+                  checked={sortBy === option.value}
+                  onCheckedChange={() => setSortBy(option.value)}
+                >
+                  <span className="flex items-center gap-2">
+                    {option.icon}
+                    {option.label}
+                  </span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Clear Filters */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 px-3 text-muted-foreground hover:text-foreground"
+              onClick={clearFilters}
+            >
+              <X className="w-3 h-3 mr-1.5" />
+              Clear
+            </Button>
+          )}
+        </div>
+
+        {/* Active filter badges */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap gap-2">
+            {selectedCategory && (
+              <Badge
+                variant="secondary"
+                className="pl-2 pr-1 py-1 gap-1 cursor-pointer hover:bg-secondary/80"
+                onClick={() => setSelectedCategory(null)}
+              >
+                {selectedCategory}
+                <X className="w-3 h-3" />
+              </Badge>
+            )}
+            {filterTab !== "all" && (
+              <Badge
+                variant="secondary"
+                className="pl-2 pr-1 py-1 gap-1 cursor-pointer hover:bg-secondary/80"
+                onClick={() => setFilterTab("all")}
+              >
+                {filterTab === "favorites" ? "Favorites" : "AI Generated"}
+                <X className="w-3 h-3" />
+              </Badge>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Templates Grid/List */}
-      {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-40 bg-muted rounded-md" />
-                <div className="h-4 bg-muted rounded w-3/4 mt-4" />
-                <div className="h-3 bg-muted rounded w-1/2 mt-2" />
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      ) : filteredTemplates.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Filter className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-semibold text-lg mb-2">No templates found</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              Try adjusting your filters or create a new template
-            </p>
-            <Button onClick={() => setShowAIDialog(true)}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generate with AI
+      {/* Template Grid/List */}
+      {filteredTemplates.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+            {hasActiveFilters ? (
+              <AlertCircle className="w-8 h-8 text-muted-foreground" />
+            ) : (
+              <FolderOpen className="w-8 h-8 text-muted-foreground" />
+            )}
+          </div>
+          <h3 className="text-lg font-medium mb-1">{hasActiveFilters ? "No templates found" : "No templates yet"}</h3>
+          <p className="text-muted-foreground text-center max-w-sm mb-4">
+            {hasActiveFilters
+              ? "Try adjusting your filters or search query"
+              : "Create your first email template to get started"}
+          </p>
+          {hasActiveFilters ? (
+            <Button variant="outline" onClick={clearFilters}>
+              Clear filters
             </Button>
-          </CardContent>
-        </Card>
+          ) : (
+            <Button onClick={() => router.push("/dashboard/templates/new")}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Template
+            </Button>
+          )}
+        </div>
       ) : (
-        <div className={viewMode === 'grid' 
-          ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3'
-          : 'space-y-4'
-        }>
+        <div
+          className={cn(
+            viewMode === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              : "flex flex-col gap-2",
+          )}
+        >
           {filteredTemplates.map((template) => (
             <TemplateCard
               key={template.id}
               template={template}
               viewMode={viewMode}
-              onDuplicate={() => handleDuplicate(template.id, template.isSystemTemplate)}
-              onToggleFavorite={() => handleToggleFavorite(template.id)}
-              onUse={() => handleUseTemplate(template.id, template.isSystemTemplate)}
+              onToggleFavorite={handleToggleFavorite}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+              onPreview={setPreviewTemplate}
             />
           ))}
+        </div>
+      )}
+
+      {/* Preview Dialog */}
+      <TemplatePreviewDialog
+        template={previewTemplate}
+        open={!!previewTemplate}
+        onOpenChange={(open) => !open && setPreviewTemplate(null)}
+      />
+
+      {/* Loading overlay */}
+      {isPending && (
+        <div className="fixed inset-0 bg-background/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
         </div>
       )}
     </div>

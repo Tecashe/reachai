@@ -1,397 +1,464 @@
-// "use client"
-
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Star, Copy, Eye, Edit, MoreVertical } from 'lucide-react'
-// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-// import Image from "next/image"
-
-// interface TemplateCardProps {
-//   template: any
-//   viewMode: 'grid' | 'list'
-//   onDuplicate: () => void
-//   onToggleFavorite: () => void
-//   onUse: () => void
-// }
-
-// export function TemplateCard({ 
-//   template, 
-//   viewMode,
-//   onDuplicate, 
-//   onToggleFavorite, 
-//   onUse 
-// }: TemplateCardProps) {
-//   if (viewMode === 'list') {
-//     return (
-//       <Card className="hover:border-primary/50 transition-colors">
-//         <div className="flex items-center gap-4 p-6">
-//           <div className="relative w-32 h-24 shrink-0 rounded-md overflow-hidden bg-muted">
-//             <Image
-//               src={template.thumbnailUrl || '/placeholder.svg?height=96&width=128&query=template'}
-//               alt={template.name}
-//               fill
-//               className="object-cover"
-//             />
-//           </div>
-
-//           <div className="flex-1 min-w-0">
-//             <div className="flex items-start justify-between gap-4">
-//               <div className="space-y-1">
-//                 <h3 className="font-semibold leading-none">{template.name}</h3>
-//                 <p className="text-sm text-muted-foreground line-clamp-1">
-//                   {template.subject}
-//                 </p>
-//               </div>
-//               <div className="flex items-center gap-2">
-//                 <Button
-//                   variant="ghost"
-//                   size="sm"
-//                   onClick={onToggleFavorite}
-//                   className="shrink-0"
-//                 >
-//                   <Star className={template.isFavorite ? "h-4 w-4 fill-current text-yellow-500" : "h-4 w-4"} />
-//                 </Button>
-//                 <Button onClick={onUse} size="sm">
-//                   Use Template
-//                 </Button>
-//                 <DropdownMenu>
-//                   <DropdownMenuTrigger asChild>
-//                     <Button variant="ghost" size="sm">
-//                       <MoreVertical className="h-4 w-4" />
-//                     </Button>
-//                   </DropdownMenuTrigger>
-//                   <DropdownMenuContent align="end">
-//                     <DropdownMenuItem onClick={onDuplicate}>
-//                       <Copy className="mr-2 h-4 w-4" />
-//                       Duplicate
-//                     </DropdownMenuItem>
-//                     <DropdownMenuItem onClick={onUse}>
-//                       <Edit className="mr-2 h-4 w-4" />
-//                       Edit
-//                     </DropdownMenuItem>
-//                   </DropdownMenuContent>
-//                 </DropdownMenu>
-//               </div>
-//             </div>
-
-//             <div className="flex items-center gap-2 mt-3">
-//               {template.industry && (
-//                 <Badge variant="secondary">{template.industry}</Badge>
-//               )}
-//               {template.category && (
-//                 <Badge variant="outline">{template.category}</Badge>
-//               )}
-//               {template.isSystemTemplate && (
-//                 <Badge className="bg-primary/10 text-primary border-primary/20">
-//                   Premium
-//                 </Badge>
-//               )}
-//               {template.aiGenerated && (
-//                 <Badge variant="outline" className="border-accent/50 text-accent">
-//                   AI Generated
-//                 </Badge>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       </Card>
-//     )
-//   }
-
-//   return (
-//     <Card className="group hover:border-primary/50 transition-all hover:shadow-lg">
-//       <CardHeader className="p-0">
-//         <div className="relative aspect-video rounded-t-lg overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
-//           <Image
-//             src={template.thumbnailUrl || '/placeholder.svg?height=300&width=450&query=email-template'}
-//             alt={template.name}
-//             fill
-//             className="object-cover transition-transform group-hover:scale-105"
-//           />
-//           <Button
-//             variant="secondary"
-//             size="sm"
-//             className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-//             onClick={onToggleFavorite}
-//           >
-//             <Star className={template.isFavorite ? "h-4 w-4 fill-current text-yellow-500" : "h-4 w-4"} />
-//           </Button>
-//         </div>
-//       </CardHeader>
-//       <CardContent className="pt-4 space-y-3">
-//         <div>
-//           <CardTitle className="line-clamp-1">{template.name}</CardTitle>
-//           <CardDescription className="line-clamp-2 mt-1">
-//             {template.subject}
-//           </CardDescription>
-//         </div>
-
-//         <div className="flex flex-wrap gap-2">
-//           {template.industry && (
-//             <Badge variant="secondary" className="text-xs">
-//               {template.industry}
-//             </Badge>
-//           )}
-//           {template.category && (
-//             <Badge variant="outline" className="text-xs">
-//               {template.category}
-//             </Badge>
-//           )}
-//         </div>
-
-//         {template.isSystemTemplate && (
-//           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-//             <span className="flex items-center gap-1">
-//               <Eye className="h-3 w-3" />
-//               {template.viewCount || 0}
-//             </span>
-//             <span className="flex items-center gap-1">
-//               <Copy className="h-3 w-3" />
-//               {template.duplicateCount || 0}
-//             </span>
-//           </div>
-//         )}
-//       </CardContent>
-//       <CardFooter className="pt-0 flex gap-2">
-//         <Button onClick={onUse} className="flex-1">
-//           Use Template
-//         </Button>
-//         <Button variant="outline" onClick={onDuplicate}>
-//           <Copy className="h-4 w-4" />
-//         </Button>
-//       </CardFooter>
-//     </Card>
-//   )
-// }
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import type React from "react"
+
+import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
+import {
+  Star,
+  Copy,
+  Trash2,
+  MoreHorizontal,
+  Mail,
+  Eye,
+  TrendingUp,
+  Clock,
+  Pencil,
+  ExternalLink,
+  Sparkles,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { Star, Copy, Eye, Edit, MoreVertical } from 'lucide-react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { TemplatePreviewDialog } from "./template-preview-dialog"
-import Image from "next/image"
+import { cn } from "@/lib/utils"
+import type { EnhancedEmailTemplate } from "@/lib/types"
 
 interface TemplateCardProps {
-  template: any
-  viewMode: 'grid' | 'list'
-  onDuplicate: () => void
-  onToggleFavorite: () => void
-  onUse: () => void
+  template: EnhancedEmailTemplate
+  onToggleFavorite: (id: string) => Promise<void>
+  onDuplicate: (id: string) => Promise<void>
+  onDelete: (id: string) => Promise<void>
+  onPreview: (template: EnhancedEmailTemplate) => void
+  viewMode?: "grid" | "list"
 }
 
-export function TemplateCard({ 
-  template, 
-  viewMode,
-  onDuplicate, 
-  onToggleFavorite, 
-  onUse 
+export function TemplateCard({
+  template,
+  onToggleFavorite,
+  onDuplicate,
+  onDelete,
+  onPreview,
+  viewMode = "grid",
 }: TemplateCardProps) {
-  const [showPreview, setShowPreview] = useState(false)
+  const router = useRouter()
+  const [isHovered, setIsHovered] = useState(false)
+  const [isFavoriteAnimating, setIsFavoriteAnimating] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
 
-  const handlePreview = () => {
-    setShowPreview(true)
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsFavoriteAnimating(true)
+    await onToggleFavorite(template.id)
+    setTimeout(() => setIsFavoriteAnimating(false), 300)
   }
 
-  const handleUseFromPreview = () => {
-    setShowPreview(false)
-    onUse()
+  const handleEdit = () => {
+    router.push(`/dashboard/templates/${template.id}/edit`)
   }
 
-  const handleDuplicateFromPreview = () => {
-    setShowPreview(false)
-    onDuplicate()
+  const handleView = () => {
+    router.push(`/dashboard/templates/${template.id}`)
   }
 
-  if (viewMode === 'list') {
+  const openRate = template.avgOpenRate ?? 0
+  const clickRate = template.avgReplyRate ?? 0
+  const performanceScore = (openRate + clickRate) / 2
+
+  const getPerformanceColor = (score: number) => {
+    if (score >= 40) return "text-emerald-500"
+    if (score >= 25) return "text-amber-500"
+    return "text-muted-foreground"
+  }
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, string> = {
+      welcome: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+      newsletter: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+      promotional: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+      transactional: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      followup: "bg-pink-500/10 text-pink-600 dark:text-pink-400",
+      notification: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+    }
+    return colors[category.toLowerCase()] || "bg-muted text-muted-foreground"
+  }
+
+  if (viewMode === "list") {
     return (
-      <>
-        <Card className="hover:border-primary/50 transition-colors">
-          <div className="flex items-center gap-4 p-6">
-            <button 
-              onClick={handlePreview}
-              className="relative w-32 h-24 shrink-0 rounded-md overflow-hidden bg-muted hover:opacity-80 transition-opacity"
-            >
-              <Image
-                src={template.thumbnailUrl || '/placeholder.svg?height=96&width=128&query=email template preview'}
-                alt={template.name}
-                fill
-                className="object-cover"
-              />
-            </button>
+      <div
+        ref={cardRef}
+        className={cn(
+          "group relative flex items-center gap-4 p-4 rounded-xl",
+          "bg-card/50 backdrop-blur-sm border border-border/50",
+          "transition-all duration-300 ease-out",
+          "hover:bg-card hover:border-border hover:shadow-lg",
+          "cursor-pointer",
+        )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={handleView}
+      >
+        {/* Favorite indicator line */}
+        {template.isFavorite && (
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-amber-400 rounded-r-full" />
+        )}
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <h3 className="font-semibold leading-none">{template.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
-                    {template.subject}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handlePreview}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onToggleFavorite}
-                    className="shrink-0"
-                  >
-                    <Star className={template.isFavorite ? "h-4 w-4 fill-current text-yellow-500" : "h-4 w-4"} />
-                  </Button>
-                  <Button onClick={onUse} size="sm">
-                    Use Template
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={handlePreview}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        Preview
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={onDuplicate}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Duplicate
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={onUse}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-3">
-                {template.industry && (
-                  <Badge variant="secondary">{template.industry}</Badge>
-                )}
-                {template.category && (
-                  <Badge variant="outline">{template.category}</Badge>
-                )}
-                {template.isSystemTemplate && (
-                  <Badge className="bg-primary/10 text-primary border-primary/20">
-                    Premium
-                  </Badge>
-                )}
-                {template.aiGenerated && (
-                  <Badge variant="outline" className="border-accent/50 text-accent">
-                    AI Generated
-                  </Badge>
-                )}
-              </div>
+        {/* Template icon/preview */}
+        <div className="relative flex-shrink-0 w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center overflow-hidden">
+          <Mail className="w-5 h-5 text-muted-foreground" />
+          {template.aiGenerated && (
+            <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+              <Sparkles className="w-2.5 h-2.5 text-primary-foreground" />
             </div>
-          </div>
-        </Card>
+          )}
+        </div>
 
-        <TemplatePreviewDialog
-          template={template}
-          open={showPreview}
-          onOpenChange={setShowPreview}
-          onUse={handleUseFromPreview}
-          onDuplicate={handleDuplicateFromPreview}
-        />
-      </>
-    )
-  }
-
-  return (
-    <>
-      <Card className="group hover:border-primary/50 transition-all hover:shadow-lg">
-        <CardHeader className="p-0">
-          <button
-            onClick={handlePreview}
-            className="relative aspect-video rounded-t-lg overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 w-full"
-          >
-            <Image
-              src={template.thumbnailUrl || '/placeholder.svg?height=300&width=450&query=email template design'}
-              alt={template.name}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <div className="text-white flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                <span className="font-medium">Preview Template</span>
-              </div>
-            </div>
-          </button>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleFavorite()
-            }}
-          >
-            <Star className={template.isFavorite ? "h-4 w-4 fill-current text-yellow-500" : "h-4 w-4"} />
-          </Button>
-        </CardHeader>
-        <CardContent className="pt-4 space-y-3">
-          <div>
-            <CardTitle className="line-clamp-1">{template.name}</CardTitle>
-            <CardDescription className="line-clamp-2 mt-1">
-              {template.subject}
-            </CardDescription>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {template.industry && (
-              <Badge variant="secondary" className="text-xs">
-                {template.industry}
-              </Badge>
-            )}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-medium text-foreground truncate">{template.name}</h3>
             {template.category && (
-              <Badge variant="outline" className="text-xs">
+              <Badge
+                variant="secondary"
+                className={cn("text-[10px] px-1.5 py-0 h-4 font-medium", getCategoryColor(template.category))}
+              >
                 {template.category}
               </Badge>
             )}
           </div>
+          <p className="text-sm text-muted-foreground truncate">{template.subject || "No subject"}</p>
+        </div>
 
-          {template.isSystemTemplate && (
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                {template.viewCount || 0}
-              </span>
-              <span className="flex items-center gap-1">
-                <Copy className="h-3 w-3" />
-                {template.duplicateCount || 0}
-              </span>
-            </div>
+        {/* Stats */}
+        <div className="hidden md:flex items-center gap-6 text-sm">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5">
+                  <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className={getPerformanceColor(openRate)}>{openRate.toFixed(1)}%</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Open rate</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className={getPerformanceColor(clickRate)}>{clickRate.toFixed(1)}%</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Reply rate</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-xs">
+              {new Date(template.updatedAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div
+          className={cn(
+            "flex items-center gap-1 transition-opacity duration-200",
+            isHovered ? "opacity-100" : "opacity-0",
           )}
-        </CardContent>
-        <CardFooter className="pt-0 flex gap-2">
-          <Button onClick={handlePreview} variant="outline" className="flex-1">
-            <Eye className="mr-2 h-4 w-4" />
+        >
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-8 w-8 rounded-lg", template.isFavorite && "text-amber-500")}
+                  onClick={handleFavorite}
+                >
+                  <Star
+                    className={cn(
+                      "w-4 h-4 transition-transform",
+                      isFavoriteAnimating && "scale-125",
+                      template.isFavorite && "fill-current",
+                    )}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{template.isFavorite ? "Remove from favorites" : "Add to favorites"}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onPreview(template)
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Preview</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                <MoreHorizontal className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleEdit}>
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit template
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDuplicate(template.id)
+                }}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(template.id)
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    )
+  }
+
+  // Grid view
+  return (
+    <div
+      ref={cardRef}
+      className={cn(
+        "group relative flex flex-col rounded-2xl overflow-hidden",
+        "bg-card/50 backdrop-blur-sm border border-border/50",
+        "transition-all duration-300 ease-out",
+        "hover:bg-card hover:border-border",
+        "hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-black/20",
+        "hover:-translate-y-1",
+        "cursor-pointer",
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleView}
+    >
+      {/* Favorite indicator */}
+      {template.isFavorite && (
+        <div className="absolute top-3 left-3 z-10">
+          <div className="w-2 h-2 rounded-full bg-amber-400 shadow-lg shadow-amber-400/50" />
+        </div>
+      )}
+
+      {/* AI badge */}
+      {template.aiGenerated && (
+        <div className="absolute top-3 right-3 z-10">
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 backdrop-blur-sm">
+            <Sparkles className="w-3 h-3 text-primary" />
+            <span className="text-[10px] font-medium text-primary">AI</span>
+          </div>
+        </div>
+      )}
+
+      {/* Preview area */}
+      <div className="relative h-36 bg-muted/30 overflow-hidden">
+        {/* Email preview mockup */}
+        <div className="absolute inset-3 rounded-lg bg-background/80 backdrop-blur-sm border border-border/50 p-3 overflow-hidden">
+          <div className="space-y-2">
+            <div className="h-2 w-3/4 rounded-full bg-muted" />
+            <div className="h-2 w-1/2 rounded-full bg-muted" />
+            <div className="mt-3 space-y-1.5">
+              <div className="h-1.5 w-full rounded-full bg-muted/60" />
+              <div className="h-1.5 w-full rounded-full bg-muted/60" />
+              <div className="h-1.5 w-2/3 rounded-full bg-muted/60" />
+            </div>
+          </div>
+        </div>
+
+        {/* Hover overlay */}
+        <div
+          className={cn(
+            "absolute inset-0 bg-background/80 backdrop-blur-sm",
+            "flex items-center justify-center gap-2",
+            "transition-opacity duration-200",
+            isHovered ? "opacity-100" : "opacity-0",
+          )}
+        >
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 rounded-lg shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation()
+              onPreview(template)
+            }}
+          >
+            <Eye className="w-3.5 h-3.5 mr-1.5" />
             Preview
           </Button>
-          <Button onClick={onUse} className="flex-1">
-            Use Template
+          <Button
+            size="sm"
+            className="h-8 rounded-lg shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleEdit()
+            }}
+          >
+            <Pencil className="w-3.5 h-3.5 mr-1.5" />
+            Edit
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
 
-      <TemplatePreviewDialog
-        template={template}
-        open={showPreview}
-        onOpenChange={setShowPreview}
-        onUse={handleUseFromPreview}
-        onDuplicate={handleDuplicateFromPreview}
-      />
-    </>
+      {/* Content */}
+      <div className="flex-1 p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="flex-1 min-w-0">
+            {template.category && (
+              <Badge
+                variant="secondary"
+                className={cn("text-[10px] px-1.5 py-0 h-4 font-medium mb-2", getCategoryColor(template.category))}
+              >
+                {template.category}
+              </Badge>
+            )}
+            <h3 className="font-semibold text-foreground truncate leading-tight">{template.name}</h3>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("h-7 w-7 rounded-lg flex-shrink-0 -mr-1 -mt-1", template.isFavorite && "text-amber-500")}
+            onClick={handleFavorite}
+          >
+            <Star
+              className={cn(
+                "w-4 h-4 transition-transform",
+                isFavoriteAnimating && "scale-125",
+                template.isFavorite && "fill-current",
+              )}
+            />
+          </Button>
+        </div>
+
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{template.subject || "No subject line"}</p>
+
+        {/* Performance metrics */}
+        <div className="flex items-center gap-4 pt-3 border-t border-border/50">
+          <div className="flex items-center gap-1.5">
+            <div
+              className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                openRate >= 40 ? "bg-emerald-500" : openRate >= 25 ? "bg-amber-500" : "bg-muted-foreground",
+              )}
+            />
+            <span className="text-xs text-muted-foreground">{openRate.toFixed(0)}% opens</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                clickRate >= 40 ? "bg-emerald-500" : clickRate >= 25 ? "bg-amber-500" : "bg-muted-foreground",
+              )}
+            />
+            <span className="text-xs text-muted-foreground">{clickRate.toFixed(0)}% replies</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick actions footer */}
+      <div
+        className={cn(
+          "flex items-center justify-between px-4 py-2 border-t border-border/50 bg-muted/30",
+          "transition-opacity duration-200",
+          isHovered ? "opacity-100" : "opacity-0",
+        )}
+      >
+        <span className="text-[11px] text-muted-foreground">
+          Updated{" "}
+          {new Date(template.updatedAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })}
+        </span>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 rounded"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDuplicate(template.id)
+            }}
+          >
+            <Copy className="w-3 h-3" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <Button variant="ghost" size="icon" className="h-6 w-6 rounded">
+                <MoreHorizontal className="w-3 h-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={handleEdit}>
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDuplicate(template.id)
+                }}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(template.id)
+                }}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </div>
   )
 }

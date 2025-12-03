@@ -1,104 +1,39 @@
-// import { getTemplate } from "@/lib/actions/templates"
-// import { VisualTemplateEditor } from "@/components/templates/template-editor/visual-template-editor"
-// import { Button } from "@/components/ui/button"
-// import { ArrowLeft } from 'lucide-react'
-// import Link from "next/link"
-// import { redirect } from 'next/navigation'
+import { notFound } from "next/navigation"
+import { getTemplate, getTemplateCategories } from "@/lib/actions/templates"
+import { TemplateEditor } from "@/components/templates/template-editor/template-editor"
 
-// export default async function EditTemplatePage({ params }: { params: { id: string } }) {
-//   const result = await getTemplate(params.id)
+interface EditTemplatePageProps {
+  params: Promise<{ id: string }>
+}
 
-//   if (!result.success || !result.template) {
-//     redirect("/dashboard/templates")
-//   }
+export async function generateMetadata({ params }: EditTemplatePageProps) {
+  const { id } = await params
+  const result = await getTemplate(id)
 
-//   return (
-//     <div className="space-y-6">
-//       <div className="flex items-center gap-4">
-//         <Button variant="ghost" size="icon" asChild>
-//           <Link href={`/dashboard/templates/${params.id}`}>
-//             <ArrowLeft className="h-5 w-5" />
-//           </Link>
-//         </Button>
-//         <div>
-//           <h1 className="text-balance text-3xl font-bold tracking-tight">Edit Template</h1>
-//           <p className="text-muted-foreground">Use the visual editor to customize your template</p>
-//         </div>
-//       </div>
+  return {
+    title: result.template ? `Edit ${result.template.name}` : "Edit Template",
+    description: "Edit your email template",
+  }
+}
 
-//       <VisualTemplateEditor template={result.template} />
-//     </div>
-//   )
-// }
+export default async function EditTemplatePage({ params }: EditTemplatePageProps) {
+  const { id } = await params
 
-// import { getTemplate } from "@/lib/actions/templates"
-// import { VisualTemplateEditor } from "@/components/templates/template-editor/visual-template-editor"
-// import { Button } from "@/components/ui/button"
-// import { ArrowLeft } from 'lucide-react'
-// import Link from "next/link"
-// import { redirect } from 'next/navigation'
-// import type { TemplateBlock } from "@/lib/types"
+  const [templateResult, categoriesResult] = await Promise.all([getTemplate(id), getTemplateCategories()])
 
-// export default async function EditTemplatePage({ params }: { params: { id: string } }) {
-//   const result = await getTemplate(params.id)
-
-//   if (!result.success || !result.template) {
-//     redirect("/dashboard/templates")
-//   }
-
-//   const editorBlocks = result.template.editorBlocks as any
-//   const initialBlocks: TemplateBlock[] = editorBlocks?.blocks || []
-
-//   return (
-//     <div className="space-y-6">
-//       <div className="flex items-center gap-4">
-//         <Button variant="ghost" size="icon" asChild>
-//           <Link href={`/dashboard/templates/${params.id}`}>
-//             <ArrowLeft className="h-5 w-5" />
-//           </Link>
-//         </Button>
-//         <div>
-//           <h1 className="text-balance text-3xl font-bold tracking-tight">Edit Template</h1>
-//           <p className="text-muted-foreground">Use the visual editor to customize your template</p>
-//         </div>
-//       </div>
-
-//       <VisualTemplateEditor 
-//         templateId={result.template.id} 
-//         initialBlocks={initialBlocks}
-//       />
-//     </div>
-//   )
-// }
-import { getTemplate } from "@/lib/actions/templates"
-import { VisualTemplateEditor } from "@/components/templates/template-editor/visual-template-editor"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from 'lucide-react'
-import Link from "next/link"
-import { redirect } from 'next/navigation'
-
-export default async function EditTemplatePage({ params }: { params: { id: string } }) {
-  const result = await getTemplate(params.id)
-
-  if (!result.success || !result.template) {
-    redirect("/dashboard/templates")
+  if (templateResult.error || !templateResult.template) {
+    notFound()
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/dashboard/templates">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-balance text-3xl font-bold tracking-tight">Edit Template</h1>
-          <p className="text-muted-foreground">Customize your template content and styling</p>
-        </div>
-      </div>
+  const categories = categoriesResult.success ? (categoriesResult.categories ?? []) : []
+  // Default variables since getTemplateVariables doesn't exist
+  const variables = [
+    { name: "firstName", required: true, description: "Contact first name" },
+    { name: "lastName", required: false, description: "Contact last name" },
+    { name: "email", required: true, description: "Contact email" },
+    { name: "companyName", required: false, description: "Company name" },
+    { name: "fullName", required: false, description: "Contact full name" },
+  ]
 
-      <VisualTemplateEditor template={result.template} />
-    </div>
-  )
+  return <TemplateEditor template={templateResult.template} categories={categories} variables={variables} mode="edit" />
 }
