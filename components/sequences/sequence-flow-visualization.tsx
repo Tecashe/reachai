@@ -215,11 +215,419 @@
 //     </div>
 //   )
 // }
+// "use client"
+
+// import { useState } from "react"
+// import { motion, AnimatePresence } from "framer-motion"
+// import { Card, CardContent } from "@/components/ui/card"
+// import { Badge } from "@/components/ui/badge"
+// import { Button } from "@/components/ui/button"
+// import {
+//   Clock,
+//   Mail,
+//   CheckCircle2,
+//   XCircle,
+//   Eye,
+//   Edit,
+//   Trash2,
+//   GripVertical,
+//   Plus,
+//   ChevronDown,
+//   ChevronUp,
+//   Copy,
+//   MoreHorizontal,
+//   ArrowDown,
+// } from "lucide-react"
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"
+// import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
+// interface Sequence {
+//   id: string
+//   stepNumber: number
+//   delayDays: number
+//   sendOnlyIfNotReplied: boolean
+//   sendOnlyIfNotOpened: boolean
+//   template: {
+//     id: string
+//     name: string
+//     subject: string
+//     body: string
+//   }
+// }
+
+// interface SequenceFlowVisualizationProps {
+//   sequences: Sequence[]
+//   campaignName: string
+//   onAddStep?: () => void
+//   onEditStep?: (id: string) => void
+//   onDeleteStep?: (id: string) => void
+//   onDuplicateStep?: (id: string) => void
+// }
+
+// export function SequenceFlowVisualization({
+//   sequences,
+//   campaignName,
+//   onAddStep,
+//   onEditStep,
+//   onDeleteStep,
+//   onDuplicateStep,
+// }: SequenceFlowVisualizationProps) {
+//   const [expandedStep, setExpandedStep] = useState<string | null>(null)
+//   const [previewStep, setPreviewStep] = useState<Sequence | null>(null)
+//   const [hoveredConnector, setHoveredConnector] = useState<number | null>(null)
+
+//   if (sequences.length === 0) {
+//     return (
+//       <div className="relative">
+//         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+//         <Card className="relative border-2 border-dashed bg-gradient-to-br from-background to-muted/20">
+//           <CardContent className="flex flex-col items-center justify-center py-20">
+//             <div className="relative mb-6">
+//               <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+//               <div className="relative rounded-full bg-gradient-to-br from-primary/20 to-primary/5 p-6">
+//                 <Mail className="h-12 w-12 text-primary" />
+//               </div>
+//             </div>
+//             <h3 className="text-2xl font-bold mb-2">Build Your Email Sequence</h3>
+//             <p className="text-muted-foreground text-center max-w-md mb-8">
+//               Create a powerful multi-step email sequence to nurture your prospects and drive conversions
+//             </p>
+//             <Button size="lg" onClick={onAddStep} className="gap-2 shadow-lg shadow-primary/20">
+//               <Plus className="h-5 w-5" />
+//               Add First Step
+//             </Button>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="relative">
+//       {/* Background Pattern */}
+//       <div className="absolute inset-0 -z-10">
+//         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
+//         <svg className="absolute inset-0 h-full w-full opacity-[0.015]" xmlns="http://www.w3.org/2000/svg">
+//           <defs>
+//             <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+//               <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="1" />
+//             </pattern>
+//           </defs>
+//           <rect width="100%" height="100%" fill="url(#grid)" />
+//         </svg>
+//       </div>
+
+//       {/* Start Node */}
+//       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mb-4">
+//         <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20">
+//           <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+//           <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-sm">Sequence Start</span>
+//         </div>
+//       </motion.div>
+
+//       {/* Connector from Start */}
+//       <div className="flex justify-center mb-4">
+//         <motion.div
+//           initial={{ scaleY: 0 }}
+//           animate={{ scaleY: 1 }}
+//           transition={{ delay: 0.2 }}
+//           className="w-0.5 h-8 bg-gradient-to-b from-emerald-500/50 to-primary/30 origin-top"
+//         />
+//       </div>
+
+//       {/* Sequence Steps */}
+//       <div className="space-y-0">
+//         {sequences.map((sequence, index) => {
+//           const isExpanded = expandedStep === sequence.id
+//           const isLast = index === sequences.length - 1
+
+//           return (
+//             <motion.div
+//               key={sequence.id}
+//               initial={{ opacity: 0, y: 30 }}
+//               animate={{ opacity: 1, y: 0 }}
+//               transition={{ delay: index * 0.1 + 0.3 }}
+//             >
+//               {/* Step Card */}
+//               <div className="relative flex justify-center">
+//                 <motion.div whileHover={{ scale: 1.01 }} className="w-full max-w-2xl">
+//                   <Card className="relative overflow-hidden border-0 shadow-lg shadow-black/5 bg-gradient-to-br from-background via-background to-muted/20">
+//                     {/* Step Number Indicator */}
+//                     <div className="absolute -left-px top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/50 to-transparent" />
+
+//                     {/* Header */}
+//                     <div className="flex items-start gap-4 p-5 pb-4">
+//                       {/* Drag Handle & Step Number */}
+//                       <div className="flex flex-col items-center gap-2">
+//                         <button className="cursor-grab text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+//                           <GripVertical className="h-5 w-5" />
+//                         </button>
+//                         <div className="relative">
+//                           <div className="absolute inset-0 bg-primary/20 rounded-xl blur-md" />
+//                           <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold text-lg shadow-lg">
+//                             {sequence.stepNumber}
+//                           </div>
+//                         </div>
+//                       </div>
+
+//                       {/* Content */}
+//                       <div className="flex-1 min-w-0">
+//                         <div className="flex items-start justify-between gap-4">
+//                           <div className="flex-1 min-w-0">
+//                             <div className="flex items-center gap-2 mb-1">
+//                               <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+//                               <h3 className="font-semibold truncate">{sequence.template.name}</h3>
+//                             </div>
+//                             <p className="text-sm text-muted-foreground truncate">{sequence.template.subject}</p>
+//                           </div>
+
+//                           {/* Actions */}
+//                           <div className="flex items-center gap-1">
+//                             <Button
+//                               variant="ghost"
+//                               size="icon"
+//                               className="h-8 w-8 text-muted-foreground hover:text-foreground"
+//                               onClick={() => setPreviewStep(sequence)}
+//                             >
+//                               <Eye className="h-4 w-4" />
+//                             </Button>
+//                             <DropdownMenu>
+//                               <DropdownMenuTrigger asChild>
+//                                 <Button
+//                                   variant="ghost"
+//                                   size="icon"
+//                                   className="h-8 w-8 text-muted-foreground hover:text-foreground"
+//                                 >
+//                                   <MoreHorizontal className="h-4 w-4" />
+//                                 </Button>
+//                               </DropdownMenuTrigger>
+//                               <DropdownMenuContent align="end" className="w-48">
+//                                 <DropdownMenuItem onClick={() => onEditStep?.(sequence.id)}>
+//                                   <Edit className="h-4 w-4 mr-2" />
+//                                   Edit Step
+//                                 </DropdownMenuItem>
+//                                 <DropdownMenuItem onClick={() => onDuplicateStep?.(sequence.id)}>
+//                                   <Copy className="h-4 w-4 mr-2" />
+//                                   Duplicate
+//                                 </DropdownMenuItem>
+//                                 <DropdownMenuSeparator />
+//                                 <DropdownMenuItem
+//                                   onClick={() => onDeleteStep?.(sequence.id)}
+//                                   className="text-destructive focus:text-destructive"
+//                                 >
+//                                   <Trash2 className="h-4 w-4 mr-2" />
+//                                   Delete
+//                                 </DropdownMenuItem>
+//                               </DropdownMenuContent>
+//                             </DropdownMenu>
+//                           </div>
+//                         </div>
+
+//                         {/* Conditions */}
+//                         <div className="flex flex-wrap gap-2 mt-3">
+//                           {sequence.sendOnlyIfNotReplied && (
+//                             <Badge
+//                               variant="secondary"
+//                               className="gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+//                             >
+//                               <CheckCircle2 className="h-3 w-3" />
+//                               No reply condition
+//                             </Badge>
+//                           )}
+//                           {sequence.sendOnlyIfNotOpened && (
+//                             <Badge
+//                               variant="secondary"
+//                               className="gap-1.5 bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+//                             >
+//                               <XCircle className="h-3 w-3" />
+//                               Not opened condition
+//                             </Badge>
+//                           )}
+//                         </div>
+
+//                         {/* Expand Toggle */}
+//                         <button
+//                           onClick={() => setExpandedStep(isExpanded ? null : sequence.id)}
+//                           className="flex items-center gap-1 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+//                         >
+//                           {isExpanded ? (
+//                             <>
+//                               <ChevronUp className="h-3.5 w-3.5" />
+//                               Hide preview
+//                             </>
+//                           ) : (
+//                             <>
+//                               <ChevronDown className="h-3.5 w-3.5" />
+//                               Show preview
+//                             </>
+//                           )}
+//                         </button>
+//                       </div>
+//                     </div>
+
+//                     {/* Expanded Content */}
+//                     <AnimatePresence>
+//                       {isExpanded && (
+//                         <motion.div
+//                           initial={{ height: 0, opacity: 0 }}
+//                           animate={{ height: "auto", opacity: 1 }}
+//                           exit={{ height: 0, opacity: 0 }}
+//                           transition={{ duration: 0.2 }}
+//                         >
+//                           <div className="px-5 pb-5">
+//                             <div className="rounded-lg bg-muted/50 border p-4">
+//                               <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-6">
+//                                 {sequence.template.body}
+//                               </p>
+//                             </div>
+//                           </div>
+//                         </motion.div>
+//                       )}
+//                     </AnimatePresence>
+//                   </Card>
+//                 </motion.div>
+//               </div>
+
+//               {/* Connector with Delay */}
+//               {!isLast && (
+//                 <div
+//                   className="relative flex flex-col items-center py-2"
+//                   onMouseEnter={() => setHoveredConnector(index)}
+//                   onMouseLeave={() => setHoveredConnector(null)}
+//                 >
+//                   {/* Animated Line */}
+//                   <motion.div
+//                     initial={{ scaleY: 0 }}
+//                     animate={{ scaleY: 1 }}
+//                     transition={{ delay: index * 0.1 + 0.5 }}
+//                     className="w-0.5 h-6 bg-gradient-to-b from-border to-primary/30 origin-top"
+//                   />
+
+//                   {/* Delay Badge */}
+//                   <motion.div
+//                     initial={{ scale: 0 }}
+//                     animate={{ scale: 1 }}
+//                     transition={{ delay: index * 0.1 + 0.6, type: "spring" }}
+//                     whileHover={{ scale: 1.05 }}
+//                     className="relative my-2"
+//                   >
+//                     <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background border-2 border-primary/20 shadow-lg shadow-black/5">
+//                       <Clock className="h-4 w-4 text-primary" />
+//                       <span className="font-semibold text-sm">
+//                         {sequence.delayDays} {sequence.delayDays === 1 ? "day" : "days"}
+//                       </span>
+//                     </div>
+
+//                     {/* Add Step Button (appears on hover) */}
+//                     <AnimatePresence>
+//                       {hoveredConnector === index && (
+//                         <motion.div
+//                           initial={{ opacity: 0, scale: 0.8 }}
+//                           animate={{ opacity: 1, scale: 1 }}
+//                           exit={{ opacity: 0, scale: 0.8 }}
+//                           className="absolute -right-12 top-1/2 -translate-y-1/2"
+//                         >
+//                           <Button
+//                             size="icon"
+//                             variant="outline"
+//                             className="h-8 w-8 rounded-full shadow-lg bg-transparent"
+//                             onClick={onAddStep}
+//                           >
+//                             <Plus className="h-4 w-4" />
+//                           </Button>
+//                         </motion.div>
+//                       )}
+//                     </AnimatePresence>
+//                   </motion.div>
+
+//                   {/* Arrow */}
+//                   <motion.div
+//                     initial={{ scaleY: 0 }}
+//                     animate={{ scaleY: 1 }}
+//                     transition={{ delay: index * 0.1 + 0.7 }}
+//                     className="flex flex-col items-center origin-top"
+//                   >
+//                     <div className="w-0.5 h-4 bg-gradient-to-b from-primary/30 to-primary/50" />
+//                     <ArrowDown className="h-4 w-4 text-primary/50 -mt-1" />
+//                   </motion.div>
+//                 </div>
+//               )}
+//             </motion.div>
+//           )
+//         })}
+//       </div>
+
+//       {/* End Node */}
+//       <motion.div
+//         initial={{ opacity: 0, y: 20 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         transition={{ delay: sequences.length * 0.1 + 0.5 }}
+//         className="flex justify-center mt-6"
+//       >
+//         <div className="flex flex-col items-center gap-4">
+//           <div className="w-0.5 h-6 bg-gradient-to-b from-primary/30 to-emerald-500/50" />
+//           <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20">
+//             <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+//             <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-sm">Sequence Complete</span>
+//           </div>
+//         </div>
+//       </motion.div>
+
+//       {/* Add Step Button at Bottom */}
+//       <motion.div
+//         initial={{ opacity: 0 }}
+//         animate={{ opacity: 1 }}
+//         transition={{ delay: sequences.length * 0.1 + 0.7 }}
+//         className="flex justify-center mt-8"
+//       >
+//         <Button variant="outline" onClick={onAddStep} className="gap-2 bg-transparent">
+//           <Plus className="h-4 w-4" />
+//           Add Step
+//         </Button>
+//       </motion.div>
+
+//       {/* Preview Dialog */}
+//       <Dialog open={!!previewStep} onOpenChange={() => setPreviewStep(null)}>
+//         <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+//           <DialogHeader>
+//             <DialogTitle className="flex items-center gap-2">
+//               <Mail className="h-5 w-5 text-primary" />
+//               {previewStep?.template.name}
+//             </DialogTitle>
+//             <DialogDescription>Step {previewStep?.stepNumber} - Preview</DialogDescription>
+//           </DialogHeader>
+//           {previewStep && (
+//             <div className="space-y-4">
+//               <div className="rounded-lg border p-4 bg-muted/30">
+//                 <p className="text-sm font-medium text-muted-foreground mb-1">Subject</p>
+//                 <p className="font-semibold">{previewStep.template.subject}</p>
+//               </div>
+//               <div className="rounded-lg border p-4 bg-muted/30">
+//                 <p className="text-sm font-medium text-muted-foreground mb-2">Body</p>
+//                 <p className="text-sm whitespace-pre-wrap">{previewStep.template.body}</p>
+//               </div>
+//               <div className="flex gap-2">
+//                 {previewStep.sendOnlyIfNotReplied && <Badge variant="secondary">Only if no reply</Badge>}
+//                 {previewStep.sendOnlyIfNotOpened && <Badge variant="secondary">Only if not opened</Badge>}
+//               </div>
+//             </div>
+//           )}
+//         </DialogContent>
+//       </Dialog>
+//     </div>
+//   )
+// }
+
 "use client"
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -230,13 +638,16 @@ import {
   Eye,
   Edit,
   Trash2,
-  GripVertical,
   Plus,
   ChevronDown,
   ChevronUp,
   Copy,
   MoreHorizontal,
-  ArrowDown,
+  Sparkles,
+  MousePointerClick,
+  BarChart3,
+  Send,
+  Target,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -246,6 +657,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
 
 interface Sequence {
   id: string
@@ -264,7 +676,7 @@ interface Sequence {
 interface SequenceFlowVisualizationProps {
   sequences: Sequence[]
   campaignName: string
-  onAddStep?: () => void
+  onAddStep?: (afterStepIndex?: number) => void
   onEditStep?: (id: string) => void
   onDeleteStep?: (id: string) => void
   onDuplicateStep?: (id: string) => void
@@ -281,64 +693,107 @@ export function SequenceFlowVisualization({
   const [expandedStep, setExpandedStep] = useState<string | null>(null)
   const [previewStep, setPreviewStep] = useState<Sequence | null>(null)
   const [hoveredConnector, setHoveredConnector] = useState<number | null>(null)
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null)
 
   if (sequences.length === 0) {
     return (
-      <div className="relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-        <Card className="relative border-2 border-dashed bg-gradient-to-br from-background to-muted/20">
-          <CardContent className="flex flex-col items-center justify-center py-20">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
-              <div className="relative rounded-full bg-gradient-to-br from-primary/20 to-primary/5 p-6">
-                <Mail className="h-12 w-12 text-primary" />
+      <div className="relative min-h-[500px] flex items-center justify-center">
+        {/* Animated background grid */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted)/0.3)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted)/0.3)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+        </div>
+
+        {/* Central empty state */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative z-10 text-center"
+        >
+          {/* Animated rings */}
+          <div className="relative mx-auto w-40 h-40 mb-8">
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.1, 0.3] }}
+              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY }}
+              className="absolute inset-0 rounded-full border-2 border-dashed border-primary/30"
+            />
+            <motion.div
+              animate={{ scale: [1, 1.4, 1], opacity: [0.2, 0.05, 0.2] }}
+              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, delay: 0.5 }}
+              className="absolute inset-0 rounded-full border-2 border-dashed border-primary/20"
+            />
+            <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-2xl shadow-primary/30">
+                <Mail className="h-10 w-10 text-primary-foreground" />
               </div>
             </div>
-            <h3 className="text-2xl font-bold mb-2">Build Your Email Sequence</h3>
-            <p className="text-muted-foreground text-center max-w-md mb-8">
-              Create a powerful multi-step email sequence to nurture your prospects and drive conversions
-            </p>
-            <Button size="lg" onClick={onAddStep} className="gap-2 shadow-lg shadow-primary/20">
-              <Plus className="h-5 w-5" />
-              Add First Step
-            </Button>
-          </CardContent>
-        </Card>
+          </div>
+
+          <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Design Your Email Journey
+          </h3>
+          <p className="text-muted-foreground max-w-md mx-auto mb-8 leading-relaxed">
+            Create a powerful multi-step sequence to nurture prospects through personalized touchpoints
+          </p>
+
+          <Button
+            size="lg"
+            onClick={() => onAddStep?.()}
+            className="gap-3 h-14 px-8 text-base rounded-2xl shadow-xl shadow-primary/20 bg-gradient-to-r from-primary to-primary/90 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300"
+          >
+            <Plus className="h-5 w-5" />
+            Add First Step
+          </Button>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-        <svg className="absolute inset-0 h-full w-full opacity-[0.015]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M 32 0 L 0 0 0 32" fill="none" stroke="currentColor" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
+    <div className="relative py-8">
+      {/* Animated background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--muted)/0.2)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--muted)/0.2)_1px,transparent_1px)] bg-[size:3rem_3rem]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       </div>
 
-      {/* Start Node */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mb-4">
-        <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20">
-          <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-sm">Sequence Start</span>
+      {/* Start Node - Premium Design */}
+      <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mb-8">
+        <div className="relative group">
+          {/* Glow effect */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          <div className="relative flex items-center gap-4 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-emerald-500/10 border border-emerald-500/30 backdrop-blur-sm">
+            <div className="relative">
+              <div className="absolute inset-0 bg-emerald-500 rounded-xl blur-md opacity-30" />
+              <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+                <Target className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div>
+              <h4 className="font-bold text-emerald-700 dark:text-emerald-300">Campaign Starts</h4>
+              <p className="text-sm text-emerald-600/70 dark:text-emerald-400/70">Prospects enter sequence</p>
+            </div>
+          </div>
         </div>
       </motion.div>
 
-      {/* Connector from Start */}
-      <div className="flex justify-center mb-4">
-        <motion.div
-          initial={{ scaleY: 0 }}
-          animate={{ scaleY: 1 }}
-          transition={{ delay: 0.2 }}
-          className="w-0.5 h-8 bg-gradient-to-b from-emerald-500/50 to-primary/30 origin-top"
-        />
+      {/* Animated connector from start */}
+      <div className="flex justify-center mb-8">
+        <div className="relative">
+          <motion.div
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="w-1 h-16 rounded-full bg-gradient-to-b from-emerald-500/50 via-primary/30 to-primary/50 origin-top"
+          />
+          {/* Animated dot traveling down */}
+          <motion.div
+            animate={{ y: [0, 64, 0] }}
+            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary shadow-lg shadow-primary/50"
+          />
+        </div>
       </div>
 
       {/* Sequence Steps */}
@@ -346,215 +801,299 @@ export function SequenceFlowVisualization({
         {sequences.map((sequence, index) => {
           const isExpanded = expandedStep === sequence.id
           const isLast = index === sequences.length - 1
+          const isHovered = hoveredNode === sequence.id
+
+          // Calculate mock performance metrics based on step number
+          const openRate = Math.max(20, 65 - index * 8)
+          const clickRate = Math.max(5, 25 - index * 4)
 
           return (
             <motion.div
               key={sequence.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.3 }}
+              transition={{ delay: index * 0.15 + 0.3 }}
             >
-              {/* Step Card */}
-              <div className="relative flex justify-center">
-                <motion.div whileHover={{ scale: 1.01 }} className="w-full max-w-2xl">
-                  <Card className="relative overflow-hidden border-0 shadow-lg shadow-black/5 bg-gradient-to-br from-background via-background to-muted/20">
-                    {/* Step Number Indicator */}
-                    <div className="absolute -left-px top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-primary/50 to-transparent" />
+              {/* Step Node - Revolutionary Design */}
+              <div className="flex justify-center px-4">
+                <motion.div
+                  onMouseEnter={() => setHoveredNode(sequence.id)}
+                  onMouseLeave={() => setHoveredNode(null)}
+                  whileHover={{ y: -4 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className="w-full max-w-2xl"
+                >
+                  <div
+                    className={cn(
+                      "relative rounded-3xl transition-all duration-500",
+                      isHovered ? "shadow-2xl shadow-primary/20" : "shadow-xl shadow-black/5",
+                    )}
+                  >
+                    {/* Glow effect on hover */}
+                    <div
+                      className={cn(
+                        "absolute -inset-1 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 rounded-3xl blur-xl transition-opacity duration-500",
+                        isHovered ? "opacity-100" : "opacity-0",
+                      )}
+                    />
 
-                    {/* Header */}
-                    <div className="flex items-start gap-4 p-5 pb-4">
-                      {/* Drag Handle & Step Number */}
-                      <div className="flex flex-col items-center gap-2">
-                        <button className="cursor-grab text-muted-foreground/50 hover:text-muted-foreground transition-colors">
-                          <GripVertical className="h-5 w-5" />
-                        </button>
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-primary/20 rounded-xl blur-md" />
-                          <div className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground font-bold text-lg shadow-lg">
-                            {sequence.stepNumber}
-                          </div>
+                    {/* Main card */}
+                    <div className="relative rounded-3xl bg-gradient-to-br from-background via-background to-muted/30 border border-border/50 backdrop-blur-sm overflow-hidden">
+                      {/* Step indicator bar */}
+                      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary via-primary/70 to-primary/40" />
+
+                      {/* Performance ribbon */}
+                      <div className="absolute top-4 right-4 flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                            {openRate}% opens
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                          <MousePointerClick className="w-3 h-3 text-blue-500" />
+                          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">{clickRate}%</span>
                         </div>
                       </div>
 
                       {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                              <h3 className="font-semibold truncate">{sequence.template.name}</h3>
+                      <div className="p-6 pl-8">
+                        <div className="flex items-start gap-5">
+                          {/* Step number with icon */}
+                          <div className="relative flex-shrink-0">
+                            <div className="absolute -inset-2 bg-primary/20 rounded-2xl blur-lg opacity-60" />
+                            <div className="relative">
+                              <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex flex-col items-center justify-center shadow-xl shadow-primary/30">
+                                <span className="text-2xl font-black text-primary-foreground">
+                                  {sequence.stepNumber}
+                                </span>
+                              </div>
+                              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-lg bg-background border-2 border-primary flex items-center justify-center">
+                                <Mail className="h-3 w-3 text-primary" />
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground truncate">{sequence.template.subject}</p>
                           </div>
 
-                          {/* Actions */}
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                              onClick={() => setPreviewStep(sequence)}
+                          {/* Main content */}
+                          <div className="flex-1 min-w-0 pt-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-bold text-lg truncate">{sequence.template.name}</h3>
+                              {sequence.stepNumber === 1 && (
+                                <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20 gap-1">
+                                  <Sparkles className="h-3 w-3" />
+                                  Initial
+                                </Badge>
+                              )}
+                            </div>
+
+                            <p className="text-muted-foreground mb-4 line-clamp-1">
+                              <span className="font-medium text-foreground/80">Subject:</span>{" "}
+                              {sequence.template.subject}
+                            </p>
+
+                            {/* Conditions as elegant pills */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {sequence.sendOnlyIfNotReplied && (
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-amber-600" />
+                                  <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                                    Skip if replied
+                                  </span>
+                                </div>
+                              )}
+                              {sequence.sendOnlyIfNotOpened && (
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                                  <XCircle className="h-3.5 w-3.5 text-blue-600" />
+                                  <span className="text-xs font-medium text-blue-700 dark:text-blue-400">
+                                    Skip if opened
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Action buttons - appear on hover */}
+                            <AnimatePresence>
+                              {isHovered && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 10 }}
+                                  className="flex items-center gap-2"
+                                >
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    className="h-9 gap-2 rounded-xl"
+                                    onClick={() => setPreviewStep(sequence)}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    Preview
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    className="h-9 gap-2 rounded-xl"
+                                    onClick={() => onEditStep?.(sequence.id)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                    Edit
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button size="sm" variant="ghost" className="h-9 w-9 rounded-xl">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-48 rounded-xl">
+                                      <DropdownMenuItem
+                                        onClick={() => onDuplicateStep?.(sequence.id)}
+                                        className="gap-2 rounded-lg"
+                                      >
+                                        <Copy className="h-4 w-4" />
+                                        Duplicate Step
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="gap-2 rounded-lg">
+                                        <BarChart3 className="h-4 w-4" />
+                                        View Analytics
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        onClick={() => onDeleteStep?.(sequence.id)}
+                                        className="gap-2 rounded-lg text-destructive focus:text-destructive"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                            {/* Expand toggle */}
+                            <button
+                              onClick={() => setExpandedStep(isExpanded ? null : sequence.id)}
+                              className="flex items-center gap-2 mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
                             >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onClick={() => onEditStep?.(sequence.id)}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit Step
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => onDuplicateStep?.(sequence.id)}>
-                                  <Copy className="h-4 w-4 mr-2" />
-                                  Duplicate
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => onDeleteStep?.(sequence.id)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              {isExpanded ? (
+                                <>
+                                  <ChevronUp className="h-4 w-4" />
+                                  <span>Hide email preview</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown className="h-4 w-4" />
+                                  <span>Show email preview</span>
+                                </>
+                              )}
+                            </button>
                           </div>
                         </div>
 
-                        {/* Conditions */}
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {sequence.sendOnlyIfNotReplied && (
-                            <Badge
-                              variant="secondary"
-                              className="gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                        {/* Expanded email preview */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
                             >
-                              <CheckCircle2 className="h-3 w-3" />
-                              No reply condition
-                            </Badge>
+                              <div className="mt-6 ml-[84px]">
+                                <div className="rounded-2xl bg-muted/50 border p-5">
+                                  <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/50">
+                                    <Send className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm font-medium">{sequence.template.subject}</span>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed line-clamp-8">
+                                    {sequence.template.body}
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
                           )}
-                          {sequence.sendOnlyIfNotOpened && (
-                            <Badge
-                              variant="secondary"
-                              className="gap-1.5 bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
-                            >
-                              <XCircle className="h-3 w-3" />
-                              Not opened condition
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Expand Toggle */}
-                        <button
-                          onClick={() => setExpandedStep(isExpanded ? null : sequence.id)}
-                          className="flex items-center gap-1 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {isExpanded ? (
-                            <>
-                              <ChevronUp className="h-3.5 w-3.5" />
-                              Hide preview
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-3.5 w-3.5" />
-                              Show preview
-                            </>
-                          )}
-                        </button>
+                        </AnimatePresence>
                       </div>
                     </div>
-
-                    {/* Expanded Content */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="px-5 pb-5">
-                            <div className="rounded-lg bg-muted/50 border p-4">
-                              <p className="text-sm text-muted-foreground whitespace-pre-wrap line-clamp-6">
-                                {sequence.template.body}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Card>
+                  </div>
                 </motion.div>
               </div>
 
-              {/* Connector with Delay */}
+              {/* Connector with Delay Node */}
               {!isLast && (
                 <div
-                  className="relative flex flex-col items-center py-2"
+                  className="relative flex flex-col items-center py-4"
                   onMouseEnter={() => setHoveredConnector(index)}
                   onMouseLeave={() => setHoveredConnector(null)}
                 >
-                  {/* Animated Line */}
+                  {/* Top connector line */}
                   <motion.div
                     initial={{ scaleY: 0 }}
                     animate={{ scaleY: 1 }}
-                    transition={{ delay: index * 0.1 + 0.5 }}
-                    className="w-0.5 h-6 bg-gradient-to-b from-border to-primary/30 origin-top"
+                    transition={{ delay: index * 0.15 + 0.5 }}
+                    className="w-1 h-8 rounded-full bg-gradient-to-b from-primary/40 to-primary/20 origin-top"
                   />
 
-                  {/* Delay Badge */}
+                  {/* Delay Node - Premium Design */}
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.1 + 0.6, type: "spring" }}
-                    whileHover={{ scale: 1.05 }}
-                    className="relative my-2"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: index * 0.15 + 0.6, type: "spring" }}
+                    className="relative my-2 group/delay"
                   >
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-background border-2 border-primary/20 shadow-lg shadow-black/5">
-                      <Clock className="h-4 w-4 text-primary" />
-                      <span className="font-semibold text-sm">
-                        {sequence.delayDays} {sequence.delayDays === 1 ? "day" : "days"}
-                      </span>
+                    {/* Glow on hover */}
+                    <div
+                      className={cn(
+                        "absolute -inset-3 bg-primary/20 rounded-2xl blur-lg transition-opacity duration-300",
+                        hoveredConnector === index ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+
+                    <div className="relative flex items-center gap-3 px-5 py-3 rounded-2xl bg-background border-2 border-primary/30 shadow-lg">
+                      <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                        <Clock className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">
+                          Wait {sequences[index + 1]?.delayDays || 1}{" "}
+                          {(sequences[index + 1]?.delayDays || 1) === 1 ? "day" : "days"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">before next step</p>
+                      </div>
                     </div>
 
-                    {/* Add Step Button (appears on hover) */}
+                    {/* Add step button - appears on hover */}
                     <AnimatePresence>
                       {hoveredConnector === index && (
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          className="absolute -right-12 top-1/2 -translate-y-1/2"
+                          initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                          animate={{ opacity: 1, scale: 1, x: 0 }}
+                          exit={{ opacity: 0, scale: 0.8, x: 20 }}
+                          className="absolute -right-16 top-1/2 -translate-y-1/2"
                         >
                           <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 rounded-full shadow-lg bg-transparent"
-                            onClick={onAddStep}
+                            size="sm"
+                            onClick={() => onAddStep?.(index + 1)}
+                            className="h-10 gap-2 rounded-xl shadow-xl shadow-primary/20"
                           >
                             <Plus className="h-4 w-4" />
+                            Insert
                           </Button>
                         </motion.div>
                       )}
                     </AnimatePresence>
                   </motion.div>
 
-                  {/* Arrow */}
+                  {/* Bottom connector with arrow */}
                   <motion.div
                     initial={{ scaleY: 0 }}
                     animate={{ scaleY: 1 }}
-                    transition={{ delay: index * 0.1 + 0.7 }}
+                    transition={{ delay: index * 0.15 + 0.7 }}
                     className="flex flex-col items-center origin-top"
                   >
-                    <div className="w-0.5 h-4 bg-gradient-to-b from-primary/30 to-primary/50" />
-                    <ArrowDown className="h-4 w-4 text-primary/50 -mt-1" />
+                    <div className="w-1 h-6 rounded-full bg-gradient-to-b from-primary/20 to-primary/40" />
+                    <div className="w-3 h-3 border-b-2 border-r-2 border-primary/50 rotate-45 -mt-2" />
                   </motion.div>
                 </div>
               )}
@@ -563,18 +1102,30 @@ export function SequenceFlowVisualization({
         })}
       </div>
 
-      {/* End Node */}
+      {/* End Node - Premium Design */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: sequences.length * 0.1 + 0.5 }}
-        className="flex justify-center mt-6"
+        transition={{ delay: sequences.length * 0.15 + 0.6 }}
+        className="flex justify-center mt-8"
       >
         <div className="flex flex-col items-center gap-4">
-          <div className="w-0.5 h-6 bg-gradient-to-b from-primary/30 to-emerald-500/50" />
-          <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            <span className="font-semibold text-emerald-700 dark:text-emerald-400 text-sm">Sequence Complete</span>
+          {/* Connector */}
+          <div className="w-1 h-8 rounded-full bg-gradient-to-b from-primary/40 via-emerald-500/30 to-emerald-500/50" />
+
+          {/* End node */}
+          <div className="relative group">
+            <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-emerald-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+            <div className="relative flex items-center gap-4 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-emerald-500/10 border border-emerald-500/30">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg">
+                <CheckCircle2 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h4 className="font-bold text-emerald-700 dark:text-emerald-300">Sequence Complete</h4>
+                <p className="text-sm text-emerald-600/70 dark:text-emerald-400/70">{sequences.length} steps total</p>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -583,38 +1134,84 @@ export function SequenceFlowVisualization({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: sequences.length * 0.1 + 0.7 }}
-        className="flex justify-center mt-8"
+        transition={{ delay: sequences.length * 0.15 + 0.8 }}
+        className="flex justify-center mt-10"
       >
-        <Button variant="outline" onClick={onAddStep} className="gap-2 bg-transparent">
-          <Plus className="h-4 w-4" />
-          Add Step
+        <Button
+          onClick={() => onAddStep?.()}
+          variant="outline"
+          size="lg"
+          className="gap-3 h-12 px-6 rounded-2xl border-dashed border-2 hover:border-primary hover:bg-primary/5 transition-all duration-300"
+        >
+          <Plus className="h-5 w-5" />
+          Add Another Step
         </Button>
       </motion.div>
 
       {/* Preview Dialog */}
       <Dialog open={!!previewStep} onOpenChange={() => setPreviewStep(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-auto rounded-3xl">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-primary" />
-              {previewStep?.template.name}
-            </DialogTitle>
-            <DialogDescription>Step {previewStep?.stepNumber} - Preview</DialogDescription>
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                <span className="text-xl font-black text-primary-foreground">{previewStep?.stepNumber}</span>
+              </div>
+              <div>
+                <DialogTitle className="text-xl">{previewStep?.template.name}</DialogTitle>
+                <DialogDescription>Step {previewStep?.stepNumber} email preview</DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
+
           {previewStep && (
-            <div className="space-y-4">
-              <div className="rounded-lg border p-4 bg-muted/30">
-                <p className="text-sm font-medium text-muted-foreground mb-1">Subject</p>
-                <p className="font-semibold">{previewStep.template.subject}</p>
+            <div className="space-y-6 pt-4">
+              {/* Subject */}
+              <div className="rounded-2xl bg-muted/50 border p-5">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Mail className="h-4 w-4" />
+                  Subject Line
+                </div>
+                <p className="font-semibold text-lg">{previewStep.template.subject}</p>
               </div>
-              <div className="rounded-lg border p-4 bg-muted/30">
-                <p className="text-sm font-medium text-muted-foreground mb-2">Body</p>
-                <p className="text-sm whitespace-pre-wrap">{previewStep.template.body}</p>
+
+              {/* Body */}
+              <div className="rounded-2xl bg-muted/50 border p-5">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                  <Send className="h-4 w-4" />
+                  Email Body
+                </div>
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <p className="whitespace-pre-wrap leading-relaxed">{previewStep.template.body}</p>
+                </div>
               </div>
-              <div className="flex gap-2">
-                {previewStep.sendOnlyIfNotReplied && <Badge variant="secondary">Only if no reply</Badge>}
-                {previewStep.sendOnlyIfNotOpened && <Badge variant="secondary">Only if not opened</Badge>}
+
+              {/* Conditions */}
+              {(previewStep.sendOnlyIfNotReplied || previewStep.sendOnlyIfNotOpened) && (
+                <div className="flex flex-wrap gap-3">
+                  {previewStep.sendOnlyIfNotReplied && (
+                    <Badge variant="secondary" className="gap-2 py-2 px-4 rounded-xl">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Only if no reply received
+                    </Badge>
+                  )}
+                  {previewStep.sendOnlyIfNotOpened && (
+                    <Badge variant="secondary" className="gap-2 py-2 px-4 rounded-xl">
+                      <XCircle className="h-4 w-4" />
+                      Only if previous not opened
+                    </Badge>
+                  )}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4 border-t">
+                <Button onClick={() => onEditStep?.(previewStep.id)} className="gap-2 rounded-xl">
+                  <Edit className="h-4 w-4" />
+                  Edit This Step
+                </Button>
+                <Button variant="outline" onClick={() => setPreviewStep(null)} className="rounded-xl">
+                  Close
+                </Button>
               </div>
             </div>
           )}
