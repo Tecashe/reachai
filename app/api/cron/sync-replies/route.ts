@@ -732,6 +732,18 @@ async function syncAccountReplies(sendingAccount: any): Promise<{
     console.log(`[${sendingAccount.email}] Decrypting credentials...`)
     const credentials = decrypt(sendingAccount.credentials)
     console.log(`[${sendingAccount.email}] ✓ Credentials decrypted`)
+    console.log(`[${sendingAccount.email}] Has access token: ${!!credentials.accessToken}`)
+    console.log(`[${sendingAccount.email}] Has refresh token: ${!!credentials.refreshToken}`)
+
+    // Check if OAuth credentials are configured
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      const error = "Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variables"
+      console.error(`[${sendingAccount.email}] ✗ ${error}`)
+      errors.push(error)
+      return { messagesFound: 0, repliesProcessed: 0, errors }
+    }
+
+    console.log(`[${sendingAccount.email}] OAuth client ID configured: ${process.env.GOOGLE_CLIENT_ID?.substring(0, 20)}...`)
 
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
@@ -744,6 +756,29 @@ async function syncAccountReplies(sendingAccount: any): Promise<{
       refresh_token: credentials.refreshToken,
     })
 
+    // Set up token refresh handler
+    oauth2Client.on('tokens', async (tokens) => {
+      console.log(`[${sendingAccount.email}] Tokens refreshed`)
+      if (tokens.refresh_token) {
+        console.log(`[${sendingAccount.email}] Got new refresh token, updating database...`)
+        try {
+          const { encrypt } = await import("@/lib/encryption")
+          await db.sendingAccount.update({
+            where: { id: sendingAccount.id },
+            data: {
+              credentials: encrypt({
+                accessToken: tokens.access_token,
+                refreshToken: tokens.refresh_token,
+              })
+            }
+          })
+          console.log(`[${sendingAccount.email}] ✓ Updated tokens in database`)
+        } catch (updateError) {
+          console.error(`[${sendingAccount.email}] Failed to update tokens:`, updateError)
+        }
+      }
+    })
+
     const gmail = google.gmail({ version: "v1", auth: oauth2Client })
 
     // Get messages from last 7 days
@@ -753,11 +788,24 @@ async function syncAccountReplies(sendingAccount: any): Promise<{
     console.log(`[${sendingAccount.email}] Gmail query: "${query}"`)
     console.log(`[${sendingAccount.email}] Querying Gmail API...`)
     
-    const response = await gmail.users.messages.list({
-      userId: "me",
-      q: query,
-      maxResults: 500,
-    })
+    let response
+    try {
+      response = await gmail.users.messages.list({
+        userId: "me",
+        q: query,
+        maxResults: 500,
+      })
+      console.log(`[${sendingAccount.email}] ✓ Gmail API responded successfully`)
+    } catch (gmailError: any) {
+      console.error(`[${sendingAccount.email}] Gmail API error:`, {
+        message: gmailError.message,
+        code: gmailError.code,
+        status: gmailError.status,
+        errors: gmailError.errors
+      })
+      errors.push(`Gmail API: ${gmailError.message || 'unknown error'}`)
+      return { messagesFound: 0, repliesProcessed: 0, errors }
+    }
 
     const messages = response.data.messages || []
     console.log(`[${sendingAccount.email}] ✓ Found ${messages.length} messages`)
