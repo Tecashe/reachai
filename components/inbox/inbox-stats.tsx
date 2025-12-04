@@ -1,5 +1,5 @@
-import { Card } from "@/components/ui/card"
-import { Mail, MessageSquare, ThumbsUp, TrendingUp } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Mail, ThumbsUp, MessageSquare, TrendingUp } from "lucide-react"
 
 interface InboxStatsProps {
   stats: {
@@ -20,63 +20,51 @@ interface InboxStatsProps {
 }
 
 export function InboxStats({ stats }: InboxStatsProps) {
-  const statCards = [
-    {
-      label: "Total Replies",
-      value: stats.total,
-      icon: Mail,
-      color: "text-foreground",
-      bgColor: "bg-primary/5",
-      iconBg: "bg-primary/10",
-    },
-    {
-      label: "Interested",
-      value: stats.byCategory.interested,
-      icon: ThumbsUp,
-      color: "text-emerald-600 dark:text-emerald-400",
-      bgColor: "bg-emerald-500/5",
-      iconBg: "bg-emerald-500/10",
-    },
-    {
-      label: "Questions",
-      value: stats.byCategory.questions,
-      icon: MessageSquare,
-      color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-500/5",
-      iconBg: "bg-blue-500/10",
-    },
-    {
-      label: "Response Rate",
-      value: `${stats.responseRate.toFixed(1)}%`,
-      icon: TrendingUp,
-      color: "text-foreground",
-      bgColor: "bg-primary/5",
-      iconBg: "bg-primary/10",
-    },
-  ]
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {statCards.map((stat) => (
-        <Card
-          key={stat.label}
-          className={`relative overflow-hidden border-border/50 ${stat.bgColor} backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 group`}
-        >
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                <p className={`text-3xl font-bold tracking-tight ${stat.color}`}>{stat.value}</p>
-              </div>
-              <div className={`rounded-xl ${stat.iconBg} p-3 group-hover:scale-110 transition-transform duration-300`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
-              </div>
-            </div>
-          </div>
-          {/* Subtle gradient accent */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-border/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-        </Card>
-      ))}
+    <div className="hidden md:flex items-center gap-6">
+      <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-primary/10">
+          <Mail className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-lg font-semibold leading-none">{stats.total}</span>
+          <span className="text-[10px] text-muted-foreground">Total</span>
+        </div>
+      </div>
+
+      <div className="h-8 w-px bg-border/50" />
+
+      <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-emerald-500/10">
+          <ThumbsUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-lg font-semibold leading-none text-emerald-600 dark:text-emerald-400">
+            {stats.byCategory.interested}
+          </span>
+          <span className="text-[10px] text-muted-foreground">Interested</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-blue-500/10">
+          <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div className="flex flex-col">
+          <span className="text-lg font-semibold leading-none text-blue-600 dark:text-blue-400">
+            {stats.byCategory.questions}
+          </span>
+          <span className="text-[10px] text-muted-foreground">Questions</span>
+        </div>
+      </div>
+
+      <div className="h-8 w-px bg-border/50" />
+
+      <Badge variant="secondary" className="h-7 px-2.5 gap-1.5 bg-muted/50 border border-border/50">
+        <TrendingUp className="h-3 w-3" />
+        <span className="font-semibold">{stats.responseRate.toFixed(1)}%</span>
+        <span className="text-muted-foreground text-[10px]">rate</span>
+      </Badge>
     </div>
   )
 }
