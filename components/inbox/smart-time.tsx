@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { format, isToday, isYesterday, isThisWeek } from "date-fns"
 
 interface SmartTimeProps {
@@ -8,7 +9,23 @@ interface SmartTimeProps {
 }
 
 export function SmartTime({ date, className }: SmartTimeProps) {
-  const d = new Date(date)
+  const [mounted, setMounted] = React.useState(false)
+  const d = React.useMemo(() => new Date(date), [date])
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Server render: just show formatted date (stable)
+  if (!mounted) {
+    return (
+      <time dateTime={d.toISOString()} className={className}>
+        {format(d, "MMM d, yyyy")}
+      </time>
+    )
+  }
+
+  // Client render: show relative time
   const now = new Date()
   const diffMs = now.getTime() - d.getTime()
   const diffMins = Math.floor(diffMs / 60000)

@@ -50,6 +50,9 @@
 //     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
 //   }
 // }
+
+
+
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
