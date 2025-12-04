@@ -462,7 +462,10 @@ export async function GET(request: Request) {
     // Get all active Gmail sending accounts
     const sendingAccounts = await db.sendingAccount.findMany({
       where: {
-        provider: "GMAIL",
+        provider: {
+          equals: "gmail",
+          mode: "insensitive"
+        },
         isActive: true,
       },
     })
