@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Activity, Mail, MousePointer, Reply, Clock, Eye, ExternalLink, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
+import { toast } from "sonner"
 
 interface ActivityItem {
   id: string
@@ -25,67 +25,44 @@ interface ActivitySidebarProps {
   prospectId: string
   prospectName: string
   children?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function ActivitySidebar({ prospectId, prospectName, children }: ActivitySidebarProps) {
+export function ActivitySidebar({ prospectId, prospectName, children, open, onOpenChange }: ActivitySidebarProps) {
   const [activities, setActivities] = React.useState<ActivityItem[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [internalOpen, setInternalOpen] = React.useState(false)
+
+  const isControlled = open !== undefined
+  const isOpen = isControlled ? open : internalOpen
+  const setIsOpen = isControlled ? onOpenChange || (() => {}) : setInternalOpen
 
   const fetchActivities = async () => {
+    if (!prospectId) return
     setIsLoading(true)
     try {
       const response = await fetch(`/api/inbox/activity/${prospectId}`)
       if (!response.ok) throw new Error()
       const data = await response.json()
-      setActivities(data.activities || [])
+      const parsedActivities = (data.activities || []).map((a: ActivityItem) => ({
+        ...a,
+        timestamp: new Date(a.timestamp),
+      }))
+      setActivities(parsedActivities)
     } catch {
-      // Use mock data for now
-      setActivities([
-        {
-          id: "1",
-          type: "sent",
-          description: "Email sent: Initial outreach",
-          timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        },
-        {
-          id: "2",
-          type: "opened",
-          description: "Email opened",
-          timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
-          metadata: { count: 3 },
-        },
-        {
-          id: "3",
-          type: "clicked",
-          description: "Clicked link: Product demo",
-          timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-          metadata: { link: "/demo" },
-        },
-        {
-          id: "4",
-          type: "opened",
-          description: "Email opened",
-          timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-          metadata: { count: 2 },
-        },
-        {
-          id: "5",
-          type: "replied",
-          description: "Replied to email",
-          timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        },
-      ])
+      setActivities([])
+      toast.error("Failed to load activity")
     } finally {
       setIsLoading(false)
     }
   }
 
   React.useEffect(() => {
-    if (isOpen && activities.length === 0) {
+    if (isOpen && prospectId) {
       fetchActivities()
     }
-  }, [isOpen])
+  }, [isOpen, prospectId])
 
   const getActivityIcon = (type: ActivityItem["type"]) => {
     switch (type) {
@@ -119,14 +96,7 @@ export function ActivitySidebar({ prospectId, prospectName, children }: Activity
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        {children || (
-          <Button variant="ghost" size="sm" className="gap-2 rounded-xl">
-            <Activity className="h-4 w-4" />
-            Activity
-          </Button>
-        )}
-      </SheetTrigger>
+      {children && <SheetTrigger asChild>{children}</SheetTrigger>}
       <SheetContent className="w-[400px] sm:w-[540px] p-0">
         <SheetHeader className="p-6 border-b">
           <SheetTitle className="flex items-center gap-2">
@@ -160,13 +130,11 @@ export function ActivitySidebar({ prospectId, prospectName, children }: Activity
               </div>
             ) : (
               <div className="relative">
-                {/* Timeline line */}
                 <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
 
                 <div className="space-y-6">
-                  {activities.map((activity, index) => (
+                  {activities.map((activity) => (
                     <div key={activity.id} className="flex gap-4 relative">
-                      {/* Icon */}
                       <div
                         className={cn(
                           "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border",
@@ -176,7 +144,6 @@ export function ActivitySidebar({ prospectId, prospectName, children }: Activity
                         {getActivityIcon(activity.type)}
                       </div>
 
-                      {/* Content */}
                       <div className="flex-1 pt-1">
                         <p className="text-sm font-medium">{activity.description}</p>
                         <div className="flex items-center gap-2 mt-1">

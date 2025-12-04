@@ -41,61 +41,15 @@ export function TemplatesDrawer({ onSelectTemplate, children }: TemplatesDrawerP
       const data = await response.json()
       setTemplates(data.templates || [])
     } catch {
-      // Use mock data for now
-      setTemplates([
-        {
-          id: "1",
-          name: "Initial Outreach",
-          subject: "Quick question about {{company}}",
-          body: "Hi {{firstName}},\n\nI noticed {{company}} is doing great work in {{industry}}. I'd love to connect and explore how we might help with {{painPoint}}.\n\nWould you be open to a quick 15-minute call this week?\n\nBest,\n{{senderName}}",
-          category: "Outreach",
-          isFavorite: true,
-          usageCount: 45,
-        },
-        {
-          id: "2",
-          name: "Follow-up #1",
-          subject: "Re: Quick question about {{company}}",
-          body: "Hi {{firstName}},\n\nJust wanted to follow up on my previous email. I understand you're busy, but I think we could add real value to {{company}}.\n\nWould a quick call work better for you?\n\nBest,\n{{senderName}}",
-          category: "Follow-up",
-          isFavorite: false,
-          usageCount: 32,
-        },
-        {
-          id: "3",
-          name: "Meeting Confirmation",
-          subject: "Confirmed: Call on {{meetingDate}}",
-          body: "Hi {{firstName}},\n\nGreat! Looking forward to our call on {{meetingDate}} at {{meetingTime}}.\n\nHere's the meeting link: {{meetingLink}}\n\nSee you then!\n\nBest,\n{{senderName}}",
-          category: "Scheduling",
-          isFavorite: true,
-          usageCount: 28,
-        },
-        {
-          id: "4",
-          name: "Objection: Budget",
-          subject: "Re: Budget concerns",
-          body: "Hi {{firstName}},\n\nI completely understand budget constraints. Many of our clients initially felt the same way.\n\nWhat helped them was seeing the ROI we deliver. On average, our customers see {{roiPercentage}}% improvement within {{timeframe}}.\n\nWould it help to see a case study from a similar company?\n\nBest,\n{{senderName}}",
-          category: "Objections",
-          isFavorite: false,
-          usageCount: 18,
-        },
-        {
-          id: "5",
-          name: "Break-up Email",
-          subject: "Closing the loop",
-          body: "Hi {{firstName}},\n\nI've reached out a few times without hearing back, so I'll assume the timing isn't right.\n\nIf things change in the future, feel free to reach out. I'm always happy to help.\n\nWishing you and {{company}} all the best!\n\nBest,\n{{senderName}}",
-          category: "Follow-up",
-          isFavorite: false,
-          usageCount: 12,
-        },
-      ])
+      setTemplates([])
+      toast.error("Failed to load templates")
     } finally {
       setIsLoading(false)
     }
   }
 
   React.useEffect(() => {
-    if (isOpen && templates.length === 0) {
+    if (isOpen) {
       fetchTemplates()
     }
   }, [isOpen])
@@ -119,8 +73,6 @@ export function TemplatesDrawer({ onSelectTemplate, children }: TemplatesDrawerP
     setIsOpen(false)
     toast.success(`Template "${template.name}" inserted`)
   }
-
-  const categories = [...new Set(templates.map((t) => t.category))]
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

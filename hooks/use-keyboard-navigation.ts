@@ -7,7 +7,7 @@ interface UseKeyboardNavigationOptions {
   messages: InboxMessage[]
   selectedMessage: InboxMessage | null
   selectedIds: string[]
-  onSelectMessage: (message: InboxMessage | null) => void
+  onSelectMessage: (message: InboxMessage) => void
   onToggleSelection: (id: string) => void
   onSelectAll: () => void
   onDeselectAll: () => void
@@ -66,8 +66,6 @@ export function useKeyboardNavigation({
           e.preventDefault()
           if (selectedIds.length > 0) {
             onDeselectAll()
-          } else {
-            onSelectMessage(null)
           }
           break
 
@@ -143,6 +141,11 @@ export function useKeyboardNavigation({
         case "?": // Show shortcuts
           e.preventDefault()
           onAction("show-shortcuts")
+          break
+
+        case "b": // Show activity sidebar
+          e.preventDefault()
+          onAction("show-activity")
           break
       }
     }
