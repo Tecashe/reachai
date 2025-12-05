@@ -72,6 +72,7 @@
 // }
 
 // app/api/inbox/poll/route.ts
+
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
@@ -92,6 +93,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
+    console.log('[API Poll] User ID:', user.id)
+
     const { searchParams } = new URL(request.url)
     const lastChecked = searchParams.get("lastChecked")
     const isInitial = searchParams.get("initial") === "true"
@@ -99,11 +102,11 @@ export async function GET(request: Request) {
     let notifications
 
     if (isInitial || !lastChecked) {
-      // First load - get all recent notifications
+      // First load - get all recent notifications from BOTH tables
       console.log('[API Poll] Initial load - fetching all recent notifications')
       notifications = await realtimeInbox.getRecentNotifications(user.id, 50)
     } else {
-      // Polling - get only new notifications since last check
+      // Polling - get only new notifications since last check from BOTH tables
       const since = new Date(lastChecked)
       console.log('[API Poll] Polling for notifications since:', since)
       notifications = await realtimeInbox.pollNotifications(user.id, since)
