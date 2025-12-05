@@ -14,7 +14,7 @@ export default function Page() {
   return (
    <div className="min-h-screen">
       <ForceLightTheme />
-      <Navigation />
+      {/* <Navigation /> */}
       <Hero />
       <FeaturesGrid />
       <SecurityShowcase />
