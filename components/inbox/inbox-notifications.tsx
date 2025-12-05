@@ -936,6 +936,9 @@ import {
   ArrowRight,
   Sparkles,
   X,
+  ArrowLeft,
+  ExternalLink,
+  Clock,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -967,6 +970,7 @@ export function InboxNotifications() {
   const [isLoading, setIsLoading] = useState(true)
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const lastCheckedRef = useRef(new Date())
   const hasShownToastRef = useRef(new Set<string>())
   const optimisticReadRef = useRef(new Set<string>())
@@ -1044,36 +1048,54 @@ export function InboxNotifications() {
     })
   }
 
-  const handleNotificationClick = useCallback(
+  const handleNotificationClick = useCallback((notification: Notification, fromPopover = false) => {
+    const isAlreadyRead = notification.delivered || optimisticReadRef.current.has(notification.id)
+
+    if (!isAlreadyRead) {
+      optimisticReadRef.current.add(notification.id)
+      setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, delivered: true } : n)))
+      setUnreadCount((prev) => Math.max(0, prev - 1))
+      markAsDelivered([notification.id])
+    }
+
+    if (fromPopover) {
+      setPopoverOpen(false)
+      setSelectedNotification(notification)
+      setTimeout(() => setSheetOpen(true), 100)
+    } else {
+      setSelectedNotification(notification)
+    }
+  }, [])
+
+  const handleViewInContext = useCallback(
     (notification: Notification) => {
-      const isAlreadyRead = notification.delivered || optimisticReadRef.current.has(notification.id)
-
-      if (!isAlreadyRead) {
-        optimisticReadRef.current.add(notification.id)
-        setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, delivered: true } : n)))
-        setUnreadCount((prev) => Math.max(0, prev - 1))
-        markAsDelivered([notification.id])
-      }
-
       if (notification.entityType === "reply" && notification.entityId) {
         router.push(`/dashboard/inbox?replyId=${notification.entityId}`)
       } else if (notification.entityType === "prospect" && notification.entityId) {
         router.push(`/dashboard/prospects?prospectId=${notification.entityId}`)
+      } else if (notification.entityType === "campaign" && notification.entityId) {
+        router.push(`/dashboard/campaigns?campaignId=${notification.entityId}`)
       }
-
-      setPopoverOpen(false)
       setSheetOpen(false)
+      setSelectedNotification(null)
     },
     [router],
   )
 
+  const handleBackToList = useCallback(() => {
+    setSelectedNotification(null)
+  }, [])
+
   const markAsDelivered = async (notificationIds: string[]) => {
     try {
-      await fetch("/api/inbox/mark-delivered", {
+      console.log("[v0] Marking as delivered:", notificationIds)
+      const response = await fetch("/api/inbox/mark-delivered", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationIds }),
       })
+      const result = await response.json()
+      console.log("[v0] Mark delivered response:", response.status, result)
     } catch (error) {
       console.error("[InboxNotifications] Mark delivered error:", error)
     }
@@ -1094,11 +1116,13 @@ export function InboxNotifications() {
 
   const handleViewAll = useCallback(() => {
     setPopoverOpen(false)
+    setSelectedNotification(null)
     setTimeout(() => setSheetOpen(true), 100)
   }, [])
 
   const goToInbox = useCallback(() => {
     setSheetOpen(false)
+    setSelectedNotification(null)
     router.push("/dashboard/inbox")
   }, [router])
 
@@ -1167,15 +1191,29 @@ export function InboxNotifications() {
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" })
   }
 
+  const formatFullDate = (date: Date | string) => {
+    const d = new Date(date)
+    return d.toLocaleDateString(undefined, {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
   const isRead = (notification: Notification) =>
     notification.delivered || optimisticReadRef.current.has(notification.id)
 
   const NotificationItem = ({
     notification,
     compact = false,
+    fromPopover = false,
   }: {
     notification: Notification
     compact?: boolean
+    fromPopover?: boolean
   }) => {
     const priorityConfig = getPriorityConfig(notification.priority)
     const PriorityIcon = priorityConfig.icon
@@ -1185,7 +1223,7 @@ export function InboxNotifications() {
 
     return (
       <button
-        onClick={() => handleNotificationClick(notification)}
+        onClick={() => handleNotificationClick(notification, fromPopover)}
         className={cn(
           "group relative w-full text-left transition-all duration-300 focus:outline-none",
           "hover:bg-muted/50 focus-visible:bg-muted/50 active:scale-[0.995]",
@@ -1261,6 +1299,91 @@ export function InboxNotifications() {
           />
         </div>
       </button>
+    )
+  }
+
+  const NotificationDetails = ({ notification }: { notification: Notification }) => {
+    const priorityConfig = getPriorityConfig(notification.priority)
+    const PriorityIcon = priorityConfig.icon
+    const entityConfig = getEntityConfig(notification.entityType)
+    const EntityIcon = entityConfig.icon
+
+    return (
+      <div className="flex flex-col h-full">
+        <div className="px-5 py-4 border-b border-border/50 bg-gradient-to-b from-muted/20 to-transparent">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToList}
+            className="h-8 px-2 -ml-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1.5" />
+            Back to notifications
+          </Button>
+        </div>
+
+        <ScrollArea className="flex-1">
+          <div className="p-6 space-y-6">
+            <div className="flex items-start gap-4">
+              <div className={cn("rounded-2xl p-4 border", priorityConfig.bg, priorityConfig.border)}>
+                <PriorityIcon className={cn("h-6 w-6", priorityConfig.color)} />
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className={cn("flex items-center gap-1.5", entityConfig.color)}>
+                    <EntityIcon className="h-4 w-4" />
+                    <span className="text-xs font-semibold uppercase tracking-wide">{entityConfig.label}</span>
+                  </div>
+                  {notification.priority === "URGENT" && (
+                    <Badge className="h-5 px-2 text-[10px] font-bold uppercase tracking-wide bg-rose-500/15 text-rose-600 dark:text-rose-400 border-0">
+                      Urgent
+                    </Badge>
+                  )}
+                  {notification.priority === "HIGH" && (
+                    <Badge className="h-5 px-2 text-[10px] font-bold uppercase tracking-wide bg-orange-500/15 text-orange-600 dark:text-orange-400 border-0">
+                      High Priority
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="text-xs">{formatFullDate(notification.createdAt)}</span>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold tracking-tight leading-tight">{notification.title}</h2>
+              <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {notification.message}
+              </p>
+            </div>
+
+            {notification.entityId && (
+              <>
+                <Separator />
+                <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                    Related {entityConfig.label}
+                  </p>
+                  <p className="text-sm font-mono text-foreground/80 break-all">ID: {notification.entityId}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </ScrollArea>
+
+        {notification.entityId && (
+          <div className="px-5 py-4 border-t border-border/50 bg-gradient-to-t from-muted/20 to-transparent">
+            <Button onClick={() => handleViewInContext(notification)} className="w-full h-11 font-semibold shadow-sm">
+              View {entityConfig.label} Details
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        )}
+      </div>
     )
   }
 
@@ -1380,7 +1503,7 @@ export function InboxNotifications() {
             <div className="max-h-[340px] overflow-y-auto overscroll-contain">
               <div className="divide-y divide-border/40">
                 {notifications.slice(0, 5).map((notification) => (
-                  <NotificationItem key={notification.id} notification={notification} compact />
+                  <NotificationItem key={notification.id} notification={notification} compact fromPopover />
                 ))}
               </div>
             </div>
@@ -1405,62 +1528,74 @@ export function InboxNotifications() {
         </PopoverContent>
       </Popover>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <Sheet
+        open={sheetOpen}
+        onOpenChange={(open) => {
+          setSheetOpen(open)
+          if (!open) setSelectedNotification(null)
+        }}
+      >
         <SheetContent
           className={cn("w-full sm:max-w-[460px] p-0", "flex flex-col", "border-l border-border/50", "bg-background")}
         >
-          <SheetHeader className="px-6 py-5 border-b border-border/50 bg-gradient-to-b from-muted/20 to-transparent space-y-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <SheetTitle className="text-xl font-bold tracking-tight">Notifications</SheetTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {notifications.length > 0
-                    ? `${unreadCount} unread · ${notifications.length} total`
-                    : "No notifications yet"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                {unreadCount > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={markAllAsRead}
-                    className="h-8 gap-1.5 text-xs font-semibold bg-transparent"
-                  >
-                    <CheckCheck className="h-3.5 w-3.5" />
-                    Mark all read
-                  </Button>
+          {selectedNotification ? (
+            <NotificationDetails notification={selectedNotification} />
+          ) : (
+            <>
+              <SheetHeader className="px-6 py-5 border-b border-border/50 bg-gradient-to-b from-muted/20 to-transparent space-y-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <SheetTitle className="text-xl font-bold tracking-tight">Notifications</SheetTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {notifications.length > 0
+                        ? `${unreadCount} unread · ${notifications.length} total`
+                        : "No notifications yet"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={markAllAsRead}
+                        className="h-8 gap-1.5 text-xs font-semibold bg-transparent"
+                      >
+                        <CheckCheck className="h-3.5 w-3.5" />
+                        Mark all read
+                      </Button>
+                    )}
+                    <SheetClose asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </SheetClose>
+                  </div>
+                </div>
+              </SheetHeader>
+
+              <ScrollArea className="flex-1">
+                {isLoading ? (
+                  <LoadingState large />
+                ) : notifications.length === 0 ? (
+                  <EmptyState large />
+                ) : (
+                  <div className="divide-y divide-border/40">
+                    {notifications.map((notification) => (
+                      <NotificationItem key={notification.id} notification={notification} />
+                    ))}
+                  </div>
                 )}
-                <SheetClose asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                    <X className="h-4 w-4" />
+              </ScrollArea>
+
+              {notifications.length > 0 && (
+                <div className="px-5 py-4 border-t border-border/50 bg-gradient-to-t from-muted/20 to-transparent">
+                  <Button onClick={goToInbox} className="w-full h-11 font-semibold shadow-sm">
+                    Open Inbox
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
-                </SheetClose>
-              </div>
-            </div>
-          </SheetHeader>
-
-          <ScrollArea className="flex-1">
-            {isLoading ? (
-              <LoadingState large />
-            ) : notifications.length === 0 ? (
-              <EmptyState large />
-            ) : (
-              <div className="divide-y divide-border/40">
-                {notifications.map((notification) => (
-                  <NotificationItem key={notification.id} notification={notification} />
-                ))}
-              </div>
-            )}
-          </ScrollArea>
-
-          {notifications.length > 0 && (
-            <div className="px-5 py-4 border-t border-border/50 bg-gradient-to-t from-muted/20 to-transparent">
-              <Button onClick={goToInbox} className="w-full h-11 font-semibold shadow-sm">
-                Open Inbox
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
+                </div>
+              )}
+            </>
           )}
         </SheetContent>
       </Sheet>
