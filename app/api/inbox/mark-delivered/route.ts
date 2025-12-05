@@ -1,4 +1,3 @@
-// app/api/inbox/mark-delivered/route.ts
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
@@ -30,7 +29,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("[API Mark Delivered] Error:", error)
+    console.error("[v0] Mark delivered error:", error)
     return NextResponse.json({ error: "Failed to mark as delivered" }, { status: 500 })
   }
 }

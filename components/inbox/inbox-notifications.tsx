@@ -157,7 +157,6 @@
 //     </Popover>
 //   )
 // }
-
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
@@ -193,7 +192,10 @@ export function InboxNotifications() {
   const fetchNotifications = useCallback(async (isInitial = false) => {
     try {
       const lastChecked = lastCheckedRef.current.toISOString()
-      const response = await fetch(`/api/inbox/poll?lastChecked=${lastChecked}`)
+      const url = isInitial 
+        ? `/api/inbox/poll?initial=true`
+        : `/api/inbox/poll?lastChecked=${lastChecked}`
+      const response = await fetch(url)
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
