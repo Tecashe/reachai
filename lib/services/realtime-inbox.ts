@@ -684,8 +684,4 @@ class RealtimeInboxManager {
   }
 }
 
-// ============================================================================
-// Export singleton instance
-// ============================================================================
-
 export const realtimeInbox = new RealtimeInboxManager()
