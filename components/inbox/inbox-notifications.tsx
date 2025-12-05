@@ -957,6 +957,7 @@ interface Notification {
   entityId?: string
   playSound: boolean
   createdAt: Date | string
+  delivered?: boolean
 }
 
 export function InboxNotifications() {
@@ -968,7 +969,7 @@ export function InboxNotifications() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const lastCheckedRef = useRef(new Date())
   const hasShownToastRef = useRef(new Set<string>())
-  const readNotificationsRef = useRef(new Set<string>())
+  const optimisticReadRef = useRef(new Set<string>())
 
   const fetchNotifications = useCallback(async (isInitial = false) => {
     try {
@@ -985,10 +986,12 @@ export function InboxNotifications() {
       if (data?.notifications && Array.isArray(data.notifications) && data.notifications.length > 0) {
         if (isInitial) {
           setNotifications(data.notifications)
-          setUnreadCount(data.notifications.length)
+          const unread = data.notifications.filter((n: Notification) => !n.delivered).length
+          setUnreadCount(unread)
         } else {
           setNotifications((prev) => [...data.notifications, ...prev])
-          setUnreadCount((prev) => prev + data.notifications.length)
+          const newUnread = data.notifications.filter((n: Notification) => !n.delivered).length
+          setUnreadCount((prev) => prev + newUnread)
 
           data.notifications.forEach((notif: Notification) => {
             if (!hasShownToastRef.current.has(notif.id)) {
@@ -1043,8 +1046,11 @@ export function InboxNotifications() {
 
   const handleNotificationClick = useCallback(
     (notification: Notification) => {
-      if (!readNotificationsRef.current.has(notification.id)) {
-        readNotificationsRef.current.add(notification.id)
+      const isAlreadyRead = notification.delivered || optimisticReadRef.current.has(notification.id)
+
+      if (!isAlreadyRead) {
+        optimisticReadRef.current.add(notification.id)
+        setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, delivered: true } : n)))
         setUnreadCount((prev) => Math.max(0, prev - 1))
         markAsDelivered([notification.id])
       }
@@ -1074,9 +1080,10 @@ export function InboxNotifications() {
   }
 
   const markAllAsRead = useCallback(() => {
-    const unreadIds = notifications.filter((n) => !readNotificationsRef.current.has(n.id)).map((n) => n.id)
+    const unreadIds = notifications.filter((n) => !n.delivered && !optimisticReadRef.current.has(n.id)).map((n) => n.id)
 
-    unreadIds.forEach((id) => readNotificationsRef.current.add(id))
+    unreadIds.forEach((id) => optimisticReadRef.current.add(id))
+    setNotifications((prev) => prev.map((n) => (unreadIds.includes(n.id) ? { ...n, delivered: true } : n)))
     setUnreadCount(0)
 
     if (unreadIds.length > 0) {
@@ -1160,7 +1167,8 @@ export function InboxNotifications() {
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" })
   }
 
-  const isRead = (notification: Notification) => readNotificationsRef.current.has(notification.id)
+  const isRead = (notification: Notification) =>
+    notification.delivered || optimisticReadRef.current.has(notification.id)
 
   const NotificationItem = ({
     notification,
@@ -1185,11 +1193,9 @@ export function InboxNotifications() {
           !read && "bg-primary/[0.02] dark:bg-primary/[0.04]",
         )}
       >
-        {/* Unread indicator line */}
         {!read && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-8 bg-primary rounded-r-full" />}
 
         <div className="flex items-start gap-3.5">
-          {/* Icon with gradient background */}
           <div className="relative shrink-0">
             <div
               className={cn(
@@ -1203,7 +1209,6 @@ export function InboxNotifications() {
             </div>
           </div>
 
-          {/* Content */}
           <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-start justify-between gap-3">
               <p
@@ -1229,7 +1234,6 @@ export function InboxNotifications() {
               {notification.message}
             </p>
 
-            {/* Tags row */}
             <div className="flex items-center gap-2 pt-1">
               <div className={cn("flex items-center gap-1", entityConfig.color)}>
                 <EntityIcon className="h-3 w-3" />
@@ -1248,7 +1252,6 @@ export function InboxNotifications() {
             </div>
           </div>
 
-          {/* Hover arrow */}
           <ArrowRight
             className={cn(
               "h-4 w-4 shrink-0 mt-0.5",
@@ -1296,7 +1299,6 @@ export function InboxNotifications() {
 
   return (
     <>
-      {/* Bell Button with Popover */}
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -1341,7 +1343,6 @@ export function InboxNotifications() {
           align="end"
           sideOffset={12}
         >
-          {/* Header */}
           <div className="px-5 py-4 bg-gradient-to-b from-muted/30 to-transparent">
             <div className="flex items-center justify-between">
               <div>
@@ -1371,7 +1372,6 @@ export function InboxNotifications() {
 
           <Separator className="opacity-50" />
 
-          {/* Notification List */}
           {isLoading ? (
             <LoadingState />
           ) : notifications.length === 0 ? (
@@ -1386,7 +1386,6 @@ export function InboxNotifications() {
             </div>
           )}
 
-          {/* Footer */}
           {notifications.length > 0 && (
             <>
               <Separator className="opacity-50" />
@@ -1406,12 +1405,10 @@ export function InboxNotifications() {
         </PopoverContent>
       </Popover>
 
-      {/* Full Notifications Sheet */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           className={cn("w-full sm:max-w-[460px] p-0", "flex flex-col", "border-l border-border/50", "bg-background")}
         >
-          {/* Header */}
           <SheetHeader className="px-6 py-5 border-b border-border/50 bg-gradient-to-b from-muted/20 to-transparent space-y-0">
             <div className="flex items-center justify-between">
               <div>
@@ -1443,7 +1440,6 @@ export function InboxNotifications() {
             </div>
           </SheetHeader>
 
-          {/* Scrollable Content */}
           <ScrollArea className="flex-1">
             {isLoading ? (
               <LoadingState large />
@@ -1458,7 +1454,6 @@ export function InboxNotifications() {
             )}
           </ScrollArea>
 
-          {/* Footer */}
           {notifications.length > 0 && (
             <div className="px-5 py-4 border-t border-border/50 bg-gradient-to-t from-muted/20 to-transparent">
               <Button onClick={goToInbox} className="w-full h-11 font-semibold shadow-sm">
