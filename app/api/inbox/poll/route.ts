@@ -30,13 +30,13 @@
 //     return NextResponse.json({ error: "Failed to poll inbox" }, { status: 500 })
 //   }
 // }
-
+// app/api/inbox/poll/route.ts
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { realtimeInbox } from "@/lib/services/realtime-inbox"
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
     const { userId: clerkId } = await auth()
     if (!clerkId) {
@@ -51,18 +51,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const body = await request.json()
-    const { notificationIds } = body
+    const { searchParams } = new URL(request.url)
+    const lastChecked = searchParams.get("lastChecked")
+    const since = lastChecked ? new Date(lastChecked) : new Date(Date.now() - 60000)
 
-    if (!Array.isArray(notificationIds) || notificationIds.length === 0) {
-      return NextResponse.json({ error: "Invalid notification IDs" }, { status: 400 })
-    }
+    const notifications = await realtimeInbox.pollNotifications(user.id, since)
 
-    await realtimeInbox.markAsDelivered(notificationIds)
+    console.log('[API Poll] Found notifications:', notifications.length) // Debug log
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ notifications })
   } catch (error) {
-    console.error("[v0] Mark delivered error:", error)
-    return NextResponse.json({ error: "Failed to mark as delivered" }, { status: 500 })
+    console.error("[API Poll] Error:", error)
+    return NextResponse.json({ error: "Failed to poll inbox" }, { status: 500 })
   }
 }
