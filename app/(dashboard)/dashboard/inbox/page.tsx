@@ -182,7 +182,6 @@ import { unifiedInbox } from "@/lib/services/unified-inbox"
 import { InboxList } from "@/components/inbox/inbox-list"
 import { InboxStats } from "@/components/inbox/inbox-stats"
 import { InboxStatsSkeleton } from "@/components/inbox/inbox-skeleton"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Inbox, ArchiveIcon, Loader2, Keyboard } from "lucide-react"
 import Link from "next/link"
@@ -233,30 +232,30 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
           </Suspense>
 
           <div className="flex items-center gap-3">
-            <Tabs defaultValue={filter || "inbox"} className="w-auto">
-              <TabsList className="h-9 bg-muted/50 backdrop-blur-sm border border-border/40 rounded-lg p-1">
-                <TabsTrigger
-                  value="inbox"
-                  asChild
-                  className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 h-7 text-sm"
-                >
-                  <Link href="/dashboard/inbox" className="flex items-center gap-1.5">
-                    <Inbox className="h-3.5 w-3.5" />
-                    Inbox
-                  </Link>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="archived"
-                  asChild
-                  className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-md px-3 h-7 text-sm"
-                >
-                  <Link href="/dashboard/inbox?filter=archived" className="flex items-center gap-1.5">
-                    <ArchiveIcon className="h-3.5 w-3.5" />
-                    Archived
-                  </Link>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex h-9 bg-muted/50 backdrop-blur-sm border border-border/40 rounded-lg p-1 gap-1">
+              <Link
+                href="/dashboard/inbox"
+                className={`flex items-center gap-1.5 rounded-md px-3 h-7 text-sm font-medium transition-all ${
+                  filter !== "archived"
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <Inbox className="h-3.5 w-3.5" />
+                Inbox
+              </Link>
+              <Link
+                href="/dashboard/inbox?filter=archived"
+                className={`flex items-center gap-1.5 rounded-md px-3 h-7 text-sm font-medium transition-all ${
+                  filter === "archived"
+                    ? "bg-background shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
+              >
+                <ArchiveIcon className="h-3.5 w-3.5" />
+                Archived
+              </Link>
+            </div>
 
             <Button variant="ghost" size="sm" className="h-9 text-xs text-muted-foreground gap-1.5 hidden lg:flex">
               <Keyboard className="h-3.5 w-3.5" />
