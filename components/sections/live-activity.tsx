@@ -137,8 +137,7 @@ export function LiveActivity() {
                 return (
                   <div
                     key={index}
-                    className="bg-background/5 backdrop-blur-sm border border-background/10 rounded-xl p-4 
-                              transition-all duration-500"
+                    className="bg-background/5 backdrop-blur-sm border border-background/10 rounded-xl p-4 transition-all duration-500"
                     style={{
                       opacity: isItemVisible ? 1 : 0,
                       transform: isItemVisible ? "translateX(0)" : "translateX(20px)",
