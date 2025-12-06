@@ -2948,7 +2948,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
          <Link href="/dashboard" className="flex items-center gap-2 group">
            <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
              <Image
-               src="/mailfra-logo.png"
+               src="/mailfra-apple-icon.png"
                alt="mailfra Logo"
                width={40}
                height={40}
