@@ -5,18 +5,37 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ScrollToTop } from "@/components/scroll-to-top"
+import { ExpandingButton } from "@/components/expanding-button"
 import { Toaster } from "sonner"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
-
 export const metadata: Metadata = {
-  title: "mailfra - AI-Powered Cold Email Personalization",
+  title: "Mailfra - Modern Cold Email Platform",
   description:
-    "Write cold emails that actually get replies. Mailfra uses AI to research prospects and craft hyper-personalized outreach at scale.",
-  generator: "builtbycashe",
+    "The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.",
+  generator: "v0.app",
+  icons: {
+    icon: [
+      {
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icon-dark-32x32.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: "/icon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    apple: "/apple-icon.png",
+  },
 }
+
 
 export default function RootLayout({
   children,
@@ -28,8 +47,10 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`font-sans antialiased`}>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+             <ScrollToTop />
             {children}
             <Toaster position="top-right" richColors />
+            <ExpandingButton />
           </ThemeProvider>
           <Analytics />
         </body>
@@ -37,3 +58,10 @@ export default function RootLayout({
     </ClerkProvider>
   )
 }
+
+
+
+
+
+
+

@@ -1,29 +1,53 @@
-import { Navigation } from "@/components/landing/navigation"
-import { Hero } from "@/components/landing/hero"
-import { FeaturesGrid } from "@/components/landing/features-grid"
-import { SecurityShowcase } from "@/components/landing/security-showcase"
-import { GradientBentoSection } from "@/components/landing/gradient-bento-section"
-import { IntegrationsSection } from "@/components/landing/integrations-section"
-import { StatsSection } from "@/components/landing/stats-section"
-import { TestimonialSection } from "@/components/landing/testimonial-section"
-import { CTASection } from "@/components/landing/cta-section"
-import { Footer } from "@/components/landing/footer"
-import { ForceLightTheme } from "@/components/theme/landing-page-light-theme"
+import { Hero } from "@/components/hero"
+import { LogoBar } from "@/components/sections/logo-bar"
+import { Problem } from "@/components/sections/problem"
+import { Features } from "@/components/sections/features"
+import { Stats } from "@/components/sections/stats"
+import { DashboardPreview } from "@/components/sections/dashboard-preview"
+import { HowItWorks } from "@/components/sections/how-it-works"
+import { UseCases } from "@/components/sections/use-cases"
+import { Integrations } from "@/components/sections/integrations"
+import { Comparison } from "@/components/sections/comparison"
+import { CaseStudies } from "@/components/sections/case-studies"
+import { Security } from "@/components/sections/security"
+import { Pricing } from "@/components/sections/pricing"
+import { Testimonials } from "@/components/sections/testimonials"
+import { Guarantee } from "@/components/sections/guarantee"
+import { FAQ } from "@/components/sections/faq"
+import { CTA } from "@/components/sections/cta"
+import { Footer } from "@/components/sections/footer"
+import { EmailWarmup } from "@/components/sections/email-warmup"
+import { GetStarted } from "@/components/sections/get-started"
+import { ROICalculator } from "@/components/sections/roi-calculator"
+import { LiveActivity } from "@/components/sections/live-activity"
+import { LiquidMorph } from "@/components/sections/transforms/liquid-morph"
 
-export default function Page() {
+export default function Home() {
   return (
-   <div className="min-h-screen">
-      <ForceLightTheme />
-      {/* <Navigation /> */}
+    <main>
       <Hero />
-      <FeaturesGrid />
-      <SecurityShowcase />
-      <GradientBentoSection />
-      <IntegrationsSection />
-      <StatsSection />
-      <TestimonialSection />
-      <CTASection />
+      <LogoBar />
+      <Problem />
+      <Features />
+      <Stats />
+      <EmailWarmup />
+      <DashboardPreview />
+      <HowItWorks />
+      <GetStarted />
+      <UseCases />
+      <Integrations />
+      <Comparison />
+      <CaseStudies />
+      <ROICalculator />
+      <Security />
+      <LiquidMorph />
+      <Pricing />
+      <LiveActivity />
+      <Testimonials />
+      <Guarantee />
+      <FAQ />
+      <CTA />
       <Footer />
-    </div>
+    </main>
   )
 }

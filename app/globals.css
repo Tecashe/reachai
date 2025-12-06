@@ -3,7 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* <CHANGE> Updated to monochrome black/white color palette matching the hero section */
+/* Updated to monochrome black/white color palette matching the hero section */
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.09 0 0);
@@ -184,6 +184,24 @@
   scrollbar-color: oklch(0.7 0 0 / 0.15) transparent;
 }
 
+/* Added marquee animations for logo bar */
+@keyframes marquee-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% / 3));
+  }
+}
+
+@keyframes marquee-right {
+  0% {
+    transform: translateX(calc(-100% / 3));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
 
 
 
