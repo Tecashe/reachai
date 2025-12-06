@@ -1,15 +1,18 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Calendar, Flame, TrendingUp } from "lucide-react"
 
 interface ActivityHeatmapProps {
   data: Array<{ date: string; sent: number }>
 }
 
 export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
-  const { cells, maxValue, weeks } = useMemo(() => {
+  const [hoveredWeek, setHoveredWeek] = useState<number | null>(null)
+
+  const { cells, maxValue, weeks, totalEmails, streakDays, avgPerDay } = useMemo(() => {
     const now = new Date()
     const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
 
@@ -19,9 +22,12 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       dataMap.set(d.date, d.sent)
     })
 
-    // Generate all dates for 90 days
+    // Generate all dates
     const cells: Array<{ date: string; value: number; dayOfWeek: number; weekIndex: number }> = []
     let maxVal = 0
+    let total = 0
+    let streak = 0
+    let currentStreak = 0
     const currentDate = new Date(ninetyDaysAgo)
 
     // Start from the beginning of the week
@@ -33,6 +39,15 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       const dateStr = currentDate.toISOString().split("T")[0]
       const value = dataMap.get(dateStr) || 0
       if (value > maxVal) maxVal = value
+      total += value
+
+      // Calculate streak
+      if (value > 0) {
+        currentStreak++
+        if (currentStreak > streak) streak = currentStreak
+      } else {
+        currentStreak = 0
+      }
 
       cells.push({
         date: dateStr,
@@ -45,19 +60,26 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       currentDate.setDate(currentDate.getDate() + 1)
     }
 
-    return { cells, maxValue: maxVal, weeks: weekIndex + 1 }
+    return {
+      cells,
+      maxValue: maxVal,
+      weeks: weekIndex + 1,
+      totalEmails: total,
+      streakDays: streak,
+      avgPerDay: Math.round(total / 90),
+    }
   }, [data])
 
-  const getIntensity = (value: number): string => {
-    if (value === 0) return "bg-foreground/[0.03]"
+  const getIntensity = (value: number): { bg: string; border: string; glow: boolean } => {
+    if (value === 0) return { bg: "bg-foreground/[0.03]", border: "border-foreground/[0.05]", glow: false }
     const ratio = value / Math.max(maxValue, 1)
-    if (ratio < 0.25) return "bg-chart-2/20"
-    if (ratio < 0.5) return "bg-chart-2/40"
-    if (ratio < 0.75) return "bg-chart-2/60"
-    return "bg-chart-2/80"
+    if (ratio < 0.25) return { bg: "bg-chart-2/25", border: "border-chart-2/20", glow: false }
+    if (ratio < 0.5) return { bg: "bg-chart-2/45", border: "border-chart-2/30", glow: false }
+    if (ratio < 0.75) return { bg: "bg-chart-2/65", border: "border-chart-2/40", glow: true }
+    return { bg: "bg-chart-2/90", border: "border-chart-2/50", glow: true }
   }
 
-  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const days = ["", "Mon", "", "Wed", "", "Fri", ""]
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
   // Get month labels
@@ -78,98 +100,127 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
   }, [cells])
 
   return (
-    <div className="relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg shadow-foreground/[0.03] overflow-hidden">
-      {/* Liquid glass overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-foreground/[0.01] pointer-events-none" />
+    <div className="relative rounded-2xl border border-border/50 bg-card/40 backdrop-blur-xl shadow-xl shadow-foreground/[0.02] overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.03] via-transparent to-foreground/[0.02] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-chart-2/[0.08] to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-foreground/[0.03] to-transparent rounded-full blur-2xl pointer-events-none" />
 
       <div className="relative p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Activity Heatmap</h3>
-            <p className="text-sm text-muted-foreground mt-1">Last 90 days of email activity</p>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Less</span>
-            <div className="flex gap-1">
-              {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => (
-                <div
-                  key={i}
-                  className={`w-3 h-3 rounded-sm ${
-                    intensity === 0
-                      ? "bg-foreground/[0.03]"
-                      : intensity < 0.5
-                        ? "bg-chart-2/30"
-                        : intensity < 0.75
-                          ? "bg-chart-2/50"
-                          : "bg-chart-2/80"
-                  } border border-foreground/5`}
-                />
-              ))}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-foreground/[0.08] to-foreground/[0.04] shadow-inner">
+              <Calendar className="h-5 w-5 text-foreground/80" />
             </div>
-            <span>More</span>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Activity Heatmap</h3>
+              <p className="text-xs text-muted-foreground">90 days of email sending activity</p>
+            </div>
+          </div>
+
+          {/* Stats pills */}
+          <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-foreground/[0.06] to-foreground/[0.03] border border-foreground/[0.08]">
+              <TrendingUp className="h-3.5 w-3.5 text-chart-2" />
+              <span className="text-xs font-medium text-foreground">{totalEmails.toLocaleString()}</span>
+              <span className="text-xs text-muted-foreground">total</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-foreground/[0.06] to-foreground/[0.03] border border-foreground/[0.08]">
+              <Flame className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs font-medium text-foreground">{streakDays}</span>
+              <span className="text-xs text-muted-foreground">day streak</span>
+            </div>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-[700px]">
+        <div className="overflow-x-auto pb-2">
+          <div className="min-w-[650px]">
             {/* Month labels */}
-            <div className="flex mb-2 ml-8">
+            <div className="flex mb-3 ml-10">
               {monthLabels.map((label, i) => (
-                <div
+                <motion.div
                   key={i}
-                  className="text-xs text-muted-foreground"
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="text-xs font-medium text-muted-foreground"
                   style={{
                     marginLeft:
-                      i === 0 ? label.weekIndex * 14 : (label.weekIndex - monthLabels[i - 1].weekIndex) * 14 - 20,
+                      i === 0 ? label.weekIndex * 13 : (label.weekIndex - monthLabels[i - 1].weekIndex) * 13 - 24,
                   }}
                 >
                   {label.month}
-                </div>
+                </motion.div>
               ))}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               {/* Day labels */}
-              <div className="flex flex-col gap-[2px] text-xs text-muted-foreground">
+              <div className="flex flex-col gap-[3px] text-[10px] text-muted-foreground font-medium pt-0.5">
                 {days.map((day, i) => (
-                  <div
-                    key={day}
-                    className="h-3 flex items-center"
-                    style={{ visibility: i % 2 === 1 ? "visible" : "hidden" }}
-                  >
+                  <div key={i} className="h-[11px] flex items-center justify-end pr-1">
                     {day}
                   </div>
                 ))}
               </div>
 
               {/* Heatmap grid */}
-              <TooltipProvider delayDuration={100}>
-                <div className="flex gap-[2px]">
+              <TooltipProvider delayDuration={50}>
+                <div className="flex gap-[3px]">
                   {Array.from({ length: weeks }).map((_, weekIdx) => (
-                    <div key={weekIdx} className="flex flex-col gap-[2px]">
+                    <div
+                      key={weekIdx}
+                      className="flex flex-col gap-[3px]"
+                      onMouseEnter={() => setHoveredWeek(weekIdx)}
+                      onMouseLeave={() => setHoveredWeek(null)}
+                    >
                       {Array.from({ length: 7 }).map((_, dayIdx) => {
                         const cell = cells.find((c) => c.weekIndex === weekIdx && c.dayOfWeek === dayIdx)
-                        if (!cell) return <div key={dayIdx} className="w-3 h-3" />
+                        if (!cell) return <div key={dayIdx} className="w-[11px] h-[11px]" />
 
                         const date = new Date(cell.date)
                         const isToday = cell.date === new Date().toISOString().split("T")[0]
+                        const intensity = getIntensity(cell.value)
+                        const isHoveredWeek = hoveredWeek === weekIdx
 
                         return (
                           <Tooltip key={dayIdx}>
                             <TooltipTrigger asChild>
                               <motion.div
                                 initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ delay: (weekIdx * 7 + dayIdx) * 0.002, duration: 0.2 }}
-                                className={`w-3 h-3 rounded-sm ${getIntensity(cell.value)} border ${
-                                  isToday ? "border-foreground/30 ring-1 ring-foreground/20" : "border-foreground/5"
-                                } cursor-pointer hover:border-foreground/30 transition-colors`}
-                              />
+                                animate={{
+                                  scale: 1,
+                                  opacity: 1,
+                                }}
+                                whileHover={{ scale: 1.3, zIndex: 10 }}
+                                transition={{
+                                  delay: (weekIdx * 7 + dayIdx) * 0.003,
+                                  duration: 0.2,
+                                  scale: { duration: 0.15 },
+                                }}
+                                className={`
+                                  relative w-[11px] h-[11px] rounded-[3px] cursor-pointer
+                                  ${intensity.bg} border ${intensity.border}
+                                  ${isToday ? "ring-2 ring-foreground/30 ring-offset-1 ring-offset-card" : ""}
+                                  ${isHoveredWeek ? "opacity-100" : hoveredWeek !== null ? "opacity-40" : "opacity-100"}
+                                  transition-all duration-200
+                                `}
+                              >
+                                {/* Glow effect for high-activity cells */}
+                                {intensity.glow && (
+                                  <div className="absolute inset-0 rounded-[3px] bg-chart-2/30 blur-[2px] -z-10" />
+                                )}
+                              </motion.div>
                             </TooltipTrigger>
-                            <TooltipContent className="bg-card/95 backdrop-blur-xl border-border/50">
-                              <p className="font-medium">{cell.value} emails</p>
-                              <p className="text-xs text-muted-foreground">
-                                {date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                            <TooltipContent
+                              side="top"
+                              className="bg-card/95 backdrop-blur-xl border-border/50 shadow-xl px-3 py-2"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2.5 h-2.5 rounded-sm ${intensity.bg}`} />
+                                <span className="font-semibold text-foreground">{cell.value} emails</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -179,6 +230,25 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
                   ))}
                 </div>
               </TooltipProvider>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-border/20">
+              <span className="text-xs text-muted-foreground">Less</span>
+              <div className="flex gap-1">
+                {[0, 0.25, 0.5, 0.75, 1].map((intensity, i) => {
+                  const style = getIntensity(intensity * maxValue)
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5 + i * 0.05 }}
+                      className={`w-[11px] h-[11px] rounded-[3px] ${style.bg} border ${style.border}`}
+                    />
+                  )
+                })}
+              </div>
+              <span className="text-xs text-muted-foreground">More</span>
             </div>
           </div>
         </div>
