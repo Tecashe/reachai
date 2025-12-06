@@ -14,21 +14,21 @@ const contactMethods = [
     icon: MessageSquare,
     title: "Sales",
     description: "Talk to our sales team about enterprise plans",
-    email: "sales@mailfra.io",
+    email: "sales@mailfra.com",
     response: "< 2 hours",
   },
   {
     icon: Headphones,
     title: "Support",
     description: "Get help with technical issues",
-    email: "support@mailfra.io",
+    email: "support@mailfra.com",
     response: "< 4 hours",
   },
   {
     icon: Building,
     title: "Partnerships",
     description: "Explore partnership opportunities",
-    email: "partners@mailfra.io",
+    email: "partners@mailfra.com",
     response: "< 24 hours",
   },
 ]
@@ -66,7 +66,7 @@ const faq = [
   {
     question: "Do you offer demos?",
     answer:
-      "Yes! We'd love to show you around. Book a demo through our contact form or email sales@mailfra.io directly.",
+      "Yes! We'd love to show you around. Book a demo through our contact form or email sales@mailfra.com directly.",
   },
   {
     question: "What's included in a demo?",
@@ -349,11 +349,11 @@ export default function ContactPage() {
                 <h3 className="text-xl font-semibold mb-6">Prefer to reach out directly?</h3>
                 <div className="space-y-4">
                   <a
-                    href="mailto:hello@mailfra.io"
+                    href="mailto:hello@mailfra.com"
                     className="flex items-center gap-4 text-white/70 hover:text-white transition-colors"
                   >
                     <Mail className="w-5 h-5" />
-                    hello@mailfra.io
+                    hello@mailfra.com
                   </a>
                   <a
                     href="tel:+14155551234"

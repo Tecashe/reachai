@@ -42,19 +42,19 @@
 //       {
 //         type: "TXT",
 //         name: domain,
-//         value: "v=spf1 include:mailfra.io ~all",
+//         value: "v=spf1 include:mailfra.com ~all",
 //         status: "pending",
 //       },
 //       {
 //         type: "TXT",
 //         name: `_dmarc.${domain}`,
-//         value: "v=DMARC1; p=quarantine; rua=mailto:dmarc@mailfra.io",
+//         value: "v=DMARC1; p=quarantine; rua=mailto:dmarc@mailfra.com",
 //         status: "pending",
 //       },
 //       {
 //         type: "CNAME",
 //         name: `mailfra._domainkey.${domain}`,
-//         value: "dkim.mailfra.io",
+//         value: "dkim.mailfra.com",
 //         status: "pending",
 //       },
 //     ]

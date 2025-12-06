@@ -221,7 +221,7 @@ export default function PrivacyPage() {
                   </li>
                 </ul>
                 <p className="text-white/70 leading-relaxed mt-4">
-                  To exercise these rights, please contact us at privacy@mailfra.io.
+                  To exercise these rights, please contact us at privacy@mailfra.com.
                 </p>
               </section>
 
@@ -262,7 +262,7 @@ export default function PrivacyPage() {
                   If you have any questions about this Privacy Policy, please contact us:
                 </p>
                 <ul className="list-none text-white/70 space-y-2">
-                  <li>Email: privacy@mailfra.io</li>
+                  <li>Email: privacy@mailfra.com</li>
                   <li>Address: 548 Market Street, Suite 42, San Francisco, CA 94104</li>
                 </ul>
               </section>

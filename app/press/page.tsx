@@ -413,8 +413,8 @@ export default function PressPage() {
             }`}
           >
             For interviews, quotes, or additional information, contact our press team at{" "}
-            <a href="mailto:press@mailfra.io" className="text-white underline hover:no-underline">
-              press@mailfra.io
+            <a href="mailto:press@mailfra.com" className="text-white underline hover:no-underline">
+              press@mailfra.com
             </a>
           </p>
           <Button size="lg" className="bg-white text-black hover:bg-white/90">

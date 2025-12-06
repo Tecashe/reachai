@@ -238,7 +238,7 @@ export default function TermsPage() {
                   If you have any questions about these Terms, please contact us:
                 </p>
                 <ul className="list-none text-white/70 space-y-2">
-                  <li>Email: legal@mailfra.io</li>
+                  <li>Email: legal@mailfra.com</li>
                   <li>Address: 548 Market Street, Suite 42, San Francisco, CA 94104</li>
                 </ul>
               </section>

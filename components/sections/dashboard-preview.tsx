@@ -156,7 +156,7 @@ export function DashboardPreview() {
                   </div>
                   <div className="flex-1 mx-4">
                     <div className="bg-neutral-800 rounded-md px-3 py-1.5 text-neutral-500 text-xs">
-                      app.mailfra.io/dashboard
+                      app.mailfra.com/dashboard
                     </div>
                   </div>
                 </div>

@@ -104,7 +104,7 @@ const faqs = [
   {
     question: "Do you have a bug bounty program?",
     answer:
-      "Yes, we maintain a responsible disclosure program. Security researchers can report vulnerabilities to security@mailfra.io for review and potential reward.",
+      "Yes, we maintain a responsible disclosure program. Security researchers can report vulnerabilities to security@mailfra.com for review and potential reward.",
   },
 ]
 
