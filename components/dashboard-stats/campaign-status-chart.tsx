@@ -4,18 +4,20 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Target } from "lucide-react"
 import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
+import { useMemo } from "react"
 
 interface CampaignStatusChartProps {
   data: Array<{ name: string; value: number }>
   total: number
 }
 
-const STATUS_COLORS: Record<string, string> = {
+const STATUS_COLORS_LIGHT: Record<string, string> = {
   DRAFT: "#71717a",
   ACTIVE: "#18181b",
   PAUSED: "#a1a1aa",
   COMPLETED: "#22c55e",
-  ARCHIVED: "#e4e4e7",
+  ARCHIVED: "#d4d4d8",
 }
 
 const STATUS_COLORS_DARK: Record<string, string> = {
@@ -23,15 +25,14 @@ const STATUS_COLORS_DARK: Record<string, string> = {
   ACTIVE: "#fafafa",
   PAUSED: "#71717a",
   COMPLETED: "#4ade80",
-  ARCHIVED: "#3f3f46",
+  ARCHIVED: "#52525b",
 }
 
 export function CampaignStatusChart({ data, total }: CampaignStatusChartProps) {
-  const filteredData = data.filter((item) => item.value > 0)
+  const { resolvedTheme } = useTheme()
 
-  // Check if we're in dark mode
-  const isDark = typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-  const colors = isDark ? STATUS_COLORS_DARK : STATUS_COLORS
+  const filteredData = useMemo(() => data.filter((item) => item.value > 0), [data])
+  const colors = useMemo(() => (resolvedTheme === "dark" ? STATUS_COLORS_DARK : STATUS_COLORS_LIGHT), [resolvedTheme])
 
   if (filteredData.length === 0) {
     return (
@@ -112,7 +113,6 @@ export function CampaignStatusChart({ data, total }: CampaignStatusChartProps) {
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center label with animation */}
             <motion.div
               className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
               initial={{ opacity: 0, scale: 0.5 }}
@@ -123,7 +123,6 @@ export function CampaignStatusChart({ data, total }: CampaignStatusChartProps) {
               <span className="text-xs text-muted-foreground font-medium">Total</span>
             </motion.div>
           </div>
-          {/* Legend with better styling */}
           <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-border/30">
             {filteredData.map((item) => (
               <div

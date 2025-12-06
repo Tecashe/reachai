@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { TrendingUp, TrendingDown, Mail, Users, MousePointerClick } from "lucide-react"
 import { motion } from "framer-motion"
+import { AnimatedCounter } from "./animated-counter"
+import { Sparkline } from "./sparkline"
 
 const iconMap = {
   Mail,
@@ -22,6 +24,7 @@ export interface StatData {
   trend?: string
   trendUp?: boolean
   highlight?: boolean
+  sparklineData?: number[]
 }
 
 interface StatCardProps {
@@ -31,6 +34,9 @@ interface StatCardProps {
 
 export function StatCard({ stat, index }: StatCardProps) {
   const Icon = iconMap[stat.iconName]
+  const numericValue = Number.parseFloat(stat.value.replace(/[^0-9.-]/g, ""))
+  const isPercentage = stat.value.includes("%")
+  const hasValidNumber = !isNaN(numericValue)
 
   return (
     <motion.div
@@ -61,17 +67,37 @@ export function StatCard({ stat, index }: StatCardProps) {
           </div>
         </CardHeader>
         <CardContent className="relative">
-          <div className="flex items-end gap-2">
-            <div className="text-3xl font-bold tracking-tight text-foreground">{stat.value}</div>
-            {stat.trend && (
-              <div
-                className={cn(
-                  "flex items-center gap-0.5 text-xs font-medium mb-1 px-1.5 py-0.5 rounded-md",
-                  stat.trendUp ? "text-chart-2 bg-chart-2/10" : "text-muted-foreground bg-muted",
+          <div className="flex items-end justify-between gap-2">
+            <div className="flex items-end gap-2">
+              <div className="text-3xl font-bold tracking-tight text-foreground">
+                {hasValidNumber ? (
+                  <>
+                    <AnimatedCounter
+                      value={numericValue}
+                      duration={1200}
+                      formatValue={(v) => (isPercentage ? v.toFixed(1) : v.toLocaleString())}
+                    />
+                    {isPercentage && "%"}
+                  </>
+                ) : (
+                  stat.value
                 )}
-              >
-                {stat.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                {stat.trend}
+              </div>
+              {stat.trend && (
+                <div
+                  className={cn(
+                    "flex items-center gap-0.5 text-xs font-medium mb-1 px-1.5 py-0.5 rounded-md",
+                    stat.trendUp ? "text-chart-2 bg-chart-2/10" : "text-muted-foreground bg-muted",
+                  )}
+                >
+                  {stat.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                  {stat.trend}
+                </div>
+              )}
+            </div>
+            {stat.sparklineData && stat.sparklineData.length > 0 && (
+              <div className="opacity-60 group-hover:opacity-100 transition-opacity">
+                <Sparkline data={stat.sparklineData} width={60} height={20} />
               </div>
             )}
           </div>

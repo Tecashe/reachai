@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { CreditCardIcon, ArrowRight, Mail, Search } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { AnimatedCounter } from "./animated-counter"
 
 const iconMap = {
   Mail,
@@ -53,7 +54,9 @@ export function CreditCard({ title, value, iconName, href, description }: Credit
             </div>
             <div>
               <p className="text-sm text-muted-foreground">{title}</p>
-              <p className="text-2xl font-bold text-foreground tracking-tight">{value.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-foreground tracking-tight">
+                <AnimatedCounter value={value} duration={1000} />
+              </p>
               <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
             </div>
           </div>

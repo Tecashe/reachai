@@ -4,13 +4,15 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail } from "lucide-react"
 import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
+import { useMemo } from "react"
 
 interface EmailEngagementChartProps {
   data: Array<{ name: string; value: number }>
   totalSent: number
 }
 
-const ENGAGEMENT_COLORS: Record<string, string> = {
+const ENGAGEMENT_COLORS_LIGHT: Record<string, string> = {
   Opened: "#18181b",
   Clicked: "#22c55e",
   Replied: "#3b82f6",
@@ -25,9 +27,13 @@ const ENGAGEMENT_COLORS_DARK: Record<string, string> = {
 }
 
 export function EmailEngagementChart({ data, totalSent }: EmailEngagementChartProps) {
-  const filteredData = data.filter((item) => item.value > 0)
-  const isDark = typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-  const colors = isDark ? ENGAGEMENT_COLORS_DARK : ENGAGEMENT_COLORS
+  const { resolvedTheme } = useTheme()
+
+  const filteredData = useMemo(() => data.filter((item) => item.value > 0), [data])
+  const colors = useMemo(
+    () => (resolvedTheme === "dark" ? ENGAGEMENT_COLORS_DARK : ENGAGEMENT_COLORS_LIGHT),
+    [resolvedTheme],
+  )
 
   if (filteredData.length === 0 || totalSent === 0) {
     return (

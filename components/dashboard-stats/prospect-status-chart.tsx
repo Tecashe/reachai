@@ -4,34 +4,37 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users } from "lucide-react"
 import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
+import { useMemo } from "react"
 
 interface ProspectStatusChartProps {
   data: Array<{ name: string; value: number }>
   total: number
 }
 
-const STATUS_COLORS: Record<string, string> = {
+const STATUS_COLORS_LIGHT: Record<string, string> = {
   ACTIVE: "#18181b",
-  CONTACTED: "#f97316",
+  CONTACTED: "#71717a",
   REPLIED: "#22c55e",
   BOUNCED: "#ef4444",
-  UNSUBSCRIBED: "#71717a",
+  UNSUBSCRIBED: "#a1a1aa",
   COMPLETED: "#3b82f6",
 }
 
 const STATUS_COLORS_DARK: Record<string, string> = {
   ACTIVE: "#fafafa",
-  CONTACTED: "#fb923c",
+  CONTACTED: "#a1a1aa",
   REPLIED: "#4ade80",
   BOUNCED: "#f87171",
-  UNSUBSCRIBED: "#a1a1aa",
+  UNSUBSCRIBED: "#71717a",
   COMPLETED: "#60a5fa",
 }
 
 export function ProspectStatusChart({ data, total }: ProspectStatusChartProps) {
-  const filteredData = data.filter((item) => item.value > 0)
-  const isDark = typeof window !== "undefined" && document.documentElement.classList.contains("dark")
-  const colors = isDark ? STATUS_COLORS_DARK : STATUS_COLORS
+  const { resolvedTheme } = useTheme()
+
+  const filteredData = useMemo(() => data.filter((item) => item.value > 0), [data])
+  const colors = useMemo(() => (resolvedTheme === "dark" ? STATUS_COLORS_DARK : STATUS_COLORS_LIGHT), [resolvedTheme])
 
   if (filteredData.length === 0) {
     return (

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CheckCircle2, TrendingUp, AlertTriangle, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { AnimatedCounter } from "./animated-counter"
 
 interface QuickOverviewCardProps {
   rates: {
@@ -22,14 +23,16 @@ export function QuickOverviewCard({ rates, overview }: QuickOverviewCardProps) {
   const metrics = [
     {
       label: "Reply Rate",
-      value: `${rates.replyRate}%`,
+      value: Number.parseFloat(rates.replyRate),
+      suffix: "%",
       sublabel: Number.parseFloat(rates.replyRate) > 5 ? "Above average" : "Room to grow",
       status: Number.parseFloat(rates.replyRate) > 5 ? "good" : "neutral",
       icon: Number.parseFloat(rates.replyRate) > 5 ? TrendingUp : Zap,
     },
     {
       label: "Bounce Rate",
-      value: `${rates.bounceRate}%`,
+      value: Number.parseFloat(rates.bounceRate),
+      suffix: "%",
       sublabel: Number.parseFloat(rates.bounceRate) < 2 ? "Excellent" : "Monitor this",
       status:
         Number.parseFloat(rates.bounceRate) < 2
@@ -41,14 +44,16 @@ export function QuickOverviewCard({ rates, overview }: QuickOverviewCardProps) {
     },
     {
       label: "Click Rate",
-      value: `${rates.clickRate}%`,
+      value: Number.parseFloat(rates.clickRate),
+      suffix: "%",
       sublabel: Number.parseFloat(rates.clickRate) > 3 ? "Good engagement" : "Add more CTAs",
       status: Number.parseFloat(rates.clickRate) > 3 ? "good" : "neutral",
       icon: Number.parseFloat(rates.clickRate) > 3 ? TrendingUp : Zap,
     },
     {
       label: "Active Campaigns",
-      value: overview.activeCampaigns.toString(),
+      value: overview.activeCampaigns,
+      suffix: "",
       sublabel: `of ${overview.totalCampaigns} total`,
       status: overview.activeCampaigns > 0 ? "good" : "neutral",
       icon: Zap,
@@ -81,7 +86,7 @@ export function QuickOverviewCard({ rates, overview }: QuickOverviewCardProps) {
                 className={cn(
                   "relative p-4 rounded-xl border border-border/50 bg-foreground/[0.02]",
                   "hover:bg-foreground/[0.04] hover:border-foreground/10 transition-all duration-300",
-                  "group cursor-default",
+                  "group cursor-default hover:-translate-y-0.5",
                 )}
               >
                 {/* Status indicator */}
@@ -104,7 +109,14 @@ export function QuickOverviewCard({ rates, overview }: QuickOverviewCardProps) {
                     )}
                   />
                 </div>
-                <p className="text-2xl font-bold text-foreground tracking-tight">{item.value}</p>
+                <p className="text-2xl font-bold text-foreground tracking-tight">
+                  <AnimatedCounter
+                    value={item.value}
+                    duration={1000}
+                    formatValue={(v) => (item.suffix === "%" ? v.toFixed(1) : v.toString())}
+                  />
+                  {item.suffix}
+                </p>
                 <p className="text-sm font-medium text-foreground/80 mt-1">{item.label}</p>
                 <p className="text-xs text-muted-foreground">{item.sublabel}</p>
               </motion.div>

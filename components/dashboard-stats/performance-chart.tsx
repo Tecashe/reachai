@@ -2,6 +2,8 @@
 
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
+import { useMemo } from "react"
 
 interface PerformanceChartProps {
   data: Array<{
@@ -14,10 +16,26 @@ interface PerformanceChartProps {
 }
 
 export function PerformanceChart({ data }: PerformanceChartProps) {
-  const formattedData = data.map((item) => ({
-    ...item,
-    displayDate: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-  }))
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === "dark"
+
+  const formattedData = useMemo(
+    () =>
+      data.map((item) => ({
+        ...item,
+        displayDate: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      })),
+    [data],
+  )
+
+  const colors = useMemo(
+    () => ({
+      sent: isDark ? "#fafafa" : "#18181b",
+      opened: isDark ? "#a1a1aa" : "#71717a",
+      replied: "#22c55e",
+    }),
+    [isDark],
+  )
 
   if (!data || data.length === 0) {
     return (
@@ -51,19 +69,19 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
         <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="sentGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#18181b" stopOpacity={0.4} />
-              <stop offset="50%" stopColor="#18181b" stopOpacity={0.1} />
-              <stop offset="100%" stopColor="#18181b" stopOpacity={0} />
+              <stop offset="0%" stopColor={colors.sent} stopOpacity={0.3} />
+              <stop offset="50%" stopColor={colors.sent} stopOpacity={0.1} />
+              <stop offset="100%" stopColor={colors.sent} stopOpacity={0} />
             </linearGradient>
             <linearGradient id="openedGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#71717a" stopOpacity={0.4} />
-              <stop offset="50%" stopColor="#71717a" stopOpacity={0.1} />
-              <stop offset="100%" stopColor="#71717a" stopOpacity={0} />
+              <stop offset="0%" stopColor={colors.opened} stopOpacity={0.3} />
+              <stop offset="50%" stopColor={colors.opened} stopOpacity={0.1} />
+              <stop offset="100%" stopColor={colors.opened} stopOpacity={0} />
             </linearGradient>
             <linearGradient id="repliedGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#22c55e" stopOpacity={0.4} />
-              <stop offset="50%" stopColor="#22c55e" stopOpacity={0.1} />
-              <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+              <stop offset="0%" stopColor={colors.replied} stopOpacity={0.4} />
+              <stop offset="50%" stopColor={colors.replied} stopOpacity={0.1} />
+              <stop offset="100%" stopColor={colors.replied} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} vertical={false} />
@@ -109,41 +127,41 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           <Area
             type="monotone"
             dataKey="sent"
-            stroke="#18181b"
+            stroke={colors.sent}
             strokeWidth={2.5}
             fill="url(#sentGradient)"
             name="Sent"
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 2, fill: "#18181b" }}
+            activeDot={{ r: 5, strokeWidth: 2, fill: colors.sent }}
           />
           <Area
             type="monotone"
             dataKey="opened"
-            stroke="#71717a"
+            stroke={colors.opened}
             strokeWidth={2}
             fill="url(#openedGradient)"
             name="Opened"
             dot={false}
-            activeDot={{ r: 4, strokeWidth: 2, fill: "#71717a" }}
+            activeDot={{ r: 4, strokeWidth: 2, fill: colors.opened }}
           />
           <Area
             type="monotone"
             dataKey="replied"
-            stroke="#22c55e"
+            stroke={colors.replied}
             strokeWidth={2}
             fill="url(#repliedGradient)"
             name="Replied"
             dot={false}
-            activeDot={{ r: 4, strokeWidth: 2, fill: "#22c55e" }}
+            activeDot={{ r: 4, strokeWidth: 2, fill: colors.replied }}
           />
         </AreaChart>
       </ResponsiveContainer>
       {/* Legend */}
       <div className="flex items-center justify-center gap-8 mt-4 pt-4 border-t border-border/30">
         {[
-          { name: "Sent", color: "#18181b" },
-          { name: "Opened", color: "#71717a" },
-          { name: "Replied", color: "#22c55e" },
+          { name: "Sent", color: colors.sent },
+          { name: "Opened", color: colors.opened },
+          { name: "Replied", color: colors.replied },
         ].map((item) => (
           <div key={item.name} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: item.color }} />
