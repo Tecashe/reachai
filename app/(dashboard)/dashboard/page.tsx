@@ -998,8 +998,6 @@
 
 
 
-
-
 import { Suspense } from "react"
 import { Flame, BarChart3, ArrowUpRight, Sparkles, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -1017,6 +1015,11 @@ import { StatCard } from "@/components/dashboard-stats/stat-card"
 import { CreditCard as CreditCardComponent } from "@/components/dashboard-stats/credit-card"
 import { SkeletonCard } from "@/components/dashboard-stats/skeleton-card"
 import { LivePulse } from "@/components/dashboard-stats/live-pulse"
+import { ConversionFunnel } from "@/components/dashboard-stats/conversion-funnel"
+import { ActivityHeatmap } from "@/components/dashboard-stats/activity-heatmap"
+import { DeliverabilityGauge } from "@/components/dashboard-stats/deliverability-gauge"
+import { GoalProgress } from "@/components/dashboard-stats/goal-progress"
+import { SmartInsights } from "@/components/dashboard-stats/smart-insights"
 import { getDashboardData } from "@/lib/actions/dashboard-stats"
 
 async function DashboardContent() {
@@ -1067,7 +1070,7 @@ async function DashboardContent() {
 
   return (
     <>
-      {/* Stats Grid - Premium glassmorphic cards with sparklines */}
+      {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat, index) => (
           <StatCard key={stat.title} stat={stat} index={index} />
@@ -1092,9 +1095,19 @@ async function DashboardContent() {
         />
       </div>
 
-      {/* Bento Grid - Asymmetric layout for visual hierarchy */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <SmartInsights data={data.insights} />
+        <GoalProgress {...data.goals} />
+        <DeliverabilityGauge {...data.deliverability} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ConversionFunnel data={data.funnel} />
+        <ActivityHeatmap data={data.charts.heatmapData} />
+      </div>
+
+      {/* Performance Chart + Domain Health */}
       <div className="grid gap-6 lg:grid-cols-12">
-        {/* Performance Chart - Large card spanning 8 columns */}
         <div className="lg:col-span-8 relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.01] to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
           <div className="h-full rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg shadow-foreground/[0.03] hover:shadow-xl hover:shadow-foreground/[0.05] transition-all duration-300 overflow-hidden">
@@ -1122,7 +1135,6 @@ async function DashboardContent() {
           </div>
         </div>
 
-        {/* Domain Health - 4 columns */}
         <div className="lg:col-span-4 relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.01] to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
           <div className="h-full rounded-2xl border border-border/50 bg-card/50 backdrop-blur-xl shadow-lg shadow-foreground/[0.03] hover:shadow-xl hover:shadow-foreground/[0.05] transition-all duration-300 overflow-hidden">
@@ -1162,7 +1174,7 @@ async function DashboardContent() {
         </div>
       </div>
 
-      {/* Donut Charts Row - Equal spacing */}
+      {/* Donut Charts Row */}
       <div className="grid gap-6 md:grid-cols-3">
         <CampaignStatusChart data={data.charts.campaignStatus} total={data.overview.totalCampaigns} />
         <ProspectStatusChart data={data.charts.prospectStatus} total={data.overview.totalProspects} />
@@ -1178,7 +1190,7 @@ async function DashboardContent() {
         warmupStages={data.sendingAccounts.warmupStages}
       />
 
-      {/* Bottom Section - Campaigns & Activity */}
+      {/* Bottom Section */}
       <div className="grid gap-6 md:grid-cols-2">
         <RecentCampaigns campaigns={data.topCampaigns} />
         <ActivityFeed activities={data.activityFeed} />
@@ -1198,6 +1210,15 @@ function DashboardSkeleton() {
       <div className="grid gap-4 md:grid-cols-2">
         <SkeletonCard variant="stat" />
         <SkeletonCard variant="stat" />
+      </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <SkeletonCard variant="chart" className="h-[280px]" />
+        <SkeletonCard variant="chart" className="h-[280px]" />
+        <SkeletonCard variant="chart" className="h-[280px]" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SkeletonCard variant="chart" className="h-[300px]" />
+        <SkeletonCard variant="chart" className="h-[300px]" />
       </div>
       <div className="grid gap-6 lg:grid-cols-12">
         <div className="lg:col-span-8">
@@ -1245,7 +1266,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Dashboard content with Suspense */}
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardContent />
       </Suspense>

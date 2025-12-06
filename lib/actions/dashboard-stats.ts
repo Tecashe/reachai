@@ -19,105 +19,126 @@ export async function getDashboardData() {
 
     const now = new Date()
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
     const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
     // Parallel queries for performance
-    const [campaigns, prospects, sendingAccounts, recentEmailLogs, dailyAnalytics, thisMonthLogs, lastMonthLogs] =
-      await Promise.all([
-        db.campaign.findMany({
-          where: { userId: user.id },
-          include: {
-            prospects: {
-              select: {
-                emailsReceived: true,
-                emailsOpened: true,
-                emailsClicked: true,
-                emailsReplied: true,
-                status: true,
-                bounced: true,
-                createdAt: true,
-              },
+    const [
+      campaigns,
+      prospects,
+      sendingAccounts,
+      recentEmailLogs,
+      dailyAnalytics,
+      ninetyDayAnalytics,
+      thisMonthLogs,
+      lastMonthLogs,
+    ] = await Promise.all([
+      db.campaign.findMany({
+        where: { userId: user.id },
+        include: {
+          prospects: {
+            select: {
+              emailsReceived: true,
+              emailsOpened: true,
+              emailsClicked: true,
+              emailsReplied: true,
+              status: true,
+              bounced: true,
+              createdAt: true,
             },
           },
-        }),
-        // All prospects with status
-        db.prospect.findMany({
-          where: { userId: user.id, isTrashed: false },
-          select: {
-            id: true,
-            status: true,
-            createdAt: true,
-          },
-        }),
-        // Sending accounts health
-        db.sendingAccount.findMany({
-          where: { userId: user.id },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            isActive: true,
-            healthScore: true,
-            warmupStage: true,
-            bounceRate: true,
-            spamComplaintRate: true,
-            openRate: true,
-            replyRate: true,
-            dailyLimit: true,
-            emailsSentToday: true,
-          },
-        }),
-        // Recent email logs for activity feed
-        db.emailLog.findMany({
-          where: {
-            prospect: { campaign: { userId: user.id } },
-          },
-          include: {
-            prospect: {
-              select: {
-                firstName: true,
-                lastName: true,
-                email: true,
-                company: true,
-              },
+        },
+      }),
+      // All prospects with status
+      db.prospect.findMany({
+        where: { userId: user.id, isTrashed: false },
+        select: {
+          id: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      // Sending accounts health
+      db.sendingAccount.findMany({
+        where: { userId: user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          isActive: true,
+          healthScore: true,
+          warmupStage: true,
+          bounceRate: true,
+          spamComplaintRate: true,
+          openRate: true,
+          replyRate: true,
+          dailyLimit: true,
+          emailsSentToday: true,
+        },
+      }),
+      // Recent email logs for activity feed
+      db.emailLog.findMany({
+        where: {
+          prospect: { campaign: { userId: user.id } },
+        },
+        include: {
+          prospect: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true,
+              company: true,
             },
           },
-          orderBy: { createdAt: "desc" },
-          take: 8,
-        }),
-        // Daily analytics for last 30 days
-        db.analytics.findMany({
-          where: {
-            campaign: { userId: user.id },
-            date: { gte: thirtyDaysAgo },
-          },
-          select: {
-            date: true,
-            emailsSent: true,
-            emailsOpened: true,
-            emailsClicked: true,
-            emailsReplied: true,
-            emailsBounced: true,
-          },
-          orderBy: { date: "asc" },
-        }),
-        db.emailLog.findMany({
-          where: {
-            prospect: { campaign: { userId: user.id } },
-            createdAt: { gte: startOfThisMonth },
-          },
-          select: { status: true },
-        }),
-        db.emailLog.findMany({
-          where: {
-            prospect: { campaign: { userId: user.id } },
-            createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
-          },
-          select: { status: true },
-        }),
-      ])
+        },
+        orderBy: { createdAt: "desc" },
+        take: 8,
+      }),
+      // Daily analytics for last 30 days
+      db.analytics.findMany({
+        where: {
+          campaign: { userId: user.id },
+          date: { gte: thirtyDaysAgo },
+        },
+        select: {
+          date: true,
+          emailsSent: true,
+          emailsOpened: true,
+          emailsClicked: true,
+          emailsReplied: true,
+          emailsBounced: true,
+        },
+        orderBy: { date: "asc" },
+      }),
+      // 90-day analytics for heatmap
+      db.analytics.findMany({
+        where: {
+          campaign: { userId: user.id },
+          date: { gte: ninetyDaysAgo },
+        },
+        select: {
+          date: true,
+          emailsSent: true,
+        },
+        orderBy: { date: "asc" },
+      }),
+      db.emailLog.findMany({
+        where: {
+          prospect: { campaign: { userId: user.id } },
+          createdAt: { gte: startOfThisMonth },
+        },
+        select: { status: true },
+      }),
+      db.emailLog.findMany({
+        where: {
+          prospect: { campaign: { userId: user.id } },
+          createdAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+        },
+        select: { status: true },
+      }),
+    ])
 
     // Campaign status distribution
     const campaignStatusCounts = { DRAFT: 0, ACTIVE: 0, PAUSED: 0, COMPLETED: 0, ARCHIVED: 0 }
@@ -211,6 +232,15 @@ export async function getDashboardData() {
         ? Math.round(activeAccounts.reduce((sum, a) => sum + a.healthScore, 0) / activeAccounts.length)
         : 0
 
+    const avgBounceRate =
+      activeAccounts.length > 0 ? activeAccounts.reduce((sum, a) => sum + a.bounceRate, 0) / activeAccounts.length : 0
+    const avgSpamRate =
+      activeAccounts.length > 0
+        ? activeAccounts.reduce((sum, a) => sum + a.spamComplaintRate, 0) / activeAccounts.length
+        : 0
+
+    const lowHealthAccounts = sendingAccounts.filter((a) => a.healthScore < 70).length
+
     // Warmup stage distribution
     const warmupStages = { NEW: 0, WARMING: 0, WARM: 0, ACTIVE: 0, ESTABLISHED: 0 }
     sendingAccounts.forEach((a) => {
@@ -222,9 +252,13 @@ export async function getDashboardData() {
     // Aggregate daily analytics for chart
     const dailyPerformance = aggregateDailyAnalytics(dailyAnalytics)
 
+    const heatmapData = ninetyDayAnalytics.map((a) => ({
+      date: a.date.toISOString().split("T")[0],
+      sent: a.emailsSent,
+    }))
+
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
     const sparklineData = dailyPerformance.filter((d) => new Date(d.date) >= sevenDaysAgo).map((d) => d.sent)
-    // Pad to 7 days if needed
     while (sparklineData.length < 7) sparklineData.unshift(0)
 
     // Top campaigns by reply rate
@@ -257,6 +291,9 @@ export async function getDashboardData() {
       timestamp: log.createdAt,
     }))
 
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    const daysRemaining = Math.max(0, Math.ceil((endOfMonth.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+
     return {
       overview: {
         totalCampaigns: campaigns.length,
@@ -264,6 +301,7 @@ export async function getDashboardData() {
         totalProspects: prospects.length,
         activeProspects,
         totalEmailsSent,
+        totalEmailsReplied,
         emailCredits: user.emailCredits,
         researchCredits: user.researchCredits,
       },
@@ -298,6 +336,30 @@ export async function getDashboardData() {
           { name: "Bounced", value: emailEngagement.bounced },
         ],
         dailyPerformance,
+        heatmapData,
+      },
+      funnel: emailEngagement,
+      deliverability: {
+        bounceRate: avgBounceRate,
+        spamRate: avgSpamRate,
+        openRate,
+        replyRate,
+      },
+      goals: {
+        emailsSent: totalEmailsSent,
+        emailsGoal: 5000,
+        repliesReceived: totalEmailsReplied,
+        repliesGoal: 100,
+        daysRemaining,
+      },
+      insights: {
+        emailsSentChange,
+        openRateChange,
+        replyRateChange,
+        topCampaign: topCampaigns[0],
+        avgReplyRate: replyRate,
+        lowHealthAccounts,
+        bestDay: getBestPerformingDay(dailyPerformance),
       },
       sendingAccounts: {
         total: sendingAccounts.length,
@@ -326,6 +388,34 @@ export async function getDashboardData() {
   }
 }
 
+function getBestPerformingDay(
+  dailyPerformance: Array<{ date: string; sent: number; replied: number }>,
+): string | undefined {
+  if (dailyPerformance.length === 0) return undefined
+
+  const dayTotals: Record<string, { replies: number; count: number }> = {}
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+  dailyPerformance.forEach((d) => {
+    const dayName = days[new Date(d.date).getDay()]
+    if (!dayTotals[dayName]) dayTotals[dayName] = { replies: 0, count: 0 }
+    dayTotals[dayName].replies += d.replied
+    dayTotals[dayName].count++
+  })
+
+  let bestDay: string | undefined
+  let bestAvg = 0
+  Object.entries(dayTotals).forEach(([day, { replies, count }]) => {
+    const avg = count > 0 ? replies / count : 0
+    if (avg > bestAvg) {
+      bestAvg = avg
+      bestDay = day
+    }
+  })
+
+  return bestDay
+}
+
 function getEmptyDashboardData() {
   return {
     overview: {
@@ -334,6 +424,7 @@ function getEmptyDashboardData() {
       totalProspects: 0,
       activeProspects: 0,
       totalEmailsSent: 0,
+      totalEmailsReplied: 0,
       emailCredits: 0,
       researchCredits: 0,
     },
@@ -357,6 +448,17 @@ function getEmptyDashboardData() {
       prospectStatus: [],
       emailEngagement: [],
       dailyPerformance: [],
+      heatmapData: [],
+    },
+    funnel: { sent: 0, opened: 0, clicked: 0, replied: 0, bounced: 0 },
+    deliverability: { bounceRate: 0, spamRate: 0, openRate: 0, replyRate: 0 },
+    goals: { emailsSent: 0, emailsGoal: 5000, repliesReceived: 0, repliesGoal: 100, daysRemaining: 30 },
+    insights: {
+      emailsSentChange: null,
+      openRateChange: null,
+      replyRateChange: null,
+      avgReplyRate: 0,
+      lowHealthAccounts: 0,
     },
     sendingAccounts: {
       total: 0,
