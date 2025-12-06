@@ -2,6 +2,8 @@
 
 import { Mail, Menu, X } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 
 export function PageHeader() {
@@ -20,7 +22,7 @@ export function PageHeader() {
     { href: "/features", label: "Features" },
     { href: "/pricing", label: "Pricing" },
     { href: "/integrations", label: "Integrations" },
-    { href: "/api", label: "API" },
+    { href: "/api-docs", label: "API" },
     { href: "/blog", label: "Blog" },
   ]
 
@@ -34,7 +36,24 @@ export function PageHeader() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
+            <div className={cn("p-6 border-b border-border/50 transition-all duration-300")}>
+                     <Link href="/dashboard" className="flex items-center gap-2 group">
+                       <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                         <Image
+                           src="/logo.png"
+                           alt="mailfra Logo"
+                           width={40}
+                           height={40}
+                           className="object-contain"
+                           priority
+                         />
+                       </div>
+                         <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
+                           Mailfra
+                         </span>
+                     </Link>
+                   </div>
+            {/* <Link href="/" className="flex items-center gap-2">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center"
                 style={{
@@ -45,7 +64,7 @@ export function PageHeader() {
                 <Mail className="w-4 h-4 text-white" />
               </div>
               <span className="font-semibold text-lg text-foreground">mailfra</span>
-            </Link>
+            </Link> */}
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">

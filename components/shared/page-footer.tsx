@@ -8,7 +8,7 @@ const footerLinks = {
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Integrations", href: "/integrations" },
-    { label: "API", href: "/api" },
+    { label: "API", href: "/api-docs" },
     { label: "Changelog", href: "/changelog" },
     { label: "Roadmap", href: "/roadmap" },
   ],
@@ -26,15 +26,13 @@ const footerLinks = {
     { label: "Press", href: "/press" },
     { label: "Partners", href: "/partners" },
     { label: "Contact", href: "/contact" },
-    { label: "Legal", href: "/legal" },
+    
   ],
   Compare: [
     { label: "vs Instantly", href: "/compare/instantly" },
     { label: "vs Smartlead", href: "/compare/smartlead" },
     { label: "vs Apollo", href: "/compare/apollo" },
     { label: "vs Lemlist", href: "/compare/lemlist" },
-    { label: "vs Outreach", href: "/compare/outreach" },
-    { label: "vs Salesloft", href: "/compare/salesloft" },
   ],
 }
 
