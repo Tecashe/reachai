@@ -2,20 +2,27 @@
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CreditCardIcon, ArrowRight } from "lucide-react"
+import { CreditCardIcon, ArrowRight, Mail, Search } from "lucide-react"
 import Link from "next/link"
-import type { LucideIcon } from "lucide-react"
 import { motion } from "framer-motion"
 
-interface CreditCardProps {
+const iconMap = {
+  Mail,
+  Search,
+} as const
+
+type IconName = keyof typeof iconMap
+
+export interface CreditCardProps {
   title: string
   value: number
-  icon: LucideIcon
+  iconName: IconName
   href: string
   description: string
 }
 
-export function CreditCard({ title, value, icon: Icon, href, description }: CreditCardProps) {
+export function CreditCard({ title, value, iconName, href, description }: CreditCardProps) {
+  const Icon = iconMap[iconName]
   const isLow = value < 100
 
   return (

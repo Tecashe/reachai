@@ -993,19 +993,7 @@
 //     </div>
 //   )
 // }
-
-import {
-  Mail,
-  Users,
-  TrendingUp,
-  MousePointerClick,
-  Flame,
-  BarChart3,
-  ArrowUpRight,
-  Search,
-  Sparkles,
-  Activity,
-} from "lucide-react"
+import { Flame, BarChart3, ArrowUpRight, Sparkles, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { RecentCampaigns } from "@/components/dashboard-stats/recent-campaigns"
@@ -1028,7 +1016,7 @@ export default async function DashboardPage() {
     {
       title: "Emails Sent",
       value: data.overview.totalEmailsSent.toLocaleString(),
-      icon: Mail,
+      iconName: "Mail" as const,
       description: "Total outreach",
       trend: data.overview.totalEmailsSent > 0 ? "+12.5%" : undefined,
       trendUp: true,
@@ -1036,7 +1024,7 @@ export default async function DashboardPage() {
     {
       title: "Active Prospects",
       value: data.overview.activeProspects.toLocaleString(),
-      icon: Users,
+      iconName: "Users" as const,
       description: `of ${data.overview.totalProspects.toLocaleString()} total`,
       trend: data.overview.activeProspects > 0 ? "+8.2%" : undefined,
       trendUp: true,
@@ -1044,7 +1032,7 @@ export default async function DashboardPage() {
     {
       title: "Open Rate",
       value: `${data.rates.openRate}%`,
-      icon: TrendingUp,
+      iconName: "TrendingUp" as const,
       description: "Across all campaigns",
       trend: Number(data.rates.openRate) > 20 ? "Above avg" : undefined,
       trendUp: Number(data.rates.openRate) > 20,
@@ -1052,7 +1040,7 @@ export default async function DashboardPage() {
     {
       title: "Reply Rate",
       value: `${data.rates.replyRate}%`,
-      icon: MousePointerClick,
+      iconName: "MousePointerClick" as const,
       description: "Engagement rate",
       trend: Number(data.rates.replyRate) > 5 ? "Excellent" : undefined,
       trendUp: Number(data.rates.replyRate) > 5,
@@ -1100,14 +1088,14 @@ export default async function DashboardPage() {
         <CreditCardComponent
           title="Email Credits"
           value={data.overview.emailCredits}
-          icon={Mail}
+          iconName="Mail"
           href="/dashboard/billing"
           description="Send unlimited campaigns"
         />
         <CreditCardComponent
           title="Research Credits"
           value={data.overview.researchCredits}
-          icon={Search}
+          iconName="Search"
           href="/dashboard/billing"
           description="AI-powered prospect research"
         />

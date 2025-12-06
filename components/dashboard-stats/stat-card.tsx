@@ -2,24 +2,36 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import type { LucideIcon } from "lucide-react"
-import { TrendingUp, TrendingDown } from "lucide-react"
+import { TrendingUp, TrendingDown, Mail, Users, MousePointerClick } from "lucide-react"
 import { motion } from "framer-motion"
 
+const iconMap = {
+  Mail,
+  Users,
+  TrendingUp,
+  MousePointerClick,
+} as const
+
+type IconName = keyof typeof iconMap
+
+export interface StatData {
+  title: string
+  value: string
+  iconName: IconName
+  description: string
+  trend?: string
+  trendUp?: boolean
+  highlight?: boolean
+}
+
 interface StatCardProps {
-  stat: {
-    title: string
-    value: string
-    icon: LucideIcon
-    description: string
-    trend?: string
-    trendUp?: boolean
-    highlight?: boolean
-  }
+  stat: StatData
   index: number
 }
 
 export function StatCard({ stat, index }: StatCardProps) {
+  const Icon = iconMap[stat.iconName]
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -45,7 +57,7 @@ export function StatCard({ stat, index }: StatCardProps) {
         <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
           <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
           <div className="p-2.5 rounded-xl bg-foreground/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] group-hover:bg-foreground/10 transition-colors duration-300">
-            <stat.icon className="h-4 w-4 text-foreground/70 group-hover:text-foreground transition-colors duration-300" />
+            <Icon className="h-4 w-4 text-foreground/70 group-hover:text-foreground transition-colors duration-300" />
           </div>
         </CardHeader>
         <CardContent className="relative">
