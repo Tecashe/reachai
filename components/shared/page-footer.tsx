@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 
 const footerLinks = {
@@ -43,17 +43,16 @@ export function PageFooter() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-2 mb-4">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #111 0%, #333 100%)",
-                }}
-              >
-                <Mail className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold text-lg text-foreground">mailfra</span>
-            </Link>
+             <Link href="/" className="inline-flex items-center gap-2 mb-4">
+                <Image
+                  src="/mailfra-logo.jpg"
+                  alt="Mailfra"
+                  width={36}
+                  height={36}
+                  className="w-9 h-9 rounded-xl object-contain"
+                />
+                <span className="font-semibold text-lg text-foreground">mailfra</span>
+              </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-6">
               The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.
             </p>

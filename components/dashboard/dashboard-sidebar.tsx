@@ -2948,7 +2948,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
          <Link href="/dashboard" className="flex items-center gap-2 group">
            <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
              <Image
-               src="/logo.png"
+               src="/mailfra-logo.png"
                alt="mailfra Logo"
                width={40}
                height={40}
@@ -2957,7 +2957,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
              />
            </div>
            {!collapsed && (
-             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
+             <span className="text-xl font-bold bg-gradient-to-r from-black-600 via-white-500 to-black-600 bg-clip-text text-transparent">
                Mailfra
              </span>
            )}

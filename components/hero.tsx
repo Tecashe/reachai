@@ -1081,7 +1081,7 @@ export function Hero() {
             >
               Sign In
             </Link>
-            <Link href="/dashboard" className="hidden sm:block">
+            <Link href="/sign-up" className="hidden sm:block">
               <Button
                 size="sm"
                 className={`rounded-full px-4 sm:px-6 h-9 sm:h-10 text-sm font-medium transition-all duration-500 whitespace-nowrap ${
