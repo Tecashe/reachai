@@ -2957,7 +2957,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
              />
            </div>
            {!collapsed && (
-             <span className="text-xl font-bold bg-gradient-to-r from-black-600 via-white-500 to-black-600 bg-clip-text text-transparent">
+             <span className="text-xl font-bold bg-white bg-clip-text text-transparent">
                Mailfra
              </span>
            )}
