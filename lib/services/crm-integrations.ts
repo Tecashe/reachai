@@ -949,7 +949,137 @@ export const pipedriveService = {
 }
 
 // Database sync helpers
-export async function syncCrmLeads(userId: string, crmType: string, credentials: CrmCredentials) {
+
+
+// Database sync helpers
+export async function syncCrmLeads(
+  userId: string,
+  crmType: string,
+  credentials: CrmCredentials
+): Promise<{
+  imported: number
+  skipped: number
+  lowQualityContacts: Array<{
+    name: string
+    email?: string
+    reason: string
+  }>
+}> {
+  let imported = 0
+  let skipped = 0
+  const lowQualityContacts: Array<{
+    name: string
+    email?: string
+    reason: string
+  }> = []
+
+  try {
+    console.log("[builtbycashe] Syncing CRM leads for user:", userId, "CRM type:", crmType)
+    let leads: CrmLead[] = []
+
+    if (crmType === "hubspot" && credentials.accessToken) {
+      leads = await hubspotService.syncLeads(userId, credentials.accessToken)
+    } else if (crmType === "salesforce" && credentials.accessToken && credentials.instanceUrl) {
+      leads = await salesforceService.syncLeads(userId, credentials.accessToken, credentials.instanceUrl)
+    } else if (crmType === "pipedrive" && credentials.apiKey) {
+      leads = await pipedriveService.syncLeads(userId, credentials.apiKey)
+    }
+
+    // Upsert leads into Prospects table
+    for (const lead of leads) {
+      // Validate lead quality
+      if (!lead.email || lead.email.trim() === "") {
+        lowQualityContacts.push({
+          name: `${lead.firstName || ""} ${lead.lastName || ""}`.trim() || "Unknown",
+          email: undefined,
+          reason: "Missing email",
+        })
+        skipped++
+        continue
+      }
+
+      if (!lead.firstName && !lead.lastName) {
+        lowQualityContacts.push({
+          name: "Unknown",
+          email: lead.email,
+          reason: "Missing name",
+        })
+        skipped++
+        continue
+      }
+
+      // Check if prospect already exists
+      const existingProspect = await db.prospect.findFirst({
+        where: {
+          email: lead.email,
+          userId,
+        },
+      })
+
+      if (existingProspect) {
+        // Update existing prospect
+        await db.prospect.update({
+          where: { id: existingProspect.id },
+          data: {
+            firstName: lead.firstName || undefined,
+            lastName: lead.lastName || undefined,
+            company: lead.company || undefined,
+            jobTitle: lead.title || undefined,
+            phoneNumber: lead.phone || undefined,
+            linkedinUrl: lead.linkedinUrl || undefined,
+            crmId: lead.externalId,
+            crmType,
+            crmSyncedAt: new Date(),
+            crmData: lead as any,
+          },
+        })
+        skipped++ // Count as skipped since it already existed
+      } else {
+        // Create new prospect
+        await db.prospect.create({
+          data: {
+            userId,
+            email: lead.email,
+            firstName: lead.firstName || undefined,
+            lastName: lead.lastName || undefined,
+            company: lead.company || undefined,
+            jobTitle: lead.title || undefined,
+            phoneNumber: lead.phone || undefined,
+            linkedinUrl: lead.linkedinUrl || undefined,
+            crmId: lead.externalId,
+            crmType,
+            crmSyncedAt: new Date(),
+            crmData: lead as any,
+          },
+        })
+        imported++
+      }
+    }
+
+    console.log(`[builtbycashe] Synced ${imported} new leads, ${skipped} skipped, ${lowQualityContacts.length} low quality from CRM`)
+    
+    return {
+      imported,
+      skipped,
+      lowQualityContacts,
+    }
+  } catch (error) {
+    console.error("[builtbycashe] CRM sync error:", error)
+    return {
+      imported: 0,
+      skipped: 0,
+      lowQualityContacts: [],
+    }
+  }
+}
+
+export const syncLeadsFromCRM = syncCrmLeads
+
+
+
+
+
+export async function syncCrmLeadsOLD(userId: string, crmType: string, credentials: CrmCredentials) {
   try {
     console.log("[builtbycashe] Syncing CRM leads for user:", userId, "CRM type:", crmType)
     let leads: CrmLead[] = []
@@ -1015,7 +1145,7 @@ export async function syncCrmLeads(userId: string, crmType: string, credentials:
   }
 }
 
-export const syncLeadsFromCRM = syncCrmLeads
+// export const syncLeadsFromCRM = syncCrmLeads
 
 // AI Deal Scoring
 export async function scoreProspect(prospect: any, crmData?: any): Promise<number> {

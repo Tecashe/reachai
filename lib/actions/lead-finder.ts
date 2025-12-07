@@ -831,11 +831,13 @@ import { syncLeadsFromCRM, type CrmCredentials } from "@/lib/services/crm-integr
  */
 export async function findLeadsFromDescription(
   description: string,
+  
   campaignId?: string,
 ): Promise<{
   success: boolean
   leads?: any[]
   error?: string
+  
   audienceProfile?: any
 }> {
   const { userId } = await auth()
@@ -1121,9 +1123,21 @@ export async function enrichLeadsWithAI(leads: any[]): Promise<{
 /**
  * Sync leads from CRM
  */
+/**
+ * Sync leads from CRM
+ */
+/**
+ * Sync leads from CRM
+ */
 export async function syncCRMLeads(crmType: string): Promise<{
   success: boolean
   imported?: number
+  skipped?: number
+  lowQualityContacts?: Array<{
+    name: string
+    email?: string
+    reason: string
+  }>
   error?: string
 }> {
   try {
@@ -1156,11 +1170,13 @@ export async function syncCRMLeads(crmType: string): Promise<{
     const credentials = integration.credentials as unknown as CrmCredentials
 
     // Sync leads from CRM
-    const leads = await syncLeadsFromCRM(user.id, crmType.toLowerCase(), credentials)
+    const result = await syncLeadsFromCRM(user.id, crmType.toLowerCase(), credentials)
 
     return {
       success: true,
-      imported: leads.length,
+      imported: result.imported,
+      skipped: result.skipped,
+      lowQualityContacts: result.lowQualityContacts,
     }
   } catch (error: any) {
     console.error("[CRM Sync] Error:", error)
@@ -1170,3 +1186,54 @@ export async function syncCRMLeads(crmType: string): Promise<{
     }
   }
 }
+
+
+// export async function syncCRMLeadsOLD(crmType: string): Promise<{
+//   success: boolean
+//   imported?: number
+//   error?: string
+// }> {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) throw new Error("Unauthorized")
+
+//     const user = await db.user.findUnique({
+//       where: { clerkId: userId },
+//       include: {
+//         integrations: {
+//           where: {
+//             type: crmType as any,
+//             isActive: true,
+//           },
+//         },
+//       },
+//     })
+
+//     if (!user) throw new Error("User not found")
+
+//     const integration = user.integrations[0]
+//     if (!integration) {
+//       return { success: false, error: `${crmType} integration not found` }
+//     }
+
+//     if (!integration.credentials) {
+//       return { success: false, error: "Integration credentials not found" }
+//     }
+
+//     const credentials = integration.credentials as unknown as CrmCredentials
+
+//     // Sync leads from CRM
+//     const leads = await syncLeadsFromCRM(user.id, crmType.toLowerCase(), credentials)
+
+//     return {
+//       success: true,
+//       imported: leads.length,
+//     }
+//   } catch (error: any) {
+//     console.error("[CRM Sync] Error:", error)
+//     return {
+//       success: false,
+//       error: error.message || "Failed to sync CRM leads",
+//     }
+//   }
+// }
