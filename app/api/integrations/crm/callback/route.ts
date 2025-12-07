@@ -1,117 +1,127 @@
-// import { auth } from "@clerk/nextjs/server"
-// import { db } from "@/lib/db"
-// import { decryptState, exchangeCodeForToken } from "@/lib/services/crm-oauth"
-// import { type NextRequest, NextResponse } from "next/server"
-
-// export async function GET(request: NextRequest) {
-//   try {
-//     const { userId } = await auth()
-//     if (!userId) {
-//       return NextResponse.redirect(new URL("/login", request.url))
-//     }
-
-//     const searchParams = request.nextUrl.searchParams
-//     const code = searchParams.get("code")
-//     const state = searchParams.get("state")
-//     const provider = searchParams.get("provider") as "hubspot" | "salesforce" | "pipedrive"
-
-//     if (!code || !state || !provider) {
-//       return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
-//     }
-
-//     // Verify state for CSRF protection
-//     const stateData = decryptState(state)
-//     if (stateData.userId !== userId) {
-//       return NextResponse.json({ error: "Invalid state" }, { status: 401 })
-//     }
-
-//     // Exchange code for token
-//     const { accessToken, refreshToken, expiresIn } = await exchangeCodeForToken(provider, code)
-
-//     // Store integration in database
-//     await db.integration.upsert({
-//       where: {
-//         userId_type: { userId, type: provider.toUpperCase() as any },
-//       },
-//       update: {
-//         accessToken,
-//         refreshToken,
-//         expiresAt: new Date(Date.now() + expiresIn * 1000),
-//       },
-//       create: {
-//         userId,
-//         type: provider.toUpperCase() as any,
-//         accessToken,
-//         refreshToken,
-//         expiresAt: new Date(Date.now() + expiresIn * 1000),
-//       },
-//     })
-
-//     // Redirect to success page
-//     return NextResponse.redirect(new URL(`/dashboard/crm?connected=${provider}`, request.url))
-//   } catch (error) {
-//     console.error("[builtbycashe] CRM OAuth callback error:", error)
-//     return NextResponse.redirect(new URL("/dashboard/crm?error=connection_failed", request.url))
-//   }
-// }
-
-import { auth } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { decryptState, exchangeCodeForToken } from "@/lib/services/crm-oauth"
-import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const code = searchParams.get("code")
+  const state = searchParams.get("state")
+  const error = searchParams.get("error")
+
+  if (error) {
+    return NextResponse.redirect(new URL("/crm?error=oauth_denied", request.url))
+  }
+
+  if (!code || !state) {
+    return NextResponse.redirect(new URL("/crm?error=missing_params", request.url))
+  }
+
   try {
-    const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.redirect(new URL("/login", request.url))
+    const { clerkId, crmType } = JSON.parse(Buffer.from(state, "base64url").toString())
+
+    const user = await db.user.findUnique({
+      where: { clerkId },
+      select: { id: true },
+    })
+
+    if (!user) {
+      return NextResponse.redirect(new URL("/crm?error=user_not_found", request.url))
     }
 
-    const searchParams = request.nextUrl.searchParams
-    const code = searchParams.get("code")
-    const state = searchParams.get("state")
-    const provider = searchParams.get("provider") as "hubspot" | "salesforce" | "pipedrive"
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    const redirectUri = `${baseUrl}/api/integrations/crm/callback`
 
-    if (!code || !state || !provider) {
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
+    let tokenData: {
+      access_token: string
+      refresh_token: string
+      expires_in: number
+      instance_url?: string
     }
 
-    // Verify state for CSRF protection
-    const stateData = decryptState(state)
-    if (stateData.userId !== userId) {
-      return NextResponse.json({ error: "Invalid state" }, { status: 401 })
+    switch (crmType) {
+      case "hubspot":
+        const hubspotResponse = await fetch("https://api.hubapi.com/oauth/v1/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: process.env.HUBSPOT_CLIENT_ID!,
+            client_secret: process.env.HUBSPOT_CLIENT_SECRET!,
+            redirect_uri: redirectUri,
+            code,
+          }),
+        })
+        if (!hubspotResponse.ok) throw new Error("HubSpot token exchange failed")
+        tokenData = await hubspotResponse.json()
+        break
+
+      case "salesforce":
+        const salesforceResponse = await fetch("https://login.salesforce.com/services/oauth2/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: process.env.SALESFORCE_CLIENT_ID!,
+            client_secret: process.env.SALESFORCE_CLIENT_SECRET!,
+            redirect_uri: redirectUri,
+            code,
+          }),
+        })
+        if (!salesforceResponse.ok) throw new Error("Salesforce token exchange failed")
+        tokenData = await salesforceResponse.json()
+        break
+
+      case "pipedrive":
+        const pipedriveResponse = await fetch("https://oauth.pipedrive.com/oauth/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            client_id: process.env.PIPEDRIVE_CLIENT_ID!,
+            client_secret: process.env.PIPEDRIVE_CLIENT_SECRET!,
+            redirect_uri: redirectUri,
+            code,
+          }),
+        })
+        if (!pipedriveResponse.ok) throw new Error("Pipedrive token exchange failed")
+        tokenData = await pipedriveResponse.json()
+        break
+
+      default:
+        return NextResponse.redirect(new URL("/crm?error=invalid_crm", request.url))
     }
 
-    // Exchange code for token
-    const { accessToken, refreshToken, expiresIn } = await exchangeCodeForToken(provider, code)
+    const integrationTypeMap: Record<string, "HUBSPOT" | "SALESFORCE" | "PIPEDRIVE"> = {
+      hubspot: "HUBSPOT",
+      salesforce: "SALESFORCE",
+      pipedrive: "PIPEDRIVE",
+    }
 
-    // Calculate expiration date
-    const expiresAt = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null
-
-    // Store integration in database
-    await db.integration.upsert({
+    await db.integration.updateMany({
       where: {
-        userId_type: { userId, type: provider.toUpperCase() as any },
+        userId: user.id,
+        type: { in: ["HUBSPOT", "SALESFORCE", "PIPEDRIVE"] },
       },
-      update: {
-        accessToken,
-        ...(refreshToken && { refreshToken }), // Only include if present
-        ...(expiresAt && { expiresAt }),
-      },
-      create: {
-        userId,
-        type: provider.toUpperCase() as any,
-        name: provider, // Add name field
-        accessToken,
-        ...(refreshToken && { refreshToken }),
-        ...(expiresAt && { expiresAt }),
+      data: { isActive: false },
+    })
+
+    await db.integration.create({
+      data: {
+        userId: user.id,
+        type: integrationTypeMap[crmType],
+        name: crmType.charAt(0).toUpperCase() + crmType.slice(1),
+        credentials: {
+          accessToken: tokenData.access_token,
+          refreshToken: tokenData.refresh_token,
+          expiresAt: Date.now() + tokenData.expires_in * 1000,
+          instanceUrl: tokenData.instance_url,
+        },
+        isActive: true,
       },
     })
 
-    // Redirect to success page
-    return NextResponse.redirect(new URL(`/dashboard/crm?connected=${provider}`, request.url))
+    return NextResponse.redirect(new URL("/crm?success=connected", request.url))
   } catch (error) {
-    console.error("[builtbycashe] CRM OAuth callback error:", error)
-    return NextResponse.redirect(new URL("/dashboard/crm?error=connection_failed", request.url))
+    console.error("[CRM Callback] Error:", error)
+    return NextResponse.redirect(new URL("/crm?error=connection_failed", request.url))
   }
 }

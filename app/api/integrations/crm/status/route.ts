@@ -1,28 +1,43 @@
 import { auth } from "@clerk/nextjs/server"
-import { db } from "@/lib/db"
 import { NextResponse } from "next/server"
+import { db } from "@/lib/db"
 
 export async function GET() {
   try {
     const { userId } = await auth()
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!userId) {
+      return NextResponse.json({ connected: false }, { status: 401 })
+    }
+
+    const user = await db.user.findUnique({
+      where: { clerkId: userId },
+      select: { id: true },
+    })
+
+    if (!user) {
+      return NextResponse.json({ connected: false })
+    }
 
     const integration = await db.integration.findFirst({
       where: {
-        userId,
-        type: {
-          in: ["HUBSPOT", "SALESFORCE", "PIPEDRIVE"],
-        },
+        userId: user.id,
+        type: { in: ["HUBSPOT", "SALESFORCE", "PIPEDRIVE"] },
+        isActive: true,
+      },
+      select: {
+        id: true,
+        type: true,
+        name: true,
+        lastSyncedAt: true,
       },
     })
 
     return NextResponse.json({
       connected: !!integration,
-      crmType: integration?.name || null,
-      integrationId: integration?.id || null,
+      integration: integration || null,
     })
   } catch (error) {
-    console.error("[builtbycashe] CRM status error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    console.error("[CRM Status] Error:", error)
+    return NextResponse.json({ connected: false, error: "Internal error" }, { status: 500 })
   }
 }

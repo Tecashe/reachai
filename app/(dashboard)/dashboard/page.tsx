@@ -1021,6 +1021,9 @@ import { DeliverabilityGauge } from "@/components/dashboard-stats/deliverability
 import { GoalProgress } from "@/components/dashboard-stats/goal-progress"
 import { SmartInsights } from "@/components/dashboard-stats/smart-insights"
 import { getDashboardData } from "@/lib/actions/dashboard-stats"
+import { OnboardingProgress } from "@/components/getting-started/onboarding-progress"
+import { Progress } from "@/components/ui/progress"
+import { EmailSetupBanner } from "@/components/dashboard/email-setup-banner"
 
 async function DashboardContent() {
   const data = await getDashboardData()
@@ -1264,6 +1267,10 @@ export default function DashboardPage() {
             </Link>
           </Button>
         </div>
+        <OnboardingProgress />
+
+        <EmailSetupBanner />
+
       </div>
 
       <Suspense fallback={<DashboardSkeleton />}>
