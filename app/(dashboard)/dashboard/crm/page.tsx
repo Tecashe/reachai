@@ -161,6 +161,7 @@
 //     </div>
 //   )
 // }
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -190,7 +191,6 @@ import { CrmLeadsList } from "@/components/crm/crm-leads-list"
 import { CrmDealScoring } from "@/components/crm/crm-deal-scoring"
 import { useToast } from "@/hooks/use-toast"
 import { AnimatedCounter } from "@/components/dashboard-stats/animated-counter"
-import { syncLeadsFromCRM, syncDealsFromCRM } from "@/lib/actions/crm"
 
 interface CRMStats {
   totalLeads: number
@@ -264,16 +264,19 @@ export default function CrmPage() {
   const handleSync = async () => {
     setSyncing(true)
     try {
-      const [leadsResult, dealsResult] = await Promise.all([syncLeadsFromCRM(), syncDealsFromCRM()])
+      const response = await fetch("/api/integrations/crm/sync", {
+        method: "POST",
+      })
+      const data = await response.json()
 
-      if (leadsResult.success || dealsResult.success) {
+      if (data.success) {
         await loadStats()
         toast({
           title: "Sync Complete",
-          description: `Synced ${leadsResult.synced || 0} leads and scored ${dealsResult.scored || 0} deals`,
+          description: `Synced ${data.leadsSynced || 0} leads and scored ${data.dealsScored || 0} deals`,
         })
       } else {
-        throw new Error(leadsResult.error || dealsResult.error || "Sync failed")
+        throw new Error(data.error || "Sync failed")
       }
     } catch (error) {
       console.error("[CRM] Sync error:", error)
