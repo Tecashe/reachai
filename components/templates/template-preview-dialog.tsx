@@ -921,7 +921,6 @@ export function TemplatePreviewDialog({ template, open, onOpenChange }: Template
   useEffect(() => {
     if (open) {
       setDevice("desktop")
-      // Stagger the visibility for entrance animation
       const timer = setTimeout(() => setIsVisible(true), 50)
       return () => clearTimeout(timer)
     } else {
@@ -936,7 +935,7 @@ export function TemplatePreviewDialog({ template, open, onOpenChange }: Template
   const variablesArray = getVariablesArray(template.variables)
 
   const deviceWidths = {
-    desktop: "max-w-full",
+    desktop: "w-full",
     tablet: "max-w-[600px]",
     mobile: "max-w-[375px]",
   }
@@ -969,54 +968,52 @@ export function TemplatePreviewDialog({ template, open, onOpenChange }: Template
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "max-w-4xl w-[92vw] p-0 gap-0 overflow-hidden",
-          "bg-background border-border/50",
-          "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
-          "dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]",
+          // Full screen with small margin
+          "!fixed !inset-4 !translate-x-0 !translate-y-0 !top-4 !left-4 !right-4 !bottom-4",
+          "!w-auto !max-w-none !max-h-none",
+          "p-0 gap-0 overflow-hidden flex flex-col",
+          "bg-background border border-border/50 rounded-2xl",
+          "shadow-2xl",
         )}
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-muted/30">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            {/* Category Badge */}
+        <div className="flex items-center justify-between px-8 py-5 border-b border-border/50 bg-muted/20 flex-shrink-0">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
             {template.category && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground/5 text-foreground/70 rounded-md">
+              <span className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-foreground/5 text-foreground/70 rounded-lg">
                 {template.category}
               </span>
             )}
 
-            {/* AI Badge */}
             {template.aiGenerated && (
-              <span className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-md">
-                <Sparkles className="w-3 h-3" />
-                AI
+              <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-lg">
+                <Sparkles className="w-3.5 h-3.5" />
+                AI Generated
               </span>
             )}
 
-            {/* Template Name */}
-            <h2 className="text-base font-semibold truncate">{template.name}</h2>
+            <h2 className="text-xl font-semibold truncate">{template.name}</h2>
           </div>
 
-          {/* Close Button */}
           <button
             onClick={() => onOpenChange(false)}
-            className="p-2 -mr-2 rounded-lg hover:bg-foreground/5 transition-colors"
+            className="p-2.5 rounded-xl hover:bg-foreground/5 transition-colors"
           >
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex flex-col lg:flex-row">
-          {/* Left: Email Preview */}
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
+          {/* Left: Email Preview - takes most space */}
           <div
             className={cn(
-              "flex-1 p-6 transition-all duration-500",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+              "flex-1 flex flex-col min-w-0 p-8 overflow-hidden",
+              "transition-all duration-500",
+              isVisible ? "opacity-100" : "opacity-0",
             )}
           >
-            {/* Device Switcher */}
-            <div className="flex items-center justify-center gap-1 mb-5">
+            {/* Device Switcher - centered */}
+            <div className="flex items-center justify-center gap-2 mb-6 flex-shrink-0">
               {[
                 { id: "desktop" as const, icon: Monitor, label: "Desktop" },
                 { id: "tablet" as const, icon: Tablet, label: "Tablet" },
@@ -1026,72 +1023,74 @@ export function TemplatePreviewDialog({ template, open, onOpenChange }: Template
                   key={id}
                   onClick={() => setDevice(id)}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300",
+                    "flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
                     device === id
-                      ? "bg-foreground text-background shadow-md"
+                      ? "bg-foreground text-background shadow-lg"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                   )}
                 >
                   <Icon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{label}</span>
+                  {label}
                 </button>
               ))}
             </div>
 
-            {/* Email Frame */}
-            <div className="flex justify-center">
-              <div className={cn("w-full transition-all duration-500 ease-out", deviceWidths[device])}>
-                <div className={cn("rounded-xl overflow-hidden", "bg-card border border-border/60", "shadow-sm")}>
+            {/* Email Frame - scrollable and centered */}
+            <div className="flex-1 overflow-auto flex justify-center">
+              <div className={cn("transition-all duration-500 ease-out h-fit", deviceWidths[device])}>
+                <div className="rounded-2xl overflow-hidden bg-card border border-border/60 shadow-lg">
                   {/* Email Header */}
-                  <div className="px-5 py-4 border-b border-border/40 bg-muted/20">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-foreground/10 to-foreground/5 flex items-center justify-center flex-shrink-0">
-                        <Mail className="w-4 h-4 text-foreground/50" />
+                  <div className="px-6 py-5 border-b border-border/40 bg-muted/20">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-foreground/10 to-foreground/5 flex items-center justify-center flex-shrink-0">
+                        <Mail className="w-5 h-5 text-foreground/50" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm truncate">{template.subject || "No subject"}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">From: Your Company</p>
+                        <p className="font-semibold text-base">{template.subject || "No subject"}</p>
+                        <p className="text-sm text-muted-foreground mt-1">From: Your Company</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Email Body */}
-                  <div className="p-5 max-h-[45vh] overflow-y-auto">{renderBody()}</div>
+                  <div className="p-6">{renderBody()}</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right: Stats & Actions */}
+          {/* Right: Stats Sidebar - fixed width */}
           <div
             className={cn(
-              "w-full lg:w-72 p-6 border-t lg:border-t-0 lg:border-l border-border/50 bg-muted/10",
+              "w-full lg:w-80 flex-shrink-0 p-8 border-t lg:border-t-0 lg:border-l border-border/50 bg-muted/10 overflow-auto",
               "transition-all duration-500 delay-100",
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+              isVisible ? "opacity-100" : "opacity-0",
             )}
           >
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="p-4 rounded-xl bg-background border border-border/40">
-                <Eye className="w-4 h-4 text-emerald-500 mb-2" />
-                <p className="text-2xl font-bold">{openRate.toFixed(1)}%</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Opens</p>
+            {/* Performance Section */}
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Performance</h3>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="p-5 rounded-xl bg-background border border-border/40">
+                <Eye className="w-5 h-5 text-emerald-500 mb-3" />
+                <p className="text-3xl font-bold">{openRate.toFixed(1)}%</p>
+                <p className="text-xs text-muted-foreground mt-1">Open Rate</p>
               </div>
-              <div className="p-4 rounded-xl bg-background border border-border/40">
-                <TrendingUp className="w-4 h-4 text-blue-500 mb-2" />
-                <p className="text-2xl font-bold">{replyRate.toFixed(1)}%</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Replies</p>
+              <div className="p-5 rounded-xl bg-background border border-border/40">
+                <TrendingUp className="w-5 h-5 text-blue-500 mb-3" />
+                <p className="text-3xl font-bold">{replyRate.toFixed(1)}%</p>
+                <p className="text-xs text-muted-foreground mt-1">Reply Rate</p>
               </div>
             </div>
 
-            {/* Details */}
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5" />
+            {/* Details Section */}
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Details</h3>
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
                   Created
                 </span>
-                <span className="font-medium">
+                <span className="text-sm font-medium">
                   {new Date(template.createdAt).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
@@ -1099,39 +1098,37 @@ export function TemplatePreviewDialog({ template, open, onOpenChange }: Template
                   })}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Used</span>
-                <span className="font-medium">{(template.timesUsed || 0).toLocaleString()} times</span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Times Used</span>
+                <span className="text-sm font-medium">{(template.timesUsed || 0).toLocaleString()}</span>
               </div>
             </div>
 
-            {/* Variables */}
+            {/* Variables Section */}
             {variablesArray.length > 0 && (
-              <div className="mb-6">
-                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+              <div className="mb-8">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
                   Variables
-                  <span className="px-1.5 py-0.5 bg-muted rounded text-[10px]">{variablesArray.length}</span>
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {variablesArray.slice(0, 6).map((v, i) => (
+                  <span className="px-2 py-0.5 bg-muted rounded-md text-xs font-normal">{variablesArray.length}</span>
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {variablesArray.map((v, i) => (
                     <code
                       key={i}
-                      className="px-2 py-1 text-[10px] bg-muted/50 border border-border/40 rounded font-mono"
+                      className="px-3 py-1.5 text-xs bg-muted/50 border border-border/40 rounded-lg font-mono"
                     >
                       {`{{${v.name}}}`}
                     </code>
                   ))}
-                  {variablesArray.length > 6 && (
-                    <span className="px-2 py-1 text-[10px] text-muted-foreground">+{variablesArray.length - 6}</span>
-                  )}
                 </div>
               </div>
             )}
 
             {/* Actions */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Button
-                className="w-full justify-between group"
+                size="lg"
+                className="w-full justify-between group text-base"
                 onClick={() => {
                   onOpenChange(false)
                   router.push(`/dashboard/templates/${template.id}/edit`)
@@ -1141,9 +1138,9 @@ export function TemplatePreviewDialog({ template, open, onOpenChange }: Template
                   <Pencil className="w-4 h-4" />
                   Edit Template
                 </span>
-                <ChevronRight className="w-4 h-4 opacity-50 group-hover:translate-x-0.5 transition-transform" />
+                <ChevronRight className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button variant="outline" className="w-full gap-2 bg-transparent">
+              <Button variant="outline" size="lg" className="w-full gap-2 bg-transparent text-base">
                 <Copy className="w-4 h-4" />
                 Duplicate
               </Button>
