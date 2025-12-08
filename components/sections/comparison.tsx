@@ -51,15 +51,15 @@ const features = [
     name: "Priority support",
     values: ["check", "minus", "minus", "check"],
   },
-  {
-    name: "White-label options",
-    values: ["check", "x", "check", "x"],
-  },
-  {
-    name: "Starting price",
-    values: ["$37/mo", "$47/mo", "$39/mo", "$59/mo"],
-    isPrice: true,
-  },
+  // {
+  //   name: "White-label options",
+  //   values: ["check", "x", "check", "x"],
+  // },
+  // {
+  //   name: "Starting price",
+  //   values: ["$37/mo", "$47/mo", "$39/mo", "$59/mo"],
+  //   isPrice: true,
+  // },
 ]
 
 export function Comparison() {

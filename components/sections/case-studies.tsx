@@ -7,7 +7,7 @@ const caseStudies = [
   {
     company: "TechScale Agency",
     industry: "Marketing Agency",
-    image: "/images/case-studies/techscale.jpg",
+    image: "/images/case-studies/techscale.jpeg",
     logo: "/images/case-studies/techscale-logo.jpg",
     quote: "We went from 5% reply rates to 28% in just 3 weeks. Mailfra changed everything for our outbound.",
     person: "Marcus Chen",
@@ -21,7 +21,7 @@ const caseStudies = [
   {
     company: "Velocity SaaS",
     industry: "B2B Software",
-    image: "/images/case-studies/velocity.jpg",
+    image: "/images/case-studies/velocity.png",
     logo: "/images/case-studies/velocity-logo.jpg",
     quote: "The inbox rotation alone saved us from burning through 50+ domains. Our deliverability is now bulletproof.",
     person: "Sarah Mitchell",
@@ -35,7 +35,7 @@ const caseStudies = [
   {
     company: "RecruitPro",
     industry: "Talent Acquisition",
-    image: "/images/case-studies/recruitpro.jpg",
+    image: "/images/case-studies/recruitpro.png",
     logo: "/images/case-studies/recruitpro-logo.jpg",
     quote: "We placed 3x more candidates in Q1 than all of last year. The AI personalization is insane.",
     person: "James Wilson",

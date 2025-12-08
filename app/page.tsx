@@ -35,7 +35,7 @@ export default function Home() {
       {/* <HowItWorks /> */}
       <GetStarted />
       <UseCases />
-      <Integrations />
+      {/* <Integrations /> */}
       <Comparison />
       <CaseStudies />
       <ROICalculator />
