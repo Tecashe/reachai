@@ -31,8 +31,8 @@ export default function Home() {
       <Features />
       <Stats />
       <EmailWarmup />
-      <DashboardPreview />
-      <HowItWorks />
+      {/* <DashboardPreview /> */}
+      {/* <HowItWorks /> */}
       <GetStarted />
       <UseCases />
       <Integrations />

@@ -29,19 +29,19 @@ export function GetStarted() {
       number: "01",
       title: "Connect your inboxes",
       description: "Link your Google Workspace or Microsoft 365 accounts in seconds. No technical setup required.",
-      image: "/images/step-connect.jpg",
+      image: "connect-accounts.png",
     },
     {
       number: "02",
       title: "Import your leads",
       description: "Upload a CSV, connect your CRM, or use our built-in lead finder to build your prospect list.",
-      image: "/images/step-leads.jpg",
+      image: "import-leads.png",
     },
     {
       number: "03",
       title: "Launch campaigns",
       description: "Write your sequence, set your schedule, and let our AI optimize deliverability automatically.",
-      image: "/images/step-launch.jpg",
+      image: "launch-optimize.png",
     },
   ]
 
