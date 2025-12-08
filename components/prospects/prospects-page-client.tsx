@@ -715,7 +715,13 @@ export function ProspectsPageClient({ initialFolders, initialTrashedCount }: Pro
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <CRMImportDialog />
+            {/* <CRMImportDialog /> */}
+
+            <CRMImportDialog 
+              folderId={selectedFolderId||""} 
+              onImportComplete={handleRefreshData} 
+            />
+
             <ApolloLeadFinderDialog subscriptionTier="FREE" researchCredits={0} />
             <SmartImportDialog
               folderId={selectedFolderId||""}
