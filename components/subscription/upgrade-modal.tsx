@@ -23,8 +23,8 @@ const PLAN_HIGHLIGHTS: Record<string, string[]> = {
 
 function useAnimatedPrice(targetPrice: number, duration = 400) {
   const [displayPrice, setDisplayPrice] = useState(targetPrice)
-  const animationRef = useRef<number>()
-  const startTimeRef = useRef<number>()
+  const animationRef = useRef<number | null>(null) // Added null type and initial value
+  const startTimeRef = useRef<number | null>(null) // Added null type and initial value
   const startPriceRef = useRef(targetPrice)
 
   useEffect(() => {
@@ -33,7 +33,7 @@ function useAnimatedPrice(targetPrice: number, duration = 400) {
     }
 
     startPriceRef.current = displayPrice
-    startTimeRef.current = undefined
+    startTimeRef.current = null // Changed from undefined to null
 
     const animate = (timestamp: number) => {
       if (!startTimeRef.current) startTimeRef.current = timestamp
@@ -239,4 +239,3 @@ export function UpgradeModal({ open, onOpenChange, currentTier, feature, message
     </Dialog>
   )
 }
-
