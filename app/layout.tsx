@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Mailfra - Modern Cold Email Platform",
   description:
     "The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.",
-  generator: "v0.app",
+  generator: "IamCasheMwangi",
   icons: {
     icon: [
       {
