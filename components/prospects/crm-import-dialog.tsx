@@ -206,17 +206,17 @@ import { cn } from "@/lib/utils"
 
 const CRM_PROVIDERS = [
   {
-    id: "hubspot",
+    id: "HUBSPOT",
     name: "HubSpot",
     logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
   },
   {
-    id: "salesforce",
+    id: "SALESFORCE",
     name: "Salesforce",
     logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/1280px-Salesforce.com_logo.svg.png",
   },
   {
-    id: "pipedrive",
+    id: "PIPEDRIVE",
     name: "Pipedrive",
     logo: "https://www.pipedrive.com/favicon.ico",
   },
@@ -252,12 +252,12 @@ export function CRMImportDialog({ trigger, onImportComplete }: CRMImportDialogPr
     try {
       const data = await getUserIntegrations()
       const crmIntegrations = data.filter(
-        (i: any) => ["hubspot", "salesforce", "pipedrive"].includes(i.type.toLowerCase()) && i.status === "CONNECTED",
+        (i: any) => ["HUBSPOT", "SALESFORCE", "PIPEDRIVE"].includes(i.type) && i.status === "CONNECTED",
       )
       setIntegrations(crmIntegrations)
 
       if (crmIntegrations.length === 1) {
-        setSelectedCrm(crmIntegrations[0].type.toLowerCase())
+        setSelectedCrm(crmIntegrations[0].type)
       }
     } catch (error) {
       console.error("Error loading integrations:", error)
@@ -273,7 +273,7 @@ export function CRMImportDialog({ trigger, onImportComplete }: CRMImportDialogPr
     setResult(null)
 
     try {
-      const integration = integrations.find((i: { type: string }) => i.type.toLowerCase() === selectedCrm.toLowerCase())
+      const integration = integrations.find((i: { type: string }) => i.type === selectedCrm)
 
       if (!integration) {
         setResult({ success: false, message: "Integration not found. Please reconnect your CRM." })
@@ -315,7 +315,7 @@ export function CRMImportDialog({ trigger, onImportComplete }: CRMImportDialogPr
     }
   }
 
-  const connectedCrmIds = integrations.map((i) => i.type.toLowerCase())
+  const connectedCrmIds = integrations.map((i) => i.type)
   const selectedProvider = CRM_PROVIDERS.find((p) => p.id === selectedCrm)
 
   return (
