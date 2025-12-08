@@ -190,6 +190,210 @@
 
 
 
+// "use client"
+
+// import { useState, useEffect } from "react"
+// import Image from "next/image"
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogDescription,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog"
+// import { Button } from "@/components/ui/button"
+// import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+// import { Progress } from "@/components/ui/progress"
+// import { Loader2, CheckCircle2, AlertCircle, Link2, Database } from "lucide-react"
+// import { toast } from "sonner"
+// import { getUserIntegrations } from "@/lib/actions/integrations"
+// import { syncCRMLeads } from "@/lib/actions/lead-finder"
+
+// const CRM_LOGOS: Record<string, string> = {
+//   HUBSPOT: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
+//   SALESFORCE:
+//     "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/1280px-Salesforce.com_logo.svg.png",
+//   PIPEDRIVE: "https://www.pipedrive.com/favicon.ico",
+// }
+
+// interface CRMImportDialogProps {
+//   onImportComplete?: () => void
+// }
+
+// export function CRMImportDialog({ onImportComplete }: CRMImportDialogProps) {
+//   const [open, setOpen] = useState(false)
+//   const [loading, setLoading] = useState(false)
+//   const [integrations, setIntegrations] = useState<any[]>([])
+//   const [selectedCRM, setSelectedCRM] = useState<string | null>(null)
+//   const [progress, setProgress] = useState(0)
+//   const [importedCount, setImportedCount] = useState(0)
+
+//   useEffect(() => {
+//     if (open) {
+//       loadIntegrations()
+//     }
+//   }, [open])
+
+//   const loadIntegrations = async () => {
+//     try {
+//       const userIntegrations = await getUserIntegrations()
+//       const crmIntegrations = userIntegrations.filter((i: any) =>
+//         ["HUBSPOT", "SALESFORCE", "PIPEDRIVE"].includes(i.type),
+//       )
+//       setIntegrations(crmIntegrations)
+//     } catch (error) {
+//       toast.error("Failed to load integrations")
+//     }
+//   }
+
+//   const handleImport = async (crmType: string) => {
+//     setLoading(true)
+//     setSelectedCRM(crmType)
+//     setProgress(10)
+
+//     try {
+//       toast.info(`Syncing leads from ${crmType}...`)
+//       setProgress(50)
+
+//       const result = await syncCRMLeads(crmType)
+
+//       if (!result.success) {
+//         toast.error(result.error || "Failed to sync leads")
+//         return
+//       }
+
+//       setImportedCount(result.imported || 0)
+//       setProgress(100)
+
+//       toast.success(`Successfully imported ${result.imported} leads from ${crmType}!`)
+
+//       if (onImportComplete) {
+//         onImportComplete()
+//       }
+
+//       setTimeout(() => {
+//         setOpen(false)
+//         setSelectedCRM(null)
+//         setProgress(0)
+//       }, 2000)
+//     } catch (error: any) {
+//       toast.error(error.message || "Failed to import leads")
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   return (
+//     <Dialog open={open} onOpenChange={setOpen}>
+//       <DialogTrigger asChild>
+//         <Button variant="outline">
+//           <Link2 className="mr-2 h-4 w-4" />
+//           Import from CRM
+//         </Button>
+//       </DialogTrigger>
+//       <DialogContent className="max-w-2xl">
+//         <DialogHeader>
+//           <DialogTitle className="flex items-center gap-2">
+//             <Database className="h-5 w-5 text-primary" />
+//             Import Leads from CRM
+//           </DialogTitle>
+//           <DialogDescription>
+//             Sync contacts from your connected CRM platforms directly into your campaigns
+//           </DialogDescription>
+//         </DialogHeader>
+
+//         {integrations.length === 0 ? (
+//           <Alert>
+//             <AlertCircle className="h-4 w-4" />
+//             <AlertTitle>No CRM Integrations Connected</AlertTitle>
+//             <AlertDescription>
+//               <p className="mb-3">Connect HubSpot, Salesforce, or Pipedrive to import leads from your CRM.</p>
+//               <Button size="sm" onClick={() => (window.location.href = "/dashboard/crm")}>
+//                 Connect CRM
+//               </Button>
+//             </AlertDescription>
+//           </Alert>
+//         ) : (
+//           <div className="space-y-4">
+//             {loading && selectedCRM ? (
+//               <div className="space-y-6 py-8">
+//                 <div className="flex flex-col items-center justify-center gap-4">
+//                   <div className="rounded-full bg-primary/10 p-4">
+//                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
+//                   </div>
+//                   <div className="text-center">
+//                     <h3 className="font-semibold">Importing Leads from {selectedCRM}</h3>
+//                     <p className="text-sm text-muted-foreground">This may take a few moments...</p>
+//                   </div>
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <div className="flex items-center justify-between text-sm">
+//                     <span className="text-muted-foreground">Progress</span>
+//                     <span className="font-medium">{progress}%</span>
+//                   </div>
+//                   <Progress value={progress} className="h-2" />
+//                 </div>
+
+//                 {progress === 100 && (
+//                   <Alert className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
+//                     <CheckCircle2 className="h-4 w-4 text-green-600" />
+//                     <AlertTitle className="text-green-900 dark:text-green-100">
+//                       Successfully Imported {importedCount} Leads
+//                     </AlertTitle>
+//                   </Alert>
+//                 )}
+//               </div>
+//             ) : (
+//               <div className="space-y-3">
+//                 <p className="text-sm text-muted-foreground">Select a CRM to import leads from:</p>
+//                 {integrations.map((integration) => {
+//                   const logo = CRM_LOGOS[integration.type]
+//                   return (
+//                     <div
+//                       key={integration.id}
+//                       className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+//                     >
+//                       <div className="flex items-center gap-3">
+//                         <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-white flex items-center justify-center p-1.5 border">
+//                           {logo ? (
+//                             <Image
+//                               src={logo || "/placeholder.svg"}
+//                               alt={integration.name || integration.type}
+//                               width={28}
+//                               height={28}
+//                               className="object-contain"
+//                             />
+//                           ) : (
+//                             <Database className="h-5 w-5 text-muted-foreground" />
+//                           )}
+//                         </div>
+//                         <div>
+//                           <p className="font-medium">{integration.name || integration.type}</p>
+//                           <p className="text-sm text-muted-foreground flex items-center gap-1">
+//                             <CheckCircle2 className="h-3 w-3 text-green-500" />
+//                             Connected {integration.lastSyncedAt ? "and synced" : ""}
+//                           </p>
+//                         </div>
+//                       </div>
+//                       <Button onClick={() => handleImport(integration.type)} disabled={loading}>
+//                         Import Leads
+//                       </Button>
+//                     </div>
+//                   )
+//                 })}
+//               </div>
+//             )}
+//           </div>
+//         )}
+//       </DialogContent>
+//     </Dialog>
+//   )
+// }
+
+
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -205,7 +409,21 @@ import {
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-import { Loader2, CheckCircle2, AlertCircle, Link2, Database } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Link2,
+  Database,
+  ArrowLeft,
+  AlertTriangle,
+  User,
+  Building,
+  Mail,
+} from "lucide-react"
 import { toast } from "sonner"
 import { getUserIntegrations } from "@/lib/actions/integrations"
 import { syncCRMLeads } from "@/lib/actions/lead-finder"
@@ -217,21 +435,49 @@ const CRM_LOGOS: Record<string, string> = {
   PIPEDRIVE: "https://www.pipedrive.com/favicon.ico",
 }
 
+interface CRMContact {
+  id: string
+  email: string | null
+  firstName: string | null
+  lastName: string | null
+  company: string | null
+  phone: string | null
+  title: string | null
+  quality: "high" | "medium" | "low"
+  missingFields: string[]
+}
+
 interface CRMImportDialogProps {
   onImportComplete?: () => void
 }
 
+type Step = "select" | "preview" | "importing" | "complete"
+
 export function CRMImportDialog({ onImportComplete }: CRMImportDialogProps) {
   const [open, setOpen] = useState(false)
+  const [step, setStep] = useState<Step>("select")
   const [loading, setLoading] = useState(false)
   const [integrations, setIntegrations] = useState<any[]>([])
   const [selectedCRM, setSelectedCRM] = useState<string | null>(null)
   const [progress, setProgress] = useState(0)
   const [importedCount, setImportedCount] = useState(0)
 
+  // Preview state
+  const [contacts, setContacts] = useState<CRMContact[]>([])
+  const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set())
+  const [summary, setSummary] = useState({ total: 0, high: 0, medium: 0, low: 0 })
+  const [excludeLowQuality, setExcludeLowQuality] = useState(true)
+
   useEffect(() => {
     if (open) {
       loadIntegrations()
+    } else {
+      // Reset state when dialog closes
+      setStep("select")
+      setSelectedCRM(null)
+      setContacts([])
+      setSelectedContacts(new Set())
+      setProgress(0)
     }
   }, [open])
 
@@ -247,42 +493,113 @@ export function CRMImportDialog({ onImportComplete }: CRMImportDialogProps) {
     }
   }
 
-  const handleImport = async (crmType: string) => {
+  const handlePreview = async (crmType: string) => {
     setLoading(true)
     setSelectedCRM(crmType)
+
+    try {
+      const response = await fetch(`/api/crm/preview?type=${crmType}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch contacts")
+      }
+
+      setContacts(data.contacts)
+      setSummary(data.summary)
+
+      const autoSelected = new Set<string>(
+        data.contacts.filter((c: CRMContact) => c.quality !== "low").map((c: CRMContact) => c.id),
+      )
+      setSelectedContacts(autoSelected)
+
+      setStep("preview")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to load contacts")
+      setSelectedCRM(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const toggleContact = (id: string) => {
+    const newSelected = new Set(selectedContacts)
+    if (newSelected.has(id)) {
+      newSelected.delete(id)
+    } else {
+      newSelected.add(id)
+    }
+    setSelectedContacts(newSelected)
+  }
+
+  const toggleAll = (quality?: "high" | "medium" | "low") => {
+    const filtered = quality ? contacts.filter((c) => c.quality === quality) : contacts
+    const allSelected = filtered.every((c) => selectedContacts.has(c.id))
+
+    const newSelected = new Set(selectedContacts)
+    filtered.forEach((c) => {
+      if (allSelected) {
+        newSelected.delete(c.id)
+      } else {
+        newSelected.add(c.id)
+      }
+    })
+    setSelectedContacts(newSelected)
+  }
+
+  const handleImport = async () => {
+    if (!selectedCRM || selectedContacts.size === 0) return
+
+    setStep("importing")
     setProgress(10)
 
     try {
-      toast.info(`Syncing leads from ${crmType}...`)
+      toast.info(`Importing ${selectedContacts.size} contacts from ${selectedCRM}...`)
       setProgress(50)
 
-      const result = await syncCRMLeads(crmType)
+      const result = await syncCRMLeads(selectedCRM)
 
       if (!result.success) {
         toast.error(result.error || "Failed to sync leads")
+        setStep("preview")
         return
       }
 
       setImportedCount(result.imported || 0)
       setProgress(100)
+      setStep("complete")
 
-      toast.success(`Successfully imported ${result.imported} leads from ${crmType}!`)
+      toast.success(`Successfully imported ${result.imported} leads from ${selectedCRM}!`)
 
       if (onImportComplete) {
         onImportComplete()
       }
-
-      setTimeout(() => {
-        setOpen(false)
-        setSelectedCRM(null)
-        setProgress(0)
-      }, 2000)
     } catch (error: any) {
       toast.error(error.message || "Failed to import leads")
-    } finally {
-      setLoading(false)
+      setStep("preview")
     }
   }
+
+  const getQualityBadge = (quality: "high" | "medium" | "low") => {
+    switch (quality) {
+      case "high":
+        return <Badge className="bg-success/20 text-success border-success/30">High Quality</Badge>
+      case "medium":
+        return (
+          <Badge variant="outline" className="border-yellow-500/30 text-yellow-600 dark:text-yellow-400">
+            Medium
+          </Badge>
+        )
+      case "low":
+        return (
+          <Badge variant="outline" className="border-destructive/30 text-destructive">
+            Low Quality
+          </Badge>
+        )
+    }
+  }
+
+  const filteredContacts = excludeLowQuality ? contacts.filter((c) => c.quality !== "low") : contacts
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -292,62 +609,40 @@ export function CRMImportDialog({ onImportComplete }: CRMImportDialogProps) {
           Import from CRM
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" />
-            Import Leads from CRM
+            {step === "select" && "Import Leads from CRM"}
+            {step === "preview" && "Preview Contacts"}
+            {step === "importing" && "Importing Leads"}
+            {step === "complete" && "Import Complete"}
           </DialogTitle>
           <DialogDescription>
-            Sync contacts from your connected CRM platforms directly into your campaigns
+            {step === "select" && "Sync contacts from your connected CRM platforms"}
+            {step === "preview" && `Review contacts from ${selectedCRM} before importing`}
+            {step === "importing" && "Please wait while we import your contacts..."}
+            {step === "complete" && "Your contacts have been imported successfully"}
           </DialogDescription>
         </DialogHeader>
 
-        {integrations.length === 0 ? (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>No CRM Integrations Connected</AlertTitle>
-            <AlertDescription>
-              <p className="mb-3">Connect HubSpot, Salesforce, or Pipedrive to import leads from your CRM.</p>
-              <Button size="sm" onClick={() => (window.location.href = "/dashboard/crm")}>
-                Connect CRM
-              </Button>
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <div className="space-y-4">
-            {loading && selectedCRM ? (
-              <div className="space-y-6 py-8">
-                <div className="flex flex-col items-center justify-center gap-4">
-                  <div className="rounded-full bg-primary/10 p-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-semibold">Importing Leads from {selectedCRM}</h3>
-                    <p className="text-sm text-muted-foreground">This may take a few moments...</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{progress}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
-                </div>
-
-                {progress === 100 && (
-                  <Alert className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertTitle className="text-green-900 dark:text-green-100">
-                      Successfully Imported {importedCount} Leads
-                    </AlertTitle>
-                  </Alert>
-                )}
-              </div>
+        {/* Step: Select CRM */}
+        {step === "select" && (
+          <>
+            {integrations.length === 0 ? (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>No CRM Integrations Connected</AlertTitle>
+                <AlertDescription>
+                  <p className="mb-3">Connect HubSpot, Salesforce, or Pipedrive to import leads from your CRM.</p>
+                  <Button size="sm" onClick={() => (window.location.href = "/dashboard/crm")}>
+                    Connect CRM
+                  </Button>
+                </AlertDescription>
+              </Alert>
             ) : (
               <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">Select a CRM to import leads from:</p>
+                <p className="text-sm text-muted-foreground">Select a CRM to preview and import leads from:</p>
                 {integrations.map((integration) => {
                   const logo = CRM_LOGOS[integration.type]
                   return (
@@ -372,28 +667,194 @@ export function CRMImportDialog({ onImportComplete }: CRMImportDialogProps) {
                         <div>
                           <p className="font-medium">{integration.name || integration.type}</p>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
-                            <CheckCircle2 className="h-3 w-3 text-green-500" />
-                            Connected {integration.lastSyncedAt ? "and synced" : ""}
+                            <CheckCircle2 className="h-3 w-3 text-success" />
+                            Connected
                           </p>
                         </div>
                       </div>
-                      <Button onClick={() => handleImport(integration.type)} disabled={loading}>
-                        Import Leads
+                      <Button onClick={() => handlePreview(integration.type)} disabled={loading}>
+                        {loading && selectedCRM === integration.type ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          "Preview Contacts"
+                        )}
                       </Button>
                     </div>
                   )
                 })}
               </div>
             )}
+          </>
+        )}
+
+        {/* Step: Preview Contacts */}
+        {step === "preview" && (
+          <div className="flex flex-col flex-1 min-h-0 space-y-4">
+            {/* Summary Cards */}
+            <div className="grid grid-cols-4 gap-3">
+              <div className="rounded-lg border bg-card/50 p-3 text-center">
+                <p className="text-2xl font-bold">{summary.total}</p>
+                <p className="text-xs text-muted-foreground">Total</p>
+              </div>
+              <div className="rounded-lg border bg-success/10 border-success/20 p-3 text-center">
+                <p className="text-2xl font-bold text-success">{summary.high}</p>
+                <p className="text-xs text-muted-foreground">High Quality</p>
+              </div>
+              <div className="rounded-lg border bg-yellow-500/10 border-yellow-500/20 p-3 text-center">
+                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{summary.medium}</p>
+                <p className="text-xs text-muted-foreground">Medium</p>
+              </div>
+              <div className="rounded-lg border bg-destructive/10 border-destructive/20 p-3 text-center">
+                <p className="text-2xl font-bold text-destructive">{summary.low}</p>
+                <p className="text-xs text-muted-foreground">Low Quality</p>
+              </div>
+            </div>
+
+            {/* Low Quality Warning */}
+            {summary.low > 0 && (
+              <Alert variant="destructive" className="bg-destructive/10 border-destructive/20">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Low Quality Contacts Detected</AlertTitle>
+                <AlertDescription className="flex items-center justify-between">
+                  <span>{summary.low} contacts are missing email addresses and cannot be contacted.</span>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="excludeLow"
+                      checked={excludeLowQuality}
+                      onCheckedChange={(checked) => setExcludeLowQuality(checked as boolean)}
+                    />
+                    <label htmlFor="excludeLow" className="text-sm cursor-pointer">
+                      Hide low quality
+                    </label>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Contacts List */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {selectedContacts.size} of {filteredContacts.length} contacts selected
+              </p>
+              <Button variant="ghost" size="sm" onClick={() => toggleAll()}>
+                {filteredContacts.every((c) => selectedContacts.has(c.id)) ? "Deselect All" : "Select All"}
+              </Button>
+            </div>
+
+            <ScrollArea className="flex-1 min-h-0 border rounded-lg">
+              <div className="divide-y">
+                {filteredContacts.map((contact) => (
+                  <div
+                    key={contact.id}
+                    className={`flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer ${
+                      selectedContacts.has(contact.id) ? "bg-primary/5" : ""
+                    }`}
+                    onClick={() => toggleContact(contact.id)}
+                  >
+                    <Checkbox checked={selectedContacts.has(contact.id)} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium truncate">
+                          {contact.firstName || contact.lastName
+                            ? `${contact.firstName || ""} ${contact.lastName || ""}`.trim()
+                            : "Unknown Name"}
+                        </p>
+                        {getQualityBadge(contact.quality)}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mt-0.5">
+                        {contact.email ? (
+                          <span className="flex items-center gap-1 truncate">
+                            <Mail className="h-3 w-3" />
+                            {contact.email}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-destructive">
+                            <Mail className="h-3 w-3" />
+                            No email
+                          </span>
+                        )}
+                        {contact.company && (
+                          <span className="flex items-center gap-1 truncate">
+                            <Building className="h-3 w-3" />
+                            {contact.company}
+                          </span>
+                        )}
+                        {contact.title && (
+                          <span className="flex items-center gap-1 truncate">
+                            <User className="h-3 w-3" />
+                            {contact.title}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-2 border-t">
+              <Button variant="ghost" onClick={() => setStep("select")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+              <Button onClick={handleImport} disabled={selectedContacts.size === 0}>
+                Import {selectedContacts.size} Contacts
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Step: Importing */}
+        {step === "importing" && (
+          <div className="space-y-6 py-8">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="rounded-full bg-primary/10 p-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-semibold">Importing Contacts from {selectedCRM}</h3>
+                <p className="text-sm text-muted-foreground">This may take a few moments...</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-medium">{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          </div>
+        )}
+
+        {/* Step: Complete */}
+        {step === "complete" && (
+          <div className="space-y-6 py-8">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="rounded-full bg-success/10 p-4">
+                <CheckCircle2 className="h-8 w-8 text-success" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-semibold">Import Complete!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Successfully imported {importedCount} contacts from {selectedCRM}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <Button onClick={() => setOpen(false)}>Done</Button>
+            </div>
           </div>
         )}
       </DialogContent>
     </Dialog>
   )
 }
-
-
-
 
 
 
