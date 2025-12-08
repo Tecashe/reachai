@@ -288,31 +288,31 @@ const features = [
     title: "AI-Powered Warmup",
     description:
       "Automatically warm up new email accounts with realistic conversations. Our AI mimics natural email patterns to build sender reputation fast.",
-    image: "email-warmup.png",
+    image: "email-warmup.jpg",
   },
   {
     title: "Smart Inbox Rotation",
     description:
       "Distribute sends across your accounts intelligently. Avoid spam triggers by spreading volume and maintaining healthy sending limits.",
-    image: "inbox-rotation.png",
+    image: "inbox-rotation.jpg",
   },
   {
     title: "Deliverability Monitoring",
     description:
       "Real-time insights into your email health. Track inbox placement, bounce rates, and spam scores across all campaigns.",
-    image: "deliverability-monitoring.png",
+    image: "deliverability-monitoring.jpg",
   },
   {
     title: "AI Personalization",
     description:
       "Generate hyper-personalized email content at scale. Our AI researches prospects and crafts messages that feel genuinely human.",
-    image: "ai-personalization.png",
+    image: "ai-personalization.jpg",
   },
   {
     title: "Advanced Analytics",
     description:
       "Deep insights into campaign performance. Track opens, replies, conversions, and revenue attribution across your entire pipeline.",
-    image: "advanced-analytics.png",
+    image: "advanced-analytics.jpg",
   },
 ]
 
