@@ -10,7 +10,7 @@ import PageFooter from "@/components/shared/page-footer"
 
 const team = [
   {
-    name: "Alex Chen",
+    name: "Simon Mwangi",
     role: "Co-founder & CEO",
     image: "/images/team/alex-chen.jpg",
     bio: "Former VP of Sales at Salesforce. 15+ years in B2B sales.",
@@ -18,7 +18,7 @@ const team = [
     twitter: "#",
   },
   {
-    name: "Sarah Mitchell",
+    name: "Maryann Nyambura",
     role: "Co-founder & CTO",
     image: "/images/team/sarah-mitchell.jpg",
     bio: "Ex-Google engineer. Built email infrastructure at scale.",
@@ -209,7 +209,7 @@ export default function AboutPage() {
                 }`}
               >
                 <p>
-                  In 2021, our founders Alex and Sarah were running a sales consulting agency. They watched their
+                  In 2021, our founders Cashe and Maryann were running a sales consulting agency. They watched their
                   clients struggle daily with the same problem: emails weren&apos;t landing.
                 </p>
                 <p>
