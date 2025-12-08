@@ -15,18 +15,18 @@ const features = [
     name: "Unlimited email accounts",
     values: ["check", "check", "check", "x"],
   },
-  {
-    name: "AI-powered warmup",
-    values: ["check", "check", "check", "check"],
-  },
+  // {
+  //   name: "AI-powered warmup",
+  //   values: ["check", "check", "check", "check"],
+  // },
   {
     name: "Smart inbox rotation",
     values: ["check", "check", "check", "minus"],
   },
-  {
-    name: "Advanced analytics dashboard",
-    values: ["check", "minus", "check", "check"],
-  },
+  // {
+  //   name: "Advanced analytics dashboard",
+  //   values: ["check", "minus", "check", "check"],
+  // },
   {
     name: "A/B testing",
     values: ["check", "check", "minus", "check"],
@@ -51,15 +51,15 @@ const features = [
     name: "Priority support",
     values: ["check", "minus", "minus", "check"],
   },
-  // {
-  //   name: "White-label options",
-  //   values: ["check", "x", "check", "x"],
-  // },
-  // {
-  //   name: "Starting price",
-  //   values: ["$37/mo", "$47/mo", "$39/mo", "$59/mo"],
-  //   isPrice: true,
-  // },
+  {
+    name: "White-label options",
+    values: ["check", "x", "check", "x"],
+  },
+  {
+    name: "Starting price",
+    values: ["$37/mo", "$47/mo", "$39/mo", "$59/mo"],
+    isPrice: true,
+  },
 ]
 
 export function Comparison() {
