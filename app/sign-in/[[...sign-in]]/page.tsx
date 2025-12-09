@@ -303,12 +303,12 @@ export default function SignInPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-cyan-500/10 blur-3xl rounded-full" />
 
         {/* Logo */}
-        <div className="absolute top-8 left-8 flex items-center gap-3">
+        {/* <div className="absolute top-8 left-8 flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
             <Mail className="h-5 w-5 text-[#0a0a0a]" />
           </div>
           <span className="font-semibold text-xl text-white">ColdFlow</span>
-        </div>
+        </div> */}
 
         {/* Morphing Text */}
         <div className="relative z-10 px-12 max-w-lg text-center h-40 flex flex-col items-center justify-center">
@@ -346,47 +346,10 @@ export default function SignInPage() {
             ))}
           </div>
         </div>
-
-        {/* Bottom stats */}
-        <div className="absolute bottom-12 left-12 right-12">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex -space-x-2">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="h-8 w-8 rounded-full bg-gradient-to-br from-white/20 to-white/5 border-2 border-[#0a0a0a]"
-                  />
-                ))}
-              </div>
-              <div>
-                <div className="text-sm font-medium text-white">10,000+ teams</div>
-                <div className="text-xs text-white/50">trust ColdFlow</div>
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-white">47%</div>
-                <div className="text-xs text-white/50">Open rate</div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-white">12%</div>
-                <div className="text-xs text-white/50">Reply rate</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Right side - Light with Sign in form */}
       <div className="flex items-center justify-center p-6 sm:p-12 bg-white relative">
-        <div className="absolute top-6 right-6 hidden lg:flex items-center gap-4">
-          <span className="text-sm text-neutral-500">{"Don't have an account?"}</span>
-          <Link href="/sign-up" className="text-sm font-medium text-neutral-900 hover:underline">
-            Sign up
-          </Link>
-        </div>
-
         <div className="w-full max-w-md space-y-8">
           <div className="lg:hidden text-center mb-8">
             <Link
@@ -420,15 +383,6 @@ export default function SignInPage() {
               }}
             />
           </motion.div>
-        </div>
-
-        {/* Bottom trust indicators */}
-        <div className="absolute bottom-6 left-8 right-8 hidden lg:flex items-center justify-center gap-6 text-xs text-neutral-400">
-          <span>SOC 2 Compliant</span>
-          <span className="h-1 w-1 rounded-full bg-neutral-300" />
-          <span>GDPR Ready</span>
-          <span className="h-1 w-1 rounded-full bg-neutral-300" />
-          <span>256-bit encryption</span>
         </div>
       </div>
     </div>
