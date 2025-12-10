@@ -1047,7 +1047,7 @@ class AutomationRuleExecutor {
       where: { id: prospect.id },
       data: {
         campaignId: newCampaignId,
-        currentStep: 0,
+        currentStep: 1,
         status: "ACTIVE",
       },
     })

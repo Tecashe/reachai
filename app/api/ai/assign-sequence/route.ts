@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         data: {
           campaignId: sequenceId,
           status: "ACTIVE",
-          currentStep: 0,
+          currentStep: 1,
         },
       })
 

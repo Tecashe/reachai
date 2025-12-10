@@ -131,7 +131,7 @@ class AISequenceAssigner {
           data: {
             campaignId: result.recommendedSequenceId,
             status: "ACTIVE",
-            currentStep: 0,
+            currentStep: 1,
           },
         })
 

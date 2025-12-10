@@ -1536,7 +1536,7 @@ export async function createCampaign(formData: FormData) {
                   qualityScore: prospect.qualityScore,
                   personalizationTokens: prospect.personalizationTokens||"",
                   status: "ACTIVE",
-                  currentStep: 0,
+                  currentStep: 1,
                 },
               })
               importedCount++
