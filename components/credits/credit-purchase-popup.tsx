@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CREDIT_PACKAGES, type CreditPackage } from "@/lib/constants"
+import { WaveLoader } from "../loader/wave-loader"
 
 type CreditPurchasePopupProps = {
   isOpen: boolean
@@ -221,7 +222,8 @@ const CardForm = ({
           <Button type="submit" disabled={isProcessing || !stripe || !elements} className="flex-1 h-12 rounded-xl">
             {isProcessing ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {/* <Loader2 className="mr-2 h-4 w-4 animate-spin" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Processing...
               </>
             ) : (

@@ -943,6 +943,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Inbox, Send, TrendingUp, CheckCircle2, AlertCircle, Plus, Trash2, Mail, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface WarmupEmail {
   id: string
@@ -1066,7 +1067,8 @@ export function WarmupDashboard() {
   if (loading && !stats) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        {/* <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> */}
+        <WaveLoader size="sm" bars={8} gap="tight" />
       </div>
     )
   }
@@ -1313,7 +1315,7 @@ export function WarmupDashboard() {
                   </div>
 
                   <Button onClick={handleAddEmail} disabled={loading} className="w-full">
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
                     Add Email
                   </Button>
                 </div>

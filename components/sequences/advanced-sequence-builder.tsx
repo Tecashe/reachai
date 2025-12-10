@@ -1066,6 +1066,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SequenceAutomationRule {
   id?: string
@@ -1186,7 +1187,8 @@ export function AdvancedSequenceBuilder({ campaignId }: AdvancedSequenceBuilderP
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          {/* <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </CardContent>
       </Card>
     )
@@ -1207,7 +1209,7 @@ export function AdvancedSequenceBuilder({ campaignId }: AdvancedSequenceBuilderP
             <div className="flex items-center gap-2">
               {hasChanges && (
                 <Button onClick={saveRules} disabled={isSaving}>
-                  {isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                  {isSaving ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Save className="h-4 w-4 mr-2" />}
                   Save Changes
                 </Button>
               )}

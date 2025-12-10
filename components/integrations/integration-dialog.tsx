@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { connectIntegration } from "@/lib/actions/integrations"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface IntegrationDialogProps {
   integration: {
@@ -97,7 +98,7 @@ export function IntegrationDialog({ integration, isConnected, open, onOpenChange
                 sign in and grant permissions.
               </p>
               <Button onClick={handleConnect} className="w-full" disabled={isConnecting}>
-                {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isConnecting && <WaveLoader size="sm" bars={8} gap="tight" />}
                 Authenticate with {integration.name}
               </Button>
             </div>
@@ -115,7 +116,7 @@ export function IntegrationDialog({ integration, isConnected, open, onOpenChange
                 <p className="text-xs text-muted-foreground">Your API key will be encrypted and stored securely.</p>
               </div>
               <Button onClick={handleConnect} className="w-full" disabled={isConnecting || !apiKey.trim()}>
-                {isConnecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isConnecting && <WaveLoader size="sm" bars={8} gap="tight" />}
                 Connect {integration.name}
               </Button>
             </div>

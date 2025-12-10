@@ -23,6 +23,7 @@ import { findLeadsWithApollo, enrichLeadsWithAI } from "@/lib/actions/lead-finde
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface ApolloLeadFinderDialogProps {
   subscriptionTier: string
@@ -317,7 +318,8 @@ export function ApolloLeadFinderDialog({
           <div className="space-y-6 py-8">
             <div className="flex flex-col items-center justify-center gap-4">
               <div className="rounded-full bg-primary/10 p-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                {/* <Loader2 className="h-8 w-8 animate-spin text-primary" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
               </div>
               <div className="text-center">
                 <h3 className="font-semibold">Finding Your Perfect Leads</h3>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Loader2, Send, Clock, ListChecks } from "lucide-react"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SequenceSelectorDialogProps {
   isOpen: boolean
@@ -108,7 +109,8 @@ export function SequenceSelectorDialog({ isOpen, onClose, replyIds, onSuccess }:
             <Label className="text-sm font-medium">Campaign with Sequence</Label>
             {isLoading ? (
               <div className="flex items-center justify-center py-8 rounded-xl bg-muted/30 border border-border/50">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                {/* <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
               </div>
             ) : (
               <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
@@ -156,7 +158,7 @@ export function SequenceSelectorDialog({ isOpen, onClose, replyIds, onSuccess }:
               disabled={isSubmitting || !selectedCampaign}
               className="h-11 px-5 rounded-xl gap-2 shadow-sm hover:shadow-md transition-all"
             >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {isSubmitting ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Send className="h-4 w-4" />}
               Add to Sequence
             </Button>
           </div>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle2, XCircle, Loader2, Users } from "lucide-react"
 import { acceptInvitation, declineInvitation } from "@/lib/actions/team"
 import { useAuth } from "@clerk/nextjs"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface InvitationAcceptanceProps {
   token: string
@@ -36,8 +37,8 @@ export function InvitationAcceptance({ token }: InvitationAcceptanceProps) {
       setStatus("success")
       setMessage("Invitation accepted successfully!")
       setWorkspaceInfo({
-        workspaceName: result.workspaceName || "the workspace",
-        role: result.role || "MEMBER",
+        workspaceName: "the workspace",
+        role:"MEMBER",
       })
 
       // Redirect to dashboard after 2 seconds
@@ -83,7 +84,8 @@ export function InvitationAcceptance({ token }: InvitationAcceptanceProps) {
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-sm text-muted-foreground mb-4">Redirecting you to the dashboard...</p>
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          {/* <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </CardContent>
       </Card>
     )
@@ -129,7 +131,7 @@ export function InvitationAcceptance({ token }: InvitationAcceptanceProps) {
           <Button onClick={handleAccept} disabled={loading} size="lg" className="w-full">
             {loading && status === "accepting" ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Accepting...
               </>
             ) : (
@@ -149,7 +151,7 @@ export function InvitationAcceptance({ token }: InvitationAcceptanceProps) {
           >
             {loading && status === "declining" ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Declining...
               </>
             ) : (

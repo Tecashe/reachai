@@ -26,6 +26,7 @@ import {
   Loader2,
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface EmailAnalysis {
   predictedOpenRate: number
@@ -129,7 +130,8 @@ export function EmailPerformancePredictor() {
           <Button onClick={handleAnalyze} disabled={analyzing || !subject || !body} className="w-full" size="lg">
             {analyzing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Analyzing with AI...
               </>
             ) : (

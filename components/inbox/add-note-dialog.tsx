@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2, StickyNote, Save } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface AddNoteDialogProps {
   isOpen: boolean
@@ -85,7 +86,7 @@ export function AddNoteDialog({ isOpen, onClose, replyIds, onSuccess }: AddNoteD
               disabled={isSubmitting || !note.trim()}
               className="h-11 px-5 rounded-xl gap-2 shadow-sm hover:shadow-md transition-all"
             >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isSubmitting ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Save className="h-4 w-4" />}
               Save Note
             </Button>
           </div>

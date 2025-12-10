@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, CheckCircle2, XCircle, PlayCircle } from "lucide-react"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 const cronJobs = [
   { name: "Send Emails", path: "/api/cron/send-emails", description: "Process and send scheduled emails" },
@@ -109,7 +110,8 @@ export default function CronTestPage() {
                     <Button size="sm" onClick={() => testCronJob(job.path)} disabled={result.status === "loading"}>
                       {result.status === "loading" ? (
                         <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          {/* <Loader2 className="w-4 h-4 mr-2 animate-spin" /> */}
+                          <WaveLoader size="sm" bars={8} gap="tight" />
                           Testing...
                         </>
                       ) : (

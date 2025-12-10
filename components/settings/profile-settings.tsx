@@ -206,6 +206,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Camera, Loader2 } from "lucide-react"
 import { updateProfile, getUser } from "@/lib/actions/settings"
 import { useUser } from "@clerk/nextjs"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface ProfileSettingsProps {
   user: {
@@ -247,7 +248,8 @@ export function ProfileSettings({ user: initialUser }: ProfileSettingsProps) {
     return (
       <Card>
         <CardContent className="p-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+          {/* <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </CardContent>
       </Card>
     )
@@ -304,7 +306,7 @@ export function ProfileSettings({ user: initialUser }: ProfileSettingsProps) {
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Saving...
                 </>
               ) : (

@@ -12,6 +12,7 @@ import { getFolders } from "@/lib/actions/prospect-folders"
 import { getProspects, uploadProspects } from "@/lib/actions/prospects"
 import { DuplicateDetectorDialog } from "@/components/prospects/duplicate-detector-dialog"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface Folder {
   id: string
@@ -207,7 +208,8 @@ export function FolderImport({ campaignId, onImportComplete }: FolderImportProps
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        {/* <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> */}
+        <WaveLoader size="sm" bars={8} gap="tight" />
       </div>
     )
   }
@@ -289,7 +291,8 @@ export function FolderImport({ campaignId, onImportComplete }: FolderImportProps
         <Button onClick={handleImport} disabled={selectedFolderIds.length === 0 || importing}>
           {importing ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+              <WaveLoader size="sm" bars={8} gap="tight" />
               Importing...
             </>
           ) : (

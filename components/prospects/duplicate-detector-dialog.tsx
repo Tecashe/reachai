@@ -173,6 +173,7 @@ import { CheckCircle2, AlertTriangle, Trash2, Check, ChevronLeft, ChevronRight, 
 import { cn } from "@/lib/utils"
 import { mergeDuplicates } from "@/lib/services/duplicate-detector"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface DuplicateGroup {
   email: string
@@ -416,7 +417,7 @@ export function DuplicateDetectorDialog({
                 <Button onClick={handleMerge} disabled={!selectedToKeep || resolving}>
                   {resolving ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <WaveLoader size="sm" bars={8} gap="tight" />
                       Merging...
                     </>
                   ) : (

@@ -198,6 +198,7 @@ import { Brain, Loader2, CheckCircle2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface BatchResearchDialogProps {
   campaignId: string
@@ -297,7 +298,8 @@ export function BatchResearchDialog({ campaignId, prospectCount }: BatchResearch
             {researching && (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  {/* <Loader2 className="h-5 w-5 animate-spin text-primary" /> */}
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">
                       Researching prospects... {stats.completed}/{stats.total}
@@ -332,7 +334,8 @@ export function BatchResearchDialog({ campaignId, prospectCount }: BatchResearch
               <Button onClick={handleResearch} disabled={researching} className="flex-1">
                 {researching ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                     Researching...
                   </>
                 ) : (

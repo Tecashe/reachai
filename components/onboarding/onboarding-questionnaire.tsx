@@ -1199,6 +1199,7 @@ import { toast } from "sonner"
 import { Loader2, Sparkles, Mail, ArrowRight, Zap } from "lucide-react"
 import { GmailAppPasswordDialog } from "@/components/email-connection/gmail-app-password-dialog"
 import { GoogleWorkspaceInstructions } from "@/components/email-connection/google-workspace-instructions"
+import { WaveLoader } from "../loader/wave-loader"
 
 export function OnboardingQuestionnaire() {
   const router = useRouter()
@@ -1420,7 +1421,8 @@ export function OnboardingQuestionnaire() {
               <Button onClick={handleSubmit} className="flex-1 h-12" disabled={!formData.monthlyVolume || loading}>
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {/* <Loader2 className="mr-2 h-4 w-4 animate-spin" /> */}
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                     Setting up...
                   </>
                 ) : (

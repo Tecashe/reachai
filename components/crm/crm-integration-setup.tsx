@@ -823,6 +823,7 @@ import {
   Clock,
   Database,
 } from "lucide-react"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface CrmIntegrationSetupProps {
   onSuccess?: () => void
@@ -1048,7 +1049,8 @@ export function CrmIntegrationSetup({ onSuccess }: CrmIntegrationSetupProps) {
                 >
                   {connecting === provider.id ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                      <WaveLoader size="sm" bars={8} gap="tight" />
                       Connecting...
                     </>
                   ) : (

@@ -202,6 +202,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { updateEmailSettings, getUser } from "@/lib/actions/settings"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface EmailSettingsProps {
   settings: {
@@ -238,7 +239,8 @@ export function EmailSettings({ settings: initialSettings }: EmailSettingsProps)
     return (
       <Card>
         <CardContent className="p-12 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+          {/* <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </CardContent>
       </Card>
     )
@@ -288,7 +290,7 @@ export function EmailSettings({ settings: initialSettings }: EmailSettingsProps)
             <Button type="submit" disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Saving...
                 </>
               ) : (

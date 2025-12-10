@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle2, Copy, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { dnsVerificationService } from "@/lib/services/dns-verification"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface DomainSetupStepProps {
   onComplete: (domain: string) => void
@@ -101,7 +102,8 @@ export function DomainSetupStep({ onComplete, onBack }: DomainSetupStepProps) {
             <Button onClick={handleAddDomain} className="flex-1 h-12" disabled={!domain || loading}>
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {/* <Loader2 className="mr-2 h-4 w-4 animate-spin" /> */}
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Generating...
                 </>
               ) : (
@@ -173,7 +175,8 @@ export function DomainSetupStep({ onComplete, onBack }: DomainSetupStepProps) {
               <Button onClick={handleVerify} className="flex-1 h-12" disabled={loading}>
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {/* <Loader2 className="mr-2 h-4 w-4 animate-spin" /> */}
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                     Verifying...
                   </>
                 ) : (

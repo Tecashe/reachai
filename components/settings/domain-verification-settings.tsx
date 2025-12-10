@@ -241,6 +241,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle2, XCircle, AlertCircle, Plus, RefreshCw, ExternalLink, Shield, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface Domain {
   id: string
@@ -399,7 +400,8 @@ export function DomainVerification() {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          {/* <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </CardContent>
       </Card>
     )
@@ -431,7 +433,7 @@ export function DomainVerification() {
               />
             </div>
             <Button onClick={addDomain} className="mt-auto" disabled={isAdding}>
-              {isAdding ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+              {isAdding ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Plus className="h-4 w-4 mr-2" />}
               Add Domain
             </Button>
           </div>
@@ -492,7 +494,7 @@ export function DomainVerification() {
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={() => verifyDomain(d.id)} disabled={verifyingId === d.id}>
                       {verifyingId === d.id ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <WaveLoader size="sm" bars={8} gap="tight" />
                       ) : (
                         <RefreshCw className="h-4 w-4 mr-2" />
                       )}

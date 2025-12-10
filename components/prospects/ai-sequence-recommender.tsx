@@ -222,6 +222,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Sparkles, GitBranch, CheckCircle2, Loader2, AlertCircle, ArrowRight } from 'lucide-react'
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface AIRecommendation {
   prospectId: string
@@ -320,7 +321,8 @@ export function AISequenceRecommender({ prospectIds, onAssign }: AISequenceRecom
             <Button onClick={analyzeProspects} disabled={isAnalyzing || prospectIds.length === 0}>
               {isAnalyzing ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Analyzing...
                 </>
               ) : (

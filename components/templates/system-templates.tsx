@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import type { EnhancedEmailTemplate } from "@/lib/types"
 import { cloneSystemTemplate } from "@/lib/actions/templates"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SystemTemplatesProps {
   templates: EnhancedEmailTemplate[]
@@ -138,7 +139,8 @@ export function SystemTemplates({ templates }: SystemTemplatesProps) {
                     disabled={isPending && cloningId === template.id}
                   >
                     {isPending && cloningId === template.id ? (
-                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      // <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                      <WaveLoader size="sm" bars={8} gap="tight" />
                     ) : (
                       <Download className="w-3.5 h-3.5 mr-1.5" />
                     )}

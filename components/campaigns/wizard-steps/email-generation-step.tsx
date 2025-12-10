@@ -690,6 +690,7 @@ import { ArrowLeft, Loader2, Sparkles, Eye, RefreshCw, Copy, Check } from "lucid
 import { toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Mail } from "lucide-react"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface EmailGenerationStepProps {
   campaign: any
@@ -959,7 +960,8 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          {/* <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
           <p className="text-muted-foreground">Loading prospects...</p>
         </div>
       </div>
@@ -1224,7 +1226,7 @@ export function EmailGenerationStep({ campaign, onNext, onBack }: EmailGeneratio
           >
             {isGenerating ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Generating {Object.keys(generatedEmails).length}/{prospects.length}...
               </>
             ) : useManualMode ? (

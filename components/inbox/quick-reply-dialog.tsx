@@ -169,6 +169,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Send, Wand2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface QuickReplyDialogProps {
   isOpen: boolean
@@ -292,7 +293,7 @@ export function QuickReplyDialog({
               variant="outline"
               className="gap-2 h-10 rounded-xl bg-background/50 border-border/50 hover:bg-accent"
             >
-              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+              {isGenerating ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Wand2 className="h-4 w-4" />}
               Generate with AI
             </Button>
           </div>
@@ -324,7 +325,7 @@ export function QuickReplyDialog({
               disabled={isSending}
               className="h-11 px-6 rounded-xl gap-2 shadow-sm hover:shadow-md transition-all"
             >
-              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {isSending ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Send className="h-4 w-4" />}
               Send Reply
             </Button>
           </div>

@@ -879,6 +879,7 @@ import {
 } from "@/lib/services/import-field-mapper"
 import { cleanAndValidateData, type CleaningResult, type ValidationIssue } from "@/lib/services/data-cleaner"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SmartImportDialogProps {
   trigger?: React.ReactNode
@@ -1400,7 +1401,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
 
                 {checkingDuplicates && (
                   <Alert>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                     <AlertTitle>Checking for existing duplicates...</AlertTitle>
                   </Alert>
                 )}
@@ -1548,7 +1549,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
                   >
                     {checkingDuplicates ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <WaveLoader size="sm" bars={8} gap="tight" />
                         Checking...
                       </>
                     ) : (
@@ -1565,7 +1566,7 @@ export function SmartImportDialog({ trigger, folderId, folderName, onImportCompl
             {/* Step 4: Importing */}
             {step === "importing" && (
               <div className="space-y-6 py-12 text-center">
-                <Loader2 className="h-12 w-12 mx-auto animate-spin text-primary" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 <div>
                   <h3 className="font-medium text-lg">Importing prospects...</h3>
                   <p className="text-sm text-muted-foreground">This may take a moment</p>

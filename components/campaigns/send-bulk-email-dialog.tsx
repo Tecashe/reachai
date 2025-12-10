@@ -14,6 +14,7 @@ import {
 import { Progress } from "@/components/ui/progress"
 import { Mail, Loader2, CheckCircle2, XCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SendBulkEmailDialogProps {
   campaignId: string
@@ -137,7 +138,8 @@ export function SendBulkEmailDialog({ campaignId }: SendBulkEmailDialogProps) {
             <Button onClick={handleSend} disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Sending...
                 </>
               ) : (

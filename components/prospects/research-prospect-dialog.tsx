@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface ResearchProspectDialogProps {
   prospectId: string
@@ -127,7 +128,8 @@ export function ResearchProspectDialog({ prospectId, prospectEmail }: ResearchPr
 
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                {/* <Loader2 className="h-5 w-5 animate-spin text-primary" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">Researching {prospectEmail}...</p>
                   <p className="text-xs text-muted-foreground">
@@ -164,7 +166,8 @@ export function ResearchProspectDialog({ prospectId, prospectEmail }: ResearchPr
               <Button onClick={handleResearch} disabled={researching} className="flex-1">
                 {researching ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                     Researching...
                   </>
                 ) : (

@@ -171,6 +171,7 @@ import { getTemplates } from "@/lib/actions/templates"
 import { useRouter } from 'next/navigation'
 import { toast } from "sonner"
 import Link from "next/link"
+import { WaveLoader } from "../loader/wave-loader"
 
 export function CreateSequenceDialog() {
   const [open, setOpen] = useState(false)
@@ -311,7 +312,7 @@ export function CreateSequenceDialog() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading || templates.length === 0}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
               Create Step
             </Button>
           </DialogFooter>

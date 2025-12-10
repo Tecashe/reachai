@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { Loader2, CheckCircle2, XCircle } from "lucide-react"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface ProgressToastProps {
   title: string
@@ -24,7 +25,7 @@ export function ProgressToast({ title, current, total, status = "loading", messa
     <Card className="w-full max-w-md">
       <CardContent className="pt-6">
         <div className="flex items-start gap-3">
-          {status === "loading" && <Loader2 className="h-5 w-5 animate-spin text-primary mt-0.5" />}
+          {status === "loading" && <WaveLoader size="sm" bars={8} gap="tight" />}
           {status === "success" && <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />}
           {status === "error" && <XCircle className="h-5 w-5 text-destructive mt-0.5" />}
 

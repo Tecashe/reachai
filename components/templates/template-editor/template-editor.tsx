@@ -31,6 +31,7 @@ import { VariablePanel } from "./variable-panel"
 import type { EnhancedEmailTemplate, TemplateCategory, TemplateVariable } from "@/lib/types"
 import { updateTemplate, createTemplate } from "@/lib/actions/templates"
 import { toast } from "sonner"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface TemplateEditorProps {
   template?: EnhancedEmailTemplate | null
@@ -281,7 +282,7 @@ export function TemplateEditor({ template, categories, variables, mode }: Templa
             disabled={isPending || !hasUnsavedChanges}
             className={cn("h-8 px-4", hasUnsavedChanges && "shadow-lg shadow-primary/20")}
           >
-            {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+            {isPending ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Save className="w-4 h-4 mr-2" />}
             {isPending ? "Saving..." : "Save"}
           </Button>
         </div>

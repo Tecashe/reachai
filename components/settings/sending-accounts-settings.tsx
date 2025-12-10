@@ -1207,6 +1207,7 @@ import {
   deleteSendingAccount,
   toggleSendingAccount,
 } from "@/lib/actions/sending-accounts"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SendingAccount {
   id: string
@@ -1370,7 +1371,8 @@ export function SendingAccountsSettings() {
   if (loading && accounts.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        {/* <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> */}
+        <WaveLoader size="sm" bars={8} gap="tight" />
       </div>
     )
   }
@@ -1516,7 +1518,7 @@ export function SendingAccountsSettings() {
                   </div>
                 </div>
                 <Button onClick={handleCreateAccount} disabled={loading} className="w-full">
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {loading ? <WaveLoader size="sm" bars={8} gap="tight" /> : null}
                   Add Resend Account
                 </Button>
               </div>

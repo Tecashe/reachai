@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import type { TemplateCategory } from "@/lib/types"
 import { createTemplate } from "@/lib/actions/templates"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface AITemplateGeneratorProps {
   categories: TemplateCategory[]
@@ -189,7 +190,7 @@ export function AITemplateGenerator({ categories, onTemplateGenerated }: AITempl
           <Button onClick={handleGenerate} disabled={isPending || !prompt.trim()} className="w-full h-11">
             {isPending ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Generating...
               </>
             ) : (
@@ -256,7 +257,7 @@ export function AITemplateGenerator({ categories, onTemplateGenerated }: AITempl
             <div className="p-4 border-t border-border/50 bg-background/50">
               <Button onClick={handleUseTemplate} disabled={isSaving} className="w-full">
                 {isSaving ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                 ) : (
                   <ChevronRight className="w-4 h-4 mr-2" />
                 )}

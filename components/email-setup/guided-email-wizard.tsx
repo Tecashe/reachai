@@ -8929,6 +8929,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Progress } from "@/components/ui/progress"
+import { WaveLoader } from "../loader/wave-loader"
 
 type SetupStep = "welcome" | "add-domain" | "spf" | "dkim" | "dmarc" | "verify" | "complete"
 
@@ -9549,7 +9550,7 @@ export function GuidedEmailWizard({ existingDomains = [], existingAccounts = [] 
                 Back
               </Button>
               <Button onClick={handleAddDomain} disabled={!state.domainName || loading} className="flex-1 h-11">
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
                 Continue
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -9753,7 +9754,7 @@ export function GuidedEmailWizard({ existingDomains = [], existingAccounts = [] 
                 disabled={loading}
                 className="sm:flex-1 w-full bg-transparent"
               >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Re-verify All
               </Button>
@@ -10083,7 +10084,7 @@ function DNSRecordStep({
           Skip for Now
         </Button>
         <Button onClick={onVerify} disabled={loading} className="sm:w-auto w-full h-11">
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+          {loading ? <WaveLoader size="sm" bars={8} gap="tight" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
           Verify {title}
         </Button>
       </CardFooter>

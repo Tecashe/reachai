@@ -237,6 +237,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { getProspects } from "@/lib/actions/prospects"
 import { getTemplates } from "@/lib/actions/templates"
+import { WaveLoader } from "../loader/wave-loader"
 
 export function EmailGeneratorForm() {
   const [generating, setGenerating] = useState(false)
@@ -367,7 +368,8 @@ export function EmailGeneratorForm() {
           <Button onClick={handleGenerate} disabled={generating || !selectedProspect} className="w-full">
             {generating ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Generating...
               </>
             ) : (

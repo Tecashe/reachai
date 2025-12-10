@@ -675,7 +675,7 @@
 //                       <Button onClick={() => handlePreview(integration.type)} disabled={loading}>
 //                         {loading && selectedCRM === integration.type ? (
 //                           <>
-//                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+//                             <WaveLoader size="sm" bars={8} gap="tight" />
 //                             Loading...
 //                           </>
 //                         ) : (
@@ -1595,6 +1595,7 @@ import {
 import { toast } from "sonner"
 import { getUserIntegrations } from "@/lib/actions/integrations"
 import { syncCRMLeads } from "@/lib/actions/lead-finder"
+import { WaveLoader } from "../loader/wave-loader"
 
 const CRM_LOGOS: Record<string, string> = {
   HUBSPOT: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
@@ -1942,7 +1943,7 @@ export function CRMImportDialog({ folderId, onImportComplete, trigger }: CRMImpo
                       <Button onClick={() => handlePreview(integration.type)} disabled={loading}>
                         {loading && selectedCRM === integration.type ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <WaveLoader size="sm" bars={8} gap="tight" />
                             Loading...
                           </>
                         ) : (
@@ -1983,7 +1984,7 @@ export function CRMImportDialog({ folderId, onImportComplete, trigger }: CRMImpo
               <Button variant="outline" size="sm" onClick={handleAIQualityCheck} disabled={aiChecking}>
                 {aiChecking ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                     Checking...
                   </>
                 ) : (
@@ -2095,7 +2096,8 @@ export function CRMImportDialog({ folderId, onImportComplete, trigger }: CRMImpo
         {step === "importing" && (
           <div className="py-8 space-y-6">
             <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              {/* <Loader2 className="h-12 w-12 animate-spin text-primary" /> */}
+              <WaveLoader size="sm" bars={8} gap="tight" />
               <p className="text-lg font-medium">Importing contacts...</p>
             </div>
             <Progress value={progress} className="h-2" />

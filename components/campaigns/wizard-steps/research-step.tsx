@@ -561,6 +561,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ArrowRight, ArrowLeft, Sparkles, Loader2, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface ResearchStepProps {
   campaign: any
@@ -643,7 +644,8 @@ export function ResearchStep({ campaign, onNext, onBack }: ResearchStepProps) {
         {isResearching ? (
           <div className="space-y-4 max-w-md mx-auto">
             <div className="flex items-center justify-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              {/* <Loader2 className="h-5 w-5 animate-spin text-primary" /> */}
+              <WaveLoader size="sm" bars={8} gap="tight" />
               <span className="text-sm font-medium">
                 Researching {researchedCount} of {totalProspects} prospects...
               </span>

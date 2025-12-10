@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Loader2, Sparkles, Send, Wand2, User } from "lucide-react"
 import { toast } from "sonner"
 import { VariableTextarea } from "./variable-textarea"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface BulkReplyDialogProps {
   isOpen: boolean
@@ -126,7 +127,7 @@ export function BulkReplyDialog({ isOpen, onClose, replyIds, onSuccess }: BulkRe
               disabled={loading}
               className="w-full h-12 rounded-xl gap-2 shadow-sm hover:shadow-md transition-all"
             >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
               <Wand2 className="h-4 w-4" />
               Generate {replyIds.length} Personalized Replies
             </Button>
@@ -142,7 +143,7 @@ export function BulkReplyDialog({ isOpen, onClose, replyIds, onSuccess }: BulkRe
                 disabled={sending}
                 className="h-10 px-5 rounded-xl gap-2 shadow-sm hover:shadow-md transition-all"
               >
-                {sending && <Loader2 className="h-4 w-4 animate-spin" />}
+                {sending && <WaveLoader size="sm" bars={8} gap="tight" />}
                 <Send className="h-4 w-4" />
                 Send All
               </Button>

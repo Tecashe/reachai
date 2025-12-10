@@ -186,6 +186,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { GitBranch, Mail, Users, ChevronRight, Loader2 } from "lucide-react"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface ExistingSequence {
   id: string
@@ -291,7 +292,8 @@ export function CreateCampaignForm() {
 
         {isLoadingSequences ? (
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
+            {/* <Loader2 className="h-4 w-4 animate-spin" /> */}
+            <WaveLoader size="sm" bars={8} gap="tight" />
             Loading sequences...
           </div>
         ) : existingSequences.length === 0 ? (
@@ -459,7 +461,8 @@ export function CreateCampaignForm() {
         <Button type="submit" className="flex-1" disabled={isPending}>
           {isPending ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+              <WaveLoader size="sm" bars={8} gap="tight" />
               Creating...
             </>
           ) : (

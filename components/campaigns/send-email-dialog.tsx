@@ -164,6 +164,7 @@ import { Send, Loader2, CalendarIcon, AlertTriangle, CheckCircle2 } from "lucide
 import { useToast } from "@/hooks/use-toast"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SendEmailDialogProps {
   prospectId: string
@@ -410,7 +411,8 @@ export function SendEmailDialog({ prospectId, prospectEmail, prospectName, campa
           <Button variant="outline" onClick={handleValidate} disabled={validating || loading}>
             {validating ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 Validating...
               </>
             ) : (
@@ -423,7 +425,8 @@ export function SendEmailDialog({ prospectId, prospectEmail, prospectName, campa
           <Button onClick={handleSend} disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                {/* <Loader2 className="h-4 w-4 mr-2 animate-spin" /> */}
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 {scheduledDate ? "Scheduling..." : "Sending..."}
               </>
             ) : (

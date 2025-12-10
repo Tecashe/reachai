@@ -14,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface CampaignManualSendButtonProps {
   campaignId: string
@@ -64,7 +65,8 @@ export function CampaignManualSendButton({ campaignId, pendingCount }: CampaignM
       <Button onClick={() => setIsOpen(true)} disabled={pendingCount === 0 || isSending} className="gap-2">
         {isSending ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            {/* <Loader2 className="h-4 w-4 animate-spin" /> */}
+            <WaveLoader size="sm" bars={8} gap="tight" />
             Sending...
           </>
         ) : (
@@ -113,7 +115,8 @@ export function CampaignManualSendButton({ campaignId, pendingCount }: CampaignM
             <AlertDialogAction onClick={handleManualSend} disabled={isSending}>
               {isSending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {/* <Loader2 className="h-4 w-4 animate-spin mr-2" /> */}
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Sending...
                 </>
               ) : (
