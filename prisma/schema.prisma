@@ -63,6 +63,7 @@ model User {
   prospectFolders ProspectFolder[]
 
   // Relationships
+  sequences          Sequence[]
   campaigns          Campaign[]
   prospects          Prospect[]
   emailTemplates     EmailTemplate[]
@@ -1622,4 +1623,441 @@ model TemplateGenerationHistory {
   @@index([userId])
   @@index([saved])
   @@index([createdAt])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================
+// SEQUENCE MANAGEMENT SYSTEM
+// ============================================
+
+model Sequence {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  status      SequenceStatus @default(DRAFT)
+  
+  // Timing settings
+  timezone           String  @default("America/New_York")
+  sendInBusinessHours Boolean @default(true)
+  businessHoursStart String  @default("09:00")
+  businessHoursEnd   String  @default("17:00")
+  businessDays       Int[]   @default([1, 2, 3, 4, 5])
+  
+  // Deliverability
+  dailySendLimit       Int     @default(50)
+  minDelayBetweenSends Int     @default(60)
+  trackOpens           Boolean @default(true)
+  trackClicks          Boolean @default(true)
+  
+  // Multi-channel
+  enableLinkedIn Boolean @default(false)
+  enableCalls    Boolean @default(false)
+  enableTasks    Boolean @default(false)
+  
+  // A/B Testing
+  enableABTesting    Boolean      @default(false)
+  abTestWinnerMetric ABTestMetric @default(REPLY_RATE)
+  abTestSampleSize   Int          @default(20)
+  abTestDuration     Int          @default(48)
+  
+  // AI Settings
+  aiOptimizeSendTime Boolean @default(true)
+  aiPersonalization  Boolean @default(true)
+  toneOfVoice        String  @default("professional")
+  
+  // Cached stats
+  totalSteps    Int    @default(0)
+  totalEnrolled Int    @default(0)
+  totalCompleted Int   @default(0)
+  avgOpenRate   Float?
+  avgReplyRate  Float?
+  avgClickRate  Float?
+  
+  // Organization
+  folderId String?
+  folder   SequenceFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  tags     String[]        @default([])
+  
+  // Relationships
+  steps       SequenceStep[]
+  enrollments SequenceEnrollment[]
+  abVariants  SequenceABVariant[]
+  automations SequenceAutomation[]
+  
+  archivedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([folderId])
+}
+
+model SequenceStep {
+  id         String   @id @default(cuid())
+  sequenceId String
+  sequence   Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  
+  order    Int
+  stepType StepType @default(EMAIL)
+  
+  // Timing
+  delayValue Int       @default(1)
+  delayUnit  DelayUnit @default(DAYS)
+  
+  // Email fields
+  subject    String?
+  body       String?   @db.Text
+  bodyHtml   String?   @db.Text
+  templateId String?
+  
+  // Personalization
+  variables      Json?
+  spintaxEnabled Boolean @default(false)
+  
+  // Conditions
+  conditions    Json?
+  skipIfReplied Boolean @default(true)
+  skipIfBounced Boolean @default(true)
+  
+  // LinkedIn fields
+  linkedInAction  LinkedInAction?
+  linkedInMessage String?         @db.Text
+  
+  // Call fields
+  callScript   String? @db.Text
+  callDuration Int?
+  
+  // Task fields
+  taskTitle       String?
+  taskDescription String?       @db.Text
+  taskPriority    TaskPriority? @default(MEDIUM)
+  
+  // Stats
+  sent      Int @default(0)
+  delivered Int @default(0)
+  opened    Int @default(0)
+  clicked   Int @default(0)
+  replied   Int @default(0)
+  bounced   Int @default(0)
+  
+  internalNotes String? @db.Text
+  
+  // Relationships
+  variants    SequenceStepVariant[]
+  executions  SequenceStepExecution[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([sequenceId, order])
+  @@index([sequenceId])
+}
+
+model SequenceStepVariant {
+  id     String       @id @default(cuid())
+  stepId String
+  step   SequenceStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  
+  variantName String
+  weight      Int     @default(50)
+  
+  subject String?
+  body    String? @db.Text
+  
+  // Stats
+  sent    Int @default(0)
+  opened  Int @default(0)
+  clicked Int @default(0)
+  replied Int @default(0)
+  
+  isWinner         Boolean   @default(false)
+  winnerSelectedAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([stepId])
+}
+
+model SequenceABVariant {
+  id         String   @id @default(cuid())
+  sequenceId String
+  sequence   Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  
+  variantName String
+  description String?
+  weight      Int     @default(50)
+  overrides   Json?
+  
+  enrolled  Int @default(0)
+  completed Int @default(0)
+  replied   Int @default(0)
+  
+  isWinner Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([sequenceId])
+}
+
+model SequenceEnrollment {
+  id         String   @id @default(cuid())
+  sequenceId String
+  sequence   Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  
+  prospectId   String
+  
+  status      EnrollmentStatus @default(ACTIVE)
+  currentStep Int              @default(0)
+  variantId   String?
+  
+  enrolledAt  DateTime  @default(now())
+  nextStepAt  DateTime?
+  completedAt DateTime?
+  pausedAt    DateTime?
+  
+  exitReason ExitReason?
+  exitedAt   DateTime?
+  
+  emailsSent    Int     @default(0)
+  emailsOpened  Int     @default(0)
+  emailsClicked Int     @default(0)
+  replied       Boolean @default(false)
+  repliedAt     DateTime?
+  
+  executions SequenceStepExecution[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([sequenceId, prospectId])
+  @@index([sequenceId])
+  @@index([prospectId])
+  @@index([status])
+  @@index([nextStepAt])
+}
+
+model SequenceStepExecution {
+  id           String             @id @default(cuid())
+  enrollmentId String
+  enrollment   SequenceEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  stepId       String
+  step         SequenceStep       @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  
+  status    ExecutionStatus @default(PENDING)
+  variantId String?
+  
+  scheduledAt DateTime?
+  executedAt  DateTime?
+  
+  // Email tracking
+  messageId   String?
+  opened      Boolean   @default(false)
+  openedAt    DateTime?
+  clicked     Boolean   @default(false)
+  clickedAt   DateTime?
+  replied     Boolean   @default(false)
+  repliedAt   DateTime?
+  bounced     Boolean   @default(false)
+  bouncedAt   DateTime?
+  
+  errorMessage String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([enrollmentId])
+  @@index([stepId])
+  @@index([status])
+}
+
+model SequenceAutomation {
+  id         String   @id @default(cuid())
+  sequenceId String
+  sequence   Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  isActive    Boolean @default(true)
+  
+  trigger       AutomationTrigger
+  triggerConfig Json?
+  conditions    Json?
+  actions       Json
+  
+  timesTriggered  Int       @default(0)
+  lastTriggeredAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([sequenceId])
+}
+
+model SequenceFolder {
+  id       String  @id @default(cuid())
+  userId   String
+  name     String
+  color    String  @default("#3b82f6")
+  icon     String  @default("Folder")
+  parentId String?
+  
+  parent    SequenceFolder?  @relation("FolderHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  SequenceFolder[] @relation("FolderHierarchy")
+  sequences Sequence[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([parentId])
+}
+
+model SequenceTemplate {
+  id          String   @id @default(cuid())
+  userId      String?
+  isSystem    Boolean  @default(false)
+  
+  name        String
+  description String?
+  category    String
+  icon        String   @default("Mail")
+  
+  steps       Json
+  settings    Json?
+  
+  usageCount  Int @default(0)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([category])
+  @@index([isSystem])
+}
+
+// ENUMS
+enum SequenceStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum StepType {
+  EMAIL
+  LINKEDIN_VIEW
+  LINKEDIN_CONNECT
+  LINKEDIN_MESSAGE
+  CALL
+  TASK
+  DELAY
+  CONDITION
+}
+
+enum DelayUnit {
+  MINUTES
+  HOURS
+  DAYS
+  WEEKS
+}
+
+enum LinkedInAction {
+  VIEW_PROFILE
+  SEND_CONNECTION
+  SEND_MESSAGE
+  SEND_INMAIL
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  BOUNCED
+  REPLIED
+  UNSUBSCRIBED
+  MANUALLY_REMOVED
+}
+
+enum ExitReason {
+  COMPLETED
+  REPLIED
+  BOUNCED
+  UNSUBSCRIBED
+  MANUAL
+  AUTOMATION
+  GOAL_MET
+}
+
+enum ExecutionStatus {
+  PENDING
+  SCHEDULED
+  SENT
+  DELIVERED
+  FAILED
+  SKIPPED
+}
+
+enum AutomationTrigger {
+  REPLY_RECEIVED
+  POSITIVE_REPLY
+  NEGATIVE_REPLY
+  NO_OPEN
+  NO_REPLY
+  LINK_CLICKED
+  STEP_COMPLETED
+  GOAL_MET
+}
+
+enum ABTestMetric {
+  OPEN_RATE
+  CLICK_RATE
+  REPLY_RATE
+  POSITIVE_REPLY_RATE
 }
