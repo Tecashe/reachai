@@ -40,13 +40,13 @@ export async function POST(request: NextRequest) {
         })
 
         // Send email
-        const result = await emailSender.sendEmail({
+        const result = await emailSender.sendCampaignEmail({
           to: schedule.prospect.email,
           subject: schedule.subject,
           html: schedule.body,
           prospectId: schedule.prospectId,
           campaignId: schedule.campaignId || undefined,
-          skipValidation: true, // Already validated when scheduled
+          skipValidation: true, // Already validated when schedule
         })
 
         if (result.success) {
