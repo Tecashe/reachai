@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import { generateAISequence, type ICPInput } from "@/lib/actions/a-sequence-generator"
+import { generateAISequence, type ICPInput } from "@/lib/actions/ai-sequence-generator"
 
 interface AISequenceGeneratorDialogProps {
   open: boolean
@@ -274,15 +274,14 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden p-0 backdrop-blur-2xl bg-background/95 dark:bg-background/90 border border-border/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
         <TooltipProvider>
           {currentStep !== "generating" && (
             <>
-              {/* Header */}
-              <div className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-950/20 dark:to-indigo-950/20">
+              <div className="px-6 pt-6 pb-4 border-b border-border/50 bg-gradient-to-r from-muted/80 to-muted/40 backdrop-blur-xl">
                 <DialogHeader>
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white">
+                    <div className="p-2 rounded-lg bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(0,0,0,0.15),0_1px_0_rgba(255,255,255,0.1)_inset]">
                       <Sparkles className="h-5 w-5" />
                     </div>
                     <div>
@@ -308,19 +307,18 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                           disabled={index > currentStepIndex}
                           className={cn(
                             "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
-                            isActive && "bg-white dark:bg-gray-800 shadow-sm",
-                            isCompleted && "cursor-pointer hover:bg-white/50 dark:hover:bg-gray-800/50",
+                            isActive &&
+                              "bg-background/80 backdrop-blur-sm shadow-[0_2px_8px_rgba(0,0,0,0.08),0_1px_0_rgba(255,255,255,0.5)_inset] dark:shadow-[0_2px_8px_rgba(0,0,0,0.3),0_1px_0_rgba(255,255,255,0.1)_inset]",
+                            isCompleted && "cursor-pointer hover:bg-background/50",
                             !isActive && !isCompleted && "opacity-50",
                           )}
                         >
                           <div
                             className={cn(
                               "p-1.5 rounded-full",
-                              isActive && "bg-violet-100 text-violet-600 dark:bg-violet-900 dark:text-violet-300",
-                              isCompleted && "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300",
-                              !isActive &&
-                                !isCompleted &&
-                                "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500",
+                              isActive && "bg-primary/10 text-primary dark:bg-primary/20",
+                              isCompleted && "bg-success/10 text-success dark:bg-success/20",
+                              !isActive && !isCompleted && "bg-muted text-muted-foreground",
                             )}
                           >
                             {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
@@ -328,16 +326,14 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                           <span
                             className={cn(
                               "text-sm font-medium hidden sm:inline",
-                              isActive && "text-gray-900 dark:text-white",
-                              !isActive && "text-gray-500 dark:text-gray-400",
+                              isActive && "text-foreground",
+                              !isActive && "text-muted-foreground",
                             )}
                           >
                             {step.title}
                           </span>
                         </button>
-                        {index < steps.length - 1 && (
-                          <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
-                        )}
+                        {index < steps.length - 1 && <ChevronRight className="h-4 w-4 text-border flex-shrink-0" />}
                       </React.Fragment>
                     )
                   })}
@@ -376,12 +372,12 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                               className={cn(
                                 "p-3 rounded-lg border text-left transition-all",
                                 formData.companySize === size.value
-                                  ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
+                                  ? "border-primary bg-primary/5 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_0_rgba(255,255,255,0.5)_inset] dark:bg-primary/10 dark:shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
+                                  : "border-border hover:border-border/80 hover:bg-muted/50",
                               )}
                             >
                               <div className="font-medium text-sm">{size.label}</div>
-                              <div className="text-xs text-gray-500">{size.description}</div>
+                              <div className="text-xs text-muted-foreground">{size.description}</div>
                             </button>
                           ))}
                         </div>
@@ -401,7 +397,13 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                               }
                             }}
                           />
-                          <Button type="button" variant="outline" size="icon" onClick={() => addRole(roleInput)}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => addRole(roleInput)}
+                            className="shadow-[0_2px_4px_rgba(0,0,0,0.06),0_1px_0_rgba(255,255,255,0.5)_inset] hover:shadow-[0_4px_8px_rgba(0,0,0,0.1)] transition-shadow"
+                          >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
@@ -420,7 +422,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                         )}
 
                         <div className="mt-3">
-                          <Label className="text-xs text-gray-500">Quick add:</Label>
+                          <Label className="text-xs text-muted-foreground">Quick add:</Label>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {COMMON_ROLES.filter((r) => !formData.targetRoles?.includes(r))
                               .slice(0, 8)
@@ -428,7 +430,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                                 <button
                                   key={role}
                                   onClick={() => addRole(role)}
-                                  className="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                  className="px-2 py-1 text-xs rounded-md bg-muted hover:bg-muted/80 transition-colors"
                                 >
                                   + {role}
                                 </button>
@@ -450,7 +452,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                     >
                       <div className="space-y-2">
                         <Label>Pain Points Your Product Solves *</Label>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           What problems does your target audience face that your product/service solves?
                         </p>
                         <div className="flex gap-2">
@@ -470,6 +472,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                             variant="outline"
                             size="icon"
                             onClick={() => addPainPoint(painPointInput)}
+                            className="shadow-[0_2px_4px_rgba(0,0,0,0.06),0_1px_0_rgba(255,255,255,0.5)_inset] hover:shadow-[0_4px_8px_rgba(0,0,0,0.1)] transition-shadow"
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -480,12 +483,12 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                             {formData.painPoints.map((painPoint, index) => (
                               <div
                                 key={index}
-                                className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+                                className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 backdrop-blur-sm border border-border/30"
                               >
-                                <Zap className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                                <Zap className="h-4 w-4 text-warning flex-shrink-0" />
                                 <span className="flex-1 text-sm">{painPoint}</span>
                                 <button onClick={() => removePainPoint(painPoint)}>
-                                  <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                                  <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive transition-colors" />
                                 </button>
                               </div>
                             ))}
@@ -493,13 +496,13 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                         )}
 
                         <div className="mt-4">
-                          <Label className="text-xs text-gray-500">Common pain points (click to add):</Label>
+                          <Label className="text-xs text-muted-foreground">Common pain points (click to add):</Label>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {COMMON_PAIN_POINTS.filter((p) => !formData.painPoints?.includes(p)).map((painPoint) => (
                               <button
                                 key={painPoint}
                                 onClick={() => addPainPoint(painPoint)}
-                                className="px-3 py-1.5 text-xs rounded-md border border-gray-200 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/30 transition-colors text-left"
+                                className="px-3 py-1.5 text-xs rounded-md border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors text-left"
                               >
                                 {painPoint}
                               </button>
@@ -544,7 +547,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                           Value Proposition *
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Info className="h-3.5 w-3.5 inline ml-1 text-gray-400" />
+                              <Info className="h-3.5 w-3.5 inline ml-1 text-muted-foreground" />
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
                               Describe what makes your product valuable and different. Include specific outcomes or
@@ -604,15 +607,15 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                                 className={cn(
                                   "p-3 rounded-lg border text-left transition-all",
                                   formData.tone === tone.value
-                                    ? "border-violet-500 bg-violet-50 dark:bg-violet-950/30"
-                                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
+                                    ? "border-primary bg-primary/5 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_0_rgba(255,255,255,0.5)_inset] dark:bg-primary/10"
+                                    : "border-border hover:border-border/80 hover:bg-muted/50",
                                 )}
                               >
                                 <div className="flex items-center gap-2">
                                   <Icon className="h-4 w-4" />
                                   <span className="font-medium text-sm">{tone.label}</span>
                                 </div>
-                                <div className="text-xs text-gray-500 mt-1">{tone.description}</div>
+                                <div className="text-xs text-muted-foreground mt-1">{tone.description}</div>
                               </button>
                             )
                           })}
@@ -631,7 +634,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                           step={1}
                           className="w-full"
                         />
-                        <div className="flex justify-between text-xs text-gray-500">
+                        <div className="flex justify-between text-xs text-muted-foreground">
                           <span>3 (Quick)</span>
                           <span>10 (Comprehensive)</span>
                         </div>
@@ -640,14 +643,16 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                       <div className="space-y-4">
                         <Label>Multi-channel Options</Label>
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/30 backdrop-blur-sm">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                                <Linkedin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              <div className="p-2 rounded-lg bg-secondary shadow-[0_2px_4px_rgba(0,0,0,0.04)]">
+                                <Linkedin className="h-4 w-4 text-foreground" />
                               </div>
                               <div>
                                 <div className="font-medium text-sm">LinkedIn Steps</div>
-                                <div className="text-xs text-gray-500">Profile views, connections, messages</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Profile views, connections, messages
+                                </div>
                               </div>
                             </div>
                             <Switch
@@ -656,14 +661,14 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                             />
                           </div>
 
-                          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/30 backdrop-blur-sm">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                                <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <div className="p-2 rounded-lg bg-secondary shadow-[0_2px_4px_rgba(0,0,0,0.04)]">
+                                <Phone className="h-4 w-4 text-foreground" />
                               </div>
                               <div>
                                 <div className="font-medium text-sm">Phone Calls</div>
-                                <div className="text-xs text-gray-500">Call tasks with scripts</div>
+                                <div className="text-xs text-muted-foreground">Call tasks with scripts</div>
                               </div>
                             </div>
                             <Switch
@@ -672,14 +677,14 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                             />
                           </div>
 
-                          <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/30 backdrop-blur-sm">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                                <ClipboardList className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                              <div className="p-2 rounded-lg bg-secondary shadow-[0_2px_4px_rgba(0,0,0,0.04)]">
+                                <ClipboardList className="h-4 w-4 text-foreground" />
                               </div>
                               <div>
                                 <div className="font-medium text-sm">Manual Tasks</div>
-                                <div className="text-xs text-gray-500">Custom research tasks</div>
+                                <div className="text-xs text-muted-foreground">Custom research tasks</div>
                               </div>
                             </div>
                             <Switch
@@ -694,9 +699,13 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                 </AnimatePresence>
               </div>
 
-              {/* Footer */}
-              <div className="px-6 py-4 border-t bg-gray-50 dark:bg-gray-900/50 flex items-center justify-between">
-                <Button variant="ghost" onClick={handleBack} disabled={currentStepIndex === 0} className="gap-2">
+              <div className="px-6 py-4 border-t border-border/50 bg-muted/30 backdrop-blur-xl flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  onClick={handleBack}
+                  disabled={currentStepIndex === 0}
+                  className="gap-2 shadow-[0_2px_4px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.08)] transition-shadow"
+                >
                   <ChevronLeft className="h-4 w-4" />
                   Back
                 </Button>
@@ -704,7 +713,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+                  className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_12px_rgba(0,0,0,0.15),0_1px_0_rgba(255,255,255,0.1)_inset] hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)] active:shadow-[0_2px_4px_rgba(0,0,0,0.1)] transition-all"
                 >
                   {currentStep === "customize" ? (
                     <>
@@ -722,15 +731,14 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
             </>
           )}
 
-          {/* Generating State */}
           {currentStep === "generating" && (
             <div className="p-8 flex flex-col items-center justify-center min-h-[400px]">
               <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative">
-                <div className="p-6 rounded-full bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/30 dark:to-indigo-900/30">
-                  <Sparkles className="h-12 w-12 text-violet-600 dark:text-violet-400" />
+                <div className="p-6 rounded-full bg-muted/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.1),0_1px_0_rgba(255,255,255,0.5)_inset] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+                  <Sparkles className="h-12 w-12 text-foreground" />
                 </div>
                 <motion.div
-                  className="absolute inset-0 rounded-full border-4 border-violet-500/30"
+                  className="absolute inset-0 rounded-full border-4 border-primary/30"
                   animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
                   transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                 />
@@ -738,20 +746,20 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
 
               <div className="mt-8 text-center">
                 <h3 className="text-xl font-semibold mb-2">Creating Your Sequence</h3>
-                <p className="text-gray-500 mb-6">{generationMessage}</p>
+                <p className="text-muted-foreground mb-6">{generationMessage}</p>
 
-                <div className="w-64 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div className="w-64 h-2 bg-muted rounded-full overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-violet-500 to-indigo-500"
+                    className="h-full bg-primary"
                     initial={{ width: "0%" }}
                     animate={{ width: `${generationProgress}%` }}
                     transition={{ duration: 0.5 }}
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-400">{generationProgress}% complete</p>
+                <p className="mt-2 text-sm text-muted-foreground">{generationProgress}% complete</p>
               </div>
 
-              <div className="mt-8 flex items-center gap-2 text-sm text-gray-500">
+              <div className="mt-8 flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 AI is writing personalized emails for your ICP...
               </div>
