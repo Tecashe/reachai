@@ -707,6 +707,7 @@ import {
   selectVariantAsWinner,
   redistributeVariantWeights,
 } from "@/lib/actions/sequence-actions"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface ABTestPanelProps {
   step: SequenceStep
@@ -1088,7 +1089,7 @@ export function ABTestPanel({ step, sequenceId, userId, onUpdate, onVariantsChan
                 </p>
                 <div className="mt-4 flex items-center justify-center gap-2">
                   <Button size="sm" onClick={handleDuplicateAsVariant} disabled={isLoading} className="shadow-sm">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Copy className="mr-2 h-4 w-4" />}
+                    {isLoading ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Copy className="mr-2 h-4 w-4" />}
                     Create A/B Test
                   </Button>
                 </div>
@@ -1197,7 +1198,7 @@ export function ABTestPanel({ step, sequenceId, userId, onUpdate, onVariantsChan
                                 className="shadow-sm"
                               >
                                 {loadingAction === variant.id ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                 <WaveLoader size="sm" bars={8} gap="tight" />
                                 ) : (
                                   <Check className="mr-2 h-4 w-4" />
                                 )}
@@ -1328,7 +1329,7 @@ export function ABTestPanel({ step, sequenceId, userId, onUpdate, onVariantsChan
                 Cancel
               </Button>
               <Button onClick={handleAddVariant} disabled={isLoading} className="shadow-sm">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                {isLoading ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Plus className="mr-2 h-4 w-4" />}
                 Add Variant
               </Button>
             </DialogFooter>

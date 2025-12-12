@@ -1458,6 +1458,7 @@ import {
 } from "@/lib/actions/sequence-actions"
 import { toast } from "sonner"
 import { AISequenceGeneratorDialog } from "./ai-sequence-generator-dialog"
+import { WaveLoader } from "../loader/wave-loader"
 
 type ViewMode = "grid" | "list"
 type SortField = "name" | "created" | "updated" | "enrolled" | "openRate" | "replyRate"
@@ -1932,7 +1933,7 @@ export function SequencesPageContent({ initialSequences, allTags, userId }: Sequ
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => handleBulkAction("pause")} disabled={isBulkLoading}>
                   {isBulkLoading ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                   ) : (
                     <Pause className="mr-1.5 h-3.5 w-3.5" />
                   )}
@@ -1940,7 +1941,7 @@ export function SequencesPageContent({ initialSequences, allTags, userId }: Sequ
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleBulkAction("resume")} disabled={isBulkLoading}>
                   {isBulkLoading ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                   ) : (
                     <Play className="mr-1.5 h-3.5 w-3.5" />
                   )}
@@ -1953,7 +1954,7 @@ export function SequencesPageContent({ initialSequences, allTags, userId }: Sequ
                   disabled={isBulkLoading}
                 >
                   {isBulkLoading ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                   ) : (
                     <Archive className="mr-1.5 h-3.5 w-3.5" />
                   )}
@@ -1967,7 +1968,7 @@ export function SequencesPageContent({ initialSequences, allTags, userId }: Sequ
                   disabled={isBulkLoading}
                 >
                   {isBulkLoading ? (
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    <WaveLoader size="sm" bars={8} gap="tight" />
                   ) : (
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                   )}

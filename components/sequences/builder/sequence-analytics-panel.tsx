@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress"
 import type { Sequence, SequenceStep } from "@/lib/types/sequence"
 import { getSequenceAnalytics } from "@/lib/actions/sequence-actions"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface SequenceAnalyticsPanelProps {
   sequence: Sequence
@@ -93,7 +94,7 @@ export function SequenceAnalyticsPanel({ sequence, steps, userId }: SequenceAnal
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <WaveLoader size="sm" bars={8} gap="tight" />
       </div>
     )
   }

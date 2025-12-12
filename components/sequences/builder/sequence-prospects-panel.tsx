@@ -471,7 +471,7 @@
 //           <div className="flex items-center gap-2">
 //             <Button variant="outline" size="sm" onClick={handleBulkPause} disabled={isActioning}>
 //               {isActioning ? (
-//                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+//                 <WaveLoader size="sm" bars={8} gap="tight" />
 //               ) : (
 //                 <Pause className="mr-1.5 h-3.5 w-3.5" />
 //               )}
@@ -767,6 +767,7 @@ import {
   createEnrollment,
 } from "@/lib/actions/sequence-action"
 import { ProspectDetailsDialog } from "./prospect-details-dialog"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface SequenceProspectsPanelProps {
   sequence: Sequence
@@ -1126,7 +1127,7 @@ export function SequenceProspectsPanel({ sequence, userId }: SequenceProspectsPa
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <WaveLoader size="sm" bars={8} gap="tight" />
       </div>
     )
   }
@@ -1202,7 +1203,7 @@ export function SequenceProspectsPanel({ sequence, userId }: SequenceProspectsPa
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleBulkPause} disabled={isActioning}>
               {isActioning ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
               ) : (
                 <Pause className="mr-1.5 h-3.5 w-3.5" />
               )}
@@ -1210,7 +1211,7 @@ export function SequenceProspectsPanel({ sequence, userId }: SequenceProspectsPa
             </Button>
             <Button variant="outline" size="sm" onClick={handleBulkResume} disabled={isActioning}>
               {isActioning ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
               ) : (
                 <Play className="mr-1.5 h-3.5 w-3.5" />
               )}
@@ -1224,7 +1225,7 @@ export function SequenceProspectsPanel({ sequence, userId }: SequenceProspectsPa
               disabled={isActioning}
             >
               {isActioning ? (
-                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
               ) : (
                 <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               )}
@@ -1425,7 +1426,7 @@ export function SequenceProspectsPanel({ sequence, userId }: SequenceProspectsPa
             <Button onClick={handleAddProspects} disabled={isAddingProspects}>
               {isAddingProspects ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Adding...
                 </>
               ) : (

@@ -38,6 +38,7 @@ import { Slider } from "@/components/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import type { ICPInput } from "@/lib/types/ai-sequence"
 import { generateAISequence } from "@/lib/actions/ai-sequence-generator"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface AISequenceGeneratorDialogProps {
   open: boolean
@@ -761,7 +762,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
               </div>
 
               <div className="mt-8 flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <WaveLoader size="sm" bars={8} gap="tight" />
                 AI is writing personalized emails for your ICP...
               </div>
             </div>

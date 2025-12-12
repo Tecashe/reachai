@@ -3511,6 +3511,7 @@ import {
   deleteStep,
   reorderSteps,
 } from "@/lib/actions/sequence-actions"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 type ActivePanel = "settings" | null
 
@@ -4052,7 +4053,7 @@ export function SequenceBuilderContent({ initialSequence, isNew = false, userId 
             onClick={handleSave}
             disabled={isSaving}
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {isSaving ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Save className="h-4 w-4" />}
             Save
           </Button>
 

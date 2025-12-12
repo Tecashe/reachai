@@ -371,6 +371,7 @@ import {
   deleteSequence,
 } from "@/lib/actions/sequence-actions"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SequenceTableRowProps {
   sequence: Sequence
@@ -579,7 +580,7 @@ export function SequenceTableRow({
         {/* Actions */}
         <div className="flex justify-end">
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            <WaveLoader size="sm" bars={8} gap="tight" />
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

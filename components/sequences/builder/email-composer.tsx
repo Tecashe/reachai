@@ -820,6 +820,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import type { SequenceStep } from "@/lib/types/sequence"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface EmailComposerProps {
   step: SequenceStep
@@ -1319,7 +1320,7 @@ export function EmailComposer({ step, onSave, onClose }: EmailComposerProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
-                      {isRewriting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                      {isRewriting ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Sparkles className="h-4 w-4" />}
                       AI Rewrite
                       <ChevronDown className="h-3 w-3" />
                     </Button>
