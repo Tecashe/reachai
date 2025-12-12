@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 interface SequenceEmptyStateProps {
   hasSequences: boolean
   onCreateSequence: () => void
+  onGenerateWithAI?: () => void
 }
 
 export function SequenceEmptyState({ hasSequences, onCreateSequence }: SequenceEmptyStateProps) {
