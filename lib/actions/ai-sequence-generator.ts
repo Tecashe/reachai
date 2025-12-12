@@ -1,95 +1,10 @@
 "use server"
 
 import { generateObject } from "ai"
-import { z } from "zod"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { type StepType, type DelayUnit, SequenceStatus } from "@prisma/client"
-
-// Schema for ICP input
-export const ICPSchema = z.object({
-  // Target Audience
-  targetIndustry: z.string().min(1, "Industry is required"),
-  companySize: z.enum(["startup", "smb", "mid_market", "enterprise", "any"]),
-  targetRoles: z.array(z.string()).min(1, "At least one role is required"),
-
-  // Pain Points & Value
-  painPoints: z.array(z.string()).min(1, "At least one pain point is required"),
-  valueProposition: z.string().min(10, "Value proposition is required"),
-  productService: z.string().min(1, "Product/service name is required"),
-
-  // Tone & Style
-  tone: z.enum(["professional", "casual", "friendly", "authoritative", "consultative"]),
-
-  // Sequence Configuration
-  sequenceLength: z.number().min(3).max(10).default(5),
-  includeLinkedIn: z.boolean().default(false),
-  includeCalls: z.boolean().default(false),
-  includeTasks: z.boolean().default(false),
-
-  // Optional extras
-  companyName: z.string().optional(),
-  caseStudyIndustry: z.string().optional(),
-  socialProofMetric: z.string().optional(),
-  competitorDifferentiator: z.string().optional(),
-})
-
-export type ICPInput = z.infer<typeof ICPSchema>
-
-// Schema for AI-generated sequence
-const GeneratedSequenceSchema = z.object({
-  name: z.string().describe("A compelling name for this sequence"),
-  description: z.string().describe("Brief description of the sequence strategy"),
-  steps: z
-    .array(
-      z.object({
-        stepType: z.enum(["EMAIL", "DELAY", "LINKEDIN_CONNECT", "LINKEDIN_MESSAGE", "LINKEDIN_VIEW", "CALL", "TASK"]),
-        order: z.number(),
-        // Timing
-        delayValue: z.number().describe("Delay before this step (use 0 for first step)"),
-        delayUnit: z.enum(["MINUTES", "HOURS", "DAYS", "WEEKS"]),
-        // Email content
-        subject: z
-          .string()
-          .nullable()
-          .describe("Email subject line with personalization tokens like {{firstName}}, {{company}}"),
-        body: z
-          .string()
-          .nullable()
-          .describe("Email body in plain text with personalization tokens. Use line breaks for paragraphs."),
-        // LinkedIn content
-        linkedInMessage: z.string().nullable().optional(),
-        // Call content
-        callScript: z.string().nullable().optional(),
-        // Task content
-        taskTitle: z.string().nullable().optional(),
-        taskDescription: z.string().nullable().optional(),
-        // Internal notes
-        internalNotes: z.string().nullable().describe("Strategy notes for why this step exists"),
-      }),
-    )
-    .min(3)
-    .max(10),
-  suggestedSubjectLineVariants: z
-    .array(
-      z.object({
-        stepOrder: z.number(),
-        variants: z.array(z.string()).describe("3 A/B test subject line variants"),
-      }),
-    )
-    .optional(),
-})
-
-type GeneratedSequence = z.infer<typeof GeneratedSequenceSchema>
-
-// Generation progress tracking
-export type GenerationProgress = {
-  stage: "analyzing" | "generating" | "optimizing" | "creating" | "complete" | "error"
-  message: string
-  progress: number
-  sequenceId?: string
-  error?: string
-}
+import { type ICPInput, GeneratedSequenceSchema } from "@/lib/types/ai-sequence"
 
 export async function generateAISequence(
   userId: string,
@@ -283,112 +198,11 @@ Generate a complete sequence with:
 Make each email distinct - don't repeat the same approach. Each step should provide new value or angle.`
 }
 
-// Streaming version for real-time progress (optional enhancement)
-export async function* generateAISequenceStream(userId: string, icp: ICPInput): AsyncGenerator<GenerationProgress> {
-  yield {
-    stage: "analyzing",
-    message: "Analyzing your ICP and target audience...",
-    progress: 10,
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  yield {
-    stage: "generating",
-    message: "Crafting personalized email copy...",
-    progress: 30,
-  }
-
-  try {
-    const prompt = buildSequencePrompt(icp)
-
-    yield {
-      stage: "generating",
-      message: "AI is writing your sequence...",
-      progress: 50,
-    }
-
-    const { object: generatedSequence } = await generateObject({
-      model: "anthropic/claude-sonnet-4-20250514",
-      schema: GeneratedSequenceSchema,
-      prompt,
-      maxOutputTokens: 8000,
-      temperature: 0.7,
-    })
-
-    yield {
-      stage: "optimizing",
-      message: "Optimizing timing and flow...",
-      progress: 70,
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    yield {
-      stage: "creating",
-      message: "Saving sequence to database...",
-      progress: 85,
-    }
-
-    const icpSummary = `Target: ${icp.targetRoles.join(", ")} in ${icp.targetIndustry} | Product: ${icp.productService}`
-    const fullDescription = generatedSequence.description + `\n\n[AI Generated] ${icpSummary}`
-
-    // Create sequence
-    const sequence = await db.sequence.create({
-      data: {
-        userId,
-        name: generatedSequence.name,
-        description: fullDescription,
-        status: SequenceStatus.DRAFT,
-        enableLinkedIn: icp.includeLinkedIn,
-        enableCalls: icp.includeCalls,
-        enableTasks: icp.includeTasks,
-        aiPersonalization: true,
-        toneOfVoice: icp.tone,
-      },
-    })
-
-    // Create steps
-    for (const step of generatedSequence.steps) {
-      await db.sequenceStep.create({
-        data: {
-          sequenceId: sequence.id,
-          order: step.order,
-          stepType: step.stepType as StepType,
-          delayValue: step.delayValue,
-          delayUnit: step.delayUnit as DelayUnit,
-          subject: step.subject,
-          body: step.body,
-          linkedInMessage: step.linkedInMessage,
-          callScript: step.callScript,
-          taskTitle: step.taskTitle,
-          taskDescription: step.taskDescription,
-          internalNotes: step.internalNotes,
-          skipIfReplied: true,
-          skipIfBounced: true,
-        },
-      })
-    }
-
-    await db.sequence.update({
-      where: { id: sequence.id },
-      data: { totalSteps: generatedSequence.steps.length },
-    })
-
-    revalidatePath("/dashboard/sequences")
-
-    yield {
-      stage: "complete",
-      message: "Sequence created successfully!",
-      progress: 100,
-      sequenceId: sequence.id,
-    }
-  } catch (error) {
-    yield {
-      stage: "error",
-      message: "Failed to generate sequence",
-      progress: 0,
-      error: error instanceof Error ? error.message : "Unknown error",
-    }
-  }
+// Streaming version for real-time progress
+export async function generateAISequenceWithProgress(
+  userId: string,
+  icp: ICPInput,
+): Promise<{ success: boolean; sequenceId?: string; error?: string }> {
+  // This is the same as generateAISequence but can be extended for streaming
+  return generateAISequence(userId, icp)
 }

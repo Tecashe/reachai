@@ -36,7 +36,8 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import { generateAISequence, type ICPInput } from "@/lib/actions/a-sequence-generator"
+import type { ICPInput } from "@/lib/types/ai-sequence"
+import { generateAISequence } from "@/lib/actions/ai-sequence-generator"
 
 interface AISequenceGeneratorDialogProps {
   open: boolean
@@ -281,7 +282,7 @@ export function AISequenceGeneratorDialog({ open, onOpenChange, userId }: AISequ
               <div className="px-6 pt-6 pb-4 border-b border-border/50 bg-gradient-to-r from-muted/80 to-muted/40 backdrop-blur-xl">
                 <DialogHeader>
                   <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-lg bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(0,0,0,0.15),0_1px_0_rgba(255,255,255,0.1)_inset]">
+                    <div className="p-2 rounded-lg bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(0,0,0,0.15),0_1px_0_rgba(255,255,255,0.1)_inset] dark:shadow-[0_4px_12px_rgba(0,0,0,0.3),0_1px_0_rgba(255,255,255,0.1)_inset]">
                       <Sparkles className="h-5 w-5" />
                     </div>
                     <div>
