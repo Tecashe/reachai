@@ -257,6 +257,139 @@
 
 
 
+// "use client"
+
+// import { motion, AnimatePresence } from "framer-motion"
+// import { dark } from "@clerk/themes"
+// import { SignIn } from "@clerk/nextjs"
+// import Link from "next/link"
+// import { Mail, ArrowLeft } from "lucide-react"
+// import { useState, useEffect } from "react"
+
+// const headlines = [
+//   { main: "Welcome back", sub: "Continue scaling your outreach where you left off" },
+//   { main: "Your leads await", sub: "Dozens of warm conversations ready for follow-up" },
+//   { main: "Keep the momentum", sub: "Smart sequences have been working while you slept" },
+//   { main: "Close more deals", sub: "Your pipeline is warmer than ever" },
+// ]
+
+// export default function SignInPage() {
+//   const [headlineIndex, setHeadlineIndex] = useState(0)
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setHeadlineIndex((prev) => (prev + 1) % headlines.length)
+//     }, 3500)
+//     return () => clearInterval(interval)
+//   }, [])
+
+//   return (
+//     <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
+//       {/* Left side - Dark with Text Morph */}
+//       <div className="hidden lg:flex flex-col items-center justify-center p-12 bg-[#0a0a0a] relative overflow-hidden">
+//         {/* Background grid pattern */}
+//         <div className="absolute inset-0 opacity-[0.03]">
+//           <svg width="100%" height="100%">
+//             <defs>
+//               <pattern id="grid-signin" width="40" height="40" patternUnits="userSpaceOnUse">
+//                 <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+//               </pattern>
+//             </defs>
+//             <rect width="100%" height="100%" fill="url(#grid-signin)" />
+//           </svg>
+//         </div>
+
+//         {/* Gradient blur */}
+//         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-cyan-500/10 blur-3xl rounded-full" />
+
+//         {/* Logo */}
+//         {/* <div className="absolute top-8 left-8 flex items-center gap-3">
+//           <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
+//             <Mail className="h-5 w-5 text-[#0a0a0a]" />
+//           </div>
+//           <span className="font-semibold text-xl text-white">ColdFlow</span>
+//         </div> */}
+
+//         {/* Morphing Text */}
+//         <div className="relative z-10 px-12 max-w-lg text-center h-40 flex flex-col items-center justify-center">
+//           <AnimatePresence mode="wait">
+//             <motion.div
+//               key={headlineIndex}
+//               initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+//               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+//               exit={{ opacity: 0, y: -30, filter: "blur(10px)" }}
+//               transition={{ duration: 0.5, ease: "easeInOut" }}
+//               className="absolute"
+//             >
+//               <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-4 text-balance">
+//                 {headlines[headlineIndex].main}
+//               </h1>
+//               <p className="text-xl text-white/50">{headlines[headlineIndex].sub}</p>
+//             </motion.div>
+//           </AnimatePresence>
+//         </div>
+
+//         {/* Progress bar */}
+//         <div className="absolute bottom-32 left-12 right-12">
+//           <div className="flex gap-3">
+//             {headlines.map((_, i) => (
+//               <div key={i} className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
+//                 <motion.div
+//                   className="h-full bg-white"
+//                   initial={{ width: "0%" }}
+//                   animate={{
+//                     width: i === headlineIndex ? "100%" : i < headlineIndex ? "100%" : "0%",
+//                   }}
+//                   transition={{ duration: i === headlineIndex ? 3.5 : 0, ease: "linear" }}
+//                 />
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Right side - Light with Sign in form */}
+//       <div className="flex items-center justify-center p-6 sm:p-12 bg-white relative">
+//         <div className="w-full max-w-md space-y-8">
+//           <div className="lg:hidden text-center mb-8">
+//             <Link
+//               href="/"
+//               className="inline-flex items-center gap-2 mb-6 text-[#a1a1aa] hover:text-[#0a0a0a] transition-colors"
+//             >
+//               <ArrowLeft className="h-4 w-4" />
+//               <span>Back to home</span>
+//             </Link>
+//           </div>
+
+//           <motion.div
+//             initial={{ opacity: 0, x: 20 }}
+//             animate={{ opacity: 1, x: 0 }}
+//             transition={{ duration: 0.5, delay: 0.2 }}
+//           >
+//             <SignIn
+//               appearance={{
+//                 baseTheme: dark,
+//                 elements: {
+//                   rootBox: "w-full",
+//                   card: "bg-white shadow-none",
+//                   headerTitle: "text-neutral-900",
+//                   headerSubtitle: "text-neutral-500",
+//                   socialButtonsBlockButton: "bg-neutral-100 border-neutral-200 text-neutral-900 hover:bg-neutral-200",
+//                   formFieldLabel: "text-neutral-700",
+//                   formFieldInput: "bg-neutral-50 border-neutral-200 text-neutral-900",
+//                   formButtonPrimary: "bg-neutral-900 hover:bg-neutral-800",
+//                   footerActionLink: "text-neutral-900 hover:text-neutral-700",
+//                 },
+//               }}
+//             />
+//           </motion.div>
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+
 "use client"
 
 import { motion, AnimatePresence } from "framer-motion"
@@ -285,7 +418,7 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-[#0a0a0a]">
-      {/* Left side - Dark with Text Morph */}
+      {/* Left side - Dark monochrome with Text Morph */}
       <div className="hidden lg:flex flex-col items-center justify-center p-12 bg-[#0a0a0a] relative overflow-hidden">
         {/* Background grid pattern */}
         <div className="absolute inset-0 opacity-[0.03]">
@@ -299,16 +432,8 @@ export default function SignInPage() {
           </svg>
         </div>
 
-        {/* Gradient blur */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-cyan-500/10 blur-3xl rounded-full" />
-
-        {/* Logo */}
-        {/* <div className="absolute top-8 left-8 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
-            <Mail className="h-5 w-5 text-[#0a0a0a]" />
-          </div>
-          <span className="font-semibold text-xl text-white">ColdFlow</span>
-        </div> */}
+        {/* Monochrome gradient blur - subtle gray tones */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 blur-3xl" />
 
         {/* Morphing Text */}
         <div className="relative z-10 px-12 max-w-lg text-center h-40 flex flex-col items-center justify-center">
@@ -330,7 +455,7 @@ export default function SignInPage() {
         </div>
 
         {/* Progress bar */}
-        <div className="absolute bottom-32 left-12 right-12">
+        {/* <div className="absolute bottom-32 left-12 right-12">
           <div className="flex gap-3">
             {headlines.map((_, i) => (
               <div key={i} className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
@@ -345,7 +470,7 @@ export default function SignInPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Right side - Light with Sign in form */}
