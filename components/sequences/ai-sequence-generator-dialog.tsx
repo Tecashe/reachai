@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
-import { generateAISequence, type ICPInput } from "@/lib/actions/ai-sequence-generator"
+import { generateAISequence, type ICPInput } from "@/lib/actions/a-sequence-generator"
 
 interface AISequenceGeneratorDialogProps {
   open: boolean
