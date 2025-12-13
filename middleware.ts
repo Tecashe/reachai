@@ -53,7 +53,7 @@ const isPublicRoute = createRouteMatcher([
   "/(.*)",
   "/api/webhooks(.*)",
   "/api/track(.*)",
-  "/api/cron(.*)",        // Add this line - excludes all cron routes
+  "/api/cron(.*)",   
   "/invite(.*)",
 ])
 
