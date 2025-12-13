@@ -1721,6 +1721,15 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     setCurrentDate(new Date().toISOString())
   }, [])
 
+  // Sync fullEditorTemplate with current subject and body
+  useEffect(() => {
+    setFullEditorTemplate((prev) => ({
+      ...prev,
+      subject,
+      body,
+    }))
+  }, [subject, body])
+
   const spamAnalysis = useMemo(() => {
     const content = `${subject} ${body}`.toLowerCase()
     const foundTriggers: string[] = []
@@ -1843,7 +1852,7 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
   }
 
   const handleFullEditorSave = (updatedSubject: string, updatedBody: string) => {
-    console.log("[v0] handleFullEditorSave called", { updatedSubject, updatedBody })
+    console.log("[v0] Full editor save called")
     setSubject(updatedSubject)
     setBody(updatedBody)
     setShowFullEditor(false)
@@ -2215,15 +2224,25 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
       </Dialog>
 
       {/* Full Editor Dialog */}
-      <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
+      {/* Add debug logging and ensure Dialog renders properly */}
+      {showFullEditor && console.log("[v0] Rendering full editor dialog")}
+      <Dialog
+        open={showFullEditor}
+        onOpenChange={(open) => {
+          console.log("[v0] Dialog open state changed:", open)
+          setShowFullEditor(open)
+        }}
+      >
         <DialogContent className="max-w-[99vw] w-full h-[98vh] p-0 overflow-hidden flex flex-col">
-          <TemplateEditor
-            template={fullEditorTemplate}
-            categories={[]}
-            variables={[]}
-            mode="create"
-            onSave={handleFullEditorSave}
-          />
+          <div className="h-full w-full">
+            <TemplateEditor
+              template={fullEditorTemplate}
+              categories={[]}
+              variables={[]}
+              mode="create"
+              onSave={handleFullEditorSave}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </>

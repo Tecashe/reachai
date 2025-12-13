@@ -126,11 +126,13 @@
 //   )
 // }
 
+
 import { notFound, redirect } from "next/navigation"
 import { TemplateEditor } from "@/components/templates/template-editor"
 import { auth } from "@clerk/nextjs/server"
 import type { TemplateCategory } from "@/lib/types"
 import { prisma } from "@/lib/db"
+import { getTemplate, duplicateTemplate } from "@/lib/actions/templates"
 
 interface EditTemplatePageProps {
   params: Promise<{ id: string }>
@@ -166,7 +168,8 @@ export default async function EditTemplatePage({ params }: EditTemplatePageProps
 
   const { id } = await params
 
-  const template = await prisma.emailTemplate.findUnique({
+  // First check if template exists at all (system or user)
+  const rawTemplate = await prisma.emailTemplate.findUnique({
     where: { id },
     include: {
       user: {
@@ -179,7 +182,7 @@ export default async function EditTemplatePage({ params }: EditTemplatePageProps
     },
   })
 
-  if (!template) {
+  if (!rawTemplate) {
     console.log("[v0] Template not found:", id)
     notFound()
   }
@@ -192,26 +195,26 @@ export default async function EditTemplatePage({ params }: EditTemplatePageProps
     notFound()
   }
 
-  if (template.isSystemTemplate || template.userId !== currentUser.id) {
-    console.log("[v0] System template or not owned, duplicating to user collection...")
+  // If it's a system template or not owned by user, duplicate it first
+  if (rawTemplate.isSystemTemplate || rawTemplate.userId !== currentUser.id) {
+    console.log("[v0] System template or not owned by user, duplicating...")
 
-    // Import duplicateTemplate from correct location
-    const { duplicateTemplate } = await import("@/lib/actions/templates")
     const duplicateResult = await duplicateTemplate(id)
 
     if (duplicateResult.success && duplicateResult.template) {
-      console.log("[v0] Redirecting to duplicated template:", duplicateResult.template.id)
+      console.log("[v0] Successfully duplicated. Redirecting to:", duplicateResult.template.id)
       redirect(`/dashboard/templates/${duplicateResult.template.id}/edit`)
     } else {
-      console.error("[v0] Failed to duplicate template:", duplicateResult.error)
+      console.error("[v0] Failed to duplicate:", duplicateResult.error)
       notFound()
     }
   }
 
-  const { getTemplate } = await import("@/lib/actions/templates")
+  // Now fetch the template with proper formatting using getTemplate
   const templateResult = await getTemplate(id)
 
   if (!templateResult.success || !templateResult.template) {
+    console.log("[v0] Failed to fetch template after checks:", id)
     notFound()
   }
 
