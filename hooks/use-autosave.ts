@@ -18,6 +18,8 @@ export function useAutosave({ onSave, delay = 3000, onConflict, enabled = true }
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const lastVersionRef = useRef<number | undefined>(undefined)
   const isSavingRef = useRef(false)
+  const retryCountRef = useRef(0)
+  const maxRetries = 5
 
   const triggerSave = useCallback(async () => {
     if (!enabled || isSavingRef.current) return
@@ -29,7 +31,6 @@ export function useAutosave({ onSave, delay = 3000, onConflict, enabled = true }
     try {
       if (!navigator.onLine) {
         setStatus("offline")
-        // Save to localStorage as backup
         localStorage.setItem(
           "template-backup",
           JSON.stringify({
@@ -57,19 +58,49 @@ export function useAutosave({ onSave, delay = 3000, onConflict, enabled = true }
           setStatus("saved")
           setLastSaved(new Date())
           localStorage.removeItem("template-backup")
+          retryCountRef.current = 0
         }
       } else {
+        retryCountRef.current++
         setStatus("error")
         setError(result.error || "Save failed")
+
+        console.log("[v0] Save failed, retry count:", retryCountRef.current)
+
+        // If we haven't exceeded max retries, schedule another attempt with exponential backoff
+        if (retryCountRef.current < maxRetries) {
+          const backoffDelay = Math.min(delay * Math.pow(2, retryCountRef.current), 30000) // Max 30 seconds
+          console.log("[v0] Scheduling retry in", backoffDelay, "ms")
+
+          setTimeout(() => {
+            if (enabled) {
+              triggerSave()
+            }
+          }, backoffDelay)
+        } else {
+          console.log("[v0] Max retries exceeded, giving up")
+          setError("Failed to save after multiple attempts. Please check your connection.")
+        }
       }
     } catch (err) {
       console.error("[v0] Autosave error:", err)
+      retryCountRef.current++
       setStatus("error")
       setError("Failed to save changes")
+
+      // Retry logic for exceptions too
+      if (retryCountRef.current < maxRetries) {
+        const backoffDelay = Math.min(delay * Math.pow(2, retryCountRef.current), 30000)
+        setTimeout(() => {
+          if (enabled) {
+            triggerSave()
+          }
+        }, backoffDelay)
+      }
     } finally {
       isSavingRef.current = false
     }
-  }, [enabled, onSave, onConflict])
+  }, [enabled, onSave, onConflict, delay])
 
   const scheduleSave = useCallback(() => {
     if (saveTimeoutRef.current) {
