@@ -1675,9 +1675,14 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
   const [showFullEditor, setShowFullEditor] = useState(false)
   const [templates, setTemplates] = useState<EnhancedEmailTemplate[]>([])
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
+  const [currentDate, setCurrentDate] = useState("")
 
   const subjectInputRef = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    setCurrentDate(new Date().toISOString())
+  }, [])
 
   const spamAnalysis = useMemo(() => {
     const content = `${subject} ${body}`.toLowerCase()
@@ -2175,8 +2180,8 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
         <DialogContent className="max-w-[99vw] w-full h-[98vh] p-0 overflow-hidden flex flex-col">
           <TemplateEditor
             template={{
-              id: "temp",
-              name: "Email Draft",
+              id: "temp-new",
+              name: "",
               subject: subject,
               body: body,
               userId: userId,
@@ -2188,24 +2193,28 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
               industry: null,
               tags: [],
               isSystemTemplate: false,
-              templateType: "TEXT",
+              isFavorite: false,
+              isPublished: false,
+              version: 1,
+              avgOpenRate: 0,
+              avgClickRate: 0,
+              avgReplyRate: 0,
+              totalSent: 0,
+              templateType: "TEXT" as const,
               editorBlocks: null,
-              editorVersion: null,
               aiGenerated: false,
-              basePrompt: null,
               aiModel: null,
               aiPrompt: null,
               aiGenerationId: null,
+              basePrompt: null,
+              editorVersion: null,
               variables: null,
               timesUsed: 0,
-              avgOpenRate: null,
-              avgReplyRate: null,
               lastUsedAt: null,
-              isFavorite: false,
               viewCount: 0,
               duplicateCount: 0,
-              createdAt: new Date(),
-              updatedAt: new Date(),
+              createdAt: currentDate ? new Date(currentDate) : new Date(),
+              updatedAt: currentDate ? new Date(currentDate) : new Date(),
             }}
             categories={[]}
             variables={[]}
@@ -2217,3 +2226,4 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     </>
   )
 }
+

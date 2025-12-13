@@ -1561,11 +1561,33 @@ interface TemplateEditorProps {
   onSave?: (subject: string, body: string) => void
 }
 
+const getDefaultSampleData = (): Record<string, string> => ({
+  firstName: "John",
+  lastName: "Doe",
+  email: "john@example.com",
+  fullName: "John Doe",
+  companyName: "Acme Inc",
+  currentDate: new Date().toLocaleDateString(),
+  currentMonth: new Date().toLocaleString("default", { month: "long" }),
+  currentYear: new Date().getFullYear().toString(),
+})
+
 export function TemplateEditor({ template, categories, variables, mode, onSave }: TemplateEditorProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const editorRef = useRef<Editor | null>(null)
   const [editor, setEditor] = useState<Editor | null>(null)
+
+  const [sampleData, setSampleData] = useState<Record<string, string>>({
+    firstName: "John",
+    lastName: "Doe",
+    email: "john@example.com",
+    fullName: "John Doe",
+    companyName: "Acme Inc",
+    currentDate: "",
+    currentMonth: "",
+    currentYear: "",
+  })
 
   const [name, setName] = useState(template?.name || "")
   const [subject, setSubject] = useState(template?.subject || "")
@@ -1813,6 +1835,10 @@ export function TemplateEditor({ template, categories, variables, mode, onSave }
     }
   }, [isResizing])
 
+  useEffect(() => {
+    setSampleData(getDefaultSampleData())
+  }, [])
+
   return (
     <div className="h-screen flex flex-col bg-background w-full max-w-none">
       {/* Header with template name and save button */}
@@ -1996,7 +2022,7 @@ Use {{variableName}} to insert dynamic content."
                       <EmailPreview
                         subject={subject}
                         content={body}
-                        sampleData={DEFAULT_SAMPLE_DATA}
+                        sampleData={sampleData}
                         devicePreview={devicePreview}
                         onDeviceChange={setDevicePreview}
                       />
@@ -2048,15 +2074,4 @@ Use {{variableName}} to insert dynamic content."
       )}
     </div>
   )
-}
-
-const DEFAULT_SAMPLE_DATA: Record<string, string> = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john@example.com",
-  fullName: "John Doe",
-  companyName: "Acme Inc",
-  currentDate: new Date().toLocaleDateString(),
-  currentMonth: new Date().toLocaleString("default", { month: "long" }),
-  currentYear: new Date().getFullYear().toString(),
 }

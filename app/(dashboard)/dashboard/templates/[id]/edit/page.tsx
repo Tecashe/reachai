@@ -126,12 +126,12 @@
 //   )
 // }
 
-
 import { notFound, redirect } from "next/navigation"
 import { getTemplate, duplicateTemplate } from "@/lib/actions/template-actions"
 import { TemplateEditor } from "@/components/templates/template-editor"
 import { auth } from "@clerk/nextjs/server"
 import type { TemplateCategory } from "@/lib/types"
+import { prisma } from "@/lib/db"
 
 interface EditTemplatePageProps {
   params: Promise<{ id: string }>
@@ -148,10 +148,12 @@ export async function generateMetadata({ params }: EditTemplatePageProps) {
     }
   }
 
-  const result = await getTemplate(userId, id)
+  const template = await prisma.emailTemplate.findUnique({
+    where: { id },
+  })
 
   return {
-    title: result.template ? `Edit ${result.template.name}` : "Edit Template",
+    title: template ? `Edit ${template.name}` : "Edit Template",
     description: "Edit your email template",
   }
 }
@@ -165,17 +167,39 @@ export default async function EditTemplatePage({ params }: EditTemplatePageProps
 
   const { id } = await params
 
+  const template = await prisma.emailTemplate.findUnique({
+    where: { id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  })
+
+  if (!template) {
+    notFound()
+  }
+
+  if (template.isSystemTemplate || template.userId !== userId) {
+    console.log("[v0] System template detected, duplicating to user collection...")
+    const duplicateResult = await duplicateTemplate(userId, id)
+    if (duplicateResult.success && duplicateResult.template) {
+      console.log("[v0] Redirecting to duplicated template:", duplicateResult.template.id)
+      redirect(`/dashboard/templates/${duplicateResult.template.id}/edit`)
+    } else {
+      console.error("[v0] Failed to duplicate template:", duplicateResult.message)
+      notFound()
+    }
+  }
+
   const templateResult = await getTemplate(userId, id)
 
   if (!templateResult.success || !templateResult.template) {
     notFound()
-  }
-
-  if (templateResult.template.isSystemTemplate && templateResult.template.userId !== userId) {
-    const duplicateResult = await duplicateTemplate(userId, id)
-    if (duplicateResult.success && duplicateResult.template) {
-      redirect(`/dashboard/templates/${duplicateResult.template.id}/edit`)
-    }
   }
 
   const categories: TemplateCategory[] = [
