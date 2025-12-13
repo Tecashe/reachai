@@ -1834,12 +1834,18 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
   }
 
   const handleApplyTemplate = async (template: any) => {
+    console.log("[v0] handleApplyTemplate started")
+    console.log("[v0] Template subject:", template.subject)
+    console.log("[v0] Template body:", template.body)
+
     setIsRewriting(true)
     await new Promise((resolve) => setTimeout(resolve, 1500))
+
     let processedSubject = template.subject
     let processedBody = template.body
 
     if (prospect) {
+      console.log("[v0] Processing variables with prospect data")
       const variableMap: Record<string, string> = {
         firstName: prospect.firstName || "",
         lastName: prospect.lastName || "",
@@ -1849,8 +1855,8 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
         companyName: prospect.companyName || "",
         title: prospect.title || "",
         industry: prospect.industry || "",
-        senderName: "Your Name", // This should come from user profile
-        senderCompany: "Your Company", // This should come from user profile
+        senderName: "Your Name",
+        senderCompany: "Your Company",
       }
 
       Object.entries(variableMap).forEach(([key, value]) => {
@@ -1861,14 +1867,20 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     }
 
     if (userId && template.id && template.id !== "custom") {
+      console.log("[v0] Tracking template usage")
       await trackTemplateUsage(userId, template.id)
     }
+
+    console.log("[v0] Setting subject to:", processedSubject)
+    console.log("[v0] Setting body to:", processedBody.substring(0, 100) + "...")
 
     setSubject(processedSubject)
     setBody(processedBody)
     addToHistory(processedSubject, processedBody)
     setShowTemplateLibrary(false)
     setIsRewriting(false)
+
+    console.log("[v0] handleApplyTemplate completed")
   }
 
   const handleAIRewrite = async (tone: string) => {
@@ -1936,7 +1948,9 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
 
   const handleTemplateSelect = async (template: any) => {
     console.log("[v0] Template selected:", template.name)
+    console.log("[v0] About to call handleApplyTemplate")
     await handleApplyTemplate(template)
+    console.log("[v0] handleApplyTemplate completed")
   }
 
   return (

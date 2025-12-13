@@ -182,11 +182,19 @@ export function TemplateLibrary({ userId, onSelectTemplate, onClose }: TemplateL
   }
 
   function handleUseTemplate(template: Template) {
-    console.log("[v0] Using template:", template.name)
+    console.log("[v0] handleUseTemplate called with template:", template.name)
+    console.log("[v0] onSelectTemplate exists?", !!onSelectTemplate)
+    console.log("[v0] onClose exists?", !!onClose)
+
     if (onSelectTemplate) {
+      console.log("[v0] Calling onSelectTemplate")
       onSelectTemplate(template)
+    } else {
+      console.log("[v0] WARNING: onSelectTemplate is not defined!")
     }
+
     if (onClose) {
+      console.log("[v0] Calling onClose")
       onClose()
     }
   }
