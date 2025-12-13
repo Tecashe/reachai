@@ -182,6 +182,7 @@ export function TemplateLibrary({ userId, onSelectTemplate, onClose }: TemplateL
   }
 
   function handleUseTemplate(template: Template) {
+    console.log("[v0] Using template:", template.name)
     if (onSelectTemplate) {
       onSelectTemplate(template)
     }

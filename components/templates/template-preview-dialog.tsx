@@ -61,6 +61,16 @@ export function TemplatePreviewDialog({ template, open, onOpenChange, onUseTempl
   const renderedSubject = replaceVariables(template.subject)
   const renderedBody = replaceVariables(template.body)
 
+  const formatBodyForDisplay = (text: string) => {
+    // Split by double line breaks for paragraphs
+    const paragraphs = text.split("\n\n")
+    return paragraphs
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0)
+      .map((p) => `<p style="margin-bottom: 1em;">${p.replace(/\n/g, "<br>")}</p>`)
+      .join("")
+  }
+
   // Extract variables from template
   const extractedVariables = React.useMemo(() => {
     const variablePattern = /\{\{([^}]+)\}\}/g
@@ -200,13 +210,16 @@ export function TemplatePreviewDialog({ template, open, onOpenChange, onUseTempl
                       <div
                         className="prose prose-sm dark:prose-invert max-w-none"
                         style={{
-                          whiteSpace: "pre-wrap",
                           fontFamily: "system-ui, -apple-system, sans-serif",
                           lineHeight: "1.6",
                         }}
-                      >
-                        {renderedBody}
-                      </div>
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            template.templateType === "HTML" || template.templateType === "VISUAL"
+                              ? renderedBody
+                              : formatBodyForDisplay(renderedBody),
+                        }}
+                      />
                     </div>
                   </div>
 
