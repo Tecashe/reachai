@@ -1558,20 +1558,10 @@ interface TemplateEditorProps {
   categories: TemplateCategory[]
   variables: TemplateVariable[]
   mode: "create" | "edit"
+  onSave?: (subject: string, body: string) => void
 }
 
-const DEFAULT_SAMPLE_DATA: Record<string, string> = {
-  firstName: "John",
-  lastName: "Doe",
-  email: "john@example.com",
-  fullName: "John Doe",
-  companyName: "Acme Inc",
-  currentDate: new Date().toLocaleDateString(),
-  currentMonth: new Date().toLocaleString("default", { month: "long" }),
-  currentYear: new Date().getFullYear().toString(),
-}
-
-export function TemplateEditor({ template, categories, variables, mode }: TemplateEditorProps) {
+export function TemplateEditor({ template, categories, variables, mode, onSave }: TemplateEditorProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const editorRef = useRef<Editor | null>(null)
@@ -1740,6 +1730,11 @@ export function TemplateEditor({ template, categories, variables, mode }: Templa
   const handleSave = async () => {
     if (!name.trim()) {
       toast.error("Please enter a template name")
+      return
+    }
+
+    if (onSave) {
+      onSave(subject, body)
       return
     }
 
@@ -2053,4 +2048,15 @@ Use {{variableName}} to insert dynamic content."
       )}
     </div>
   )
+}
+
+const DEFAULT_SAMPLE_DATA: Record<string, string> = {
+  firstName: "John",
+  lastName: "Doe",
+  email: "john@example.com",
+  fullName: "John Doe",
+  companyName: "Acme Inc",
+  currentDate: new Date().toLocaleDateString(),
+  currentMonth: new Date().toLocaleString("default", { month: "long" }),
+  currentYear: new Date().getFullYear().toString(),
 }

@@ -1550,22 +1550,17 @@
 
 "use client"
 
-import * as React from "react"
+import { useMemo } from "react"
 import {
   Bold,
   Italic,
   Link2,
   Variable,
   Sparkles,
-  Eye,
-  Smartphone,
-  Monitor,
   Copy,
   Check,
   AlertTriangle,
   CheckCircle2,
-  Undo2,
-  Redo2,
   FileText,
   ChevronDown,
   User,
@@ -1579,7 +1574,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -1588,21 +1582,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import type { SequenceStep } from "@/lib/types/sequence"
-import { WaveLoader } from "@/components/loader/wave-loader"
-import { trackTemplateUsage } from "@/lib/actions/template-actions"
+import type { SequenceStep, EnhancedEmailTemplate } from "@/lib/types/sequence"
 import { TemplateLibrary } from "@/components/templates/template-library"
 import { TemplateEditor } from "@/components/templates/template-editor"
-
-interface EmailComposerProps {
-  step: SequenceStep
-  onSave: (subject: string, body: string) => void
-  onClose: () => void
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
-  userId?: string
-  prospect?: any
-}
+import { toast } from "sonner"
+import { useEffect, useState, useRef } from "react"
+import { getTemplates } from "@/lib/actions/templates"
 
 const SPAM_TRIGGER_WORDS = [
   "free",
@@ -1629,73 +1614,6 @@ const SPAM_TRIGGER_WORDS = [
   "incredible deal",
   "amazing",
   "unbelievable",
-]
-
-const EMAIL_TEMPLATES = [
-  {
-    id: "cold-intro",
-    name: "Cold Introduction",
-    category: "Outreach",
-    subject: "Quick question about {{company}}",
-    body: `Hi {{firstName}},
-
-I came across {{company}} and was impressed by your work in the industry.
-
-I'm reaching out because we help companies like yours [brief value prop].
-
-Would you be open to a quick 15-minute chat to see if there's a fit?
-
-Best,
-{{senderName}}`,
-  },
-  {
-    id: "follow-up-1",
-    name: "First Follow-up",
-    category: "Follow-up",
-    subject: "Re: Quick question about {{company}}",
-    body: `Hi {{firstName}},
-
-I wanted to follow up on my previous email. I know you're busy, so I'll keep this brief.
-
-[One-liner about value prop]
-
-Would a quick call this week work for you?
-
-Best,
-{{senderName}}`,
-  },
-  {
-    id: "value-add",
-    name: "Value-Add Touch",
-    category: "Nurture",
-    subject: "Thought you might find this useful",
-    body: `Hi {{firstName}},
-
-I came across [relevant resource/article/case study] and thought of {{company}}.
-
-[Brief insight about why it's relevant]
-
-Would love to hear your thoughts!
-
-Best,
-{{senderName}}`,
-  },
-  {
-    id: "breakup",
-    name: "Breakup Email",
-    category: "Follow-up",
-    subject: "Should I close your file?",
-    body: `Hi {{firstName}},
-
-I've reached out a few times but haven't heard back, which is totally fine.
-
-I'll assume the timing isn't right and will close out your file.
-
-If things change in the future, feel free to reach out.
-
-Best,
-{{senderName}}`,
-  },
 ]
 
 const PERSONALIZATION_VARIABLES = {
@@ -1740,23 +1658,28 @@ const AI_REWRITE_TONES = [
   { id: "concise", label: "Concise", description: "Short and to the point" },
 ]
 
+type EmailComposerProps = {
+  step: SequenceStep
+  onSave: (subject: string, body: string) => void
+  onClose: () => void
+  isOpen: boolean
+  onOpenChange: (open: boolean) => void
+  userId: string
+  prospect: any // Define the type of prospect if possible
+}
+
 export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, userId, prospect }: EmailComposerProps) {
-  const [subject, setSubject] = React.useState(step.subject || "")
-  const [body, setBody] = React.useState(step.body || "")
-  const [viewMode, setViewMode] = React.useState<"edit" | "preview">("edit")
-  const [previewDevice, setPreviewDevice] = React.useState<"desktop" | "mobile">("desktop")
-  const [showTemplateLibrary, setShowTemplateLibrary] = React.useState(false)
-  const [showFullEditor, setShowFullEditor] = React.useState(false)
-  const [isRewriting, setIsRewriting] = React.useState(false)
-  const [isCopied, setIsCopied] = React.useState(false)
+  const [subject, setSubject] = useState(step?.subject || "")
+  const [body, setBody] = useState(step?.body || "") // Changed step?.content to step?.body to match SequenceStep type
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false)
+  const [showFullEditor, setShowFullEditor] = useState(false)
+  const [templates, setTemplates] = useState<EnhancedEmailTemplate[]>([])
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
 
-  const [history, setHistory] = React.useState<{ subject: string; body: string }[]>([{ subject, body }])
-  const [historyIndex, setHistoryIndex] = React.useState(0)
+  const subjectInputRef = useRef<HTMLInputElement | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const bodyRef = React.useRef<HTMLTextAreaElement>(null)
-  const subjectRef = React.useRef<HTMLInputElement>(null)
-
-  const spamAnalysis = React.useMemo(() => {
+  const spamAnalysis = useMemo(() => {
     const content = `${subject} ${body}`.toLowerCase()
     const foundTriggers: string[] = []
     const warnings: string[] = []
@@ -1799,102 +1722,25 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     return "Poor"
   }
 
-  const addToHistory = (newSubject: string, newBody: string) => {
-    const newHistory = history.slice(0, historyIndex + 1)
-    newHistory.push({ subject: newSubject, body: newBody })
-    setHistory(newHistory)
-    setHistoryIndex(newHistory.length - 1)
-  }
-
-  const handleUndo = () => {
-    if (historyIndex > 0) {
-      const prev = history[historyIndex - 1]
-      setSubject(prev.subject)
-      setBody(prev.body)
-      setHistoryIndex(historyIndex - 1)
-    }
-  }
-
-  const handleRedo = () => {
-    if (historyIndex < history.length - 1) {
-      const next = history[historyIndex + 1]
-      setSubject(next.subject)
-      setBody(next.body)
-      setHistoryIndex(historyIndex + 1)
-    }
-  }
-
   const handleSubjectChange = (value: string) => {
     setSubject(value)
-    addToHistory(value, body)
   }
 
   const handleBodyChange = (value: string) => {
     setBody(value)
-    addToHistory(subject, value)
   }
 
-  const handleApplyTemplate = async (template: any) => {
-    console.log("[v0] handleApplyTemplate started")
-    console.log("[v0] Template subject:", template.subject)
-    console.log("[v0] Template body:", template.body)
-
-    setIsRewriting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    let processedSubject = template.subject
-    let processedBody = template.body
-
-    if (prospect) {
-      console.log("[v0] Processing variables with prospect data")
-      const variableMap: Record<string, string> = {
-        firstName: prospect.firstName || "",
-        lastName: prospect.lastName || "",
-        fullName: `${prospect.firstName || ""} ${prospect.lastName || ""}`.trim(),
-        email: prospect.email || "",
-        company: prospect.companyName || "",
-        companyName: prospect.companyName || "",
-        title: prospect.title || "",
-        industry: prospect.industry || "",
-        senderName: "Your Name",
-        senderCompany: "Your Company",
-      }
-
-      Object.entries(variableMap).forEach(([key, value]) => {
-        const regex = new RegExp(`{{${key}}}`, "g")
-        processedSubject = processedSubject.replace(regex, value)
-        processedBody = processedBody.replace(regex, value)
-      })
-    }
-
-    if (userId && template.id && template.id !== "custom") {
-      console.log("[v0] Tracking template usage")
-      await trackTemplateUsage(userId, template.id)
-    }
-
-    console.log("[v0] Setting subject to:", processedSubject)
-    console.log("[v0] Setting body to:", processedBody.substring(0, 100) + "...")
-
-    setSubject(processedSubject)
-    setBody(processedBody)
-    addToHistory(processedSubject, processedBody)
-    setShowTemplateLibrary(false)
-    setIsRewriting(false)
-
-    console.log("[v0] handleApplyTemplate completed")
+  const handleApplyTemplate = async (template: EnhancedEmailTemplate) => {
+    console.log("[v0] handleApplyTemplate starting with template:", template.name)
+    // Placeholder for template processing logic
   }
 
   const handleAIRewrite = async (tone: string) => {
-    setIsRewriting(true)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    const rewrittenBody = `[Rewritten in ${tone} tone]\n\n${body}`
-    setBody(rewrittenBody)
-    addToHistory(subject, rewrittenBody)
-    setIsRewriting(false)
+    // Placeholder for AI rewrite logic
   }
 
   const insertVariable = (variable: string) => {
-    const target = bodyRef.current
+    const target = textareaRef.current
     if (!target) return
 
     const start = target.selectionStart || 0
@@ -1903,7 +1749,6 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     const newBody = body.substring(0, start) + variableText + body.substring(end)
 
     setBody(newBody)
-    addToHistory(subject, newBody)
 
     setTimeout(() => {
       target.focus()
@@ -1913,15 +1758,14 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
 
   const handleCopyToClipboard = async () => {
     await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`)
-    setIsCopied(true)
-    setTimeout(() => setIsCopied(false), 2000)
+    // Placeholder for processing state logic
   }
 
   const handleSave = () => {
     onSave(subject, body)
   }
 
-  const previewContent = React.useMemo(() => {
+  const previewContent = useMemo(() => {
     const sampleData: Record<string, string> = {
       firstName: "John",
       lastName: "Smith",
@@ -1947,12 +1791,39 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     return { subject: previewSubject, body: previewBody }
   }, [subject, body])
 
-  const handleTemplateSelect = async (template: any) => {
+  const handleTemplateSelect = async (template: EnhancedEmailTemplate) => {
     console.log("[v0] Template selected:", template.name)
     console.log("[v0] About to call handleApplyTemplate")
     await handleApplyTemplate(template)
     console.log("[v0] handleApplyTemplate completed")
   }
+
+  const handleFullEditorSave = (updatedSubject: string, updatedBody: string) => {
+    console.log("[v0] handleFullEditorSave called", { updatedSubject, updatedBody })
+    setSubject(updatedSubject)
+    setBody(updatedBody)
+    setShowFullEditor(false)
+    toast("Email updated from editor")
+  }
+
+  useEffect(() => {
+    if (showTemplateLibrary && userId && templates.length === 0) {
+      setIsLoadingTemplates(true)
+      getTemplates()
+        .then((result) => {
+          if (Array.isArray(result)) {
+            setTemplates(result as EnhancedEmailTemplate[])
+          }
+        })
+        .catch((error) => {
+          console.error("[v0] Error fetching templates:", error)
+          toast.error("Failed to load templates")
+        })
+        .finally(() => {
+          setIsLoadingTemplates(false)
+        })
+    }
+  }, [showTemplateLibrary, userId, templates.length])
 
   return (
     <>
@@ -1965,25 +1836,23 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                 <DialogDescription>Create and optimize your email content with AI assistance</DialogDescription>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 rounded-lg border px-3 py-1.5">
-                  <div
-                    className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
-                      spamAnalysis.score >= 80
-                        ? "bg-green-500/10 text-green-500"
-                        : spamAnalysis.score >= 60
-                          ? "bg-yellow-500/10 text-yellow-500"
-                          : "bg-red-500/10 text-red-500",
-                    )}
-                  >
-                    {spamAnalysis.score}
-                  </div>
-                  <div className="text-xs">
-                    <p className={cn("font-medium", getSpamScoreColor(spamAnalysis.score))}>
-                      {getSpamScoreLabel(spamAnalysis.score)}
-                    </p>
-                    <p className="text-muted-foreground">Deliverability</p>
-                  </div>
+                <div
+                  className={cn(
+                    "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
+                    spamAnalysis.score >= 80
+                      ? "bg-green-500/10 text-green-500"
+                      : spamAnalysis.score >= 60
+                        ? "bg-yellow-500/10 text-yellow-500"
+                        : "bg-red-500/10 text-red-500",
+                  )}
+                >
+                  {spamAnalysis.score}
+                </div>
+                <div className="text-xs">
+                  <p className={cn("font-medium", getSpamScoreColor(spamAnalysis.score))}>
+                    {getSpamScoreLabel(spamAnalysis.score)}
+                  </p>
+                  <p className="text-muted-foreground">Deliverability</p>
                 </div>
               </div>
             </div>
@@ -1995,41 +1864,6 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
               {/* Toolbar */}
               <div className="flex items-center justify-between border-b px-4 py-2">
                 <div className="flex items-center gap-1">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={handleUndo}
-                          disabled={historyIndex === 0}
-                        >
-                          <Undo2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Undo</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={handleRedo}
-                          disabled={historyIndex === history.length - 1}
-                        >
-                          <Redo2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Redo</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  <Separator orientation="vertical" className="mx-1 h-6" />
-
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -2139,14 +1973,14 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
-                        {isRewriting ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Sparkles className="h-4 w-4" />}
+                        <Sparkles className="h-4 w-4" />
                         AI Rewrite
                         <ChevronDown className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
                       {AI_REWRITE_TONES.map((tone) => (
-                        <DropdownMenuItem key={tone.id} onClick={() => handleAIRewrite(tone.id)} disabled={isRewriting}>
+                        <DropdownMenuItem key={tone.id} onClick={() => handleAIRewrite(tone.id)}>
                           <div>
                             <p className="text-sm">{tone.label}</p>
                             <p className="text-xs text-muted-foreground">{tone.description}</p>
@@ -2156,98 +1990,40 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-
-                <div className="flex items-center gap-1">
-                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "edit" | "preview")}>
-                    <TabsList className="h-8">
-                      <TabsTrigger value="edit" className="h-7 px-3 text-xs">
-                        Edit
-                      </TabsTrigger>
-                      <TabsTrigger value="preview" className="h-7 px-3 text-xs">
-                        <Eye className="mr-1 h-3 w-3" />
-                        Preview
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
               </div>
 
               {/* Editor content */}
               <div className="flex-1 overflow-auto p-4">
-                {viewMode === "edit" ? (
-                  <div className="space-y-4 max-w-3xl mx-auto">
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium text-muted-foreground">Subject Line</Label>
-                      <Input
-                        ref={subjectRef}
-                        value={subject}
-                        onChange={(e) => handleSubjectChange(e.target.value)}
-                        placeholder="Enter your subject line..."
-                        className="text-base"
-                      />
-                      <p className="text-xs text-muted-foreground">{subject.length}/60 characters</p>
-                    </div>
+                <div className="space-y-4 max-w-3xl mx-auto">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Subject Line</Label>
+                    <Input
+                      ref={subjectInputRef}
+                      value={subject}
+                      onChange={(e) => handleSubjectChange(e.target.value)}
+                      placeholder="Enter your subject line..."
+                      className="text-base"
+                    />
+                    <p className="text-xs text-muted-foreground">{subject.length}/60 characters</p>
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
-                      <Textarea
-                        ref={bodyRef}
-                        value={body}
-                        onChange={(e) => handleBodyChange(e.target.value)}
-                        placeholder="Write your email content here..."
-                        className="min-h-[350px] text-sm resize-none font-mono"
-                      />
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground">{body.length} characters</p>
-                        <p className="text-xs text-muted-foreground">
-                          {(body.match(/\{\{[^}]+\}\}/g) || []).length} variables
-                        </p>
-                      </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
+                    <Textarea
+                      ref={textareaRef}
+                      value={body}
+                      onChange={(e) => handleBodyChange(e.target.value)}
+                      placeholder="Write your email content here..."
+                      className="min-h-[350px] text-sm resize-none font-mono"
+                    />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">{body.length} characters</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(body.match(/\{\{[^}]+\}\}/g) || []).length} variables
+                      </p>
                     </div>
                   </div>
-                ) : (
-                  <div className="max-w-3xl mx-auto">
-                    <div className="flex justify-center mb-4">
-                      <div className="inline-flex rounded-lg border p-1">
-                        <Button
-                          variant={previewDevice === "desktop" ? "secondary" : "ghost"}
-                          size="sm"
-                          className="h-7 px-3"
-                          onClick={() => setPreviewDevice("desktop")}
-                        >
-                          <Monitor className="mr-1 h-3 w-3" />
-                          Desktop
-                        </Button>
-                        <Button
-                          variant={previewDevice === "mobile" ? "secondary" : "ghost"}
-                          size="sm"
-                          className="h-7 px-3"
-                          onClick={() => setPreviewDevice("mobile")}
-                        >
-                          <Smartphone className="mr-1 h-3 w-3" />
-                          Mobile
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div
-                      className={cn(
-                        "mx-auto rounded-lg border bg-white dark:bg-card shadow-sm overflow-hidden",
-                        previewDevice === "mobile" ? "max-w-[375px]" : "max-w-full",
-                      )}
-                    >
-                      <div className="border-b bg-muted/30 px-4 py-3">
-                        <p className="text-sm font-medium text-foreground">{previewContent.subject}</p>
-                        <p className="text-xs text-muted-foreground">To: john@company.com</p>
-                      </div>
-                      <div className="p-4">
-                        <pre className="whitespace-pre-wrap text-sm font-sans text-foreground">
-                          {previewContent.body}
-                        </pre>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
 
@@ -2352,8 +2128,8 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
           {/* Footer */}
           <div className="flex items-center justify-between border-t px-6 py-4">
             <Button variant="outline" onClick={handleCopyToClipboard} className="gap-2 shadow-sm bg-transparent">
-              {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {isCopied ? "Copied!" : "Copy"}
+              <Copy className="h-4 w-4" />
+              Copy
             </Button>
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={onClose} className="shadow-sm bg-transparent">
@@ -2368,68 +2144,76 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
         </DialogContent>
       </Dialog>
 
+      {/* Template Library Dialog */}
       <Dialog open={showTemplateLibrary} onOpenChange={setShowTemplateLibrary}>
-        <DialogContent className="max-w-[98vw] w-[1400px] h-[90vh] p-0 overflow-hidden">
-          <DialogHeader className="px-6 py-4 border-b">
+        <DialogContent className="max-w-[98vw] w-[1600px] h-[95vh] p-6 overflow-hidden flex flex-col">
+          <DialogHeader>
             <DialogTitle>Choose Email Template</DialogTitle>
-            <DialogDescription>Select a template from your library or browse system templates</DialogDescription>
           </DialogHeader>
           {userId && (
             <div className="flex-1 overflow-auto">
-              <TemplateLibrary
-                userId={userId}
-                onSelectTemplate={handleTemplateSelect}
-                onClose={() => setShowTemplateLibrary(false)}
-              />
+              {isLoadingTemplates ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-muted-foreground">Loading templates...</div>
+                </div>
+              ) : (
+                <TemplateLibrary
+                  templates={templates}
+                  categories={[]}
+                  userId={userId}
+                  onSelectTemplate={handleTemplateSelect}
+                  onClose={() => setShowTemplateLibrary(false)}
+                />
+              )}
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {showFullEditor && userId && (
-        <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
-          <DialogContent className="max-w-[99vw] w-full h-[96vh] p-0 overflow-hidden">
-            <TemplateEditor
-              template={{
-                id: "temp_draft",
-                name: "Email Draft",
-                subject,
-                body,
-                userId,
-                description: null,
-                category: null,
-                industry: null,
-                templateType: "TEXT",
-                tags: [],
-                thumbnailUrl: null,
-                previewImageUrl: null,
-                colorScheme: null,
-                editorBlocks: null,
-                isSystemTemplate: false,
-                isFavorite: false,
-                isPublished: false,
-                avgOpenRate: null,
-                avgClickRate: null,
-                avgReplyRate: null,
-                usageCount: 0,
-                duplicateCount: 0,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-              }}
-              categories={[]}
-              variables={[]}
-              mode="edit"
-              onSave={(updatedSubject, updatedBody) => {
-                setSubject(updatedSubject)
-                setBody(updatedBody)
-                addToHistory(updatedSubject, updatedBody)
-                setShowFullEditor(false)
-              }}
-              onClose={() => setShowFullEditor(false)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Full Editor Dialog */}
+      <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
+        <DialogContent className="max-w-[99vw] w-full h-[98vh] p-0 overflow-hidden flex flex-col">
+          <TemplateEditor
+            template={{
+              id: "temp",
+              name: "Email Draft",
+              subject: subject,
+              body: body,
+              userId: userId,
+              description: null,
+              category: null,
+              thumbnailUrl: null,
+              previewImageUrl: null,
+              colorScheme: null,
+              industry: null,
+              tags: [],
+              isSystemTemplate: false,
+              templateType: "TEXT",
+              editorBlocks: null,
+              editorVersion: null,
+              aiGenerated: false,
+              basePrompt: null,
+              aiModel: null,
+              aiPrompt: null,
+              aiGenerationId: null,
+              variables: null,
+              timesUsed: 0,
+              avgOpenRate: null,
+              avgReplyRate: null,
+              lastUsedAt: null,
+              isFavorite: false,
+              viewCount: 0,
+              duplicateCount: 0,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }}
+            categories={[]}
+            variables={[]}
+            mode="create"
+            onSave={handleFullEditorSave}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

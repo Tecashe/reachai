@@ -619,7 +619,6 @@
 //   "welcome",
 //   "announcement",
 // ]
-
 import type { User, Campaign, Prospect, EmailTemplate, EmailLog, Analytics, Prisma } from "@prisma/client"
 
 // Extended types with relations
@@ -801,6 +800,7 @@ export interface EnhancedEmailTemplate {
   // Template type
   isSystemTemplate: boolean
   templateType: TemplateType
+  isPublished?: boolean
 
   // Editor data
   editorBlocks: Prisma.JsonValue | null
@@ -918,8 +918,6 @@ export const TEMPLATE_TAGS = [
   "welcome",
   "announcement",
 ]
-
-
 
 
 
