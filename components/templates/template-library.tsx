@@ -383,9 +383,16 @@ export function TemplateLibrary({ userId, onSelectTemplate, onClose }: TemplateL
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button onClick={() => handleUseTemplate(template)} className="w-full">
-                      Use Template
-                    </Button>
+                    {onSelectTemplate ? (
+                      <Button onClick={() => handleUseTemplate(template)} className="w-full">
+                        Use Template
+                      </Button>
+                    ) : (
+                      <Button onClick={() => setPreviewTemplate(template)} variant="outline" className="w-full">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Preview
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               ))}

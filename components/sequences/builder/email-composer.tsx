@@ -2125,7 +2125,10 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                     variant="ghost"
                     size="sm"
                     className="h-8 gap-1 text-xs"
-                    onClick={() => setShowFullEditor(true)}
+                    onClick={() => {
+                      console.log("[v0] Full Editor button clicked")
+                      setShowFullEditor(true)
+                    }}
                   >
                     <Maximize2 className="h-4 w-4" />
                     Full Editor
@@ -2381,6 +2384,7 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
         </DialogContent>
       </Dialog>
 
+      {/* Full Editor Dialog */}
       <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
         <DialogContent className="max-w-[1200px] max-h-[90vh]">
           <DialogHeader>
