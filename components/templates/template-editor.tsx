@@ -11,15 +11,15 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { EmailPreview } from "./email-preview"
+import { EmailPreview } from "./template-editor/email-preview"
 import { VariablePanel } from "./variable-panel"
 import { RichTextEditor } from "./rich-text-editor"
 import { RichTextToolbar } from "./rich-text-toolbar"
 import { VersionHistoryDialog } from "./version-history-dialog"
 import { AutosaveIndicator } from "./autosave-indicator"
 import { ConflictResolutionDialog } from "./conflict-resolution-dialog"
-import { useAutosave } from "@/lib/hooks/use-autosave"
-import { useDebounce } from "@/lib/hooks/use-debounce"
+import { useAutosave } from "@/hooks/use-autosave"
+import { useDebounce } from "@/hooks/use-dbounce"
 import type { Editor } from "@tiptap/react"
 import type { EnhancedEmailTemplate, TemplateCategory, TemplateVariable } from "@/lib/types"
 import { updateTemplate, createTemplate } from "@/lib/actions/templates"
@@ -98,7 +98,7 @@ export function TemplateEditor({ template, categories, variables, mode }: Templa
         }
 
         setHasUnsavedChanges(false)
-        return { success: true, version: result.template?.version }
+        return { success: true }
       } catch (err) {
         console.error("[v0] Autosave error:", err)
         return { success: false, error: "Failed to save" }

@@ -306,7 +306,7 @@ export function TemplatePreviewDialog({ template, open, onOpenChange, onUseTempl
         {/* Footer */}
         <div className="flex items-center justify-between border-t px-6 py-4">
           <div className="text-xs text-muted-foreground">
-            
+            {template.user?.name && <span>Created by {template.user.name}</span>}
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>

@@ -287,6 +287,7 @@ model EmailTemplate {
 
   // NEW: Template categories (many-to-many)
   templateCategories TemplateInCategory[]
+  versions           TemplateVersion[]
 
   // Existing relationships
   emailSequences EmailSequence[]
@@ -1972,6 +1973,36 @@ model SequenceTemplate {
   @@index([userId])
   @@index([category])
   @@index([isSystem])
+}
+
+model TemplateVersion {
+  id          String   @id @default(cuid())
+  templateId  String
+  template    EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  version     Int      @default(1)
+  name        String
+  subject     String
+  body        String   @db.Text
+  
+  // Store snapshot of template data at this version
+  description String?  @db.Text
+  category    String?
+  industry    String?
+  templateType TemplateType @default(TEXT)
+  tags        String[]
+  thumbnailUrl String?
+  colorScheme Json?
+  editorBlocks Json?
+  
+  // Version metadata
+  changeNote  String?  @db.Text
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([templateId])
+  @@index([createdAt])
+  @@unique([templateId, version])
 }
 
 // ENUMS
