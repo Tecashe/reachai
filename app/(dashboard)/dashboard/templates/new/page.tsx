@@ -1,4 +1,4 @@
-import { TemplateEditor } from "@/components/templates/template-editor"
+import { TemplateEditorForm } from "@/components/templates/template-editor-form"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
@@ -23,21 +23,21 @@ export default async function NewTemplatePage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
+    <div className="h-screen flex flex-col">
+      <div className="border-b px-6 py-4">
         <Link href="/templates">
-          <Button variant="ghost" className="gap-2 mb-4">
+          <Button variant="ghost" className="gap-2 mb-2">
             <ArrowLeft className="w-4 h-4" />
             Back to Templates
           </Button>
         </Link>
-        <h1 className="text-4xl font-bold mb-2">Create New Template</h1>
-        <p className="text-muted-foreground text-lg">
-          Build a custom email template with dynamic variables and live preview
-        </p>
+        <h1 className="text-2xl font-bold">Create New Template</h1>
+        <p className="text-muted-foreground">Build a custom email template with dynamic variables and live preview</p>
       </div>
 
-      <TemplateEditor userId={userId} />
+      <div className="flex-1 overflow-hidden">
+        <TemplateEditorForm userId={userId} />
+      </div>
     </div>
   )
 }

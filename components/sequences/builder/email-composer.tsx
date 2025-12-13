@@ -1573,6 +1573,7 @@ import {
   Briefcase,
   AtSign,
   Plus,
+  Maximize2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -1590,6 +1591,7 @@ import { cn } from "@/lib/utils"
 import type { SequenceStep } from "@/lib/types/sequence"
 import { WaveLoader } from "@/components/loader/wave-loader"
 import { trackTemplateUsage } from "@/lib/actions/template-actions"
+import { TemplateLibrary } from "@/components/templates/template-library"
 
 interface EmailComposerProps {
   step: SequenceStep
@@ -1598,6 +1600,7 @@ interface EmailComposerProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   userId?: string
+  prospect?: any
 }
 
 const SPAM_TRIGGER_WORDS = [
@@ -1736,12 +1739,13 @@ const AI_REWRITE_TONES = [
   { id: "concise", label: "Concise", description: "Short and to the point" },
 ]
 
-export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, userId }: EmailComposerProps) {
+export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, userId, prospect }: EmailComposerProps) {
   const [subject, setSubject] = React.useState(step.subject || "")
   const [body, setBody] = React.useState(step.body || "")
   const [viewMode, setViewMode] = React.useState<"edit" | "preview">("edit")
   const [previewDevice, setPreviewDevice] = React.useState<"desktop" | "mobile">("desktop")
   const [showTemplateLibrary, setShowTemplateLibrary] = React.useState(false)
+  const [showFullEditor, setShowFullEditor] = React.useState(false)
   const [isRewriting, setIsRewriting] = React.useState(false)
   const [isCopied, setIsCopied] = React.useState(false)
 
@@ -1830,19 +1834,41 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
   }
 
   const handleApplyTemplate = async (template: any) => {
-    // Replace variables with actual values or placeholders
-    const templateSubject = template.subject
-    const templateBody = template.body
+    setIsRewriting(true)
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    let processedSubject = template.subject
+    let processedBody = template.body
 
-    // Track template usage if userId is available
-    if (userId && template.id) {
+    if (prospect) {
+      const variableMap: Record<string, string> = {
+        firstName: prospect.firstName || "",
+        lastName: prospect.lastName || "",
+        fullName: `${prospect.firstName || ""} ${prospect.lastName || ""}`.trim(),
+        email: prospect.email || "",
+        company: prospect.companyName || "",
+        companyName: prospect.companyName || "",
+        title: prospect.title || "",
+        industry: prospect.industry || "",
+        senderName: "Your Name", // This should come from user profile
+        senderCompany: "Your Company", // This should come from user profile
+      }
+
+      Object.entries(variableMap).forEach(([key, value]) => {
+        const regex = new RegExp(`{{${key}}}`, "g")
+        processedSubject = processedSubject.replace(regex, value)
+        processedBody = processedBody.replace(regex, value)
+      })
+    }
+
+    if (userId && template.id && template.id !== "custom") {
       await trackTemplateUsage(userId, template.id)
     }
 
-    setSubject(templateSubject)
-    setBody(templateBody)
-    addToHistory(templateSubject, templateBody)
+    setSubject(processedSubject)
+    setBody(processedBody)
+    addToHistory(processedSubject, processedBody)
     setShowTemplateLibrary(false)
+    setIsRewriting(false)
   }
 
   const handleAIRewrite = async (tone: string) => {
@@ -1909,295 +1935,20 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
   }, [subject, body])
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle>Email Composer</DialogTitle>
-              <DialogDescription>Create and optimize your email content with AI assistance</DialogDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 rounded-lg border px-3 py-1.5">
-                <div
-                  className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
-                    spamAnalysis.score >= 80
-                      ? "bg-green-500/10 text-green-500"
-                      : spamAnalysis.score >= 60
-                        ? "bg-yellow-500/10 text-yellow-500"
-                        : "bg-red-500/10 text-red-500",
-                  )}
-                >
-                  {spamAnalysis.score}
-                </div>
-                <div className="text-xs">
-                  <p className={cn("font-medium", getSpamScoreColor(spamAnalysis.score))}>
-                    {getSpamScoreLabel(spamAnalysis.score)}
-                  </p>
-                  <p className="text-muted-foreground">Deliverability</p>
-                </div>
+    <>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[1400px] max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="px-6 py-4 border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle>Email Composer</DialogTitle>
+                <DialogDescription>Create and optimize your email content with AI assistance</DialogDescription>
               </div>
-            </div>
-          </div>
-        </DialogHeader>
-
-        <div className="flex-1 flex overflow-hidden">
-          {/* Editor panel */}
-          <div className="flex-1 flex flex-col border-r">
-            {/* Toolbar */}
-            <div className="flex items-center justify-between border-b px-4 py-2">
-              <div className="flex items-center gap-1">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={handleUndo}
-                        disabled={historyIndex === 0}
-                      >
-                        <Undo2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Undo</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={handleRedo}
-                        disabled={historyIndex === history.length - 1}
-                      >
-                        <Redo2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Redo</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <Separator orientation="vertical" className="mx-1 h-6" />
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Bold className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Bold</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Italic className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Italic</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Link2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Insert Link</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-
-                <Separator orientation="vertical" className="mx-1 h-6" />
-
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
-                      <Variable className="h-4 w-4" />
-                      Variables
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-72 p-0" align="start">
-                    <div className="p-3 border-b bg-muted/30">
-                      <h4 className="font-medium text-sm">Insert Variable</h4>
-                      <p className="text-xs text-muted-foreground">Click to insert at cursor</p>
-                    </div>
-                    <ScrollArea className="h-64">
-                      <div className="p-2">
-                        {Object.entries(PERSONALIZATION_VARIABLES).map(([categoryKey, category]) => {
-                          const CategoryIcon = category.icon
-                          return (
-                            <div key={categoryKey} className="mb-3 last:mb-0">
-                              <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                <CategoryIcon className="h-3.5 w-3.5" />
-                                {category.label}
-                              </div>
-                              {category.variables.map((v) => (
-                                <button
-                                  key={v.key}
-                                  className="w-full flex items-center justify-between px-3 py-2 text-left rounded-md hover:bg-muted transition-colors group"
-                                  onClick={() => insertVariable(v.key)}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <code className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-xs font-mono">
-                                      {`{{${v.key}}}`}
-                                    </code>
-                                    <span className="text-sm text-muted-foreground">{v.label}</span>
-                                  </div>
-                                  <Plus className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50" />
-                                </button>
-                              ))}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </ScrollArea>
-                  </PopoverContent>
-                </Popover>
-
-                {/* Templates */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 gap-1 text-xs"
-                  onClick={() => setShowTemplateLibrary(true)}
-                >
-                  <FileText className="h-4 w-4" />
-                  Templates
-                </Button>
-
-                {/* AI Rewrite */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
-                      {isRewriting ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Sparkles className="h-4 w-4" />}
-                      AI Rewrite
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    {AI_REWRITE_TONES.map((tone) => (
-                      <DropdownMenuItem key={tone.id} onClick={() => handleAIRewrite(tone.id)} disabled={isRewriting}>
-                        <div>
-                          <p className="text-sm">{tone.label}</p>
-                          <p className="text-xs text-muted-foreground">{tone.description}</p>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "edit" | "preview")}>
-                  <TabsList className="h-8">
-                    <TabsTrigger value="edit" className="h-7 px-3 text-xs">
-                      Edit
-                    </TabsTrigger>
-                    <TabsTrigger value="preview" className="h-7 px-3 text-xs">
-                      <Eye className="mr-1 h-3 w-3" />
-                      Preview
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-            </div>
-
-            {/* Editor content */}
-            <div className="flex-1 overflow-auto p-4">
-              {viewMode === "edit" ? (
-                <div className="space-y-4 max-w-3xl mx-auto">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Subject Line</Label>
-                    <Input
-                      ref={subjectRef}
-                      value={subject}
-                      onChange={(e) => handleSubjectChange(e.target.value)}
-                      placeholder="Enter your subject line..."
-                      className="text-base"
-                    />
-                    <p className="text-xs text-muted-foreground">{subject.length}/60 characters</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
-                    <Textarea
-                      ref={bodyRef}
-                      value={body}
-                      onChange={(e) => handleBodyChange(e.target.value)}
-                      placeholder="Write your email content here..."
-                      className="min-h-[350px] text-sm resize-none font-mono"
-                    />
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">{body.length} characters</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(body.match(/\{\{[^}]+\}\}/g) || []).length} variables
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="max-w-3xl mx-auto">
-                  <div className="flex justify-center mb-4">
-                    <div className="inline-flex rounded-lg border p-1">
-                      <Button
-                        variant={previewDevice === "desktop" ? "secondary" : "ghost"}
-                        size="sm"
-                        className="h-7 px-3"
-                        onClick={() => setPreviewDevice("desktop")}
-                      >
-                        <Monitor className="mr-1 h-3 w-3" />
-                        Desktop
-                      </Button>
-                      <Button
-                        variant={previewDevice === "mobile" ? "secondary" : "ghost"}
-                        size="sm"
-                        className="h-7 px-3"
-                        onClick={() => setPreviewDevice("mobile")}
-                      >
-                        <Smartphone className="mr-1 h-3 w-3" />
-                        Mobile
-                      </Button>
-                    </div>
-                  </div>
-
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 rounded-lg border px-3 py-1.5">
                   <div
                     className={cn(
-                      "mx-auto rounded-lg border bg-white dark:bg-card shadow-sm overflow-hidden",
-                      previewDevice === "mobile" ? "max-w-[375px]" : "max-w-full",
-                    )}
-                  >
-                    <div className="border-b bg-muted/30 px-4 py-3">
-                      <p className="text-sm font-medium text-foreground">{previewContent.subject}</p>
-                      <p className="text-xs text-muted-foreground">To: john@company.com</p>
-                    </div>
-                    <div className="p-4">
-                      <pre className="whitespace-pre-wrap text-sm font-sans text-foreground">{previewContent.body}</pre>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Side panel - Spam analysis */}
-          <div className="w-80 flex flex-col overflow-hidden">
-            <div className="p-4 border-b">
-              <h4 className="font-medium text-sm">Deliverability Check</h4>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-4">
-                <div className="text-center py-4">
-                  <div
-                    className={cn(
-                      "inline-flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold",
+                      "flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
                       spamAnalysis.score >= 80
                         ? "bg-green-500/10 text-green-500"
                         : spamAnalysis.score >= 60
@@ -2207,101 +1958,447 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                   >
                     {spamAnalysis.score}
                   </div>
-                  <p className={cn("mt-2 font-medium", getSpamScoreColor(spamAnalysis.score))}>
-                    {getSpamScoreLabel(spamAnalysis.score)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Deliverability Score</p>
-                </div>
-
-                <Separator />
-
-                {(spamAnalysis.foundTriggers.length > 0 || spamAnalysis.warnings.length > 0) && (
-                  <div className="space-y-3">
-                    <h5 className="text-xs font-medium text-muted-foreground uppercase">Issues Found</h5>
-
-                    {spamAnalysis.foundTriggers.length > 0 && (
-                      <div className="rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30 p-3">
-                        <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-xs font-medium">Spam trigger words</span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {spamAnalysis.foundTriggers.map((word) => (
-                            <Badge key={word} variant="outline" className="text-[10px] bg-white dark:bg-transparent">
-                              {word}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {spamAnalysis.warnings.map((warning, i) => (
-                      <div key={i} className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3">
-                        <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
-                        <span className="text-xs">{warning}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {spamAnalysis.foundTriggers.length === 0 && spamAnalysis.warnings.length === 0 && (
-                  <div className="flex items-center gap-2 rounded-lg border bg-green-50 dark:bg-green-950/30 p-3">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    <span className="text-xs text-green-700 dark:text-green-400">
-                      No issues found. Your email looks great!
-                    </span>
-                  </div>
-                )}
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <h5 className="text-xs font-medium text-muted-foreground uppercase">Best Practices</h5>
-                  <div className="space-y-2 text-xs text-muted-foreground">
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
-                      <span>Keep subject under 60 characters</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
-                      <span>Personalize with variables</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
-                      <span>Avoid spam trigger words</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
-                      <span>Limit to 1-2 links per email</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
-                      <span>Keep emails under 200 words</span>
-                    </div>
+                  <div className="text-xs">
+                    <p className={cn("font-medium", getSpamScoreColor(spamAnalysis.score))}>
+                      {getSpamScoreLabel(spamAnalysis.score)}
+                    </p>
+                    <p className="text-muted-foreground">Deliverability</p>
                   </div>
                 </div>
               </div>
-            </ScrollArea>
-          </div>
-        </div>
+            </div>
+          </DialogHeader>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between border-t px-6 py-4">
-          <Button variant="outline" onClick={handleCopyToClipboard} className="gap-2 shadow-sm bg-transparent">
-            {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {isCopied ? "Copied!" : "Copy"}
-          </Button>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={onClose} className="shadow-sm bg-transparent">
-              Cancel
-            </Button>
-            <Button onClick={handleSave} className="gap-2 shadow-sm">
-              <Check className="h-4 w-4" />
-              Save Changes
-            </Button>
+          <div className="flex-1 flex overflow-hidden">
+            {/* Editor panel */}
+            <div className="flex-1 flex flex-col border-r">
+              {/* Toolbar */}
+              <div className="flex items-center justify-between border-b px-4 py-2">
+                <div className="flex items-center gap-1">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={handleUndo}
+                          disabled={historyIndex === 0}
+                        >
+                          <Undo2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Undo</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={handleRedo}
+                          disabled={historyIndex === history.length - 1}
+                        >
+                          <Redo2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Redo</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <Separator orientation="vertical" className="mx-1 h-6" />
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Bold className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Bold</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Italic className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Italic</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Link2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Insert Link</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <Separator orientation="vertical" className="mx-1 h-6" />
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
+                        <Variable className="h-4 w-4" />
+                        Variables
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0" align="start">
+                      <div className="p-3 border-b bg-muted/30">
+                        <h4 className="font-medium text-sm">Insert Variable</h4>
+                        <p className="text-xs text-muted-foreground">Click to insert at cursor</p>
+                      </div>
+                      <ScrollArea className="h-64">
+                        <div className="p-2">
+                          {Object.entries(PERSONALIZATION_VARIABLES).map(([categoryKey, category]) => {
+                            const CategoryIcon = category.icon
+                            return (
+                              <div key={categoryKey} className="mb-3 last:mb-0">
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                  <CategoryIcon className="h-3.5 w-3.5" />
+                                  {category.label}
+                                </div>
+                                {category.variables.map((v) => (
+                                  <button
+                                    key={v.key}
+                                    className="w-full flex items-center justify-between px-3 py-2 text-left rounded-md hover:bg-muted transition-colors group"
+                                    onClick={() => insertVariable(v.key)}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <code className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-xs font-mono">
+                                        {`{{${v.key}}}`}
+                                      </code>
+                                      <span className="text-sm text-muted-foreground">{v.label}</span>
+                                    </div>
+                                    <Plus className="h-3.5 w-3.5 opacity-0 group-hover:opacity-50" />
+                                  </button>
+                                ))}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </ScrollArea>
+                    </PopoverContent>
+                  </Popover>
+
+                  {/* Templates */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1 text-xs"
+                    onClick={() => setShowTemplateLibrary(true)}
+                  >
+                    <FileText className="h-4 w-4" />
+                    Templates
+                  </Button>
+
+                  {/* AI Rewrite */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
+                        {isRewriting ? <WaveLoader size="sm" bars={8} gap="tight" /> : <Sparkles className="h-4 w-4" />}
+                        AI Rewrite
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      {AI_REWRITE_TONES.map((tone) => (
+                        <DropdownMenuItem key={tone.id} onClick={() => handleAIRewrite(tone.id)} disabled={isRewriting}>
+                          <div>
+                            <p className="text-sm">{tone.label}</p>
+                            <p className="text-xs text-muted-foreground">{tone.description}</p>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  {/* Full Editor Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 gap-1 text-xs"
+                    onClick={() => setShowFullEditor(true)}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                    Full Editor
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "edit" | "preview")}>
+                    <TabsList className="h-8">
+                      <TabsTrigger value="edit" className="h-7 px-3 text-xs">
+                        Edit
+                      </TabsTrigger>
+                      <TabsTrigger value="preview" className="h-7 px-3 text-xs">
+                        <Eye className="mr-1 h-3 w-3" />
+                        Preview
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              </div>
+
+              {/* Editor content */}
+              <div className="flex-1 overflow-auto p-4">
+                {viewMode === "edit" ? (
+                  <div className="space-y-4 max-w-3xl mx-auto">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-muted-foreground">Subject Line</Label>
+                      <Input
+                        ref={subjectRef}
+                        value={subject}
+                        onChange={(e) => handleSubjectChange(e.target.value)}
+                        placeholder="Enter your subject line..."
+                        className="text-base"
+                      />
+                      <p className="text-xs text-muted-foreground">{subject.length}/60 characters</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
+                      <Textarea
+                        ref={bodyRef}
+                        value={body}
+                        onChange={(e) => handleBodyChange(e.target.value)}
+                        placeholder="Write your email content here..."
+                        className="min-h-[350px] text-sm resize-none font-mono"
+                      />
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-muted-foreground">{body.length} characters</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(body.match(/\{\{[^}]+\}\}/g) || []).length} variables
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="max-w-3xl mx-auto">
+                    <div className="flex justify-center mb-4">
+                      <div className="inline-flex rounded-lg border p-1">
+                        <Button
+                          variant={previewDevice === "desktop" ? "secondary" : "ghost"}
+                          size="sm"
+                          className="h-7 px-3"
+                          onClick={() => setPreviewDevice("desktop")}
+                        >
+                          <Monitor className="mr-1 h-3 w-3" />
+                          Desktop
+                        </Button>
+                        <Button
+                          variant={previewDevice === "mobile" ? "secondary" : "ghost"}
+                          size="sm"
+                          className="h-7 px-3"
+                          onClick={() => setPreviewDevice("mobile")}
+                        >
+                          <Smartphone className="mr-1 h-3 w-3" />
+                          Mobile
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div
+                      className={cn(
+                        "mx-auto rounded-lg border bg-white dark:bg-card shadow-sm overflow-hidden",
+                        previewDevice === "mobile" ? "max-w-[375px]" : "max-w-full",
+                      )}
+                    >
+                      <div className="border-b bg-muted/30 px-4 py-3">
+                        <p className="text-sm font-medium text-foreground">{previewContent.subject}</p>
+                        <p className="text-xs text-muted-foreground">To: john@company.com</p>
+                      </div>
+                      <div className="p-4">
+                        <pre className="whitespace-pre-wrap text-sm font-sans text-foreground">
+                          {previewContent.body}
+                        </pre>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Side panel - Spam analysis */}
+            <div className="w-80 flex flex-col overflow-hidden">
+              <div className="p-4 border-b">
+                <h4 className="font-medium text-sm">Deliverability Check</h4>
+              </div>
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-4">
+                  <div className="text-center py-4">
+                    <div
+                      className={cn(
+                        "inline-flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold",
+                        spamAnalysis.score >= 80
+                          ? "bg-green-500/10 text-green-500"
+                          : spamAnalysis.score >= 60
+                            ? "bg-yellow-500/10 text-yellow-500"
+                            : "bg-red-500/10 text-red-500",
+                      )}
+                    >
+                      {spamAnalysis.score}
+                    </div>
+                    <p className={cn("mt-2 font-medium", getSpamScoreColor(spamAnalysis.score))}>
+                      {getSpamScoreLabel(spamAnalysis.score)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Deliverability Score</p>
+                  </div>
+
+                  <Separator />
+
+                  {(spamAnalysis.foundTriggers.length > 0 || spamAnalysis.warnings.length > 0) && (
+                    <div className="space-y-3">
+                      <h5 className="text-xs font-medium text-muted-foreground uppercase">Issues Found</h5>
+
+                      {spamAnalysis.foundTriggers.length > 0 && (
+                        <div className="rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30 p-3">
+                          <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-xs font-medium">Spam trigger words</span>
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {spamAnalysis.foundTriggers.map((word) => (
+                              <Badge key={word} variant="outline" className="text-[10px] bg-white dark:bg-transparent">
+                                {word}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {spamAnalysis.warnings.map((warning, i) => (
+                        <div key={i} className="flex items-start gap-2 rounded-lg border bg-muted/50 p-3">
+                          <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
+                          <span className="text-xs">{warning}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {spamAnalysis.foundTriggers.length === 0 && spamAnalysis.warnings.length === 0 && (
+                    <div className="flex items-center gap-2 rounded-lg border bg-green-50 dark:bg-green-950/30 p-3">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span className="text-xs text-green-700 dark:text-green-400">
+                        No issues found. Your email looks great!
+                      </span>
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-medium text-muted-foreground uppercase">Best Practices</h5>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
+                        <span>Keep subject under 60 characters</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
+                        <span>Personalize with variables</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
+                        <span>Avoid spam trigger words</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
+                        <span>Limit to 1-2 links per email</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 className="h-3 w-3 mt-0.5 text-green-500" />
+                        <span>Keep emails under 200 words</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between border-t px-6 py-4">
+            <Button variant="outline" onClick={handleCopyToClipboard} className="gap-2 shadow-sm bg-transparent">
+              {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {isCopied ? "Copied!" : "Copy"}
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={onClose} className="shadow-sm bg-transparent">
+                Cancel
+              </Button>
+              <Button onClick={handleSave} className="gap-2 shadow-sm">
+                <Check className="h-4 w-4" />
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Library Dialog */}
+      <Dialog open={showTemplateLibrary} onOpenChange={setShowTemplateLibrary}>
+        <DialogContent className="max-w-[1200px] max-h-[90vh] overflow-hidden p-0">
+          <TemplateLibrary
+            userId={userId || ""}
+            onSelectTemplate={handleApplyTemplate}
+            onClose={() => setShowTemplateLibrary(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Full Editor Dialog */}
+      <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] overflow-hidden p-6">
+          <DialogHeader>
+            <DialogTitle>Full Email Editor</DialogTitle>
+            <DialogDescription>Edit your email with advanced formatting options</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 h-[calc(95vh-120px)]">
+            <div className="space-y-2">
+              <Label htmlFor="full-subject">Subject Line</Label>
+              <Input
+                id="full-subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Enter email subject"
+                className="w-full"
+              />
+            </div>
+            <div className="flex-1 flex flex-col space-y-2">
+              <Label htmlFor="full-body">Email Body</Label>
+              <Textarea
+                id="full-body"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Compose your email..."
+                className="flex-1 resize-none font-mono text-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowFullEditor(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  addToHistory(subject, body)
+                  setShowFullEditor(false)
+                }}
+              >
+                Apply Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -7,11 +7,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Filter, Star, Copy, Eye, Trash2, MoreVertical, TrendingUp, Clock } from "lucide-react"
+import { Search, Filter, Star, Copy, Eye, Trash2, MoreVertical, TrendingUp, Clock, Edit, Plus } from "lucide-react"
 import { getTemplates, duplicateTemplate, deleteTemplate, toggleTemplateFavorite } from "@/lib/actions/template-actions"
 import { useToast } from "@/hooks/use-toast"
+import { TemplatePreviewDialog } from "./template-preview-dialog"
+import { useRouter } from "next/navigation"
 
 interface Template {
   id: string
@@ -40,9 +41,11 @@ interface Template {
 interface TemplateLibraryProps {
   userId: string
   onSelectTemplate?: (template: Template) => void
+  onClose?: () => void
 }
 
-export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryProps) {
+export function TemplateLibrary({ userId, onSelectTemplate, onClose }: TemplateLibraryProps) {
+  const router = useRouter()
   const [templates, setTemplates] = useState<Template[]>([])
   const [filteredTemplates, setFilteredTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
@@ -103,7 +106,6 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
   function filterTemplates() {
     let filtered = templates
 
-    // Filter by tab
     if (selectedTab === "favorites") {
       filtered = filtered.filter((t) => t.isFavorite)
     } else if (selectedTab === "my-templates") {
@@ -112,7 +114,6 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
       filtered = filtered.filter((t) => t.isSystemTemplate)
     }
 
-    // Filter by search
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(
@@ -124,12 +125,10 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
       )
     }
 
-    // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter((t) => t.category === selectedCategory)
     }
 
-    // Filter by industry
     if (selectedIndustry !== "all") {
       filtered = filtered.filter((t) => t.industry === selectedIndustry)
     }
@@ -186,6 +185,17 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
     if (onSelectTemplate) {
       onSelectTemplate(template)
     }
+    if (onClose) {
+      onClose()
+    }
+  }
+
+  function handleEditTemplate(templateId: string) {
+    router.push(`/templates/${templateId}`)
+  }
+
+  function handleCreateTemplate() {
+    router.push("/templates/new")
   }
 
   return (
@@ -196,6 +206,10 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
           <h2 className="text-2xl font-bold tracking-tight">Email Templates</h2>
           <p className="text-muted-foreground">Browse and use high-converting email templates for your campaigns</p>
         </div>
+        <Button onClick={handleCreateTemplate} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Create Template
+        </Button>
       </div>
 
       {/* Filters */}
@@ -285,6 +299,12 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
                             <Eye className="mr-2 h-4 w-4" />
                             Preview
                           </DropdownMenuItem>
+                          {!template.isSystemTemplate && (
+                            <DropdownMenuItem onClick={() => handleEditTemplate(template.id)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem onClick={() => handleDuplicate(template.id)}>
                             <Copy className="mr-2 h-4 w-4" />
                             Duplicate
@@ -329,24 +349,28 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
                         </span>
                         <span className="font-medium">{template.timesUsed}x</span>
                       </div>
-                      {template.avgOpenRate !== null && (
-                        <div className="flex items-center justify-between">
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <TrendingUp className="h-3 w-3" />
-                            Open Rate
-                          </span>
-                          <span className="font-medium">{template.avgOpenRate?.toFixed(1)}%</span>
-                        </div>
-                      )}
-                      {template.avgReplyRate !== null && (
-                        <div className="flex items-center justify-between">
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <TrendingUp className="h-3 w-3" />
-                            Reply Rate
-                          </span>
-                          <span className="font-medium">{template.avgReplyRate?.toFixed(1)}%</span>
-                        </div>
-                      )}
+                      {template.avgOpenRate !== null &&
+                        template.avgOpenRate !== undefined &&
+                        template.avgOpenRate > 0 && (
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              <TrendingUp className="h-3 w-3" />
+                              Open Rate
+                            </span>
+                            <span className="font-medium">{template.avgOpenRate.toFixed(1)}%</span>
+                          </div>
+                        )}
+                      {template.avgReplyRate !== null &&
+                        template.avgReplyRate !== undefined &&
+                        template.avgReplyRate > 0 && (
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              <TrendingUp className="h-3 w-3" />
+                              Reply Rate
+                            </span>
+                            <span className="font-medium">{template.avgReplyRate.toFixed(1)}%</span>
+                          </div>
+                        )}
                     </div>
                   </CardContent>
                   <CardFooter>
@@ -362,53 +386,17 @@ export function TemplateLibrary({ userId, onSelectTemplate }: TemplateLibraryPro
       </Tabs>
 
       {/* Preview Dialog */}
-      <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{previewTemplate?.name}</DialogTitle>
-            <DialogDescription>{previewTemplate?.description}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Subject Line</h4>
-              <div className="rounded-lg border bg-muted/50 p-3 text-sm">{previewTemplate?.subject}</div>
-            </div>
-            <div>
-              <h4 className="mb-2 text-sm font-semibold">Email Body</h4>
-              <div className="max-h-96 overflow-y-auto rounded-lg border bg-muted/50 p-4">
-                <pre className="whitespace-pre-wrap font-sans text-sm">{previewTemplate?.body}</pre>
-              </div>
-            </div>
-            {previewTemplate?.tags && previewTemplate.tags.length > 0 && (
-              <div>
-                <h4 className="mb-2 text-sm font-semibold">Tags</h4>
-                <div className="flex flex-wrap gap-2">
-                  {previewTemplate.tags.map((tag) => (
-                    <Badge key={tag} variant="outline">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setPreviewTemplate(null)}>
-              Close
-            </Button>
-            <Button
-              onClick={() => {
-                if (previewTemplate) {
-                  handleUseTemplate(previewTemplate)
-                  setPreviewTemplate(null)
-                }
-              }}
-            >
-              Use Template
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {previewTemplate && (
+        <TemplatePreviewDialog
+          template={previewTemplate as any}
+          open={!!previewTemplate}
+          onOpenChange={(open) => !open && setPreviewTemplate(null)}
+          onUseTemplate={() => {
+            handleUseTemplate(previewTemplate)
+            setPreviewTemplate(null)
+          }}
+        />
+      )}
     </div>
   )
 }
