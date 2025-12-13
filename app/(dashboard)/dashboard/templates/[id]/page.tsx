@@ -165,7 +165,7 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
                 <span className="text-sm font-medium">Email Preview</span>
                 <div className="flex items-center gap-1 p-1 rounded-lg bg-background/50">
                   <Button variant="secondary" size="icon" className="h-6 w-6">
-                    <Monitor className="w-3.5 h-3.5" />
+                    <Monitor className="w-3.5 h-3.5 text-primary" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6">
                     <Tablet className="w-3.5 h-3.5" />
@@ -219,7 +219,7 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
                   <p className="text-2xl font-semibold">{replyRate.toFixed(1)}%</p>
                 </div>
               </div>
-              {template.timesUsed > 0 && (
+              {template.timesUsed && template.timesUsed > 0 && (
                 <p className="text-xs text-muted-foreground mt-3 text-center">
                   Used {template.timesUsed.toLocaleString()} times
                 </p>
@@ -260,7 +260,7 @@ export default async function TemplateDetailPage({ params }: TemplateDetailPageP
               </div>
             </div>
 
-            {/* Variables - use parsed variables array */}
+            {/* Variables */}
             {variables.length > 0 && (
               <div className="rounded-xl border border-border/50 p-4">
                 <h3 className="font-medium mb-4">Variables ({variables.length})</h3>

@@ -1,12 +1,9 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { ArrowLeft, Sparkles, FolderOpen, FileEdit } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getTemplateCategories, getSystemTemplates } from "@/lib/actions/templates"
-import { AITemplateGenerator } from "@/components/templates/ai-template-generator"
-import { SystemTemplates } from "@/components/templates/system-templates"
-import { TemplateEditor } from "@/components/templates/template-editor/template-editor"
+import { getTemplateCategories } from "@/lib/actions/templates"
+import { TemplateEditor } from "@/components/templates/template-editor"
 
 export const metadata = {
   title: "New Template",
@@ -14,10 +11,9 @@ export const metadata = {
 }
 
 async function NewTemplateContent() {
-  const [categoriesResult, systemTemplates] = await Promise.all([getTemplateCategories(), getSystemTemplates()])
-
+  const categoriesResult = await getTemplateCategories()
   const categories = categoriesResult.success ? (categoriesResult.categories ?? []) : []
-  // Default variables since getTemplateVariables doesn't exist
+
   const variables = [
     { name: "firstName", required: true, description: "Contact first name" },
     { name: "lastName", required: false, description: "Contact last name" },
@@ -36,51 +32,13 @@ async function NewTemplateContent() {
         </Button>
         <div>
           <h1 className="text-lg font-semibold">Create New Template</h1>
-          <p className="text-sm text-muted-foreground">Choose how you want to create your email template</p>
+          <p className="text-sm text-muted-foreground">Design your email template</p>
         </div>
       </header>
 
       {/* Main content */}
-      <div className="container max-w-6xl py-8">
-        <Tabs defaultValue="ai" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 h-auto p-1">
-            <TabsTrigger value="ai" className="flex items-center gap-2 py-3 data-[state=active]:shadow-lg">
-              <Sparkles className="w-4 h-4" />
-              <div className="text-left">
-                <p className="font-medium">AI Generate</p>
-                <p className="text-xs text-muted-foreground hidden sm:block">Describe and generate</p>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="gallery" className="flex items-center gap-2 py-3 data-[state=active]:shadow-lg">
-              <FolderOpen className="w-4 h-4" />
-              <div className="text-left">
-                <p className="font-medium">Gallery</p>
-                <p className="text-xs text-muted-foreground hidden sm:block">Use a starter template</p>
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="blank" className="flex items-center gap-2 py-3 data-[state=active]:shadow-lg">
-              <FileEdit className="w-4 h-4" />
-              <div className="text-left">
-                <p className="font-medium">Blank</p>
-                <p className="text-xs text-muted-foreground hidden sm:block">Start from scratch</p>
-              </div>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="ai" className="min-h-[500px]">
-            <AITemplateGenerator categories={categories} />
-          </TabsContent>
-
-          <TabsContent value="gallery" className="min-h-[500px]">
-            <SystemTemplates templates={systemTemplates} />
-          </TabsContent>
-
-          <TabsContent value="blank">
-            <div className="rounded-xl border border-border/50 overflow-hidden">
-              <TemplateEditor categories={categories} variables={variables} mode="create" />
-            </div>
-          </TabsContent>
-        </Tabs>
+      <div className="container max-w-7xl py-8">
+        <TemplateEditor categories={categories} variables={variables} mode="create" />
       </div>
     </div>
   )
