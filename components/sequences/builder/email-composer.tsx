@@ -795,7 +795,6 @@ import {
   Check,
   AlertTriangle,
   CheckCircle2,
-  Loader2,
   Undo2,
   Redo2,
   FileText,
@@ -1129,7 +1128,7 @@ export function EmailComposer({ step, onSave, onClose }: EmailComposerProps) {
 
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-6xl w-[95vw] h-[90vh] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-[1400px] w-[95vw] h-[90vh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <div>
