@@ -2223,18 +2223,11 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
         </DialogContent>
       </Dialog>
 
-      {/* Full Editor Dialog */}
-      {/* Add debug logging and ensure Dialog renders properly */}
+      {/* Full Editor Dialog - Separate from main dialog */}
       {showFullEditor && console.log("[v0] Rendering full editor dialog")}
-      <Dialog
-        open={showFullEditor}
-        onOpenChange={(open) => {
-          console.log("[v0] Dialog open state changed:", open)
-          setShowFullEditor(open)
-        }}
-      >
+      <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
         <DialogContent className="max-w-[99vw] w-full h-[98vh] p-0 overflow-hidden flex flex-col">
-          <div className="h-full w-full">
+          <div className="h-full w-full overflow-auto">
             <TemplateEditor
               template={fullEditorTemplate}
               categories={[]}
