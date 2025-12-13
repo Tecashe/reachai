@@ -1676,6 +1676,43 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
   const [templates, setTemplates] = useState<EnhancedEmailTemplate[]>([])
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
   const [currentDate, setCurrentDate] = useState("")
+  const [fullEditorTemplate, setFullEditorTemplate] = useState({
+    id: "temp-new",
+    name: "",
+    subject: subject,
+    body: body,
+    userId: userId,
+    description: null,
+    category: null,
+    thumbnailUrl: null,
+    previewImageUrl: null,
+    colorScheme: null,
+    industry: null,
+    tags: [],
+    isSystemTemplate: false,
+    isFavorite: false,
+    isPublished: false,
+    version: 1,
+    avgOpenRate: 0,
+    avgClickRate: 0,
+    avgReplyRate: 0,
+    totalSent: 0,
+    templateType: "TEXT" as const,
+    editorBlocks: null,
+    aiGenerated: false,
+    aiModel: null,
+    aiPrompt: null,
+    aiGenerationId: null,
+    basePrompt: null,
+    editorVersion: null,
+    variables: null,
+    timesUsed: 0,
+    lastUsedAt: null,
+    viewCount: 0,
+    duplicateCount: 0,
+    createdAt: currentDate ? new Date(currentDate) : new Date(),
+    updatedAt: currentDate ? new Date(currentDate) : new Date(),
+  })
 
   const subjectInputRef = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -1729,10 +1766,12 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
 
   const handleSubjectChange = (value: string) => {
     setSubject(value)
+    setFullEditorTemplate((prev) => ({ ...prev, subject: value }))
   }
 
   const handleBodyChange = (value: string) => {
     setBody(value)
+    setFullEditorTemplate((prev) => ({ ...prev, body: value }))
   }
 
   const handleApplyTemplate = async (template: EnhancedEmailTemplate) => {
@@ -2179,43 +2218,7 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
       <Dialog open={showFullEditor} onOpenChange={setShowFullEditor}>
         <DialogContent className="max-w-[99vw] w-full h-[98vh] p-0 overflow-hidden flex flex-col">
           <TemplateEditor
-            template={{
-              id: "temp-new",
-              name: "",
-              subject: subject,
-              body: body,
-              userId: userId,
-              description: null,
-              category: null,
-              thumbnailUrl: null,
-              previewImageUrl: null,
-              colorScheme: null,
-              industry: null,
-              tags: [],
-              isSystemTemplate: false,
-              isFavorite: false,
-              isPublished: false,
-              version: 1,
-              avgOpenRate: 0,
-              avgClickRate: 0,
-              avgReplyRate: 0,
-              totalSent: 0,
-              templateType: "TEXT" as const,
-              editorBlocks: null,
-              aiGenerated: false,
-              aiModel: null,
-              aiPrompt: null,
-              aiGenerationId: null,
-              basePrompt: null,
-              editorVersion: null,
-              variables: null,
-              timesUsed: 0,
-              lastUsedAt: null,
-              viewCount: 0,
-              duplicateCount: 0,
-              createdAt: currentDate ? new Date(currentDate) : new Date(),
-              updatedAt: currentDate ? new Date(currentDate) : new Date(),
-            }}
+            template={fullEditorTemplate}
             categories={[]}
             variables={[]}
             mode="create"
@@ -2226,4 +2229,3 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     </>
   )
 }
-

@@ -127,7 +127,6 @@
 // }
 
 import { notFound, redirect } from "next/navigation"
-import { getTemplate, duplicateTemplate } from "@/lib/actions/template-actions"
 import { TemplateEditor } from "@/components/templates/template-editor"
 import { auth } from "@clerk/nextjs/server"
 import type { TemplateCategory } from "@/lib/types"
@@ -181,22 +180,36 @@ export default async function EditTemplatePage({ params }: EditTemplatePageProps
   })
 
   if (!template) {
+    console.log("[v0] Template not found:", id)
     notFound()
   }
 
-  if (template.isSystemTemplate || template.userId !== userId) {
-    console.log("[v0] System template detected, duplicating to user collection...")
-    const duplicateResult = await duplicateTemplate(userId, id)
+  const currentUser = await prisma.user.findUnique({
+    where: { clerkId: userId },
+  })
+
+  if (!currentUser) {
+    notFound()
+  }
+
+  if (template.isSystemTemplate || template.userId !== currentUser.id) {
+    console.log("[v0] System template or not owned, duplicating to user collection...")
+
+    // Import duplicateTemplate from correct location
+    const { duplicateTemplate } = await import("@/lib/actions/templates")
+    const duplicateResult = await duplicateTemplate(id)
+
     if (duplicateResult.success && duplicateResult.template) {
       console.log("[v0] Redirecting to duplicated template:", duplicateResult.template.id)
       redirect(`/dashboard/templates/${duplicateResult.template.id}/edit`)
     } else {
-      console.error("[v0] Failed to duplicate template:", duplicateResult.message)
+      console.error("[v0] Failed to duplicate template:", duplicateResult.error)
       notFound()
     }
   }
 
-  const templateResult = await getTemplate(userId, id)
+  const { getTemplate } = await import("@/lib/actions/templates")
+  const templateResult = await getTemplate(id)
 
   if (!templateResult.success || !templateResult.template) {
     notFound()
