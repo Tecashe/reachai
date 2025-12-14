@@ -452,6 +452,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Sparkles, Search, Loader2, CheckCircle2, Rocket, Star, TrendingUp, DollarSign, Lock, AlertCircle } from "lucide-react"
 import { findLeadsWithApollo, enrichLeadsWithAI } from "@/lib/actions/lead-finder"
+import { deductResearchCredits } from "@/lib/actions/user"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
@@ -572,6 +573,16 @@ export function ApolloLeadFinderDialog({
       setEnrichedResults(enrichResult.enrichedLeads || [])
       setProgress(100)
       setStep("results")
+
+      // Deduct credits after successful search
+      try {
+        const creditsUsed = searchResult.leads?.length || 0
+        await deductResearchCredits(creditsUsed)
+        console.log(`Deducted ${creditsUsed} research credits`)
+      } catch (creditError) {
+        console.error("Failed to deduct credits:", creditError)
+        // Don't fail the whole operation if credit deduction fails
+      }
 
       toast.success(`Found and enriched ${enrichResult.enrichedLeads?.length || 0} high-quality leads!`)
 

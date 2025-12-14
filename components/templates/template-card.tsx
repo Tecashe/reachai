@@ -1044,6 +1044,7 @@ interface TemplateCardProps {
   onPreview: (template: EnhancedEmailTemplate) => void
   onSelect?: (template: EnhancedEmailTemplate) => void
   viewMode?: "grid" | "list"
+  isEmbedded?: boolean
 }
 
 export function TemplateCard({
@@ -1054,6 +1055,7 @@ export function TemplateCard({
   onPreview,
   onSelect,
   viewMode = "grid",
+  isEmbedded = false,
 }: TemplateCardProps) {
   const router = useRouter()
   const [isHovered, setIsHovered] = useState(false)
@@ -1122,8 +1124,8 @@ export function TemplateCard({
     return colors[category.toLowerCase()] || "bg-muted text-muted-foreground border-border"
   }
 
-  const cleanBody = stripHtml(template.body, true)
-  const bodyPreview = truncateText(cleanBody, 200)
+  const cleanBody = stripHtml(template.body, false)
+  const bodyPreview = truncateText(cleanBody, isEmbedded ? 150 : 200)
 
   return (
     <div
@@ -1139,7 +1141,12 @@ export function TemplateCard({
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleView}
     >
-      <div className="relative p-8 pb-6 bg-gradient-to-br from-muted/50 to-muted/20 border-b border-border/50">
+      <div
+        className={cn(
+          "relative bg-gradient-to-br from-muted/50 to-muted/20 border-b border-border/50",
+          isEmbedded ? "p-6 pb-5" : "p-8 pb-6",
+        )}
+      >
         {template.isSystemTemplate && (
           <div className="mb-4">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30 shadow-sm">
@@ -1151,7 +1158,12 @@ export function TemplateCard({
 
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-2xl leading-tight mb-3 text-foreground group-hover:text-primary transition-colors">
+            <h3
+              className={cn(
+                "font-bold leading-tight mb-3 text-foreground group-hover:text-primary transition-colors",
+                isEmbedded ? "text-xl" : "text-2xl",
+              )}
+            >
               {template.name}
             </h3>
             {template.description && (
@@ -1205,7 +1217,7 @@ export function TemplateCard({
         </div>
       </div>
 
-      <div className="flex-1 p-8 space-y-6">
+      <div className={cn("flex-1 space-y-6", isEmbedded ? "p-6" : "p-8")}>
         {/* Subject Preview */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
@@ -1223,13 +1235,18 @@ export function TemplateCard({
             <div className="h-1 w-1 rounded-full bg-primary" />
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Email Content</span>
           </div>
-          <div className="text-sm text-muted-foreground leading-relaxed line-clamp-6 whitespace-pre-wrap break-words">
+          <div
+            className={cn(
+              "text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap break-words",
+              isEmbedded ? "line-clamp-4" : "line-clamp-6",
+            )}
+          >
             {bodyPreview}
           </div>
         </div>
       </div>
 
-      <div className="mt-auto p-6 pt-5 border-t-2 border-border/50 bg-muted/30">
+      <div className={cn("mt-auto border-t-2 border-border/50 bg-muted/30", isEmbedded ? "p-5 pt-4" : "p-6 pt-5")}>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             {template.category && (

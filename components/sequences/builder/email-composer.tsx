@@ -4423,11 +4423,10 @@
 
 
 
-
 "use client"
 
 import { useMemo } from "react"
-import { stripHtml } from "@/lib/utils/emails"
+import { stripHtml, hasImages } from "@/lib/utils/emails"
 import {
   Bold,
   Italic,
@@ -4446,6 +4445,7 @@ import {
   AtSign,
   Plus,
   Maximize2,
+  ImageIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -4590,6 +4590,7 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
     createdAt: currentDate ? new Date(currentDate) : new Date(),
     updatedAt: currentDate ? new Date(currentDate) : new Date(),
   })
+  const [templateHasImages, setTemplateHasImages] = useState(false)
 
   const subjectInputRef = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -4662,11 +4663,23 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
 
   const handleApplyTemplate = async (template: EnhancedEmailTemplate) => {
     console.log("[v0] handleApplyTemplate starting with template:", template.name)
+
+    const containsImages = hasImages(template.body)
+    setTemplateHasImages(containsImages)
+
     setSubject(template.subject)
     const cleanBody = stripHtml(template.body, true)
     setBody(cleanBody)
     setShowTemplateLibrary(false)
-    toast.success(`Applied template: ${template.name}`)
+
+    if (containsImages) {
+      toast.info("Template contains images", {
+        description: "Images are shown as placeholders. Use Full Editor for rich formatting with images.",
+      })
+    } else {
+      toast.success(`Applied template: ${template.name}`)
+    }
+
     console.log("[v0] Template applied successfully")
   }
 
@@ -4974,6 +4987,31 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
               </div>
               <ScrollArea className="flex-1">
                 <div className="p-4 space-y-4">
+                  {templateHasImages && (
+                    <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                            This template contains images
+                          </h4>
+                          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                            Images are shown as placeholders in this view. For rich formatting with embedded images, use
+                            the Full Editor.
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2 border-blue-300 dark:border-blue-700 bg-transparent"
+                            onClick={() => setShowFullEditor(true)}
+                          >
+                            Open Full Editor
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="text-center py-4">
                     <div
                       className={cn(

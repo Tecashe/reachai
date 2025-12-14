@@ -36,6 +36,7 @@
 //   return text.slice(0, maxLength).trim() + "..."
 // }
 
+
 /**
  * Strips HTML tags and converts HTML to plain text
  * @param html - HTML string to convert
@@ -48,24 +49,18 @@ export function stripHtml(html: string, preserveImages = false): string {
   let text = html
 
   if (preserveImages) {
-    // Extract and temporarily replace img tags with placeholders
-    const imgTags: string[] = []
-    text = text.replace(/<img[^>]*>/gi, (match) => {
-      imgTags.push(match)
-      return `___IMG_PLACEHOLDER_${imgTags.length - 1}___`
+    text = text.replace(/<img[^>]*src=["']([^"']*)["'][^>]*alt=["']([^"']*)["'][^>]*>/gi, (match, src, alt) => {
+      const filename = src.split("/").pop() || "image"
+      return `[Image: ${alt || filename} - ${src}]`
     })
-
-    // Remove all other HTML tags
-    text = text.replace(/<[^>]*>/g, " ")
-
-    // Restore img tags
-    imgTags.forEach((img, index) => {
-      text = text.replace(`___IMG_PLACEHOLDER_${index}___`, img)
+    text = text.replace(/<img[^>]*src=["']([^"']*)["'][^>]*>/gi, (match, src) => {
+      const filename = src.split("/").pop() || "image"
+      return `[Image: ${filename} - ${src}]`
     })
-  } else {
-    // Remove all HTML tags
-    text = text.replace(/<[^>]*>/g, " ")
   }
+
+  // Remove all HTML tags
+  text = text.replace(/<[^>]*>/g, " ")
 
   // Decode common HTML entities
   text = text
@@ -92,4 +87,39 @@ export function stripHtml(html: string, preserveImages = false): string {
 export function truncateText(text: string, maxLength: number): string {
   if (!text || text.length <= maxLength) return text
   return text.slice(0, maxLength).trim() + "..."
+}
+
+/**
+ * Checks if HTML content contains images
+ * @param html - HTML string to check
+ * @returns True if HTML contains img tags
+ */
+export function hasImages(html: string): boolean {
+  return /<img[^>]*>/i.test(html)
+}
+
+/**
+ * Extract images from HTML
+ * @param html - HTML string to extract images from
+ * @returns Array of image objects with src and alt
+ */
+export function extractImages(html: string): Array<{ src: string; alt: string }> {
+  const images: Array<{ src: string; alt: string }> = []
+  const imgRegex = /<img[^>]*src=["']([^"']*)["'][^>]*alt=["']([^"']*)["'][^>]*>/gi
+  let match: RegExpExecArray | null
+
+  while ((match = imgRegex.exec(html)) !== null) {
+    images.push({ src: match[1], alt: match[2] || "" })
+  }
+
+  // Also check for images without alt
+  const simpleImgRegex = /<img[^>]*src=["']([^"']*)["'][^>]*>/gi
+  while ((match = simpleImgRegex.exec(html)) !== null) {
+    const src = match[1]
+    if (!images.find((img) => img.src === src)) {
+      images.push({ src, alt: "" })
+    }
+  }
+
+  return images
 }

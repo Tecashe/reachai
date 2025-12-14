@@ -2617,7 +2617,7 @@ export function TemplateLibrary({
               </div>
             </div>
           ) : (
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+            <div className={`grid gap-6 ${isEmbedded ? "grid-cols-1" : "md:grid-cols-2 lg:grid-cols-2"}`}>
               {filteredTemplates.map((template) => (
                 <TemplateCard
                   key={template.id}
@@ -2627,6 +2627,7 @@ export function TemplateLibrary({
                   onDelete={handleDelete}
                   onPreview={handlePreview}
                   onSelect={onSelectTemplate ? handleUseTemplate : undefined}
+                  isEmbedded={isEmbedded}
                 />
               ))}
             </div>
