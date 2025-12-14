@@ -1062,7 +1062,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import type { SequenceStep, StepType, DelayUnit, SequenceStepVariant } from "@/lib/types/sequence"
-import { EmailComposer } from "./email-composer-client"
+import { EmailComposerClient } from "./email-composer-client"
 import { ABTestPanel } from "./ab-test-panel"
 
 interface SequenceStepPanelProps {
@@ -1551,7 +1551,7 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
 
       {/* Email Composer Dialog */}
       {showEmailComposer && (
-        <EmailComposer
+        <EmailComposerClient
           step={step}
           userId={userId}
           onSave={handleEmailComposerSave}
