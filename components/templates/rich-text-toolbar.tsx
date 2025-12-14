@@ -1164,53 +1164,16 @@ export function RichTextToolbar({ editor }: RichTextToolbarProps) {
   const handleInsertButton = () => {
     if (!buttonUrl || !buttonText) return
 
-    // Simpler button approach that works in TipTap editor and emails
-    const buttonConfigs = {
-      primary: {
-        bgColor: "#3B82F6",
-        textColor: "#ffffff",
-        borderColor: "#3B82F6",
-      },
-      secondary: {
-        bgColor: "#10B981",
-        textColor: "#ffffff",
-        borderColor: "#10B981",
-      },
-      outline: {
-        bgColor: "#ffffff",
-        textColor: "#3B82F6",
-        borderColor: "#3B82F6",
-      },
-      ghost: {
-        bgColor: "#F3F4F6",
-        textColor: "#374151",
-        borderColor: "#E5E7EB",
-      },
-    }
-
-    const config = buttonConfigs[buttonStyle as keyof typeof buttonConfigs]
-
-    // Use a centered div with a styled link - works better in TipTap
-    const buttonHTML = `
-      <div style="text-align: center; margin: 25px 0;">
-        <a href="${buttonUrl}" 
-           style="background-color: ${config.bgColor}; 
-                  color: ${config.textColor}; 
-                  padding: 14px 32px; 
-                  text-decoration: none; 
-                  border-radius: 8px; 
-                  display: inline-block; 
-                  font-weight: 600; 
-                  font-size: 16px;
-                  border: 2px solid ${config.borderColor};
-                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
-           target="_blank">
-          ${buttonText}
-        </a>
-      </div>
-    `
-
-    editor.chain().focus().insertContent(buttonHTML).run()
+    // Use the custom button command
+    editor
+      .chain()
+      .focus()
+      .setButton({
+        href: buttonUrl,
+        text: buttonText,
+        style: buttonStyle,
+      })
+      .run()
 
     setShowButtonDialog(false)
     setButtonText("Click Here")
