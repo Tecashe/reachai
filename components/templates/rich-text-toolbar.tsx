@@ -1032,7 +1032,6 @@
 //   )
 // }
 
-
 "use client"
 
 import type React from "react"
@@ -1165,7 +1164,7 @@ export function RichTextToolbar({ editor }: RichTextToolbarProps) {
   const handleInsertButton = () => {
     if (!buttonUrl || !buttonText) return
 
-    // Email-safe button styles using table-based layout
+    // Simpler button approach that works in TipTap editor and emails
     const buttonConfigs = {
       primary: {
         bgColor: "#3B82F6",
@@ -1178,31 +1177,37 @@ export function RichTextToolbar({ editor }: RichTextToolbarProps) {
         borderColor: "#10B981",
       },
       outline: {
-        bgColor: "transparent",
+        bgColor: "#ffffff",
         textColor: "#3B82F6",
         borderColor: "#3B82F6",
       },
       ghost: {
         bgColor: "#F3F4F6",
         textColor: "#374151",
-        borderColor: "#F3F4F6",
+        borderColor: "#E5E7EB",
       },
     }
 
     const config = buttonConfigs[buttonStyle as keyof typeof buttonConfigs]
 
-    // Table-based button for maximum email client compatibility
+    // Use a centered div with a styled link - works better in TipTap
     const buttonHTML = `
-      <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin: 30px auto; border-spacing: 0;">
-        <tr>
-          <td style="border-radius: 6px; background-color: ${config.bgColor}; border: 2px solid ${config.borderColor};">
-            <a href="${buttonUrl}" target="_blank" style="display: inline-block; padding: 15px 40px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: bold; color: ${config.textColor}; text-decoration: none; border-radius: 6px; -webkit-text-size-adjust: none; mso-line-height-rule: exactly;">
-              ${buttonText}
-            </a>
-          </td>
-        </tr>
-      </table>
-      <p><br></p>
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="${buttonUrl}" 
+           style="background-color: ${config.bgColor}; 
+                  color: ${config.textColor}; 
+                  padding: 14px 32px; 
+                  text-decoration: none; 
+                  border-radius: 8px; 
+                  display: inline-block; 
+                  font-weight: 600; 
+                  font-size: 16px;
+                  border: 2px solid ${config.borderColor};
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;"
+           target="_blank">
+          ${buttonText}
+        </a>
+      </div>
     `
 
     editor.chain().focus().insertContent(buttonHTML).run()
