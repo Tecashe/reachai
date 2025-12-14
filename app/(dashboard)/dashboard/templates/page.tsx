@@ -1,7 +1,37 @@
+// import { Suspense } from "react"
+// import { getTemplates, getTemplateCategories } from "@/lib/actions/templates"
+// import { TemplateLibrary } from "@/components/templates/template-library"
+// import { TemplateLibrarySkeleton } from "@/components/templates/template-library-skeleton"
+
+// export const metadata = {
+//   title: "Email Templates",
+//   description: "Manage your email templates",
+// }
+
+// async function TemplateLibraryLoader() {
+//   const [templates, categoriesResult] = await Promise.all([getTemplates(), getTemplateCategories()])
+
+//   const categories = categoriesResult.success ? (categoriesResult.categories ?? []) : []
+
+//   return <TemplateLibrary templates={templates} categories={categories} />
+// }
+
+// export default function TemplatesPage() {
+//   return (
+//     <div className="container max-w-7xl py-8">
+//       <Suspense fallback={<TemplateLibrarySkeleton />}>
+//         <TemplateLibraryLoader />
+//       </Suspense>
+//     </div>
+//   )
+// }
+
 import { Suspense } from "react"
 import { getTemplates, getTemplateCategories } from "@/lib/actions/templates"
 import { TemplateLibrary } from "@/components/templates/template-library"
 import { TemplateLibrarySkeleton } from "@/components/templates/template-library-skeleton"
+import { auth } from "@clerk/nextjs/server"
+import { db } from "@/lib/db"
 
 export const metadata = {
   title: "Email Templates",
@@ -9,16 +39,23 @@ export const metadata = {
 }
 
 async function TemplateLibraryLoader() {
+  const { userId: clerkId } = await auth()
+  const user = clerkId
+    ? await db.user.findUnique({
+        where: { clerkId },
+      })
+    : null
+
   const [templates, categoriesResult] = await Promise.all([getTemplates(), getTemplateCategories()])
 
   const categories = categoriesResult.success ? (categoriesResult.categories ?? []) : []
 
-  return <TemplateLibrary templates={templates} categories={categories} />
+  return <TemplateLibrary templates={templates} categories={categories} userId={user?.id} />
 }
 
 export default function TemplatesPage() {
   return (
-    <div className="container max-w-7xl py-8">
+    <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
       <Suspense fallback={<TemplateLibrarySkeleton />}>
         <TemplateLibraryLoader />
       </Suspense>
