@@ -45,7 +45,7 @@ export function PageFooter() {
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
              <Link href="/" className="inline-flex items-center gap-2 mb-4">
                 <Image
-                  src="/mailfra-logo.jpg"
+                  src="/mailfra-logo.png"
                   alt="Mailfra"
                   width={36}
                   height={36}
@@ -96,19 +96,19 @@ export function PageFooter() {
             <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} mailfra. All rights reserved.</p>
             <div className="flex items-center gap-6">
               <Link
-                href="/legal/privacy"
+                href="/privacy"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Privacy
               </Link>
               <Link
-                href="/legal/terms"
+                href="/terms"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Terms
               </Link>
               <Link
-                href="/legal/cookies"
+                href="/cookies"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cookies

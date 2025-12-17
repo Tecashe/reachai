@@ -274,7 +274,7 @@ export function Footer() {
           >
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
               <Image
-                src="/mailfra-logo.jpg"
+                src="/mailfra-logo.png"
                 alt="Mailfra"
                 width={36}
                 height={36}
@@ -343,26 +343,26 @@ export function Footer() {
 
             <div className="flex items-center gap-6">
               <Link
-                href="/legal/privacy"
+                href="/privacy"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Privacy
               </Link>
               <Link
-                href="/legal/terms"
+                href="/terms"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Terms
               </Link>
               <Link
-                href="/legal/cookies"
+                href="/cookies"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Cookies
               </Link>
             </div>
 
-            {/* Social links */}
+            {/* Social links*/}
             <div className="flex items-center gap-4">
               {["twitter", "linkedin", "github"].map((social) => (
                 <a
