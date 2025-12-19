@@ -1,33 +1,3 @@
-// import { type NextRequest, NextResponse } from "next/server"
-// import { generateEmail } from "@/lib/services/email-generator"
-
-// export async function POST(request: NextRequest) {
-//   try {
-//     const body = await request.json()
-//     const { prospect, researchData, template, tone, personalizationLevel, callToAction } = body
-
-//     if (!prospect || !prospect.email) {
-//       return NextResponse.json({ error: "Prospect email is required" }, { status: 400 })
-//     }
-
-//     const result = await generateEmail({
-//       prospect,
-//       researchData,
-//       template,
-//       tone,
-//       personalizationLevel,
-//       callToAction,
-//     })
-
-//     return NextResponse.json({
-//       success: true,
-//       data: result,
-//     })
-//   } catch (error) {
-//     console.error("[builtbycashe] Email generation API error:", error)
-//     return NextResponse.json({ error: "Failed to generate email" }, { status: 500 })
-//   }
-// }
 
 import { type NextRequest, NextResponse } from "next/server"
 import { generateEmail } from "@/lib/services/email-generator"

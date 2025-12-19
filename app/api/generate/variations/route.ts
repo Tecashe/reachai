@@ -1,33 +1,4 @@
-// import { type NextRequest, NextResponse } from "next/server"
-// import { generateEmailVariations } from "@/lib/services/email-generator"
 
-// export async function POST(request: NextRequest) {
-//   try {
-//     const body = await request.json()
-//     const { prospect, researchData, template, count = 3 } = body
-
-//     if (!prospect || !prospect.email) {
-//       return NextResponse.json({ error: "Prospect email is required" }, { status: 400 })
-//     }
-
-//     const variations = await generateEmailVariations(
-//       {
-//         prospect,
-//         researchData,
-//         template,
-//       },
-//       count,
-//     )
-
-//     return NextResponse.json({
-//       success: true,
-//       data: variations,
-//     })
-//   } catch (error) {
-//     console.error("[builtbycashe] Email variations API error:", error)
-//     return NextResponse.json({ error: "Failed to generate email variations" }, { status: 500 })
-//   }
-// }
 
 import { type NextRequest, NextResponse } from "next/server"
 import { generateEmailVariations } from "@/lib/services/email-generator"
