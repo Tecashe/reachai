@@ -403,7 +403,7 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
               {/* Toolbar */}
               <div className="flex items-center justify-between border-b px-4 py-2">
                 <div className="flex items-center gap-1">
-                  <TooltipProvider>
+                  {/* <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -412,8 +412,8 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                       </TooltipTrigger>
                       <TooltipContent>Bold</TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
+                  </TooltipProvider> */}
+                  {/* <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -422,8 +422,8 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                       </TooltipTrigger>
                       <TooltipContent>Italic</TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
+                  </TooltipProvider> */}
+                  {/* <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -432,9 +432,9 @@ export function EmailComposer({ step, onSave, onClose, isOpen, onOpenChange, use
                       </TooltipTrigger>
                       <TooltipContent>Insert Link</TooltipContent>
                     </Tooltip>
-                  </TooltipProvider>
+                  </TooltipProvider> */}
 
-                  <Separator orientation="vertical" className="mx-1 h-6" />
+                  {/* <Separator orientation="vertical" className="mx-1 h-6" /> */}
 
                   <Popover>
                     <PopoverTrigger asChild>
