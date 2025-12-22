@@ -36,7 +36,7 @@ export default function ApiDocumentationPage() {
               <CardTitle>Quick Start Guide</CardTitle>
               <CardDescription>Get started with the MailFra API in minutes</CardDescription>
             </div>
-            <Link href="/docs/API-DOCUMENTATION.md" target="_blank">
+            <Link href="/docs/api-reference" target="_blank">
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Full Documentation

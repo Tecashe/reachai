@@ -106,6 +106,7 @@
 // const bottomItems: NavItem[] = [
 //   { name: "Integrations", href: "/dashboard/integrations", icon: Zap, tourId: "integrations" },
 //   { name: "Settings", href: "/dashboard/settings", icon: Settings, tourId: "settings" },
+//    { name: "API Docs", href: "/dashboard/settings/api", icon: Server, tourId: "api-docs" },
 //   { name: "Billing", href: "/dashboard/billing", icon: CreditCard, tourId: "billing" },
 // ]
 
@@ -417,6 +418,7 @@
 import type React from "react"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -451,6 +453,7 @@ import {
   Wand2,
 } from "lucide-react"
 import { UpgradeModal } from "@/components/subscription/upgrade-modal"
+import { useTheme } from "next-themes"
 
 interface NavItem {
   name: string
@@ -621,6 +624,8 @@ function NavGroupComponent({
 
 function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: SidebarContentProps) {
   const pathname = usePathname()
+   const [mounted, setMounted] = useState(false)
+  const { resolvedTheme } = useTheme()
   const [showUpgrade, setShowUpgrade] = useState(false)
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
@@ -646,17 +651,35 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     setExpandedGroups((prev) => ({ ...prev, [name]: !prev[name] }))
   }
 
+    // Determine which logo to show
+    const logoSrc = mounted && resolvedTheme === 'dark' 
+    ? '/mailfra-logo-dark.png'  // Your dark mode logo
+    : '/mailfra-logo-light.png'  // Your light mode logo
+
+
   return (
     <>
       {/* Logo */}
-      <div className={cn("p-4 border-b border-border/50 transition-all duration-300", collapsed && "p-3")}>
-        <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-sm group-hover:shadow-md transition-all duration-200">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
-          </div>
-          {!collapsed && <span className="text-lg font-semibold tracking-tight">ReachAI</span>}
-        </Link>
-      </div>
+       <div className={cn("p-6 border-b border-border/50 transition-all duration-300", collapsed && "p-4")}>
+         <Link href="/dashboard" className="flex items-center gap-2 group">
+           <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+             <Image
+               src={logoSrc}
+               alt="Mailfra Logo"
+               width={40}
+               height={40}
+               className="object-contain"
+               priority
+             />
+           </div>
+           {!collapsed && (
+             <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+               Mailfra
+             </span>
+           )}
+         </Link>
+       </div>
+
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
