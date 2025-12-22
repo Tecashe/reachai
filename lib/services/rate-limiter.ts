@@ -19,7 +19,7 @@ interface RateLimitResult {
 
 export async function checkRateLimit(apiKeyId: string, limit: number): Promise<RateLimitResult> {
   const now = Date.now()
-  const window = 3600000 // 1 hour in milliseconds
+  const window = 3600000 // 1hour in milliseconds
   const windowStart = now - window
 
   if (redis) {
