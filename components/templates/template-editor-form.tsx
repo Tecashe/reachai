@@ -154,58 +154,108 @@ export function TemplateEditorForm({ userId, template, onSave }: TemplateEditorF
     setVariables(variables.filter((_, i) => i !== index))
   }
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setIsSaving(true)
+
+  //   try {
+  //     const templateData = {
+  //       name: formData.name,
+  //       description: formData.description ?? undefined,
+  //       category: formData.category ?? undefined,
+  //       industry: formData.industry ?? undefined,
+  //       templateType: formData.templateType as "TEXT" | "HTML" | "VISUAL",
+  //       subject,
+  //       body,
+  //       tags,
+  //       variables,
+  //       colorScheme: {
+  //         primary: colorScheme.primary || "#3b82f6",
+  //         secondary: colorScheme.secondary || "#8b5cf6",
+  //         accent: colorScheme.accent || "#10b981",
+  //       },
+  //       isFavorite: formData.isFavorite,
+  //     }
+
+  //     if (template) {
+  //       const updateInput = {
+  //         id: template.id,
+  //         ...templateData,
+  //       }
+  //       const result = await updateTemplate(userId, updateInput)
+  //       if (result.success) {
+  //         toast.success("Template updated successfully")
+  //         router.push("/templates")
+  //       } else {
+  //         toast.error("message" in result ? result.message : "Failed to update template")
+  //       }
+  //     } else {
+  //       const result = await createTemplate(userId, templateData)
+  //       if (result.success) {
+  //         toast.success("Template created successfully")
+  //         router.push("/templates")
+  //       } else {
+  //         toast.error("message" in result ? result.message : "Failed to create template")
+  //       }
+  //     }
+  //     onSave?.()
+  //   } catch (error) {
+  //     console.error("Failed to save template:", error)
+  //     toast.error("Failed to save template")
+  //   } finally {
+  //     setIsSaving(false)
+  //   }
+  // }
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSaving(true)
+  e.preventDefault()
+  setIsSaving(true)
 
-    try {
-      const templateData = {
-        name: formData.name,
-        description: formData.description ?? undefined,
-        category: formData.category ?? undefined,
-        industry: formData.industry ?? undefined,
-        templateType: formData.templateType as "TEXT" | "HTML" | "VISUAL",
-        subject,
-        body,
-        tags,
-        variables,
-        colorScheme: {
-          primary: colorScheme.primary || "#3b82f6",
-          secondary: colorScheme.secondary || "#8b5cf6",
-          accent: colorScheme.accent || "#10b981",
-        },
-        isFavorite: formData.isFavorite,
-      }
-
-      if (template) {
-        const updateInput = {
-          id: template.id,
-          ...templateData,
-        }
-        const result = await updateTemplate(userId, updateInput)
-        if (result.success) {
-          toast.success("Template updated successfully")
-          router.push("/templates")
-        } else {
-          toast.error("message" in result ? result.message : "Failed to update template")
-        }
-      } else {
-        const result = await createTemplate(userId, templateData)
-        if (result.success) {
-          toast.success("Template created successfully")
-          router.push("/templates")
-        } else {
-          toast.error("message" in result ? result.message : "Failed to create template")
-        }
-      }
-      onSave?.()
-    } catch (error) {
-      console.error("Failed to save template:", error)
-      toast.error("Failed to save template")
-    } finally {
-      setIsSaving(false)
+  try {
+    const templateData = {
+      name: formData.name,
+      description: formData.description ?? undefined,
+      category: formData.category ?? undefined,
+      industry: formData.industry ?? undefined,
+      templateType: formData.templateType as "TEXT" | "HTML" | "VISUAL",
+      subject,
+      body,
+      tags,
+      variables,
+      colorScheme: {
+        primary: colorScheme.primary || "#3b82f6",
+        secondary: colorScheme.secondary || "#8b5cf6",
+        accent: colorScheme.accent || "#10b981",
+      },
+      isFavorite: formData.isFavorite,
     }
+
+    if (template) {
+      // Update existing template - note the function signature change
+      const result = await updateTemplate(template.id, templateData)
+      if (result.success) {
+        toast.success("Template updated successfully")
+        router.push("/templates")
+      } else {
+        toast.error((result as any).error || "Failed to update template")
+      }
+    } else {
+      // Create new template - only pass templateData
+      const result = await createTemplate(templateData)
+      if (result.success) {
+        toast.success("Template created successfully")
+        router.push("/templates")
+      } else {
+        toast.error((result as any).error || "Failed to create template")
+      }
+    }
+    onSave?.()
+  } catch (error) {
+    console.error("Failed to save template:", error)
+    toast.error("Failed to save template")
+  } finally {
+    setIsSaving(false)
   }
+}
 
   // Sample preview data
   const sampleData: Record<string, string> = {

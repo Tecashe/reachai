@@ -50,7 +50,7 @@ export function LiquidMorph() {
               transform: `scale(${1 + progress * 0.1})`,
             }}
           >
-            <img src="/images/transforms/liquid-before.jpg" alt="Before" className="w-full h-full object-cover" />
+            <img src="/images/transforms/liquid-before.png" alt="Before" className="w-full h-full object-cover" />
           </div>
 
           {/* Second image - fades in */}
@@ -62,7 +62,7 @@ export function LiquidMorph() {
               transform: `scale(${1.1 - progress * 0.1})`,
             }}
           >
-            <img src="/images/transforms/liquid-after.jpg" alt="After" className="w-full h-full object-cover" />
+            <img src="/images/transforms/liquid-after.png" alt="After" className="w-full h-full object-cover" />
           </div>
 
           {/* Liquid overlay effect */}

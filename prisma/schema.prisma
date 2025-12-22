@@ -532,6 +532,7 @@ model ApiKey {
 
   // Rate limiting
   rateLimit Int @default(1000) // Requests per hour
+  requestLogs       ApiRequestLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -539,6 +540,22 @@ model ApiKey {
   @@index([userId])
   @@index([key])
   @@index([keyPrefix])
+}
+
+model ApiRequestLog {
+  id            String   @id @default(cuid())
+  apiKeyId      String
+  apiKey        ApiKey   @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  
+  endpoint      String
+  method        String
+  statusCode    Int
+  responseTime  Int      // milliseconds
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([apiKeyId])
+  @@index([createdAt])
 }
 
 model SendingAccount {
@@ -550,6 +567,7 @@ model SendingAccount {
   name     String
   email    String
   provider String // "resend", "gmail", "outlook"
+  ipAddress          String?
 
   // Credentials (encrypted)
   credentials Json // API keys, OAuth tokens, etc.
