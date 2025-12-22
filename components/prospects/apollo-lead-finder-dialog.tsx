@@ -195,39 +195,14 @@ export function ApolloLeadFinderDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            AI-Powered Lead Finder
+            Lead Finder
             {/* Debug toggle button */}
-            <button
-              onClick={() => setDebugMode(!debugMode)}
-              className="ml-auto text-xs text-muted-foreground hover:text-foreground"
-              title="Toggle debug info"
-            >
-              🐛
-            </button>
-          </DialogTitle>
+            </DialogTitle>
           <DialogDescription>
-            Describe your ideal customer and we'll use Apollo.io + AI to find and enrich perfect leads
+            Describe your ideal customer
           </DialogDescription>
         </DialogHeader>
-
-        {/* Debug info panel */}
-        {debugMode && (
-          <Alert className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950">
-            <AlertCircle className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-900 dark:text-blue-100">Debug Information</AlertTitle>
-            <AlertDescription className="text-blue-900 dark:text-blue-100 font-mono text-xs">
-              <div className="space-y-1 mt-2">
-                <div>Raw Tier: <strong>{JSON.stringify(subscriptionTier)}</strong></div>
-                <div>Normalized: <strong>{normalizedTier}</strong></div>
-                <div>Can Use Apollo: <strong>{canUseApollo ? "✅ Yes" : "❌ No"}</strong></div>
-                <div>Credits: <strong>{researchCredits}</strong></div>
-                <div>Cost: <strong>{totalCost}</strong></div>
-                <div>Enough Credits: <strong>{hasEnoughCredits ? "✅ Yes" : "❌ No"}</strong></div>
-              </div>
-            </AlertDescription>
-          </Alert>
-        )}
-
+        
         {/* Free user upgrade prompt */}
         {!canUseApollo && (
           <Alert className="border-primary bg-primary/5">
