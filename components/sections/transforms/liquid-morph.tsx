@@ -89,8 +89,7 @@ export function LiquidMorph() {
         </div>
 
         <div className="absolute bottom-8 left-8 z-10">
-          <p className="text-white/60 text-sm uppercase tracking-widest mb-2">Transformation 02</p>
-          <h3 className="text-white text-2xl md:text-4xl font-light">Fluid Reality</h3>
+          <p className="text-white/60 text-sm uppercase tracking-widest mb-2">Cold Email Transformation</p>
         </div>
 
         <div className="absolute bottom-8 right-8 z-10">

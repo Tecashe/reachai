@@ -10,7 +10,7 @@ const footerLinks = {
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
     { label: "Integrations", href: "/integrations" },
-    { label: "API", href: "/api-docs" },
+    { label: "API", href: "/docs" },
     { label: "Changelog", href: "/changelog" },
     { label: "Roadmap", href: "/roadmap" },
   ],

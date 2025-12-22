@@ -118,7 +118,7 @@ const categories = [
       { title: "Salesforce Integration", slug: "salesforce" },
       { title: "HubSpot Integration", slug: "hubspot" },
       { title: "Zapier Automations", slug: "zapier" },
-      { title: "API Documentation", slug: "api-docs" },
+      { title: "API Documentation", slug: "docs" },
     ],
   },
   {
@@ -354,7 +354,7 @@ export default function HelpCenterPage() {
               <h3 className="text-xl font-bold text-neutral-900 mb-2">Developer Resources</h3>
               <p className="text-neutral-500 mb-6">Building with our API? Check out our developer documentation.</p>
               <Link
-                href="/api-docs"
+                href="/docs"
                 className="inline-flex items-center gap-2 text-neutral-900 font-medium hover:gap-3 transition-all"
               >
                 View API Docs

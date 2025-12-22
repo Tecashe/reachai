@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { withApiAuth } from "@/lib/middleware/api-wrapper"
 import { db } from "@/lib/db"
 import { z } from "zod"
+import { withCache, cache } from "@/lib/services/cache"
+import { normalizePagination, createPaginationMeta } from "@/lib/utils/pagination"
 
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),
@@ -16,52 +18,68 @@ export const GET = withApiAuth("campaigns:read")(async (request, context) => {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get("status")
-    const limit = Math.min(Number.parseInt(searchParams.get("limit") || "50"), 100)
-    const offset = Number.parseInt(searchParams.get("offset") || "0")
+    const search = searchParams.get("search")
+    const { limit, offset } = normalizePagination({
+      limit: searchParams.get("limit"),
+      offset: searchParams.get("offset"),
+    })
+//s
+    const cacheKey = `campaigns:${context.user.id}:${status || "all"}:${search || "none"}:${limit}:${offset}`
 
-    const where: any = {
-      userId: context.user.id,
-    }
+    const result = await withCache(
+      cacheKey,
+      async () => {
+        const where: any = {
+          userId: context.user.id,
+        }
 
-    if (status) {
-      where.status = status
-    }
+        if (status) {
+          where.status = status
+        }
 
-    const [campaigns, total] = await Promise.all([
-      db.campaign.findMany({
-        where,
-        take: limit,
-        skip: offset,
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          status: true,
-          dailySendLimit: true,
-          totalProspects: true,
-          emailsSent: true,
-          emailsOpened: true,
-          emailsReplied: true,
-          emailsBounced: true,
-          createdAt: true,
-          launchedAt: true,
-        },
-      }),
-      db.campaign.count({ where }),
-    ])
+        if (search) {
+          where.name = {
+            contains: search,
+            mode: "insensitive",
+          }
+        }
+
+        const [campaigns, total] = await Promise.all([
+          db.campaign.findMany({
+            where,
+            take: limit,
+            skip: offset,
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              status: true,
+              dailySendLimit: true,
+              totalProspects: true,
+              emailsSent: true,
+              emailsOpened: true,
+              emailsReplied: true,
+              emailsBounced: true,
+              createdAt: true,
+              launchedAt: true,
+            },
+          }),
+          db.campaign.count({ where }),
+        ])
+
+        return {
+          campaigns,
+          pagination: createPaginationMeta(total, limit, offset),
+        }
+      },
+      { ttl: 60, tags: [`user:${context.user.id}:campaigns`] },
+    )
 
     return NextResponse.json({
       success: true,
-      data: {
-        campaigns,
-        pagination: {
-          total,
-          limit,
-          offset,
-          hasMore: offset + limit < total,
-        },
-      },
+      data: result.campaigns,
+      meta: result.pagination,
     })
   } catch (error: any) {
     console.error("[v0] Error fetching campaigns:", error)
@@ -87,6 +105,8 @@ export const POST = withApiAuth("campaigns:write")(async (request, context) => {
         status: "DRAFT",
       },
     })
+
+    await cache.invalidateTag(`user:${context.user.id}:campaigns`)
 
     return NextResponse.json(
       {
