@@ -207,7 +207,7 @@ export function TemplateLibrary({
   )
 
   const handleCreateTemplate = useCallback(() => {
-    router.push("/templates/new")
+    router.push(`/dashboard/templates/new`)
   }, [router])
 
   const handlePreview = useCallback((template: EnhancedEmailTemplate) => {
