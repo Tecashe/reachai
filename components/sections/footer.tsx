@@ -87,7 +87,7 @@ export function Footer() {
               The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.
             </p>
 
-            {/* Newsletter signup */}
+            {/* Newsletter sign-up */}
             <div className="flex gap-2">
               <input
                 type="email"

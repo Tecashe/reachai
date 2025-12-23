@@ -60,10 +60,10 @@ export function PageHeader() {
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
-              <Link href="/login">Sign In</Link>
+              <Link href="/sign-in">Sign In</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href="/signup">Start Free Trial</Link>
+              <Link href="/sign-up">Start Free Trial</Link>
             </Button>
           </div>
 
@@ -89,10 +89,10 @@ export function PageHeader() {
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/sign-in">Sign In</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href="/signup">Start Free Trial</Link>
+                  <Link href="/sign-up">Start Free Trial</Link>
                 </Button>
               </div>
             </nav>

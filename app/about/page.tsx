@@ -468,7 +468,7 @@ export default function AboutPage() {
             Whether you&apos;re looking to scale your outreach or join our team, we&apos;d love to hear from you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
+            <Link href="/sign-up">
               <Button size="lg" className="bg-black text-white hover:bg-black/80 w-full sm:w-auto">
                 Start Free Trial
               </Button>

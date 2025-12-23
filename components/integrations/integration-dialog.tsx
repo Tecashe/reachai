@@ -45,7 +45,7 @@ export function IntegrationDialog({ integration, isConnected, open, onOpenChange
       const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=https://www.googleapis.com/auth/gmail.send&state=${state}&access_type=offline&prompt=consent`
       window.location.href = googleAuthUrl
     } else if (integration.type === "OUTLOOK") {
-      const microsoftAuthUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=https://graph.microsoft.com/Mail.Send&state=${state}`
+      const microsoftAuthUrl = `https://sign-in.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=https://graph.microsoft.com/Mail.Send&state=${state}`
       window.location.href = microsoftAuthUrl
     }
   }

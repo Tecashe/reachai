@@ -28,7 +28,7 @@ export class OutlookOAuthService {
       prompt: "consent",
     })
 
-    return `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/authorize?${params.toString()}`
+    return `https://sign-in.microsoftonline.com/${this.tenantId}/oauth2/v2.0/authorize?${params.toString()}`
   }
 
   /**
@@ -43,7 +43,7 @@ export class OutlookOAuthService {
       grant_type: "authorization_code",
     })
 
-    const response = await fetch(`https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
+    const response = await fetch(`https://sign-in.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -75,7 +75,7 @@ export class OutlookOAuthService {
       grant_type: "refresh_token",
     })
 
-    const response = await fetch(`https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
+    const response = await fetch(`https://sign-in.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",

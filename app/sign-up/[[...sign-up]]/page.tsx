@@ -34,11 +34,11 @@ export default function SignUpPage() {
           <div className="absolute inset-0 opacity-[0.03]">
             <svg width="100%" height="100%">
               <defs>
-                <pattern id="grid-signup" width="40" height="40" patternUnits="userSpaceOnUse">
+                <pattern id="grid-sign-up" width="40" height="40" patternUnits="userSpaceOnUse">
                   <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill="url(#grid-signup)" />
+              <rect width="100%" height="100%" fill="url(#grid-sign-up)" />
             </svg>
           </div>
 

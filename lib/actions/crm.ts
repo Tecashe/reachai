@@ -149,7 +149,7 @@ export async function initiateCRMConnection(crmType: CRMType) {
       const salesforceClientId = process.env.SALESFORCE_CLIENT_ID
       if (!salesforceClientId) return { success: false, error: "Salesforce not configured" }
 
-      authUrl = `https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id=${salesforceClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`
+      authUrl = `https://sign-in.salesforce.com/services/oauth2/authorize?response_type=code&client_id=${salesforceClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`
       break
 
     case "pipedrive":

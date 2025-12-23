@@ -110,7 +110,7 @@ Open [http://localhost:3000](http://localhost:3000) to see your app.
    - Create live products and prices
 
 5. **Test Everything:**
-   - Test user signup flow
+   - Test user sign-up flow
    - Test subscription checkout
    - Test email sending
    - Test webhook processing

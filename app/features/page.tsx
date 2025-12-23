@@ -209,7 +209,7 @@ export default function FeaturesPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/signup"
+                href="/sign-up"
                 className="h-14 px-8 bg-foreground text-background font-medium rounded-full flex items-center gap-2 hover:bg-foreground/90 transition-all"
               >
                 Start Free Trial
@@ -365,7 +365,7 @@ export default function FeaturesPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/signup"
+              href="/sign-up"
               className="h-14 px-8 bg-background text-foreground font-medium rounded-full flex items-center gap-2 hover:bg-background/90 transition-all"
             >
               Start Free Trial

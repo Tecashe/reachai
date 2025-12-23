@@ -2,7 +2,7 @@
 import { z } from "zod"
 
 const envSchema = z.object({
-  // Database
+  // Db
   DATABASE_URL: z.string().url(),
 
   // Clerk Auth
@@ -50,7 +50,7 @@ const envSchema = z.object({
 
   SALESFORCE_CLIENT_ID: z.string().optional(),
   SALESFORCE_CLIENT_SECRET: z.string().optional(),
-  SALESFORCE_LOGIN_URL: z.string().url().optional().default("https://login.salesforce.com"),
+  SALESFORCE_LOGIN_URL: z.string().url().optional().default("https://sign-in.salesforce.com"),
 
   PIPEDRIVE_CLIENT_ID: z.string().optional(),
   PIPEDRIVE_CLIENT_SECRET: z.string().optional(),

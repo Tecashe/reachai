@@ -176,7 +176,7 @@
 
 //               <div className="flex flex-wrap gap-4 mb-12">
 //                 <Link
-//                   href="/signup"
+//                   href="/sign-up"
 //                   className="h-14 px-8 bg-foreground text-background font-medium rounded-full flex items-center gap-2 hover:bg-foreground/90 transition-all"
 //                 >
 //                   Get API Key
@@ -368,7 +368,7 @@
 //             Sign up for free and get your API key in seconds. No credit card required.
 //           </p>
 //           <Link
-//             href="/signup"
+//             href="/sign-up"
 //             className="inline-flex h-14 px-8 bg-background text-foreground font-medium rounded-full items-center gap-2 hover:bg-background/90 transition-all"
 //           >
 //             Get Started Free
@@ -970,7 +970,7 @@ X-RateLimit-Reset: 1640995200`}
             Sign up for free and get your API key in seconds. No credit card required.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/signup">
+            <Link href="/sign-up">
               <Button size="lg" className="gap-2">
                 Get API Key
                 <ArrowRight className="w-4 h-4" />

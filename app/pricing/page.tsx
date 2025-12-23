@@ -198,7 +198,7 @@ export default function PricingPage() {
 
                   {/* CTA */}
                   <Link
-                    href={plan.cta === "Contact Sales" ? "/contact" : "/signup"}
+                    href={plan.cta === "Contact Sales" ? "/contact" : "/sign-up"}
                     className={`w-full h-12 flex items-center justify-center gap-2 rounded-full font-medium transition-all ${
                       plan.popular
                         ? "bg-background text-foreground hover:bg-background/90"

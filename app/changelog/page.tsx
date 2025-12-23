@@ -334,7 +334,7 @@ export default function ChangelogPage() {
             Start your free trial and experience the latest mailfra updates firsthand.
           </p>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="inline-flex h-14 px-8 bg-foreground text-background font-medium rounded-full items-center gap-2 hover:bg-foreground/90 transition-all"
           >
             Start Free Trial
