@@ -1,7 +1,7 @@
 import { Hero } from "@/components/hero"
 import { LogoBar } from "@/components/sections/logo-bar"
 import { Problem } from "@/components/sections/problem"
-import { Features } from "@/components/sections/features"
+import  Features  from "@/components/sections/features"
 import { Stats } from "@/components/sections/stats"
 import { DashboardPreview } from "@/components/sections/dashboard-preview"
 import { HowItWorks } from "@/components/sections/how-it-works"
@@ -31,11 +31,11 @@ export default function Home() {
       <Features />
       <Stats />
       <EmailWarmup />
-             <DashboardPreview /> 
-             <HowItWorks /> 
+             {/* <DashboardPreview /> 
+             <HowItWorks />  */}
       <GetStarted />
       <UseCases />
-           <Integrations />
+           {/* <Integrations /> */}
       <Comparison />
       <CaseStudies />
       <ROICalculator />
