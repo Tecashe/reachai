@@ -188,7 +188,7 @@ export function PageFooter() {
                     alt="Mailfra"
                     width={36}
                     height={36}
-                    className="w-9 h-9 rounded-xl object-contain"
+                    className="w-9 h-9 object-contain"
                   />
                 )}
                 <span className="font-semibold text-lg text-foreground">mailfra</span>
