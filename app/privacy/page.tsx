@@ -2957,8 +2957,19 @@ export default function PrivacyPage() {
           }
         })
       },
-      { threshold: 0.3, rootMargin: "-100px 0px -50% 0px" },
+      { threshold: 0.1, rootMargin: "-150px 0px -200px 0px" }, // More lenient trigger zone
     )
+    // const observer = new IntersectionObserver(
+    //   (entries) => {
+    //     entries.forEach((entry) => {
+    //       if (entry.isIntersecting) {
+    //         setVisibleSections((prev) => new Set([...prev, entry.target.id]))
+    //         setActiveSection(entry.target.id)
+    //       }
+    //     })
+    //   },
+    //   { threshold: 0.3, rootMargin: "-100px 0px -50% 0px" },
+    // )
 
     sections.forEach((section) => {
       const el = document.getElementById(section.id)
@@ -4016,7 +4027,7 @@ export default function PrivacyPage() {
                   you to take appropriate precautions to protect your own data.
                 </p>
               </section>
-                            
+
               {/* Cookies */}
               <section id="cookies" className="mb-16 scroll-mt-32">
                 <h2 className="text-3xl font-bold mb-4">Cookies and Tracking Technologies</h2>
