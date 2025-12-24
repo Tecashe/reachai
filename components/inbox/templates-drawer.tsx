@@ -1,5 +1,9 @@
 "use client"
 
+
+import {useCallback } from "react"
+import { useRouter } from "next/navigation"
+
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,6 +31,7 @@ interface TemplatesDrawerProps {
 }
 
 export function TemplatesDrawer({ onSelectTemplate, children }: TemplatesDrawerProps) {
+  const router = useRouter()
   const [templates, setTemplates] = React.useState<Template[]>([])
   const [isLoading, setIsLoading] = React.useState(false)
   const [isOpen, setIsOpen] = React.useState(false)
@@ -67,6 +72,11 @@ export function TemplatesDrawer({ onSelectTemplate, children }: TemplatesDrawerP
     setTimeout(() => setCopiedId(null), 2000)
     toast.success("Template copied")
   }
+
+  const handleCreateTemplate = useCallback(() => {
+      router.push(`/dashboard/templates/new`)
+    }, [router])
+  
 
   const handleSelect = (template: Template) => {
     onSelectTemplate(template)
@@ -118,9 +128,13 @@ export function TemplatesDrawer({ onSelectTemplate, children }: TemplatesDrawerP
                 <p className="text-xs text-muted-foreground mb-4">
                   {searchQuery ? "Try a different search" : "Create your first template"}
                 </p>
-                <Button size="sm" className="gap-2 rounded-xl">
+                {/* <Button size="sm" className="gap-2 rounded-xl">
                   <Plus className="h-4 w-4" />
                   Create Template
+                </Button> */}
+                 <Button onClick={handleCreateTemplate} size="lg" className="mt-4">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Template
                 </Button>
               </div>
             ) : (
