@@ -365,27 +365,18 @@ export default function FeatureShowcase() {
   }, [scrollProgress])
 
   const getAmbientOpacity = (index: number) => {
-    const sectionProgress = (smoothProgress * showcaseFeatures.length) % 1
-    const fadeRange = 0.75
-
-    if (index === activeShowcase) {
-      return 1 - sectionProgress * (1 / fadeRange)
-    } else if (index === activeShowcase + 1) {
-      return Math.max(0, (sectionProgress - (1 - fadeRange)) / fadeRange)
-    }
-    return 0
+    return index === activeShowcase ? 1 : 0
   }
 
   const getBlurAmount = (index: number) => {
-    const opacity = getAmbientOpacity(index)
-    return 4 - opacity * 4
+    return index === activeShowcase ? 0 : 2
   }
 
   return (
     <section
       ref={showcaseRef}
       className="relative"
-      style={{ height: `${showcaseFeatures.length * 80}vh` }}
+      style={{ height: `${showcaseFeatures.length * 60}vh` }}
     >
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         {/* Full background images with heavy overlays */}
@@ -393,7 +384,7 @@ export default function FeatureShowcase() {
           {showcaseFeatures.map((feature, index) => (
             <div
               key={`ambient-${feature.title}`}
-              className="absolute inset-0 transition-all duration-[1800ms] ease-in-out"
+              className="absolute inset-0 transition-all duration-700 ease-out"
               style={{
                 opacity: getAmbientOpacity(index),
                 filter: `blur(${getBlurAmount(index)}px)`,
@@ -419,7 +410,7 @@ export default function FeatureShowcase() {
             {showcaseFeatures.map((feature, index) => (
               <div
                 key={feature.title}
-                className="transition-all duration-[1800ms] ease-in-out"
+                className="transition-all duration-700 ease-out"
                 style={{
                   position: index === 0 ? "relative" : "absolute",
                   inset: 0,
@@ -428,8 +419,8 @@ export default function FeatureShowcase() {
                   alignItems: "center",
                   justifyContent: "center",
                   opacity: getAmbientOpacity(index),
-                  filter: `blur(${getBlurAmount(index) * 0.2}px)`,
-                  transform: `scale(${0.98 + getAmbientOpacity(index) * 0.02})`,
+                  filter: `blur(${getBlurAmount(index) * 0.5}px)`,
+                  transform: `translateY(${index === activeShowcase ? 0 : 10}px)`,
                   pointerEvents: getAmbientOpacity(index) > 0.5 ? "auto" : "none",
                   willChange: "opacity, filter, transform",
                 }}
