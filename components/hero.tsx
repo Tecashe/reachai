@@ -353,7 +353,7 @@ export function Hero() {
         >
           <div className="w-full max-w-4xl mx-auto pointer-events-auto text-center">
             {/* Feature Badges */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-12">
+            {/* <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-12">
               {[
                 { icon: Zap, label: "Lightning Fast", delay: 0 },
                 { icon: Globe, label: "Global Scale", delay: 0.1 },
@@ -378,7 +378,7 @@ export function Hero() {
                   <span className="text-xs sm:text-sm font-medium text-foreground">{badge.label}</span>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             {/* Main CTA Heading */}
             <h2
