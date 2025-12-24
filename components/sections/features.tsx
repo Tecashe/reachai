@@ -274,6 +274,206 @@
 //   )
 // }
 
+// "use client"
+
+// import { useEffect, useRef, useState } from "react"
+// import Image from "next/image"
+
+// const showcaseFeatures = [
+//   {
+//     title: "Inbox Rotation Engine",
+//     subtitle: "Distribute sends intelligently",
+//     description:
+//       "Our smart rotation algorithm analyzes account health, sending limits, and warm-up status to distribute your campaigns across accounts for maximum deliverability.",
+//     image: "/inbox-rotation.png",
+//     stats: [
+//       { value: "50+", label: "Accounts per workspace" },
+//       { value: "Smart", label: "Load balancing" },
+//       { value: "Auto", label: "Failover protection" },
+//     ],
+//   },
+//   {
+//     title: "AI Email Warmup",
+//     subtitle: "Build reputation automatically",
+//     description:
+//       "Connect a new account and watch our AI build its reputation through realistic engagement patterns, gradual volume increases, and spam folder rescues.",
+//     image: "/email-warmup.png",
+//     stats: [
+//       { value: "14 days", label: "To full warmup" },
+//       { value: "Real", label: "Engagement signals" },
+//       { value: "24/7", label: "Automated process" },
+//     ],
+//   },
+//   {
+//     title: "Campaign Analytics",
+//     subtitle: "Data-driven decisions",
+//     description:
+//       "Real-time dashboards show exactly how your campaigns perform. Track every open, click, reply, and conversion across all your sequences.",
+//     image: "/advanced-analytics.png",
+//     stats: [
+//       { value: "Live", label: "Real-time updates" },
+//       { value: "Export", label: "Custom reports" },
+//       { value: "API", label: "Data access" },
+//     ],
+//   },
+// ]
+
+// export default function FeatureShowcase() {
+//   const showcaseRef = useRef<HTMLDivElement>(null)
+//   const [scrollProgress, setScrollProgress] = useState(0)
+//   const [activeShowcase, setActiveShowcase] = useState(0)
+//   const [smoothProgress, setSmoothProgress] = useState(0)
+
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       if (!showcaseRef.current) return
+//       const rect = showcaseRef.current.getBoundingClientRect()
+//       const sectionHeight = showcaseRef.current.offsetHeight
+//       const viewportHeight = window.innerHeight
+
+//       const progress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - viewportHeight)))
+//       setScrollProgress(progress)
+
+//       const featureProgress = progress * showcaseFeatures.length
+//       const newIndex = Math.min(
+//         Math.floor(featureProgress),
+//         showcaseFeatures.length - 1
+//       )
+//       setActiveShowcase(newIndex)
+//     }
+
+//     window.addEventListener("scroll", handleScroll, { passive: true })
+//     handleScroll()
+//     return () => window.removeEventListener("scroll", handleScroll)
+//   }, [])
+
+//   useEffect(() => {
+//     let animationFrame: number
+//     const smoothing = 0.18
+
+//     const animate = () => {
+//       setSmoothProgress((prev) => {
+//         const diff = scrollProgress - prev
+//         if (Math.abs(diff) < 0.0001) return scrollProgress
+//         return prev + diff * smoothing
+//       })
+//       animationFrame = requestAnimationFrame(animate)
+//     }
+
+//     animationFrame = requestAnimationFrame(animate)
+//     return () => cancelAnimationFrame(animationFrame)
+//   }, [scrollProgress])
+
+//   const getAmbientOpacity = (index: number) => {
+//     return index === activeShowcase ? 1 : 0
+//   }
+
+//   const getBlurAmount = (index: number) => {
+//     return index === activeShowcase ? 0 : 2
+//   }
+
+//   return (
+//     <section
+//       ref={showcaseRef}
+//       className="relative"
+//       style={{ height: `${showcaseFeatures.length * 60}vh` }}
+//     >
+//       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
+//         {/* Full background images with heavy overlays */}
+//         <div className="absolute inset-0">
+//           {showcaseFeatures.map((feature, index) => (
+//             <div
+//               key={`ambient-${feature.title}`}
+//               className="absolute inset-0 transition-all duration-700 ease-out"
+//               style={{
+//                 opacity: getAmbientOpacity(index),
+//                 filter: `blur(${getBlurAmount(index)}px)`,
+//                 willChange: "opacity, filter",
+//               }}
+//             >
+//               <Image
+//                 src={feature.image || "/placeholder.svg"}
+//                 alt={feature.title}
+//                 fill
+//                 className="object-cover"
+//                 style={{ transform: `scale(${1.1 + getAmbientOpacity(index) * 0.05})` }}
+//               />
+//               {/* Heavy overlay for ambient effect */}
+//               <div className="absolute inset-0 bg-background/80" />
+//             </div>
+//           ))}
+//         </div>
+
+//         {/* Content floating in center */}
+//         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+//           <div className="max-w-3xl mx-auto text-center">
+//             {showcaseFeatures.map((feature, index) => (
+//               <div
+//                 key={feature.title}
+//                 className="transition-all duration-700 ease-out"
+//                 style={{
+//                   position: index === 0 ? "relative" : "absolute",
+//                   inset: 0,
+//                   display: "flex",
+//                   flexDirection: "column",
+//                   alignItems: "center",
+//                   justifyContent: "center",
+//                   opacity: getAmbientOpacity(index),
+//                   filter: `blur(${getBlurAmount(index) * 0.5}px)`,
+//                   transform: `translateY(${index === activeShowcase ? 0 : 10}px)`,
+//                   pointerEvents: getAmbientOpacity(index) > 0.5 ? "auto" : "none",
+//                   willChange: "opacity, filter, transform",
+//                 }}
+//               >
+//                 <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 block">
+//                   {feature.subtitle}
+//                 </span>
+//                 <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-tight">
+//                   {feature.title}
+//                 </h2>
+//                 <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-12 max-w-2xl">
+//                   {feature.description}
+//                 </p>
+
+//                 {/* Stats */}
+//                 <div className="flex flex-wrap justify-center gap-12 mb-8">
+//                   {feature.stats.map((stat) => (
+//                     <div key={stat.label} className="text-center">
+//                       <div className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+//                         {stat.value}
+//                       </div>
+//                       <div className="text-sm text-muted-foreground">{stat.label}</div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               </div>
+//             ))}
+
+//             {/* Progress indicators */}
+//             <div className="relative flex justify-center gap-2 mt-16">
+//               {showcaseFeatures.map((_, index) => (
+//                 <div
+//                   key={index}
+//                   className="h-1 rounded-full transition-all duration-700"
+//                   style={{
+//                     width: activeShowcase === index ? "48px" : "24px",
+//                     backgroundColor:
+//                       activeShowcase === index ? "var(--foreground)" : "var(--border)",
+//                     opacity: activeShowcase === index ? 1 : 0.4,
+//                   }}
+//                 />
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Subtle vignette */}
+//         <div className="absolute inset-0 bg-gradient-to-br from-background/20 via-transparent to-background/20 pointer-events-none" />
+//       </div>
+//     </section>
+//   )
+// }
+
 "use client"
 
 import { useEffect, useRef, useState } from "react"
@@ -323,6 +523,16 @@ export default function FeatureShowcase() {
   const [scrollProgress, setScrollProgress] = useState(0)
   const [activeShowcase, setActiveShowcase] = useState(0)
   const [smoothProgress, setSmoothProgress] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -376,9 +586,64 @@ export default function FeatureShowcase() {
     <section
       ref={showcaseRef}
       className="relative"
-      style={{ height: `${showcaseFeatures.length * 60}vh` }}
+      style={{ height: isMobile ? "auto" : `${showcaseFeatures.length * 150}vh` }}
     >
-      <div className="sticky top-0 h-screen flex items-center overflow-hidden">
+      {isMobile ? (
+        // Mobile: Simple stacked layout
+        <div className="py-16 px-4">
+          <div className="max-w-2xl mx-auto space-y-16">
+            {showcaseFeatures.map((feature, index) => (
+              <div
+                key={feature.title}
+                className="relative"
+              >
+                {/* Mobile image with reduced opacity */}
+                <div className="relative h-64 rounded-2xl overflow-hidden mb-6">
+                  <Image
+                    src={feature.image || "/placeholder.svg"}
+                    alt={feature.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-background/85" />
+                </div>
+
+                {/* Mobile content */}
+                <div className="text-center">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 block">
+                    {feature.subtitle}
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 leading-tight">
+                    {feature.title}
+                  </h2>
+                  <p className="text-base text-muted-foreground leading-relaxed mb-6">
+                    {feature.description}
+                  </p>
+
+                  {/* Mobile stats */}
+                  <div className="flex flex-wrap justify-center gap-8">
+                    {feature.stats.map((stat) => (
+                      <div key={stat.label} className="text-center">
+                        <div className="text-2xl font-bold text-foreground mb-1">
+                          {stat.value}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                {index < showcaseFeatures.length - 1 && (
+                  <div className="mt-16 h-px bg-border" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        // Desktop: Sticky scroll effect
+        <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         {/* Full background images with heavy overlays */}
         <div className="absolute inset-0">
           {showcaseFeatures.map((feature, index) => (
@@ -398,8 +663,8 @@ export default function FeatureShowcase() {
                 className="object-cover"
                 style={{ transform: `scale(${1.1 + getAmbientOpacity(index) * 0.05})` }}
               />
-              {/* Heavy overlay for ambient effect */}
-              <div className="absolute inset-0 bg-background/80" />
+              {/* Heavy overlay for ambient effect - images barely visible */}
+              <div className="absolute inset-0 bg-background/92" />
             </div>
           ))}
         </div>
@@ -470,6 +735,7 @@ export default function FeatureShowcase() {
         {/* Subtle vignette */}
         <div className="absolute inset-0 bg-gradient-to-br from-background/20 via-transparent to-background/20 pointer-events-none" />
       </div>
+      )}
     </section>
   )
 }
