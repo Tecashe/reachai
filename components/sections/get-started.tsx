@@ -316,8 +316,8 @@ export function GetStarted() {
 
           <div className="space-y-32 lg:space-y-40">
             {steps.map((step, index) => {
-              // Adjusted timing: images appear earlier and stay visible longer
-              const stepProgress = Math.max(0, Math.min(1, (scrollProgress - 0.15 - index * 0.15) * 2.5))
+              // Images appear quickly and stay visible
+              const stepProgress = Math.max(0, Math.min(1, (scrollProgress - 0.1 - index * 0.12) * 4))
               const isEven = index % 2 === 0
 
               return (
@@ -332,8 +332,8 @@ export function GetStarted() {
                     className={`flex-1 ${isEven ? "lg:text-right lg:pr-16" : "lg:text-left lg:pl-16"}`}
                     style={{
                       opacity: stepProgress,
-                      transform: `translateX(${isEven ? -1 : 1}${(1 - stepProgress) * 40}px)`,
-                      transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
+                      transform: `translateY(${(1 - stepProgress) * 20}px)`,
+                      transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
                     }}
                   >
                     {/* Step number - large and subtle */}
@@ -365,39 +365,37 @@ export function GetStarted() {
                     />
                   </div>
 
-                  {/* Image Container - Bright and clearly visible */}
+                  {/* Image Container - Crystal clear, fades in vertically */}
                   <div
                     className="flex-1 w-full"
                     style={{
                       opacity: stepProgress,
-                      transform: `translateX(${isEven ? 1 : -1}${(1 - stepProgress) * 40}px)`,
-                      transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
+                      transform: `translateY(${(1 - stepProgress) * 20}px)`,
+                      transition: "all 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
                     }}
                   >
                     <div className="relative group">
-                      {/* Outer glow effect - brighter */}
+                      {/* Outer glow effect */}
                       <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-foreground/10 via-transparent to-foreground/10 blur-md opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
 
-                      {/* Glass frame - lighter */}
+                      {/* Glass frame */}
                       <div className="relative rounded-2xl p-1 bg-gradient-to-br from-border/60 via-border/30 to-border/60">
-                        {/* Inner container - bright background */}
-                        <div className="relative rounded-xl overflow-hidden bg-muted/30 shadow-[0_8px_32px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.08)]">
-                          {/* Image - full brightness, no darkening */}
-                          <div className="aspect-[4/3] relative bg-background">
+                        {/* Inner container - completely clear */}
+                        <div className="relative rounded-xl overflow-hidden bg-background shadow-[0_8px_32px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.04)]">
+                          {/* Image - 100% clear, no overlays */}
+                          <div className="aspect-[4/3] relative">
                             <img
                               src={step.image || "/placeholder.svg"}
                               alt={step.title}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                             />
-                            {/* Very subtle inner shadow - not darkening */}
-                            <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.03)] pointer-events-none rounded-xl" />
                           </div>
 
-                          {/* Bottom info bar - more transparent to show image */}
-                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/70 via-background/30 to-transparent backdrop-blur-sm">
+                          {/* Bottom info bar - minimal and clear */}
+                          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background/80 to-transparent">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                              <span className="text-xs text-foreground/80 font-medium uppercase tracking-wider">
+                              <span className="text-xs text-foreground font-medium uppercase tracking-wider">
                                 Step {step.number}
                               </span>
                             </div>
@@ -405,7 +403,7 @@ export function GetStarted() {
                         </div>
                       </div>
 
-                      {/* Decorative corner accents - more visible */}
+                      {/* Decorative corner accents */}
                       <div className="absolute -top-2 -left-2 w-6 h-6 border-l-2 border-t-2 border-foreground/30 rounded-tl-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute -bottom-2 -right-2 w-6 h-6 border-r-2 border-b-2 border-foreground/30 rounded-br-lg opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
