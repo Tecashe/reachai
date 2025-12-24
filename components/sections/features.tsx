@@ -363,9 +363,9 @@ export default function FeatureShowcase() {
     return () => cancelAnimationFrame(animationFrame)
   }, [scrollProgress])
 
-  const getLayerOpacity = (index: number) => {
+  const getAmbientOpacity = (index: number) => {
     const sectionProgress = (smoothProgress * showcaseFeatures.length) % 1
-    const fadeRange = 0.85
+    const fadeRange = 0.9
 
     if (index === activeShowcase) {
       return 1 - sectionProgress * (1 / fadeRange)
@@ -375,6 +375,11 @@ export default function FeatureShowcase() {
     return 0
   }
 
+  const getBlurAmount = (index: number) => {
+    const opacity = getAmbientOpacity(index)
+    return 8 - opacity * 8
+  }
+
   return (
     <section
       ref={showcaseRef}
@@ -382,143 +387,96 @@ export default function FeatureShowcase() {
       style={{ height: `${showcaseFeatures.length * 100}vh` }}
     >
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Text content - left side */}
-            <div className="relative">
-              {showcaseFeatures.map((feature, index) => (
-                <div
-                  key={feature.title}
-                  className="transition-all duration-[2000ms] ease-out"
-                  style={{
-                    position: index === 0 ? "relative" : "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    opacity: getLayerOpacity(index),
-                    transform: `translateY(${getLayerOpacity(index) === 1 ? 0 : 20}px)`,
-                    pointerEvents: getLayerOpacity(index) > 0.5 ? "auto" : "none",
-                    willChange: "opacity, transform",
-                  }}
-                >
-                  <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4 block">
-                    {feature.subtitle}
-                  </span>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-                    {feature.title}
-                  </h2>
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                    {feature.description}
-                  </p>
-
-                  {/* Stats */}
-                  <div className="flex gap-8">
-                    {feature.stats.map((stat) => (
-                      <div key={stat.label}>
-                        <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                        <div className="text-sm text-muted-foreground">{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* Progress indicators */}
-              <div className="flex gap-2 mt-12">
-                {showcaseFeatures.map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-1 rounded-full transition-all duration-700"
-                    style={{
-                      width: activeShowcase === index ? "48px" : "24px",
-                      backgroundColor:
-                        activeShowcase === index ? "var(--foreground)" : "var(--border)",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Image - right side with dissolving layers and frosted glass */}
-            <div className="relative h-[400px] lg:h-[600px]">
-              <div className="absolute inset-0 rounded-2xl overflow-hidden">
-                {/* Background image layers - dissolve between each other */}
-                {showcaseFeatures.map((feature, index) => (
-                  <div
-                    key={`bg-${feature.title}`}
-                    className="absolute inset-0 transition-opacity duration-[2500ms] ease-in-out"
-                    style={{
-                      opacity: getLayerOpacity(index) * 0.9,
-                      willChange: "opacity",
-                    }}
-                  >
-                    <Image
-                      src={feature.image || "/placeholder.svg"}
-                      alt={feature.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-
-                {/* Gradient overlays for seamless blending */}
-                <div className="absolute inset-0 bg-gradient-to-br from-background/30 via-transparent to-background/20" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-background/10 to-transparent" />
-
-                {/* Frosted glass content overlay */}
-                <div className="absolute inset-0 flex items-end p-8">
-                  <div
-                    className="w-full backdrop-blur-2xl rounded-2xl p-6 border border-border/30"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(var(--background-rgb, 255, 255, 255), 0.15) 0%, rgba(var(--background-rgb, 255, 255, 255), 0.05) 100%)",
-                      boxShadow:
-                        "0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
-                    }}
-                  >
-                    {showcaseFeatures.map((feature, index) => (
-                      <div
-                        key={`overlay-${feature.title}`}
-                        className="transition-opacity duration-[2000ms] ease-in-out"
-                        style={{
-                          position: index === 0 ? "relative" : "absolute",
-                          inset: index === 0 ? "auto" : 0,
-                          padding: index === 0 ? "0" : "1.5rem",
-                          opacity: getLayerOpacity(index),
-                          pointerEvents: getLayerOpacity(index) > 0.5 ? "auto" : "none",
-                          willChange: "opacity",
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-xs text-muted-foreground mb-1">
-                              Feature {index + 1} of {showcaseFeatures.length}
-                            </p>
-                            <p className="text-base font-semibold text-foreground">
-                              {feature.title}
-                            </p>
-                          </div>
-                          <div className="w-12 h-12 rounded-xl bg-foreground/10 backdrop-blur-sm flex items-center justify-center border border-border/30">
-                            <span className="text-lg font-bold text-foreground">{index + 1}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Subtle ambient glow that changes with content */}
-              <div
-                className="absolute -inset-8 rounded-full blur-3xl -z-10 transition-opacity duration-[3000ms] ease-in-out"
-                style={{
-                  background: "radial-gradient(circle, var(--muted) 0%, transparent 70%)",
-                  opacity: 0.2 + smoothProgress * 0.1,
-                }}
+        {/* Full background images with heavy overlays */}
+        <div className="absolute inset-0">
+          {showcaseFeatures.map((feature, index) => (
+            <div
+              key={`ambient-${feature.title}`}
+              className="absolute inset-0 transition-all duration-[3000ms] ease-in-out"
+              style={{
+                opacity: getAmbientOpacity(index),
+                filter: `blur(${getBlurAmount(index)}px)`,
+                willChange: "opacity, filter",
+              }}
+            >
+              <Image
+                src={feature.image || "/placeholder.svg"}
+                alt={feature.title}
+                fill
+                className="object-cover"
+                style={{ transform: `scale(${1.1 + getAmbientOpacity(index) * 0.05})` }}
               />
+              {/* Heavy overlay for ambient effect */}
+              <div className="absolute inset-0 bg-background/80" />
+            </div>
+          ))}
+        </div>
+
+        {/* Content floating in center */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="max-w-3xl mx-auto text-center">
+            {showcaseFeatures.map((feature, index) => (
+              <div
+                key={feature.title}
+                className="transition-all duration-[3000ms] ease-in-out"
+                style={{
+                  position: index === 0 ? "relative" : "absolute",
+                  inset: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: getAmbientOpacity(index),
+                  filter: `blur(${getBlurAmount(index) * 0.3}px)`,
+                  transform: `scale(${0.97 + getAmbientOpacity(index) * 0.03})`,
+                  pointerEvents: getAmbientOpacity(index) > 0.5 ? "auto" : "none",
+                  willChange: "opacity, filter, transform",
+                }}
+              >
+                <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 block">
+                  {feature.subtitle}
+                </span>
+                <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-8 leading-tight">
+                  {feature.title}
+                </h2>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-12 max-w-2xl">
+                  {feature.description}
+                </p>
+
+                {/* Stats */}
+                <div className="flex flex-wrap justify-center gap-12 mb-8">
+                  {feature.stats.map((stat) => (
+                    <div key={stat.label} className="text-center">
+                      <div className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+                        {stat.value}
+                      </div>
+                      <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            {/* Progress indicators */}
+            <div className="relative flex justify-center gap-2 mt-16">
+              {showcaseFeatures.map((_, index) => (
+                <div
+                  key={index}
+                  className="h-1 rounded-full transition-all duration-700"
+                  style={{
+                    width: activeShowcase === index ? "48px" : "24px",
+                    backgroundColor:
+                      activeShowcase === index ? "var(--foreground)" : "var(--border)",
+                    opacity: activeShowcase === index ? 1 : 0.4,
+                  }}
+                />
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Subtle vignette */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background/20 via-transparent to-background/20 pointer-events-none" />
       </div>
     </section>
   )

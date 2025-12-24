@@ -352,33 +352,7 @@ export function Hero() {
           }}
         >
           <div className="w-full max-w-4xl mx-auto pointer-events-auto text-center">
-            {/* Feature Badges */}
-            {/* <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mb-8 sm:mb-12">
-              {[
-                { icon: Zap, label: "Lightning Fast", delay: 0 },
-                { icon: Globe, label: "Global Scale", delay: 0.1 },
-                { icon: Shield, label: "Enterprise Security", delay: 0.2 },
-              ].map((badge, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full transition-all duration-700"
-                  style={{
-                    background: isDark
-                      ? "linear-gradient(135deg, oklch(0.16 0.006 285 / 0.9), oklch(0.14 0.006 285 / 0.8))"
-                      : "linear-gradient(135deg, oklch(0.995 0.002 90 / 0.95), oklch(0.98 0.002 90 / 0.85))",
-                    boxShadow: isDark
-                      ? "0 15px 40px oklch(0 0 0 / 0.3), 0 0 0 1px oklch(1 0 0 / 0.06) inset"
-                      : "0 15px 40px oklch(0.12 0.005 285 / 0.06), 0 0 0 1px oklch(1 0 0 / 0.9) inset",
-                    backdropFilter: "blur(20px)",
-                    opacity: Math.max(0, (phase2Progress - badge.delay) * 2),
-                    transform: `translateY(${20 - Math.max(0, (phase2Progress - badge.delay) * 2) * 20}px)`,
-                  }}
-                >
-                  <badge.icon className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-                  <span className="text-xs sm:text-sm font-medium text-foreground">{badge.label}</span>
-                </div>
-              ))}
-            </div> */}
+            
 
             {/* Main CTA Heading */}
             <h2
