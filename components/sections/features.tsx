@@ -285,7 +285,7 @@ const showcaseFeatures = [
     subtitle: "Distribute sends intelligently",
     description:
       "Our smart rotation algorithm analyzes account health, sending limits, and warm-up status to distribute your campaigns across accounts for maximum deliverability.",
-    image: "/inbox-rotation.jpg",
+    image: "/inbox-rotation.png",
     stats: [
       { value: "50+", label: "Accounts per workspace" },
       { value: "Smart", label: "Load balancing" },
@@ -297,7 +297,7 @@ const showcaseFeatures = [
     subtitle: "Build reputation automatically",
     description:
       "Connect a new account and watch our AI build its reputation through realistic engagement patterns, gradual volume increases, and spam folder rescues.",
-    image: "/email-warmup.jpg",
+    image: "/email-warmup.png",
     stats: [
       { value: "14 days", label: "To full warmup" },
       { value: "Real", label: "Engagement signals" },
@@ -309,7 +309,7 @@ const showcaseFeatures = [
     subtitle: "Data-driven decisions",
     description:
       "Real-time dashboards show exactly how your campaigns perform. Track every open, click, reply, and conversion across all your sequences.",
-    image: "/advanced-analytics.jpg",
+    image: "/advanced-analytics.png",
     stats: [
       { value: "Live", label: "Real-time updates" },
       { value: "Export", label: "Custom reports" },
