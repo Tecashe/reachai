@@ -306,7 +306,7 @@ export function Hero() {
             </div>
 
             {/* Social Proof */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div
@@ -337,7 +337,9 @@ export function Hero() {
                   <span className="font-semibold">4.9/5</span> from 2,000+ reviews
                 </p>
               </div>
-            </div>
+            </div> */}
+
+
           </div>
         </div>
 
