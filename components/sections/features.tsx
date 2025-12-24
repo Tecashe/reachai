@@ -334,8 +334,9 @@ export default function FeatureShowcase() {
       const progress = Math.max(0, Math.min(1, -rect.top / (sectionHeight - viewportHeight)))
       setScrollProgress(progress)
 
+      const featureProgress = progress * showcaseFeatures.length
       const newIndex = Math.min(
-        Math.floor(progress * showcaseFeatures.length),
+        Math.floor(featureProgress),
         showcaseFeatures.length - 1
       )
       setActiveShowcase(newIndex)
@@ -348,7 +349,7 @@ export default function FeatureShowcase() {
 
   useEffect(() => {
     let animationFrame: number
-    const smoothing = 0.12
+    const smoothing = 0.18
 
     const animate = () => {
       setSmoothProgress((prev) => {
@@ -365,7 +366,7 @@ export default function FeatureShowcase() {
 
   const getAmbientOpacity = (index: number) => {
     const sectionProgress = (smoothProgress * showcaseFeatures.length) % 1
-    const fadeRange = 0.9
+    const fadeRange = 0.75
 
     if (index === activeShowcase) {
       return 1 - sectionProgress * (1 / fadeRange)
@@ -377,14 +378,14 @@ export default function FeatureShowcase() {
 
   const getBlurAmount = (index: number) => {
     const opacity = getAmbientOpacity(index)
-    return 8 - opacity * 8
+    return 4 - opacity * 4
   }
 
   return (
     <section
       ref={showcaseRef}
       className="relative"
-      style={{ height: `${showcaseFeatures.length * 100}vh` }}
+      style={{ height: `${showcaseFeatures.length * 80}vh` }}
     >
       <div className="sticky top-0 h-screen flex items-center overflow-hidden">
         {/* Full background images with heavy overlays */}
@@ -392,7 +393,7 @@ export default function FeatureShowcase() {
           {showcaseFeatures.map((feature, index) => (
             <div
               key={`ambient-${feature.title}`}
-              className="absolute inset-0 transition-all duration-[3000ms] ease-in-out"
+              className="absolute inset-0 transition-all duration-[1800ms] ease-in-out"
               style={{
                 opacity: getAmbientOpacity(index),
                 filter: `blur(${getBlurAmount(index)}px)`,
@@ -418,7 +419,7 @@ export default function FeatureShowcase() {
             {showcaseFeatures.map((feature, index) => (
               <div
                 key={feature.title}
-                className="transition-all duration-[3000ms] ease-in-out"
+                className="transition-all duration-[1800ms] ease-in-out"
                 style={{
                   position: index === 0 ? "relative" : "absolute",
                   inset: 0,
@@ -427,8 +428,8 @@ export default function FeatureShowcase() {
                   alignItems: "center",
                   justifyContent: "center",
                   opacity: getAmbientOpacity(index),
-                  filter: `blur(${getBlurAmount(index) * 0.3}px)`,
-                  transform: `scale(${0.97 + getAmbientOpacity(index) * 0.03})`,
+                  filter: `blur(${getBlurAmount(index) * 0.2}px)`,
+                  transform: `scale(${0.98 + getAmbientOpacity(index) * 0.02})`,
                   pointerEvents: getAmbientOpacity(index) > 0.5 ? "auto" : "none",
                   willChange: "opacity, filter, transform",
                 }}
