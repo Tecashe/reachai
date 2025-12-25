@@ -472,3 +472,261 @@
 .testimonial-card.animate-in {
   animation: fade-in-up 0.7s ease-out forwards;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* These enhance the article content prose styles */
+
+/* Prose enhancements for guide content */
+.prose {
+  @apply text-neutral-700 leading-relaxed;
+}
+
+.prose h2 {
+  @apply text-2xl font-bold text-neutral-900 mt-12 mb-6 pb-3 border-b border-neutral-200;
+}
+
+.prose h3 {
+  @apply text-xl font-semibold text-neutral-900 mt-8 mb-4;
+}
+
+.prose h4 {
+  @apply text-lg font-semibold text-neutral-900 mt-6 mb-3;
+}
+
+.prose p {
+  @apply mb-4 text-base leading-relaxed;
+}
+
+.prose ul,
+.prose ol {
+  @apply my-6 space-y-2;
+}
+
+.prose li {
+  @apply text-neutral-700 leading-relaxed;
+}
+
+.prose ul li {
+  @apply ml-6 pl-2 relative;
+}
+
+.prose ul li::before {
+  @apply absolute left-[-1.2rem] top-[0.6rem] w-1.5 h-1.5 bg-blue-500 rounded-full;
+  content: '';
+}
+
+.prose ol {
+  @apply list-decimal ml-6;
+}
+
+.prose ol li {
+  @apply pl-2;
+}
+
+.prose a {
+  @apply text-blue-600 hover:text-blue-700 underline decoration-blue-300 hover:decoration-blue-500 transition-colors;
+}
+
+.prose strong {
+  @apply font-semibold text-neutral-900;
+}
+
+.prose em {
+  @apply italic text-neutral-600;
+}
+
+.prose code {
+  @apply px-1.5 py-0.5 bg-neutral-100 text-neutral-800 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply my-6 p-4 bg-neutral-900 text-neutral-100 rounded-xl overflow-x-auto;
+}
+
+.prose pre code {
+  @apply p-0 bg-transparent text-neutral-100;
+}
+
+.prose blockquote {
+  @apply my-6 pl-4 border-l-4 border-blue-500 italic text-neutral-600;
+}
+
+.prose img {
+  @apply rounded-xl my-8;
+}
+
+.prose table {
+  @apply w-full my-8 border-collapse;
+}
+
+.prose th {
+  @apply bg-neutral-100 px-4 py-2 text-left font-semibold text-neutral-900 border border-neutral-200;
+}
+
+.prose td {
+  @apply px-4 py-2 border border-neutral-200 text-neutral-700;
+}
+
+/* Custom callout boxes */
+.prose .callout {
+  @apply my-6 p-6 rounded-xl border-l-4;
+}
+
+.prose .callout-info {
+  @apply bg-blue-50 border-blue-500;
+}
+
+.prose .callout-warning {
+  @apply bg-yellow-50 border-yellow-500;
+}
+
+.prose .callout-success {
+  @apply bg-green-50 border-green-500;
+}
+
+.prose .callout-error {
+  @apply bg-red-50 border-red-500;
+}
+
+.prose .callout h3 {
+  @apply text-base font-semibold mt-0 mb-2;
+}
+
+.prose .callout p {
+  @apply mb-0 text-sm;
+}
+
+/* Print styles for PDF generation */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .prose {
+    @apply text-black;
+  }
+  
+  .prose h2 {
+    @apply break-after-avoid;
+  }
+  
+  .prose pre {
+    @apply break-inside-avoid;
+  }
+  
+  .prose table {
+    @apply break-inside-avoid;
+  }
+  
+  header,
+  aside,
+  .share-buttons,
+  .cta-section {
+    display: none !important;
+  }
+  
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+  
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+}
+
+/* Smooth scrolling for chapter navigation */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Loading skeleton animations */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+  background-size: 1000px 100%;
+}
+
+/* Focus states for accessibility */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-500;
+}
+
+button:focus-visible,
+a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-blue-500;
+}
+
+/* Custom scrollbar for sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Fade-in animation for chapters */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Progress indicator pulse */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
