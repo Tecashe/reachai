@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { Upload, Download, Loader2, CheckCircle2 } from "lucide-react"
+import { Upload, Download, Loader2, ArrowLeft } from "lucide-react"
 
 interface Props {
   onAccountsAdded: () => void
@@ -94,44 +94,52 @@ export function CsvBulkImport({ onAccountsAdded, onCancel }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <h3 className="text-2xl font-bold text-foreground">Bulk Import Accounts</h3>
-        <p className="text-muted-foreground text-lg">Import multiple email accounts at once using a CSV file</p>
+      <div className="flex items-center gap-4">
+        <Button onClick={onCancel} variant="ghost" size="icon" className="shrink-0">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div>
+          <h3 className="text-2xl font-bold text-foreground">Bulk Import Accounts</h3>
+          <p className="text-muted-foreground mt-1">Import multiple email accounts at once using a CSV file</p>
+        </div>
       </div>
 
-      {/* CSV Template Download */}
-      <div className="rounded-2xl border border-white/20 bg-white/5 backdrop-blur-xl p-6">
+      <Card className="p-6 bg-white">
         <div className="space-y-3">
           <h4 className="font-semibold text-foreground">CSV Template</h4>
-          <p className="text-sm text-muted-foreground">Download the template to see the required format</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Download the template to see the required format for bulk importing
+          </p>
           <Button onClick={downloadTemplate} variant="outline" className="gap-2 bg-transparent">
             <Download className="h-4 w-4" />
             Download Template
           </Button>
         </div>
-      </div>
+      </Card>
 
-      {/* File Upload Area */}
-      <div
+      <Card
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 ${
-          isDragActive ? "border-primary/60 bg-primary/10" : "border-white/20 bg-white/5 hover:border-white/40"
+        className={`p-8 transition-all duration-200 cursor-pointer ${
+          isDragActive
+            ? "bg-primary/5 border-primary border-2 border-dashed"
+            : "bg-white border-2 border-dashed hover:border-foreground/40"
         }`}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl" />
-        <div className="relative p-8 text-center space-y-4">
-          <Upload className="h-12 w-12 text-muted-foreground mx-auto" />
+        <div className="text-center space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+            <Upload className="h-8 w-8 text-muted-foreground" />
+          </div>
           <div className="space-y-1">
             <p className="text-lg font-semibold text-foreground">Drop your CSV file here</p>
-            <p className="text-sm text-muted-foreground">or</p>
+            <p className="text-sm text-muted-foreground">or click to browse</p>
           </div>
 
           <label>
             <input type="file" accept=".csv" onChange={handleFileInput} disabled={isLoading} className="hidden" />
-            <Button asChild disabled={isLoading} className="gap-2">
+            <Button asChild disabled={isLoading} className="gap-2 bg-primary hover:bg-primary/90">
               <span>
                 {isLoading ? (
                   <>
@@ -139,21 +147,13 @@ export function CsvBulkImport({ onAccountsAdded, onCancel }: Props) {
                     Importing...
                   </>
                 ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Select CSV File
-                  </>
+                  <>Select CSV File</>
                 )}
               </span>
             </Button>
           </label>
         </div>
-      </div>
-
-      {/* Cancel button */}
-      <Button onClick={onCancel} variant="outline" className="w-full bg-transparent">
-        Cancel
-      </Button>
+      </Card>
     </div>
   )
 }

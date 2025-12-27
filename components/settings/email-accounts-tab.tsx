@@ -7,18 +7,16 @@ import { CheckCircle2, Mail } from "lucide-react"
 export function EmailAccountsTab() {
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Email Accounts</h2>
-        <p className="text-muted-foreground">Connect and manage your email accounts for sending campaigns</p>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">Email Accounts</h2>
+        <p className="text-muted-foreground mt-1">Connect and manage your email accounts for sending campaigns</p>
       </div>
 
-      {/* Info cards */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-blue-500/20 bg-blue-500/5">
+        <Card className="border-primary/10 bg-primary/5">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-blue-500" />
+              <Mail className="h-5 w-5 text-foreground" />
               <CardTitle className="text-base">Multiple Accounts</CardTitle>
             </div>
             <CardDescription>
@@ -27,10 +25,10 @@ export function EmailAccountsTab() {
           </CardHeader>
         </Card>
 
-        <Card className="border-green-500/20 bg-green-500/5">
+        <Card className="border-success/10 bg-success/5">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
               <CardTitle className="text-base">Auto Warmup</CardTitle>
             </div>
             <CardDescription>

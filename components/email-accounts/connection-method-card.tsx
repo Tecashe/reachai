@@ -1,57 +1,37 @@
 "use client"
 
-import { ArrowRight } from "lucide-react"
-
-interface Provider {
-  id: string
-  name: string
-  provider: string
-  icon: string
-  color: string
-  description: string
-}
+import { Card } from "@/components/ui/card"
+import { Mail, ArrowRight } from "lucide-react"
 
 interface Props {
-  provider: Provider
+  title: string
+  description: string
+  icon: "gmail" | "outlook" | "smtp"
   onClick: () => void
 }
 
-export function ConnectionMethodCard({ provider, onClick }: Props) {
+export function ConnectionMethodCard({ title, description, icon, onClick }: Props) {
+  const getIcon = () => {
+    // Using Mail icon for all, you can add custom icons later
+    return <Mail className="h-6 w-6 text-foreground" />
+  }
+
   return (
-    <button
+    <Card
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl text-left transition-all duration-300 hover:shadow-2xl active:scale-95"
+      className="p-6 bg-white cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 group"
     >
-      {/* Glassmorphism background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 group-hover:border-white/40 transition-all" />
-
-      {/* Gradient overlay on hover */}
-      <div
-        className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${provider.color}`}
-        style={{ opacity: 0.05 }}
-      />
-
-      {/* Content */}
-      <div className="relative p-6 space-y-4">
-        {/* Top: Logo and name */}
-        <div className="flex items-start justify-between">
-          <div
-            className={`flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br ${provider.color} text-white font-bold text-2xl shadow-lg`}
-          >
-            {provider.icon}
-          </div>
-          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
+      <div className="space-y-4">
+        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">{getIcon()}</div>
+        <div className="space-y-2">
+          <h4 className="font-semibold text-foreground text-lg">{title}</h4>
+          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         </div>
-
-        {/* Provider info */}
-        <div className="space-y-1">
-          <h3 className="font-semibold text-foreground">{provider.name}</h3>
-          <p className="text-sm text-muted-foreground">{provider.provider}</p>
+        <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:gap-3 transition-all">
+          <span>Get started</span>
+          <ArrowRight className="h-4 w-4" />
         </div>
-
-        {/* Description */}
-        <p className="text-sm text-muted-foreground leading-relaxed">{provider.description}</p>
       </div>
-    </button>
+    </Card>
   )
 }
