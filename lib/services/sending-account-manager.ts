@@ -381,11 +381,11 @@ class SendingAccountManager {
     })
 
     if (bounceRate >= 5) {
-      // Fix: Use logger with proper metadata object
-      // logger.error(`Sending account paused due to high bounce rate: ${bounceRate}%`, {
-      //   accountId,
-      //   bounceRate,
-      // })
+      // Fix: Pass undefined for error parameter, then context as third parameter
+      logger.error(`Sending account paused due to high bounce rate: ${bounceRate}%`, undefined, {
+        accountId,
+        bounceRate,
+      })
     }
   }
 
