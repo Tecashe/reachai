@@ -462,7 +462,7 @@ export class OutlookOAuthImapService {
   }
 
   /**
-   * Verify both IMAP and SMTP connections
+   * Verify both IMAP and SMTP 
    */
   async verifyConnections(email: string, accessToken: string): Promise<{
     imap: boolean
