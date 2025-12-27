@@ -570,6 +570,34 @@ model SendingAccount {
   provider String // "resend", "gmail", "outlook"
   ipAddress          String?
 
+
+
+  connectionMethod  String?  // nullable for backwards compatibility
+  
+  smtpHost          String?
+  smtpPort          Int?
+  smtpSecure        Boolean? @default(false)
+  smtpUsername      String?
+  smtpPassword      String?  @db.Text
+  
+  imapHost          String?
+  imapPort          Int?
+  imapTls           Boolean? @default(true)
+  imapUsername      String?
+  imapPassword      String?  @db.Text
+  
+  oauthProvider     String?
+  oauthRefreshToken String?  @db.Text
+  oauthAccessToken  String?  @db.Text
+  oauthTokenExpiry  DateTime?
+  
+  
+  
+
+
+
+
+
   // Credentials (encrypted)
   credentials Json // API keys, OAuth tokens, etc.
 

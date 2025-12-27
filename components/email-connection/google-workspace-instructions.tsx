@@ -40,7 +40,7 @@ export function GoogleWorkspaceInstructions() {
             Google Workspace Admin Setup
           </DialogTitle>
           <DialogDescription>
-            If you use Google Workspace (not personal Gmail), your admin must approve mailfra before you can connect
+            If you use Google Workspace (not personal Gmail), your admin must approve ReachAI before you can connect
           </DialogDescription>
         </DialogHeader>
 
@@ -58,9 +58,9 @@ export function GoogleWorkspaceInstructions() {
             <div className="flex items-start gap-3">
               <Badge className="mt-1">Step 1</Badge>
               <div className="flex-1 space-y-2">
-                <h4 className="font-semibold">Copy mailfra's Client ID</h4>
+                <h4 className="font-semibold">Copy ReachAI's Client ID</h4>
                 <p className="text-sm text-muted-foreground">
-                  You'll need this to approve mailfra in your Google Workspace Admin Console
+                  You'll need this to approve ReachAI in your Google Workspace Admin Console
                 </p>
                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg font-mono text-sm">
                   <code className="flex-1">{CLIENT_ID}</code>
@@ -118,7 +118,7 @@ export function GoogleWorkspaceInstructions() {
             <div className="flex items-start gap-3">
               <Badge className="mt-1">Step 4</Badge>
               <div className="flex-1 space-y-2">
-                <h4 className="font-semibold">Configure mailfra App</h4>
+                <h4 className="font-semibold">Configure ReachAI App</h4>
                 <ol className="text-sm text-muted-foreground space-y-1 ml-4 list-decimal">
                   <li>
                     Click <strong>"Configure new app"</strong>
@@ -131,7 +131,7 @@ export function GoogleWorkspaceInstructions() {
                     Click <strong>"Search"</strong>
                   </li>
                   <li>
-                    Select <strong>"mailfra OAuth Email"</strong> when it appears
+                    Select <strong>"ReachAI OAuth Email"</strong> when it appears
                   </li>
                   <li>
                     Click <strong>"Select"</strong>

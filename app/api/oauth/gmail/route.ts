@@ -21,11 +21,8 @@
 //   }
 // }
 
-
-// app/api/oauth/gmail/route.ts
 import { type NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { gmailOAuthImap } from "@/lib/services/email/gmail-oauth-imap"
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,13 +32,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Generate OAuth URL with IMAP/SMTP scopes (NOT gmail.send)
-    const authUrl = gmailOAuthImap.getAuthUrl(userId)
-
-    // Redirect user to Google OAuth consent screen
-    return NextResponse.redirect(authUrl)
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings/email-connection`)
   } catch (error) {
-    console.error("[OAuth] Gmail initiation error:", error)
-    return NextResponse.json({ error: "Failed to initiate Gmail OAuth" }, { status: 500 })
+    console.error("[v0] Email connection redirect error:", error)
+    return NextResponse.json({ error: "Failed to initiate email connection" }, { status: 500 })
   }
 }

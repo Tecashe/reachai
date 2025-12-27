@@ -90,56 +90,38 @@
 //   }
 // }
 
-
-// app/api/oauth/outlook/callback/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { outlookOAuthImap } from "@/lib/services/email/outlook-oauth-imap"
+import { outlookOAuth } from "@/lib/services/oauth/outlook-oauth"
 import { db } from "@/lib/db"
-import { encrypt } from "@/lib/encryption"
+import { encryptPassword } from "@/lib/encryption"
+import { getAutoConfigForEmail } from "@/lib/email-connection/provider-configs"
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const code = searchParams.get("code")
-    const state = searchParams.get("state") // This is the userId
+    const state = searchParams.get("state")
     const error = searchParams.get("error")
 
     if (error) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_denied`
-      )
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_denied`)
     }
 
     if (!code || !state) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_invalid`
-      )
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_invalid`)
     }
 
     const userId = state
 
     // Exchange code for tokens
-    const tokens = await outlookOAuthImap.getTokensFromCode(code)
+    const tokens = await outlookOAuth.getTokensFromCode(code)
 
-    if (!tokens.accessToken || !tokens.refreshToken) {
+    if (!tokens.access_token || !tokens.refresh_token) {
       throw new Error("Failed to get tokens from Outlook")
     }
 
     // Get user's Outlook profile
-    const profile = await outlookOAuthImap.getUserProfile(tokens.accessToken)
-
-    // Verify IMAP/SMTP connections
-    const connectionTest = await outlookOAuthImap.verifyConnections(
-      profile.email,
-      tokens.accessToken
-    )
-
-    if (!connectionTest.healthy) {
-      console.error("[OAuth] Connection verification failed:", connectionTest)
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_connection_failed`
-      )
-    }
+    const profile = await outlookOAuth.getUserProfile(tokens.access_token)
 
     // Find user in database
     const user = await db.user.findUnique({
@@ -147,26 +129,15 @@ export async function GET(request: NextRequest) {
     })
 
     if (!user) {
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=user_not_found`
-      )
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=user_not_found`)
     }
 
-    // Encrypt credentials
-    const encryptedCredentials = encrypt({
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresAt: tokens.expiresOn.getTime(),
-      provider: 'outlook',
-      connectionType: 'oauth_imap_smtp',
-      imapHost: 'outlook.office365.com',
-      imapPort: 993,
-      smtpHost: 'smtp.office365.com',
-      smtpPort: 587,
-    })
+    const autoConfig = getAutoConfigForEmail(profile.email)
+    if (!autoConfig) {
+      throw new Error("Could not auto-configure Outlook settings")
+    }
 
-    // Create or update sending account
-    const sendingAccount = await db.sendingAccount.upsert({
+    const account = await db.sendingAccount.upsert({
       where: {
         userId_email: {
           userId: user.id,
@@ -178,40 +149,38 @@ export async function GET(request: NextRequest) {
         name: `Outlook - ${profile.email}`,
         email: profile.email,
         provider: "outlook",
-        credentials: encryptedCredentials,
-        dailyLimit: 300, // Outlook's daily limit
+        connectionMethod: "oauth_workspace",
+        credentials: {}, // Add required credentials field
+        smtpHost: autoConfig.smtp.host,
+        smtpPort: autoConfig.smtp.port,
+        smtpSecure: autoConfig.smtp.secure,
+        smtpUsername: profile.email,
+        smtpPassword: encryptPassword(tokens.access_token),
+        imapHost: autoConfig.imap.host,
+        imapPort: autoConfig.imap.port,
+        imapTls: autoConfig.imap.tls,
+        imapUsername: profile.email,
+        imapPassword: encryptPassword(tokens.access_token),
+        oauthProvider: "outlook",
+        oauthAccessToken: encryptPassword(tokens.access_token),
+        oauthRefreshToken: encryptPassword(tokens.refresh_token),
+        oauthTokenExpiry: new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
+        dailyLimit: 300,
         hourlyLimit: 30,
         isActive: true,
-        healthScore: 100,
-        warmupEnabled: true,
-        warmupStage: 'NEW',
-        warmupDailyLimit: 20,
       },
       update: {
-        credentials: encryptedCredentials,
+        name: `Outlook - ${profile.email}`,
+        credentials: {}, // Add required credentials field
+        smtpPassword: encryptPassword(tokens.access_token),
+        imapPassword: encryptPassword(tokens.access_token),
+        oauthAccessToken: encryptPassword(tokens.access_token),
+        oauthRefreshToken: encryptPassword(tokens.refresh_token),
+        oauthTokenExpiry: new Date(Date.now() + (tokens.expires_in || 3600) * 1000),
         isActive: true,
-        healthScore: 100,
       },
     })
 
-    // Log successful connection
-    await db.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'sending_account.connected',
-        entityType: 'sending_account',
-        entityId: sendingAccount.id,
-        metadata: {
-          provider: 'outlook',
-          email: profile.email,
-          connectionType: 'oauth_imap_smtp',
-          imapVerified: connectionTest.imap,
-          smtpVerified: connectionTest.smtp,
-        },
-      },
-    })
-
-    // Check if coming from onboarding
     const referer = request.headers.get("referer")
     if (referer && referer.includes("/onboarding")) {
       await db.user.update({
@@ -220,19 +189,12 @@ export async function GET(request: NextRequest) {
           onboardingCompletedQuestionnaire: true,
         },
       })
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=outlook_connected`
-      )
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=outlook_connected`)
     }
 
-    // Redirect back to settings with success message
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=outlook_connected&email=${encodeURIComponent(profile.email)}`
-    )
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=outlook_connected`)
   } catch (error) {
-    console.error("[OAuth] Outlook callback error:", error)
-    return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_failed`
-    )
+    console.error("[v0] Outlook OAuth callback error:", error)
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?error=outlook_oauth_failed`)
   }
 }
