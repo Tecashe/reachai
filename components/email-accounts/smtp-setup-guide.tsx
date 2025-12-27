@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, CheckCircle2, Loader2 } from "lucide-react"
+import { WaveLoader } from "@/components/loader/wave-loader"
+import { ArrowLeft, CheckCircle2 } from "lucide-react"
 
 interface Props {
   onAccountAdded: () => void
@@ -63,158 +64,152 @@ export function SmtpSetupGuide({ onAccountAdded, onBack }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button type="button" onClick={onBack} variant="ghost" size="icon" className="shrink-0">
-          <ArrowLeft className="h-5 w-5" />
+      <div className="flex items-center gap-3">
+        <Button type="button" onClick={onBack} variant="ghost" size="icon" className="shrink-0 h-9 w-9">
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h3 className="text-2xl font-bold text-foreground">Custom SMTP Setup</h3>
-          <p className="text-muted-foreground mt-1">Configure your email provider's SMTP and IMAP settings</p>
+          <h3 className="text-xl font-semibold text-foreground">Custom SMTP</h3>
+          <p className="text-sm text-muted-foreground">Configure SMTP and IMAP settings</p>
         </div>
       </div>
 
-      <Card className="p-6 bg-white space-y-5">
-        <div>
-          <h4 className="font-semibold text-foreground mb-4">Account Information</h4>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Account Name</label>
-              <Input
-                name="accountName"
-                placeholder="My Email Account"
-                value={formData.accountName}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
-              <Input
-                name="email"
-                type="email"
-                placeholder="your-email@example.com"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
+      <Card className="p-5 bg-card border-border/50 space-y-4">
+        <h4 className="font-medium text-sm text-foreground">Account Information</h4>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Account Name</label>
+            <Input
+              name="accountName"
+              placeholder="My Email Account"
+              value={formData.accountName}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Email Address</label>
+            <Input
+              name="email"
+              type="email"
+              placeholder="your-email@example.com"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
           </div>
         </div>
       </Card>
 
-      <Card className="p-6 bg-white space-y-5">
-        <div>
-          <h4 className="font-semibold text-foreground mb-4">SMTP Settings (Outgoing)</h4>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-2">SMTP Host</label>
-              <Input
-                name="smtpHost"
-                placeholder="smtp.example.com"
-                value={formData.smtpHost}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">SMTP Port</label>
-              <Input
-                name="smtpPort"
-                placeholder="587"
-                value={formData.smtpPort}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">SMTP Username</label>
-              <Input
-                name="smtpUsername"
-                placeholder="username"
-                value={formData.smtpUsername}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-2">SMTP Password</label>
-              <Input
-                name="smtpPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.smtpPassword}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
+      <Card className="p-5 bg-card border-border/50 space-y-4">
+        <h4 className="font-medium text-sm text-foreground">SMTP Settings (Outgoing)</h4>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-foreground mb-1.5">SMTP Host</label>
+            <Input
+              name="smtpHost"
+              placeholder="smtp.example.com"
+              value={formData.smtpHost}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Port</label>
+            <Input
+              name="smtpPort"
+              placeholder="587"
+              value={formData.smtpPort}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Username</label>
+            <Input
+              name="smtpUsername"
+              placeholder="username"
+              value={formData.smtpUsername}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-foreground mb-1.5">Password</label>
+            <Input
+              name="smtpPassword"
+              type="password"
+              placeholder="••••••••"
+              value={formData.smtpPassword}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
           </div>
         </div>
       </Card>
 
-      <Card className="p-6 bg-white space-y-5">
-        <div>
-          <h4 className="font-semibold text-foreground mb-4">IMAP Settings (Incoming)</h4>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-2">IMAP Host</label>
-              <Input
-                name="imapHost"
-                placeholder="imap.example.com"
-                value={formData.imapHost}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">IMAP Port</label>
-              <Input
-                name="imapPort"
-                placeholder="993"
-                value={formData.imapPort}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">IMAP Username</label>
-              <Input
-                name="imapUsername"
-                placeholder="username"
-                value={formData.imapUsername}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-2">IMAP Password</label>
-              <Input
-                name="imapPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.imapPassword}
-                onChange={handleInputChange}
-                required
-                className="bg-background"
-              />
-            </div>
+      <Card className="p-5 bg-card border-border/50 space-y-4">
+        <h4 className="font-medium text-sm text-foreground">IMAP Settings (Incoming)</h4>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-foreground mb-1.5">IMAP Host</label>
+            <Input
+              name="imapHost"
+              placeholder="imap.example.com"
+              value={formData.imapHost}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Port</label>
+            <Input
+              name="imapPort"
+              placeholder="993"
+              value={formData.imapPort}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-foreground mb-1.5">Username</label>
+            <Input
+              name="imapUsername"
+              placeholder="username"
+              value={formData.imapUsername}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-foreground mb-1.5">Password</label>
+            <Input
+              name="imapPassword"
+              type="password"
+              placeholder="••••••••"
+              value={formData.imapPassword}
+              onChange={handleInputChange}
+              required
+              className="h-9 text-sm"
+            />
           </div>
         </div>
       </Card>
 
-      <Button type="submit" disabled={isLoading} className="w-full h-11 bg-primary hover:bg-primary/90 gap-2">
+      <Button type="submit" disabled={isLoading} className="w-full h-10 gap-2" size="sm">
         {isLoading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Connecting...
+            <WaveLoader size="sm" color="bg-primary-foreground" />
+            <span>Connecting...</span>
           </>
         ) : (
           <>
