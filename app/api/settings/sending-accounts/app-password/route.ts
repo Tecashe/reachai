@@ -58,6 +58,117 @@
 //   }
 // }
 
+
+
+// import { NextResponse } from "next/server"
+// import { auth } from "@clerk/nextjs/server"
+// import { db } from "@/lib/db"
+// import { encryptPassword } from "@/lib/encryption"
+// import { emailConnectionService } from "@/lib/email-connection/smtp-imap-service"
+// import { getAutoConfigForEmail } from "@/lib/email-connection/provider-configs"
+
+// export async function POST(request: Request) {
+//   try {
+//     const { userId } = await auth()
+//     if (!userId) {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+//     }
+
+//     const user = await db.user.findUnique({ where: { clerkId: userId } })
+//     if (!user) {
+//       return NextResponse.json({ error: "User not found" }, { status: 404 })
+//     }
+
+//     const body = await request.json()
+//     const { name, email, appPassword, provider } = body
+
+//     if (!name || !email || !appPassword || provider !== "gmail") {
+//       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+//     }
+
+//     // Get Gmail provider config (always use Gmail settings for app password)
+//     const autoConfig = getAutoConfigForEmail(email)
+//     if (!autoConfig) {
+//       return NextResponse.json({ error: "Unsupported email provider" }, { status: 400 })
+//     }
+
+//     // Clean password (remove spaces from app passwords)
+//     const cleanPassword = appPassword.replace(/\s/g, "")
+//     if (cleanPassword.length !== 16) {
+//       return NextResponse.json({ error: "App password must be 16 characters" }, { status: 400 })
+//     }
+
+//     // Test SMTP connection
+//     const smtpTest = await emailConnectionService.testSMTPConnection({
+//       host: autoConfig.smtp.host,
+//       port: autoConfig.smtp.port,
+//       secure: autoConfig.smtp.secure,
+//       username: email,
+//       password: cleanPassword,
+//     })
+
+//     if (!smtpTest.success) {
+//       return NextResponse.json({ error: `SMTP test failed: ${smtpTest.error}` }, { status: 400 })
+//     }
+
+//     // Test IMAP connection
+//     const imapTest = await emailConnectionService.testIMAPConnection({
+//       host: autoConfig.imap.host,
+//       port: autoConfig.imap.port,
+//       tls: autoConfig.imap.tls,
+//       username: email,
+//       password: cleanPassword,
+//     })
+
+//     if (!imapTest.success) {
+//       return NextResponse.json({ error: `IMAP test failed: ${imapTest.error}` }, { status: 400 })
+//     }
+
+//     // Create or update sending account
+//     const account = await db.sendingAccount.upsert({
+//       where: {
+//         userId_email: {
+//           userId: user.id,
+//           email: email,
+//         },
+//       },
+//       create: {
+//         userId: user.id,
+//         name,
+//         email,
+//         provider: "gmail",
+//         connectionMethod: "app_password",
+//         credentials: {}, // Add required credentials field
+//         smtpHost: autoConfig.smtp.host,
+//         smtpPort: autoConfig.smtp.port,
+//         smtpSecure: autoConfig.smtp.secure,
+//         smtpUsername: email,
+//         smtpPassword: encryptPassword(cleanPassword),
+//         imapHost: autoConfig.imap.host,
+//         imapPort: autoConfig.imap.port,
+//         imapTls: autoConfig.imap.tls,
+//         imapUsername: email,
+//         imapPassword: encryptPassword(cleanPassword),
+//         dailyLimit: 500,
+//         hourlyLimit: 50,
+//         isActive: true,
+//       },
+//       update: {
+//         name,
+//         credentials: {}, // Add required credentials field
+//         smtpPassword: encryptPassword(cleanPassword),
+//         imapPassword: encryptPassword(cleanPassword),
+//         isActive: true,
+//       },
+//     })
+
+//     return NextResponse.json({ success: true, accountId: account.id })
+//   } catch (error) {
+//     console.error("[v0] App password connection error:", error)
+//     return NextResponse.json({ error: "Failed to connect account" }, { status: 500 })
+//   }
+// }
+
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
@@ -78,24 +189,43 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { name, email, appPassword, provider } = body
+    console.log("[v0] Request body:", body) // Debug log
+    
+    // Fix: The frontend sends 'accountName', not 'name'
+    const { accountName, email, appPassword, provider } = body
 
-    if (!name || !email || !appPassword || provider !== "gmail") {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    // Fix: Use accountName instead of name
+    if (!accountName || !email || !appPassword || provider !== "gmail") {
+      console.log("[v0] Validation failed:", { accountName, email, appPassword: appPassword ? "***" : null, provider })
+      return NextResponse.json({ 
+        error: "Missing required fields",
+        details: {
+          accountName: !accountName,
+          email: !email,
+          appPassword: !appPassword,
+          provider: provider !== "gmail"
+        }
+      }, { status: 400 })
     }
 
     // Get Gmail provider config (always use Gmail settings for app password)
     const autoConfig = getAutoConfigForEmail(email)
     if (!autoConfig) {
+      console.log("[v0] Unsupported email provider:", email)
       return NextResponse.json({ error: "Unsupported email provider" }, { status: 400 })
     }
 
     // Clean password (remove spaces from app passwords)
     const cleanPassword = appPassword.replace(/\s/g, "")
+    console.log("[v0] Clean password length:", cleanPassword.length)
+    
     if (cleanPassword.length !== 16) {
-      return NextResponse.json({ error: "App password must be 16 characters" }, { status: 400 })
+      return NextResponse.json({ 
+        error: `App password must be 16 characters (got ${cleanPassword.length})` 
+      }, { status: 400 })
     }
 
+    console.log("[v0] Testing SMTP connection...")
     // Test SMTP connection
     const smtpTest = await emailConnectionService.testSMTPConnection({
       host: autoConfig.smtp.host,
@@ -106,9 +236,11 @@ export async function POST(request: Request) {
     })
 
     if (!smtpTest.success) {
+      console.log("[v0] SMTP test failed:", smtpTest.error)
       return NextResponse.json({ error: `SMTP test failed: ${smtpTest.error}` }, { status: 400 })
     }
 
+    console.log("[v0] Testing IMAP connection...")
     // Test IMAP connection
     const imapTest = await emailConnectionService.testIMAPConnection({
       host: autoConfig.imap.host,
@@ -119,9 +251,11 @@ export async function POST(request: Request) {
     })
 
     if (!imapTest.success) {
+      console.log("[v0] IMAP test failed:", imapTest.error)
       return NextResponse.json({ error: `IMAP test failed: ${imapTest.error}` }, { status: 400 })
     }
 
+    console.log("[v0] Creating/updating account...")
     // Create or update sending account
     const account = await db.sendingAccount.upsert({
       where: {
@@ -132,11 +266,11 @@ export async function POST(request: Request) {
       },
       create: {
         userId: user.id,
-        name,
+        name: accountName, // Fix: Use accountName
         email,
         provider: "gmail",
         connectionMethod: "app_password",
-        credentials: {}, // Add required credentials field
+        credentials: {},
         smtpHost: autoConfig.smtp.host,
         smtpPort: autoConfig.smtp.port,
         smtpSecure: autoConfig.smtp.secure,
@@ -152,17 +286,21 @@ export async function POST(request: Request) {
         isActive: true,
       },
       update: {
-        name,
-        credentials: {}, // Add required credentials field
+        name: accountName, // Fix: Use accountName
+        credentials: {},
         smtpPassword: encryptPassword(cleanPassword),
         imapPassword: encryptPassword(cleanPassword),
         isActive: true,
       },
     })
 
+    console.log("[v0] Account created/updated successfully:", account.id)
     return NextResponse.json({ success: true, accountId: account.id })
   } catch (error) {
     console.error("[v0] App password connection error:", error)
-    return NextResponse.json({ error: "Failed to connect account" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Failed to connect account",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, { status: 500 })
   }
 }
