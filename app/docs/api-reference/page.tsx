@@ -120,7 +120,7 @@ export default function APIDocumentationPage() {
 
                   <Card className="p-6">
                     <h3 className="text-xl font-semibold mb-4">Base URL</h3>
-                    <CodeBlock code="https://your-domain.com/api/v1" />
+                    <CodeBlock code="https://mailfra.com/api/v1" />
                   </Card>
 
                   <Card className="p-6">
@@ -159,7 +159,7 @@ export default function APIDocumentationPage() {
                           <CodeBlock
                             code={`const axios = require('axios');
 
-const response = await axios.get('https://your-domain.com/api/v1/campaigns', {
+const response = await axios.get('https://mailfra.com/api/v1/campaigns', {
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY'
   }
@@ -312,7 +312,7 @@ console.log(response.data);`}
                       <div>
                         <h4 className="font-semibold mb-2">Example Request</h4>
                         <CodeBlock
-                          code={`const response = await fetch('https://your-domain.com/api/v1/campaigns?status=ACTIVE&limit=10', {
+                          code={`const response = await fetch('https://mailfra.com/api/v1/campaigns?status=ACTIVE&limit=10', {
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY'
   }

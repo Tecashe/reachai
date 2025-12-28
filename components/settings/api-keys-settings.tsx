@@ -343,7 +343,7 @@ export function ApiKeysSettings() {
           </div>
           <div className="space-y-2">
             <h4 className="font-medium">Base URL</h4>
-            <code className="block p-3 bg-muted rounded text-sm">https://your-domain.com/api/v1</code>
+            <code className="block p-3 bg-muted rounded text-sm">https://mailfra.com/api/v1</code>
           </div>
           <Button variant="outline" asChild>
             <a href="/docs" target="_blank" rel="noreferrer">

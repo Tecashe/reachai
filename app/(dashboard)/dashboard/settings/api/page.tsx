@@ -112,7 +112,7 @@ export default function ApiDocumentationPage() {
         </CardHeader>
         <CardContent>
           <div className="rounded-lg bg-muted p-4 font-mono text-sm overflow-x-auto">
-            <pre>{`curl -X POST https://your-domain.com/api/campaigns \\
+            <pre>{`curl -X POST https://mailfra.com/api/campaigns \\
   -H "Authorization: Bearer $MAILFRA_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
