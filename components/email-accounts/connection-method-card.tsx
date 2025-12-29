@@ -12,24 +12,23 @@ interface Props {
 
 export function ConnectionMethodCard({ title, description, icon, onClick }: Props) {
   const getIcon = () => {
-    // Using Mail icon for all, you can add custom icons later
-    return <Mail className="h-6 w-6 text-foreground" />
+    return <Mail className="h-5 w-5 text-foreground" />
   }
 
   return (
     <Card
       onClick={onClick}
-      className="p-6 bg-white cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 group"
+      className="p-5 bg-card border-border/50 cursor-pointer transition-all duration-200 hover:border-border hover:shadow-sm hover:-translate-y-0.5 group"
     >
-      <div className="space-y-4">
-        <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">{getIcon()}</div>
-        <div className="space-y-2">
-          <h4 className="font-semibold text-foreground text-lg">{title}</h4>
-          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+      <div className="space-y-3">
+        <div className="w-10 h-10 rounded-md bg-muted/50 flex items-center justify-center">{getIcon()}</div>
+        <div className="space-y-1">
+          <h4 className="font-semibold text-sm text-foreground">{title}</h4>
+          <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
         </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-foreground group-hover:gap-3 transition-all">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-foreground group-hover:gap-2 transition-all pt-1">
           <span>Get started</span>
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-3.5 w-3.5" />
         </div>
       </div>
     </Card>

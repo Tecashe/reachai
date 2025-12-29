@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { EmailAccountCard } from "./email-account-card"
-import { Plus, Upload, Loader2 } from "lucide-react"
+import { WaveLoader } from "@/components/loader/wave-loader"
+import { Plus, Upload } from "lucide-react"
 
 interface Props {
   onAddAccount: () => void
@@ -48,9 +49,9 @@ export function ConnectedAccountsList({ onAddAccount, onBulkImport }: Props) {
 
   if (isLoading) {
     return (
-      <Card className="p-12 bg-white">
-        <div className="flex flex-col items-center justify-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <Card className="p-16 bg-card border-border/50">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <WaveLoader size="lg" />
           <p className="text-sm text-muted-foreground">Loading accounts...</p>
         </div>
       </Card>
@@ -58,21 +59,21 @@ export function ConnectedAccountsList({ onAddAccount, onBulkImport }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="p-6 bg-white border-border">
-        <div className="flex items-center justify-between gap-4">
+    <div className="space-y-4">
+      <Card className="p-5 bg-card border-border/50">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Connected Accounts</h3>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h3 className="text-base font-semibold text-foreground">Email Accounts</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
               {accounts.length} {accounts.length === 1 ? "account" : "accounts"} connected
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button onClick={onBulkImport} variant="outline" className="gap-2 bg-transparent">
+          <div className="flex gap-2">
+            <Button onClick={onBulkImport} variant="outline" size="sm" className="gap-2 bg-transparent">
               <Upload className="h-4 w-4" />
-              Import CSV
+              <span className="hidden sm:inline">Import CSV</span>
             </Button>
-            <Button onClick={onAddAccount} className="gap-2 bg-primary hover:bg-primary/90">
+            <Button onClick={onAddAccount} size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
               Add Account
             </Button>
@@ -81,22 +82,23 @@ export function ConnectedAccountsList({ onAddAccount, onBulkImport }: Props) {
       </Card>
 
       {accounts.length === 0 ? (
-        <Card className="p-12 bg-white border-dashed">
-          <div className="text-center space-y-3">
-            <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <Plus className="h-6 w-6 text-muted-foreground" />
+        <Card className="p-12 bg-card border-dashed border-border/50">
+          <div className="text-center space-y-4">
+            <div className="mx-auto w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center">
+              <Plus className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-              <h4 className="font-semibold text-foreground">No accounts connected</h4>
+              <h4 className="font-medium text-foreground">No accounts connected</h4>
               <p className="text-sm text-muted-foreground mt-1">Add your first email account to start sending</p>
             </div>
-            <Button onClick={onAddAccount} className="mt-4">
+            <Button onClick={onAddAccount} size="sm" className="mt-2">
+              <Plus className="h-4 w-4 mr-2" />
               Add Account
             </Button>
           </div>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {accounts.map((account) => (
             <EmailAccountCard key={account.id} account={account} onDelete={handleDelete} />
           ))}
