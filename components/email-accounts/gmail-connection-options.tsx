@@ -85,6 +85,126 @@
 //   )
 // }
 
+
+
+// "use client"
+
+// import { useState } from "react"
+// import { Button } from "@/components/ui/button"
+// import { Card } from "@/components/ui/card"
+// import { GmailAppPasswordFlow } from "./gmail-app-password-flow"
+// import { GmailOAuthFlow } from "./gmail-oauth-flow"
+// import { ArrowLeft, Key, Shield } from "lucide-react"
+
+// interface Props {
+//   onAccountAdded: () => void
+//   onBack: () => void
+// }
+
+// type ConnectionType = "select" | "app-password" | "oauth"
+
+// export function GmailConnectionOptions({ onAccountAdded, onBack }: Props) {
+//   const [connectionType, setConnectionType] = useState<ConnectionType>("select")
+
+//   if (connectionType === "app-password") {
+//     return (
+//       <div className="space-y-4">
+//         <Button onClick={() => setConnectionType("select")} variant="ghost" size="sm" className="gap-2 -ml-2">
+//           <ArrowLeft className="h-4 w-4" />
+//           Back to options
+//         </Button>
+//         <GmailAppPasswordFlow onAccountAdded={onAccountAdded} />
+//       </div>
+//     )
+//   }
+
+//   if (connectionType === "oauth") {
+//     return (
+//       <div className="space-y-4">
+//         <Button onClick={() => setConnectionType("select")} variant="ghost" size="sm" className="gap-2 -ml-2">
+//           <ArrowLeft className="h-4 w-4" />
+//           Back to options
+//         </Button>
+//         <GmailOAuthFlow onAccountAdded={onAccountAdded} />
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       <div className="flex items-center gap-3">
+//         <Button onClick={onBack} variant="ghost" size="icon" className="shrink-0 h-9 w-9">
+//           <ArrowLeft className="h-4 w-4" />
+//         </Button>
+//         <div>
+//           <h3 className="text-xl font-semibold text-foreground">Connect Gmail</h3>
+//           <p className="text-sm text-muted-foreground">Choose your connection method</p>
+//         </div>
+//       </div>
+
+//       <div className="grid gap-3">
+//         <Card
+//           onClick={() => setConnectionType("oauth")}
+//           className="p-5 bg-card border-border/50 cursor-pointer transition-all duration-200 hover:border-border hover:shadow-sm group"
+//         >
+//           <div className="flex items-start gap-4">
+//             <div className="w-10 h-10 rounded-md bg-primary/5 flex items-center justify-center shrink-0">
+//               <Shield className="h-5 w-5 text-primary" />
+//             </div>
+//             <div className="flex-1 space-y-2">
+//               <div>
+//                 <h4 className="font-semibold text-sm text-foreground">OAuth 2.0</h4>
+//                 <p className="text-xs text-muted-foreground mt-1">
+//                   Recommended for Google Workspace and personal accounts
+//                 </p>
+//               </div>
+//               <div className="flex flex-wrap gap-1.5">
+//                 <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
+//                   Recommended
+//                 </span>
+//                 <span className="text-xs px-2 py-0.5 rounded bg-success/10 text-success font-medium">
+//                   More stable
+//                 </span>
+//                 <span className="text-xs px-2 py-0.5 rounded bg-muted/50 text-muted-foreground font-medium">
+//                   One-click setup
+//                 </span>
+//               </div>
+//             </div>
+//           </div>
+//         </Card>
+
+//         <Card
+//           onClick={() => setConnectionType("app-password")}
+//           className="p-5 bg-card border-border/50 cursor-pointer transition-all duration-200 hover:border-border hover:shadow-sm group"
+//         >
+//           <div className="flex items-start gap-4">
+//             <div className="w-10 h-10 rounded-md bg-muted/30 flex items-center justify-center shrink-0">
+//               <Key className="h-5 w-5 text-muted-foreground" />
+//             </div>
+//             <div className="flex-1 space-y-2">
+//               <div>
+//                 <h4 className="font-semibold text-sm text-foreground">App Password</h4>
+//                 <p className="text-xs text-muted-foreground mt-1">
+//                   Alternative method for personal Gmail accounts
+//                 </p>
+//               </div>
+//               <div className="flex flex-wrap gap-1.5">
+//                 <span className="text-xs px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
+//                   Requires 2FA
+//                 </span>
+//                 <span className="text-xs px-2 py-0.5 rounded bg-muted/50 text-muted-foreground font-medium">
+//                   Manual setup
+//                 </span>
+//               </div>
+//             </div>
+//           </div>
+//         </Card>
+//       </div>
+//     </div>
+//   )
+// }
+
+
 "use client"
 
 import { useState } from "react"
@@ -92,14 +212,15 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { GmailAppPasswordFlow } from "./gmail-app-password-flow"
 import { GmailOAuthFlow } from "./gmail-oauth-flow"
-import { ArrowLeft, Key, Shield } from "lucide-react"
+import { WorkspaceDelegationFlow } from "./workspace-delegation-flow"
+import { ArrowLeft, Key, Shield, Building2 } from "lucide-react"
 
 interface Props {
   onAccountAdded: () => void
   onBack: () => void
 }
 
-type ConnectionType = "select" | "app-password" | "oauth"
+type ConnectionType = "select" | "app-password" | "oauth" | "workspace-delegation"
 
 export function GmailConnectionOptions({ onAccountAdded, onBack }: Props) {
   const [connectionType, setConnectionType] = useState<ConnectionType>("select")
@@ -124,6 +245,18 @@ export function GmailConnectionOptions({ onAccountAdded, onBack }: Props) {
           Back to options
         </Button>
         <GmailOAuthFlow onAccountAdded={onAccountAdded} />
+      </div>
+    )
+  }
+
+  if (connectionType === "workspace-delegation") {
+    return (
+      <div className="space-y-4">
+        <Button onClick={() => setConnectionType("select")} variant="ghost" size="sm" className="gap-2 -ml-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to options
+        </Button>
+        <WorkspaceDelegationFlow onAccountAdded={onAccountAdded} />
       </div>
     )
   }
@@ -153,7 +286,7 @@ export function GmailConnectionOptions({ onAccountAdded, onBack }: Props) {
               <div>
                 <h4 className="font-semibold text-sm text-foreground">OAuth 2.0</h4>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Recommended for Google Workspace and personal accounts
+                  Recommended for personal Gmail and Google Workspace accounts
                 </p>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -161,10 +294,37 @@ export function GmailConnectionOptions({ onAccountAdded, onBack }: Props) {
                   Recommended
                 </span>
                 <span className="text-xs px-2 py-0.5 rounded bg-success/10 text-success font-medium">
-                  More stable
+                  Most stable
                 </span>
                 <span className="text-xs px-2 py-0.5 rounded bg-muted/50 text-muted-foreground font-medium">
                   One-click setup
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card
+          onClick={() => setConnectionType("workspace-delegation")}
+          className="p-5 bg-card border-border/50 cursor-pointer transition-all duration-200 hover:border-border hover:shadow-sm group"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-md bg-purple-500/5 flex items-center justify-center shrink-0">
+              <Building2 className="h-5 w-5 text-purple-600" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <div>
+                <h4 className="font-semibold text-sm text-foreground">Google Workspace Delegation</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enterprise setup for pre-approved organization-wide access
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="text-xs px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 font-medium">
+                  Enterprise
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded bg-muted/50 text-muted-foreground font-medium">
+                  Requires admin
                 </span>
               </div>
             </div>
