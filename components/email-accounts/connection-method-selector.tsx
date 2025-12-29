@@ -12,32 +12,32 @@ interface Props {
 export function ConnectionMethodSelector({ onSelectProvider, onCancel }: Props) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button onClick={onCancel} variant="ghost" size="icon" className="shrink-0 h-9 w-9">
-          <ArrowLeft className="h-4 w-4" />
+      <div className="flex items-center gap-4">
+        <Button onClick={onCancel} variant="ghost" size="icon" className="shrink-0">
+          <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h3 className="text-xl font-semibold text-foreground">Add Email Account</h3>
-          <p className="text-sm text-muted-foreground">Choose your email provider</p>
+          <h3 className="text-2xl font-bold text-foreground">Add Email Account</h3>
+          <p className="text-muted-foreground mt-1">Choose your email provider to get started</p>
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         <ConnectionMethodCard
           title="Gmail"
-          description="Personal or Google Workspace"
+          description="Personal or Google Workspace accounts"
           icon="gmail"
           onClick={() => onSelectProvider("gmail")}
         />
         <ConnectionMethodCard
           title="Outlook"
-          description="Microsoft 365 or Outlook.com"
+          description="Microsoft 365 or Outlook.com accounts"
           icon="outlook"
           onClick={() => onSelectProvider("outlook")}
         />
         <ConnectionMethodCard
           title="Custom SMTP"
-          description="Any email with SMTP access"
+          description="Any email provider with SMTP access"
           icon="smtp"
           onClick={() => onSelectProvider("smtp")}
         />

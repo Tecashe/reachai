@@ -5,8 +5,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { WaveLoader } from "@/components/loader/wave-loader"
-import { Upload, Download, ArrowLeft } from "lucide-react"
+import { Upload, Download, Loader2, ArrowLeft } from "lucide-react"
 
 interface Props {
   onAccountsAdded: () => void
@@ -95,24 +94,24 @@ export function CsvBulkImport({ onAccountsAdded, onCancel }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button onClick={onCancel} variant="ghost" size="icon" className="shrink-0 h-9 w-9">
-          <ArrowLeft className="h-4 w-4" />
+      <div className="flex items-center gap-4">
+        <Button onClick={onCancel} variant="ghost" size="icon" className="shrink-0">
+          <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h3 className="text-xl font-semibold text-foreground">Bulk Import</h3>
-          <p className="text-sm text-muted-foreground">Import multiple accounts via CSV</p>
+          <h3 className="text-2xl font-bold text-foreground">Bulk Import Accounts</h3>
+          <p className="text-muted-foreground mt-1">Import multiple email accounts at once using a CSV file</p>
         </div>
       </div>
 
-      <Card className="p-5 bg-card border-border/50">
+      <Card className="p-6 bg-white">
         <div className="space-y-3">
-          <h4 className="font-medium text-sm text-foreground">CSV Template</h4>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            Download the template to see the required format
+          <h4 className="font-semibold text-foreground">CSV Template</h4>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Download the template to see the required format for bulk importing
           </p>
-          <Button onClick={downloadTemplate} variant="outline" size="sm" className="gap-2 bg-transparent">
-            <Download className="h-3.5 w-3.5" />
+          <Button onClick={downloadTemplate} variant="outline" className="gap-2 bg-transparent">
+            <Download className="h-4 w-4" />
             Download Template
           </Button>
         </div>
@@ -126,26 +125,26 @@ export function CsvBulkImport({ onAccountsAdded, onCancel }: Props) {
         className={`p-8 transition-all duration-200 cursor-pointer ${
           isDragActive
             ? "bg-primary/5 border-primary border-2 border-dashed"
-            : "bg-card border-2 border-dashed border-border/50 hover:border-border"
+            : "bg-white border-2 border-dashed hover:border-foreground/40"
         }`}
       >
         <div className="text-center space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center">
-            <Upload className="h-5 w-5 text-muted-foreground" />
+          <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+            <Upload className="h-8 w-8 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Drop your CSV file here</p>
-            <p className="text-xs text-muted-foreground">or click to browse</p>
+            <p className="text-lg font-semibold text-foreground">Drop your CSV file here</p>
+            <p className="text-sm text-muted-foreground">or click to browse</p>
           </div>
 
           <label>
             <input type="file" accept=".csv" onChange={handleFileInput} disabled={isLoading} className="hidden" />
-            <Button asChild disabled={isLoading} size="sm" className="gap-2">
+            <Button asChild disabled={isLoading} className="gap-2 bg-primary hover:bg-primary/90">
               <span>
                 {isLoading ? (
                   <>
-                    <WaveLoader size="sm" color="bg-primary-foreground" />
-                    <span>Importing...</span>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Importing...
                   </>
                 ) : (
                   <>Select CSV File</>

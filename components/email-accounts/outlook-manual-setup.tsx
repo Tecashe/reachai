@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { WaveLoader } from "@/components/loader/wave-loader"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Loader2 } from "lucide-react"
 
 interface Props {
   onAccountAdded: () => void
@@ -62,140 +61,146 @@ export function OutlookManualSetup({ onAccountAdded }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">Manual Setup</h3>
-        <p className="text-sm text-muted-foreground">Configure custom SMTP and IMAP</p>
+        <h3 className="text-2xl font-bold text-foreground">Manual Setup</h3>
+        <p className="text-muted-foreground mt-1">Configure custom SMTP and IMAP settings</p>
       </div>
 
-      <Card className="p-5 bg-card border-border/50 space-y-4">
-        <h4 className="font-medium text-sm text-foreground">Account Information</h4>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">Account Name</label>
-            <Input
-              name="accountName"
-              placeholder="My Outlook Account"
-              value={formData.accountName}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">Email Address</label>
-            <Input
-              name="email"
-              type="email"
-              placeholder="your-email@outlook.com"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-        </div>
-      </Card>
-
-      <Card className="p-5 bg-card border-border/50 space-y-4">
-        <h4 className="font-medium text-sm text-foreground">SMTP Settings</h4>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-foreground mb-1.5">SMTP Host</label>
-            <Input
-              name="smtpHost"
-              value={formData.smtpHost}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">Port</label>
-            <Input
-              name="smtpPort"
-              value={formData.smtpPort}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">Username</label>
-            <Input
-              name="smtpUsername"
-              value={formData.smtpUsername}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-foreground mb-1.5">Password</label>
-            <Input
-              name="smtpPassword"
-              type="password"
-              value={formData.smtpPassword}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
+      <Card className="p-6 bg-white space-y-5">
+        <div>
+          <h4 className="font-semibold text-foreground mb-4">Account Information</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Account Name</label>
+              <Input
+                name="accountName"
+                placeholder="My Outlook Account"
+                value={formData.accountName}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
+              <Input
+                name="email"
+                type="email"
+                placeholder="your-email@outlook.com"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
           </div>
         </div>
       </Card>
 
-      <Card className="p-5 bg-card border-border/50 space-y-4">
-        <h4 className="font-medium text-sm text-foreground">IMAP Settings</h4>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-foreground mb-1.5">IMAP Host</label>
-            <Input
-              name="imapHost"
-              value={formData.imapHost}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">Port</label>
-            <Input
-              name="imapPort"
-              value={formData.imapPort}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-foreground mb-1.5">Username</label>
-            <Input
-              name="imapUsername"
-              value={formData.imapUsername}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-foreground mb-1.5">Password</label>
-            <Input
-              name="imapPassword"
-              type="password"
-              value={formData.imapPassword}
-              onChange={handleInputChange}
-              required
-              className="h-9 text-sm"
-            />
+      <Card className="p-6 bg-white space-y-5">
+        <div>
+          <h4 className="font-semibold text-foreground mb-4">SMTP Settings</h4>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-foreground mb-2">SMTP Host</label>
+              <Input
+                name="smtpHost"
+                value={formData.smtpHost}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Port</label>
+              <Input
+                name="smtpPort"
+                value={formData.smtpPort}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Username</label>
+              <Input
+                name="smtpUsername"
+                value={formData.smtpUsername}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+              <Input
+                name="smtpPassword"
+                type="password"
+                value={formData.smtpPassword}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
           </div>
         </div>
       </Card>
 
-      <Button type="submit" disabled={isLoading} className="w-full h-10 gap-2" size="sm">
+      <Card className="p-6 bg-white space-y-5">
+        <div>
+          <h4 className="font-semibold text-foreground mb-4">IMAP Settings</h4>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-foreground mb-2">IMAP Host</label>
+              <Input
+                name="imapHost"
+                value={formData.imapHost}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Port</label>
+              <Input
+                name="imapPort"
+                value={formData.imapPort}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Username</label>
+              <Input
+                name="imapUsername"
+                value={formData.imapUsername}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+              <Input
+                name="imapPassword"
+                type="password"
+                value={formData.imapPassword}
+                onChange={handleInputChange}
+                required
+                className="bg-background"
+              />
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Button type="submit" disabled={isLoading} className="w-full h-11 bg-primary hover:bg-primary/90 gap-2">
         {isLoading ? (
           <>
-            <WaveLoader size="sm" color="bg-primary-foreground" />
-            <span>Connecting...</span>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Connecting...
           </>
         ) : (
           <>

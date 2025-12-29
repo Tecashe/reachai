@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
-import { WaveLoader } from "@/components/loader/wave-loader"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Loader2 } from "lucide-react"
 
 interface Props {
   onAccountAdded: () => void
@@ -56,20 +55,20 @@ export function OutlookVariantsSetup({ onAccountAdded }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-foreground">Quick Setup</h3>
-        <p className="text-sm text-muted-foreground">Enter credentials and we'll handle the rest</p>
+        <h3 className="text-2xl font-bold text-foreground">Quick Setup</h3>
+        <p className="text-muted-foreground mt-1">Enter your credentials and we'll handle the rest</p>
       </div>
 
-      <Card className="p-5 bg-card border-border/50 space-y-4">
+      <Card className="p-6 bg-white space-y-5">
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">Outlook Variant</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Outlook Variant</label>
           <select
             name="variant"
             value={formData.variant}
             onChange={handleInputChange}
-            className="w-full h-9 px-3 rounded-md border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground"
           >
             <option value="outlook.com">Outlook.com / Hotmail.com</option>
             <option value="office365">Office 365 / Microsoft 365</option>
@@ -78,19 +77,19 @@ export function OutlookVariantsSetup({ onAccountAdded }: Props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">Account Name</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Account Name</label>
           <Input
             name="accountName"
             placeholder="My Outlook Account"
             value={formData.accountName}
             onChange={handleInputChange}
             required
-            className="h-9 text-sm"
+            className="bg-background"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">Email Address</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
           <Input
             name="email"
             type="email"
@@ -98,12 +97,12 @@ export function OutlookVariantsSetup({ onAccountAdded }: Props) {
             value={formData.email}
             onChange={handleInputChange}
             required
-            className="h-9 text-sm"
+            className="bg-background"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-foreground mb-1.5">Password</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Password</label>
           <Input
             name="password"
             type="password"
@@ -111,16 +110,16 @@ export function OutlookVariantsSetup({ onAccountAdded }: Props) {
             value={formData.password}
             onChange={handleInputChange}
             required
-            className="h-9 text-sm"
+            className="bg-background"
           />
         </div>
       </Card>
 
-      <Button type="submit" disabled={isLoading} className="w-full h-10 gap-2" size="sm">
+      <Button type="submit" disabled={isLoading} className="w-full h-11 bg-primary hover:bg-primary/90 gap-2">
         {isLoading ? (
           <>
-            <WaveLoader size="sm" color="bg-primary-foreground" />
-            <span>Connecting...</span>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Connecting...
           </>
         ) : (
           <>
