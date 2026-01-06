@@ -70,7 +70,7 @@
 //     image: '/images/guides/cold-email-masterclass.jpg',
 //     color: 'from-blue-500/20 to-purple-500/20',
 //     author: {
-//       name: 'Sarah Chen',
+//       name: 'Simon M',
 //       role: 'Head of Growth',
 //       image: '/images/authors/sarah-chen.jpg',
 //       bio: 'Sarah has led growth at 3 B2B SaaS companies, generating over $50M in pipeline through cold outreach. She has helped 200+ companies build their outbound engines.',
@@ -212,7 +212,7 @@
 //     image: '/images/guides/cold-email-masterclass.jpg',
 //     color: 'from-blue-500/20 to-purple-500/20',
 //     author: {
-//       name: 'Sarah Chen',
+//       name: 'Simon M',
 //       role: 'Head of Growth',
 //       image: '/images/authors/sarah-chen.jpg',
 //       bio: 'Sarah has led growth at 3 B2B SaaS companies, generating over $50M in pipeline through cold outreach. She\'s helped 200+ companies build their outbound engines.'
@@ -1220,7 +1220,7 @@ export const guides: Record<string, Guide> = {
     image: '/images/guides/cold-email-masterclass.jpg',
     color: 'from-blue-500/20 to-purple-500/20',
     author: {
-      name: 'Sarah Chen',
+      name: 'Simon M',
       role: 'Head of Growth',
       image: '/images/authors/sarah-chen.jpg',
       bio: 'Sarah has led growth at 3 B2B SaaS companies, generating over $50M in pipeline through cold outreach. She\'s helped 200+ companies build their outbound engines.'

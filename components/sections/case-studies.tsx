@@ -10,7 +10,7 @@ const caseStudies = [
     image: "/images/case-studies/techscale.jpeg",
     logo: "/images/case-studies/techscale-logo.jpg",
     quote: "We went from 5% reply rates to 28% in just 3 weeks. Mailfra changed everything for our outbound.",
-    person: "Marcus Chen",
+    person: "Marcus Kelvin",
     role: "Founder & CEO",
     metrics: [
       { label: "Reply Rate", before: "5%", after: "28%", change: "+460%" },

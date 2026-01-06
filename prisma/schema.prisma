@@ -483,6 +483,7 @@ model TeamMember {
   @@index([status])
 }
 
+
 model Notification {
   id     String @id @default(cuid())
   userId String
@@ -495,8 +496,12 @@ model Notification {
   entityType String? // "campaign", "prospect", "email"
   entityId   String?
 
+  severity          String?  // "info", "warning", "critical", "success"
+  relatedAccountId  String?  // Link to SendingAccount for warmup notifications
+
   // Status
   read   Boolean   @default(false)
+  isRead            Boolean @default(false)
   readAt DateTime?
 
   // Metadata
@@ -507,6 +512,7 @@ model Notification {
   User      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
+   @@index([isRead])
   @@index([read])
   @@index([createdAt])
 }
@@ -1090,6 +1096,7 @@ model WarmupSession {
   // Stats
   emailsSent         Int   @default(0)
   emailsOpened       Int   @default(0)
+  emailsReceived     Int   @default(0)
   emailsReplied      Int   @default(0)
   inboxPlacementRate Float @default(0)
 
@@ -1132,6 +1139,8 @@ model WarmupInteraction {
   landedInInbox Boolean @default(true)
   landedInSpam  Boolean @default(false)
 
+  warmupId          String?
+
   // Email provider ID (for tracking)
   messageId String?
 
@@ -1144,6 +1153,7 @@ model WarmupInteraction {
   @@index([direction])
   @@index([sentAt])
   @@index([isPending]) // Index for efficient pending reply queries
+  @@index([warmupId])
 }
 
 model EmailAttachment {

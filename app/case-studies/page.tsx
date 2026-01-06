@@ -33,7 +33,7 @@ const caseStudies = [
     ],
     quote:
       "Mailfra completely transformed our outbound motion. We went from struggling to book 10 meetings a month to consistently hitting 200+.",
-    quotePerson: "Marcus Chen",
+    quotePerson: "Marcus Kelvin",
     quoteRole: "Founder & CEO",
     quoteAvatar: "/images/case-studies/marcus-chen.jpg",
     featured: true,

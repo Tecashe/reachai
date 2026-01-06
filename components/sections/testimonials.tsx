@@ -6,7 +6,7 @@ const testimonials = [
   {
     quote:
       "We went from 50 meetings a month to 200+ after switching to mailfra. The AI personalization is genuinely impressive - prospects think we spent hours researching them.",
-    author: "Sarah Chen",
+    author: "Simon M",
     role: "Head of Sales",
     company: "TechFlow",
     image: "professional headshot asian woman executive dark hair",

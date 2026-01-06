@@ -16,7 +16,7 @@ const upcomingWebinars = [
     time: "11:00 AM EST",
     duration: "60 min",
     speakers: [
-      { name: "Sarah Chen", role: "Head of Deliverability", avatar: "/images/webinars/speaker-sarah.jpg" },
+      { name: "Simon M", role: "Head of Deliverability", avatar: "/images/webinars/speaker-sarah.jpg" },
       { name: "Mike Roberts", role: "Email Strategist", avatar: "/images/webinars/speaker-mike.jpg" },
     ],
     attendees: 847,
@@ -59,7 +59,7 @@ const pastWebinars = [
     date: "November 28, 2024",
     duration: "52 min",
     views: 4521,
-    speakers: [{ name: "Sarah Chen", role: "Head of Deliverability", avatar: "/images/webinars/speaker-sarah.jpg" }],
+    speakers: [{ name: "Simon M", role: "Head of Deliverability", avatar: "/images/webinars/speaker-sarah.jpg" }],
     image: "/images/webinars/follow-up-science.jpg",
   },
   {

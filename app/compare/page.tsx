@@ -288,7 +288,7 @@ export default function ComparePage() {
               {
                 quote:
                   "The inbox rotation alone increased our reply rates by 40%. Should have switched from Smartlead months ago.",
-                author: "Sarah Chen",
+                author: "Simon M",
                 role: "Founder, GrowthLab",
                 from: "Smartlead",
                 image: "/images/compare/testimonial-2.jpg",
