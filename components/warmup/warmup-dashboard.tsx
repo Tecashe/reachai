@@ -2824,19 +2824,264 @@
 //     </div>
 //   )
 // }
+
+// "use client"
+
+// import { useEffect, useState } from "react"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Flame, Users, CheckCircle2, Plus } from "lucide-react"
+// import { WarmupAccountCard } from "./warmup-account-card"
+// import { FirstTimeRequirementsModal } from "./first-time-requirements-modal"
+// import { P2PNetworkDashboard } from "./p2p-network-dashboard"
+// import { WarmupAccountDetailModal } from "./warmup-account-modal"
+// import { toast } from "sonner"
+// import Link from "next/link"
+// import { WaveLoader } from "@/components/loader/wave-loader"
+
+// export interface WarmupAccount {
+//   id: string
+//   email: string
+//   healthScore: number
+//   warmupStage: "NEW" | "WARMING" | "WARM" | "ACTIVE" | "ESTABLISHED"
+//   warmupProgress: number
+//   openRate: number
+//   replyRate: number
+//   spamRate: number
+//   bounceRate: number
+//   inboxPlacementRate: number
+//   dailyLimit: number
+//   emailsSentToday: number
+//   warmupEnabled: boolean
+//   warmupStartDate: Date
+//   daysInStage: number
+//   daysUntilNext: number
+// }
+
+// export function EnhancedWarmupDashboard() {
+//   const [accounts, setAccounts] = useState<WarmupAccount[]>([])
+//   const [loading, setLoading] = useState(true)
+//   const [userTier, setUserTier] = useState<"FREE" | "STARTER" | "PRO" | "AGENCY">("FREE")
+//   const [networkStats, setNetworkStats] = useState({
+//     avgHealth: 0,
+//     activeAccounts: 0,
+//     readyAccounts: 0,
+//   })
+//   const [selectedAccount, setSelectedAccount] = useState<WarmupAccount | null>(null)
+//   const [detailModalOpen, setDetailModalOpen] = useState(false)
+
+//   useEffect(() => {
+//     fetchWarmupAccounts()
+//     fetchUserTier()
+
+//     const interval = setInterval(() => {
+//       fetchWarmupAccounts()
+//     }, 30000)
+
+//     return () => clearInterval(interval)
+//   }, [])
+
+//   const fetchWarmupAccounts = async () => {
+//     try {
+//       const response = await fetch("/api/warmup/stats")
+//       const data = await response.json()
+
+//       const warmupAccounts = (data.accounts || []).map((acc: any) => {
+//         const daysInStage = Math.floor((Date.now() - new Date(acc.warmupStartDate).getTime()) / (1000 * 60 * 60 * 24))
+//         const stageDurations: Record<string, number> = { NEW: 7, WARMING: 7, WARM: 7, ACTIVE: 8, ESTABLISHED: 0 }
+//         const daysUntilNext =
+//           acc.warmupStage === "ESTABLISHED" ? 0 : Math.max(0, stageDurations[acc.warmupStage] - daysInStage)
+
+//         return {
+//           id: acc.id,
+//           email: acc.email,
+//           healthScore: acc.healthScore || 0,
+//           warmupStage: acc.warmupStage || "NEW",
+//           warmupProgress: acc.warmupProgress || 0,
+//           openRate: acc.openRate || 0,
+//           replyRate: acc.replyRate || 0,
+//           spamRate: acc.spamRate || 0,
+//           bounceRate: acc.bounceRate || 0,
+//           inboxPlacementRate: acc.inboxPlacementRate || 100 - ((acc.bounceRate || 0) + (acc.spamRate || 0)),
+//           dailyLimit: acc.warmupDailyLimit || 20,
+//           emailsSentToday: acc.emailsSentToday || 0,
+//           warmupEnabled: acc.warmupEnabled !== false,
+//           warmupStartDate: acc.warmupStartDate || new Date(),
+//           daysInStage,
+//           daysUntilNext,
+//         }
+//       })
+
+//       setAccounts(warmupAccounts)
+
+//       const avgHealth =
+//         warmupAccounts.length > 0
+//           ? Math.round(
+//               warmupAccounts.reduce((sum: number, acc: any) => sum + acc.healthScore, 0) / warmupAccounts.length,
+//             )
+//           : 0
+//       const activeAccounts = warmupAccounts.filter((acc: any) => acc.warmupEnabled).length
+//       const readyAccounts = warmupAccounts.filter((acc: any) => acc.healthScore >= 90).length
+
+//       setNetworkStats({ avgHealth, activeAccounts, readyAccounts })
+//     } catch (error) {
+//       console.error("[v0] Error fetching warmup accounts:", error)
+//       toast.error("Failed to load warmup accounts")
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const fetchUserTier = async () => {
+//     try {
+//       const response = await fetch("/api/user/subscription")
+//       if (response.ok) {
+//         const data = await response.json()
+//         setUserTier(data.tier)
+//       }
+//     } catch (error) {
+//       console.error("[v0] Error fetching user tier:", error)
+//     }
+//   }
+
+//   const handleTogglePause = async (accountId: string, paused: boolean) => {
+//     try {
+//       const response = await fetch(`/api/settings/sending-accounts/${accountId}`, {
+//         method: "PATCH",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ warmupEnabled: !paused }),
+//       })
+
+//       if (!response.ok) throw new Error("Failed to toggle warmup")
+
+//       toast.success(paused ? "Warmup paused" : "Warmup resumed")
+//       await fetchWarmupAccounts()
+//     } catch (error) {
+//       toast.error("Failed to update warmup status")
+//     }
+//   }
+
+//   const handleViewDetails = (accountId: string) => {
+//     const account = accounts.find((acc) => acc.id === accountId)
+//     if (account) {
+//       setSelectedAccount(account)
+//       setDetailModalOpen(true)
+//     }
+//   }
+
+//   if (loading) {
+//     return (
+//       <div className="flex items-center justify-center py-12">
+//         <WaveLoader color="bg-foreground" size="md" speed="normal" />
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       <FirstTimeRequirementsModal />
+
+//       <WarmupAccountDetailModal
+//         account={selectedAccount}
+//         open={detailModalOpen}
+//         onClose={() => {
+//           setDetailModalOpen(false)
+//           setSelectedAccount(null)
+//         }}
+//       />
+
+//       <div className="grid gap-4 md:grid-cols-3">
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Network Health</CardTitle>
+//             <Flame className="h-4 w-4 text-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold text-foreground">{networkStats.avgHealth}</div>
+//             <p className="text-xs text-muted-foreground mt-1">Average health score</p>
+//           </CardContent>
+//         </Card>
+
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Active Accounts</CardTitle>
+//             <Users className="h-4 w-4 text-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold text-foreground">{networkStats.activeAccounts}</div>
+//             <p className="text-xs text-muted-foreground mt-1">Currently warming</p>
+//           </CardContent>
+//         </Card>
+
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Ready to Send</CardTitle>
+//             <CheckCircle2 className="h-4 w-4 text-success" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold text-success">{networkStats.readyAccounts}</div>
+//             <p className="text-xs text-muted-foreground mt-1">Health score ≥ 90</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       <P2PNetworkDashboard userTier={userTier} />
+
+//       {accounts.length === 0 ? (
+//         <Card className="p-12 text-center border border-border">
+//           <Flame className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+//           <h3 className="text-xl font-semibold mb-2">No Accounts Warming Yet</h3>
+//           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+//             You have email accounts connected. Enable warmup on them to start building reputation before sending cold
+//             emails.
+//           </p>
+//           <Button asChild size="lg">
+//             <Link href="/dashboard/settings?tab=email-accounts">
+//               <Plus className="mr-2 h-4 w-4" />
+//               Manage Email Accounts
+//             </Link>
+//           </Button>
+//         </Card>
+//       ) : (
+//         <div className="space-y-4">
+//           <div className="flex items-center justify-between">
+//             <h2 className="text-xl font-semibold">Warming Accounts ({accounts.length})</h2>
+//             <Button asChild>
+//               <Link href="/dashboard/settings?tab=email-accounts">
+//                 <Plus className="mr-2 h-4 w-4" />
+//                 Add Account
+//               </Link>
+//             </Button>
+//           </div>
+
+//           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+//             {accounts.map((account) => (
+//               <WarmupAccountCard
+//                 key={account.id}
+//                 account={account}
+//                 onTogglePause={handleTogglePause}
+//                 onViewDetails={handleViewDetails}
+//               />
+//             ))}
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   )
+// }
+
 "use client"
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Flame, Users, CheckCircle2, Plus } from "lucide-react"
+import { Flame, Users, CheckCircle2 } from "lucide-react"
 import { WarmupAccountCard } from "./warmup-account-card"
 import { FirstTimeRequirementsModal } from "./first-time-requirements-modal"
 import { P2PNetworkDashboard } from "./p2p-network-dashboard"
 import { WarmupAccountDetailModal } from "./warmup-account-modal"
 import { toast } from "sonner"
-import Link from "next/link"
 import { WaveLoader } from "@/components/loader/wave-loader"
+import { AccountWarmupSelector } from "./account-warmup-selector"
 
 export interface WarmupAccount {
   id: string
@@ -3026,31 +3271,12 @@ export function EnhancedWarmupDashboard() {
 
       <P2PNetworkDashboard userTier={userTier} />
 
-      {accounts.length === 0 ? (
-        <Card className="p-12 text-center border border-border">
-          <Flame className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No Accounts Warming Yet</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            You have email accounts connected. Enable warmup on them to start building reputation before sending cold
-            emails.
-          </p>
-          <Button asChild size="lg">
-            <Link href="/dashboard/settings?tab=email-accounts">
-              <Plus className="mr-2 h-4 w-4" />
-              Manage Email Accounts
-            </Link>
-          </Button>
-        </Card>
-      ) : (
+      <AccountWarmupSelector />
+
+      {accounts.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Warming Accounts ({accounts.length})</h2>
-            <Button asChild>
-              <Link href="/dashboard/settings?tab=email-accounts">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Account
-              </Link>
-            </Button>
+            <h2 className="text-xl font-semibold">Warmup Analytics ({accounts.length})</h2>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
