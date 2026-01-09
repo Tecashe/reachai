@@ -72,10 +72,10 @@ export function P2PNetworkDashboard({ userTier }: P2PNetworkDashboardProps) {
 
   const getTierAccess = (tier: string) => {
     const access = {
-      FREE: { canUse: false, pool: "None - Pool warmup only", quality: "N/A" },
-      STARTER: { canUse: false, pool: "None - Pool warmup only", quality: "N/A" },
-      PRO: { canUse: true, pool: "Standard Pool (Mixed providers)", quality: "Medium" },
-      AGENCY: { canUse: true, pool: "Premium Pool (G-Suite/Office 365 only)", quality: "High" },
+      FREE: { canUse: true, pool: "Basic Pool (Standard warmup)", quality: "Basic" },
+      STARTER: { canUse: true, pool: "Basic Pool (Standard warmup)", quality: "Basic" },
+      PRO: { canUse: true, pool: "Standard P2P Pool (Mixed providers)", quality: "Medium" },
+      AGENCY: { canUse: true, pool: "Premium P2P Pool (G-Suite/Office 365 only)", quality: "High" },
     }
 
     return access[tier as keyof typeof access]
@@ -124,17 +124,8 @@ export function P2PNetworkDashboard({ userTier }: P2PNetworkDashboardProps) {
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <h4 className="font-semibold text-sm flex items-center gap-2">
-                  {tierAccess.canUse ? (
-                    <>
-                      <Shield className="h-4 w-4 text-green-600" />
-                      P2P Access Enabled
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="h-4 w-4 text-amber-600" />
-                      P2P Access Locked
-                    </>
-                  )}
+                  <Shield className="h-4 w-4 text-success" />
+                  Warmup Access Enabled
                 </h4>
                 <div className="space-y-1 text-sm text-muted-foreground">
                   <div>
@@ -145,16 +136,16 @@ export function P2PNetworkDashboard({ userTier }: P2PNetworkDashboardProps) {
                   </div>
                 </div>
               </div>
-              {!tierAccess.canUse && (
-                <Button asChild size="sm">
-                  <Link href="/dashboard/settings?tab=billing">Upgrade to Pro</Link>
+              {(userTier === "FREE" || userTier === "STARTER") && (
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/dashboard/settings?tab=billing">Upgrade for P2P</Link>
                 </Button>
               )}
             </div>
           </div>
 
           {/* Network Stats */}
-          {stats && tierAccess.canUse && (
+          {stats && (userTier === "PRO" || userTier === "AGENCY") && (
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="space-y-1">
@@ -177,7 +168,10 @@ export function P2PNetworkDashboard({ userTier }: P2PNetworkDashboardProps) {
 
               {/* Provider Distribution */}
               <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Provider Distribution</h4>
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-purple-600" />
+                  Provider Distribution
+                </h4>
                 <div className="space-y-2">
                   {stats.network.providerDistribution.map((provider) => (
                     <div key={provider.provider} className="flex items-center gap-3">
@@ -212,30 +206,37 @@ export function P2PNetworkDashboard({ userTier }: P2PNetworkDashboardProps) {
             </>
           )}
 
-          {!tierAccess.canUse && (
+          {(userTier === "FREE" || userTier === "STARTER") && (
             <div className="space-y-3 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 p-4">
               <h4 className="font-semibold text-sm flex items-center gap-2">
                 <Crown className="h-4 w-4 text-amber-600" />
-                Upgrade to Access P2P Network
+                Upgrade for Advanced P2P Network
               </h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <Shield className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
                   <span>
-                    <strong>Pro Plan:</strong> Access standard pool with mixed providers and medium-quality peers
+                    <strong>Current: Basic Pool Warmup</strong> - Your emails are being warmed using our standard warmup
+                    pool
+                  </span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Shield className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+                  <span>
+                    <strong>Pro Plan:</strong> Unlock P2P warmup with real peer email exchanges for better results
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Crown className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
                   <span>
-                    <strong>Agency Plan:</strong> Access premium pool with Google Workspace and Office 365 accounts only
+                    <strong>Agency Plan:</strong> Premium P2P pool with only Google Workspace and Office 365 accounts
                   </span>
                 </li>
               </ul>
               <Button asChild className="w-full" size="lg">
                 <Link href="/dashboard/settings?tab=billing">
                   <Crown className="mr-2 h-4 w-4" />
-                  Upgrade Now
+                  Upgrade for P2P Network
                 </Link>
               </Button>
             </div>
