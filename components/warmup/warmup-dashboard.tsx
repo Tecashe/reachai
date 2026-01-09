@@ -3068,230 +3068,946 @@
 //       )}
 //     </div>
 //   )
+// // }
+
+
+// "use client"
+
+// import { useEffect, useState } from "react"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Flame, Users, CheckCircle2 } from "lucide-react"
+// import { WarmupAccountCard } from "./warmup-account-card"
+// import { FirstTimeRequirementsModal } from "./first-time-requirements-modal"
+// import { P2PNetworkDashboard } from "./p2p-network-dashboard"
+// import { WarmupAccountDetailModal } from "./warmup-account-modal"
+// import { toast } from "sonner"
+// import { WaveLoader } from "@/components/loader/wave-loader"
+// import { AccountWarmupSelector } from "./account-warmup-selector"
+
+// export interface WarmupAccount {
+//   id: string
+//   email: string
+//   healthScore: number
+//   warmupStage: "NEW" | "WARMING" | "WARM" | "ACTIVE" | "ESTABLISHED"
+//   warmupProgress: number
+//   openRate: number
+//   replyRate: number
+//   spamRate: number
+//   bounceRate: number
+//   inboxPlacementRate: number
+//   dailyLimit: number
+//   emailsSentToday: number
+//   warmupEnabled: boolean
+//   warmupStartDate: Date
+//   daysInStage: number
+//   daysUntilNext: number
+// }
+
+// export function EnhancedWarmupDashboard() {
+//   const [accounts, setAccounts] = useState<WarmupAccount[]>([])
+//   const [loading, setLoading] = useState(true)
+//   const [userTier, setUserTier] = useState<"FREE" | "STARTER" | "PRO" | "AGENCY">("FREE")
+//   const [networkStats, setNetworkStats] = useState({
+//     avgHealth: 0,
+//     activeAccounts: 0,
+//     readyAccounts: 0,
+//   })
+//   const [selectedAccount, setSelectedAccount] = useState<WarmupAccount | null>(null)
+//   const [detailModalOpen, setDetailModalOpen] = useState(false)
+
+//   useEffect(() => {
+//     fetchWarmupAccounts()
+//     fetchUserTier()
+
+//     const interval = setInterval(() => {
+//       fetchWarmupAccounts()
+//     }, 30000)
+
+//     return () => clearInterval(interval)
+//   }, [])
+
+//   const fetchWarmupAccounts = async () => {
+//     try {
+//       const response = await fetch("/api/warmup/stats")
+//       const data = await response.json()
+
+//       const warmupAccounts = (data.accounts || []).map((acc: any) => {
+//         const daysInStage = Math.floor((Date.now() - new Date(acc.warmupStartDate).getTime()) / (1000 * 60 * 60 * 24))
+//         const stageDurations: Record<string, number> = { NEW: 7, WARMING: 7, WARM: 7, ACTIVE: 8, ESTABLISHED: 0 }
+//         const daysUntilNext =
+//           acc.warmupStage === "ESTABLISHED" ? 0 : Math.max(0, stageDurations[acc.warmupStage] - daysInStage)
+
+//         return {
+//           id: acc.id,
+//           email: acc.email,
+//           healthScore: acc.healthScore || 0,
+//           warmupStage: acc.warmupStage || "NEW",
+//           warmupProgress: acc.warmupProgress || 0,
+//           openRate: acc.openRate || 0,
+//           replyRate: acc.replyRate || 0,
+//           spamRate: acc.spamRate || 0,
+//           bounceRate: acc.bounceRate || 0,
+//           inboxPlacementRate: acc.inboxPlacementRate || 100 - ((acc.bounceRate || 0) + (acc.spamRate || 0)),
+//           dailyLimit: acc.warmupDailyLimit || 20,
+//           emailsSentToday: acc.emailsSentToday || 0,
+//           warmupEnabled: acc.warmupEnabled !== false,
+//           warmupStartDate: acc.warmupStartDate || new Date(),
+//           daysInStage,
+//           daysUntilNext,
+//         }
+//       })
+
+//       setAccounts(warmupAccounts)
+
+//       const avgHealth =
+//         warmupAccounts.length > 0
+//           ? Math.round(
+//               warmupAccounts.reduce((sum: number, acc: any) => sum + acc.healthScore, 0) / warmupAccounts.length,
+//             )
+//           : 0
+//       const activeAccounts = warmupAccounts.filter((acc: any) => acc.warmupEnabled).length
+//       const readyAccounts = warmupAccounts.filter((acc: any) => acc.healthScore >= 90).length
+
+//       setNetworkStats({ avgHealth, activeAccounts, readyAccounts })
+//     } catch (error) {
+//       console.error("[v0] Error fetching warmup accounts:", error)
+//       toast.error("Failed to load warmup accounts")
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const fetchUserTier = async () => {
+//     try {
+//       const response = await fetch("/api/user/subscription")
+//       if (response.ok) {
+//         const data = await response.json()
+//         setUserTier(data.tier)
+//       }
+//     } catch (error) {
+//       console.error("[v0] Error fetching user tier:", error)
+//     }
+//   }
+
+//   const handleTogglePause = async (accountId: string, paused: boolean) => {
+//     try {
+//       const response = await fetch(`/api/settings/sending-accounts/${accountId}`, {
+//         method: "PATCH",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ warmupEnabled: !paused }),
+//       })
+
+//       if (!response.ok) throw new Error("Failed to toggle warmup")
+
+//       toast.success(paused ? "Warmup paused" : "Warmup resumed")
+//       await fetchWarmupAccounts()
+//     } catch (error) {
+//       toast.error("Failed to update warmup status")
+//     }
+//   }
+
+//   const handleViewDetails = (accountId: string) => {
+//     const account = accounts.find((acc) => acc.id === accountId)
+//     if (account) {
+//       setSelectedAccount(account)
+//       setDetailModalOpen(true)
+//     }
+//   }
+
+//   if (loading) {
+//     return (
+//       <div className="flex items-center justify-center py-12">
+//         <WaveLoader color="bg-foreground" size="md" speed="normal" />
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       <FirstTimeRequirementsModal />
+
+//       <WarmupAccountDetailModal
+//         account={selectedAccount}
+//         open={detailModalOpen}
+//         onClose={() => {
+//           setDetailModalOpen(false)
+//           setSelectedAccount(null)
+//         }}
+//       />
+
+//       <div className="grid gap-4 md:grid-cols-3">
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Network Health</CardTitle>
+//             <Flame className="h-4 w-4 text-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold text-foreground">{networkStats.avgHealth}</div>
+//             <p className="text-xs text-muted-foreground mt-1">Average health score</p>
+//           </CardContent>
+//         </Card>
+
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Active Accounts</CardTitle>
+//             <Users className="h-4 w-4 text-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold text-foreground">{networkStats.activeAccounts}</div>
+//             <p className="text-xs text-muted-foreground mt-1">Currently warming</p>
+//           </CardContent>
+//         </Card>
+
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Ready to Send</CardTitle>
+//             <CheckCircle2 className="h-4 w-4 text-success" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold text-success">{networkStats.readyAccounts}</div>
+//             <p className="text-xs text-muted-foreground mt-1">Health score ≥ 90</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       <P2PNetworkDashboard userTier={userTier} />
+
+//       <AccountWarmupSelector />
+
+//       {accounts.length > 0 && (
+//         <div className="space-y-4">
+//           <div className="flex items-center justify-between">
+//             <h2 className="text-xl font-semibold">Warmup Analytics ({accounts.length})</h2>
+//           </div>
+
+//           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+//             {accounts.map((account) => (
+//               <WarmupAccountCard
+//                 key={account.id}
+//                 account={account}
+//                 onTogglePause={handleTogglePause}
+//                 onViewDetails={handleViewDetails}
+//               />
+//             ))}
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   )
 // }
 
 
+// "use client"
+
+// import { useEffect, useState, useCallback } from "react"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Badge } from "@/components/ui/badge"
+// import { Progress } from "@/components/ui/progress"
+// import {
+//   Mail,
+//   Send,
+//   TrendingUp,
+//   TrendingDown,
+//   Minus,
+//   Activity,
+//   Users,
+//   Settings,
+//   LayoutDashboard,
+//   Zap,
+// } from "lucide-react"
+// import { toast } from "sonner"
+// import { WaveLoader } from "@/components/loader/wave-loader"
+// import { WarmupOverviewTab } from "./tabs/warmup-overview-tab"
+// import { WarmupAccountsTab } from "./tabs/warmup-accounts-tab"
+// import { WarmupNetworkTab } from "./tabs/warmup-network-tab"
+// import { WarmupSettingsTab } from "./tabs/warmup-settings-tab"
+
+// export interface WarmupAccount {
+//   id: string
+//   email: string
+//   provider: "gmail" | "outlook" | "yahoo" | "custom"
+//   status: "active" | "paused" | "warming" | "issues" | "completed"
+//   dailyVolume: number
+//   targetVolume: number
+//   inboxRate: number
+//   inboxRateTrend: "up" | "down" | "stable"
+//   daysActive: number
+//   healthScore: number
+//   warmupStage: "initial" | "ramp_up" | "stabilization" | "maintenance"
+//   warmupProgress: number
+//   lastActivity: Date
+//   createdAt: Date
+// }
+
+// export interface RecentActivity {
+//   id: string
+//   accountId: string
+//   accountEmail: string
+//   timestamp: Date
+//   action: string
+//   type: "sent" | "received" | "spam_recovered" | "marked_important" | "positive_reply"
+//   status: "success" | "warning" | "error"
+// }
+
+// interface DashboardStats {
+//   activeAccounts: number
+//   activeAccountsTrend: "up" | "down" | "stable"
+//   activeAccountsTrendValue: number
+//   emailsSentToday: number
+//   emailsTarget: number
+//   emailsTrend: "up" | "down" | "stable"
+//   avgInboxRate: number
+//   inboxRateTrend: "up" | "down" | "stable"
+//   networkHealthScore: number
+//   networkHealthGrade: string
+// }
+
+// export function WarmupDashboard() {
+//   const [activeTab, setActiveTab] = useState("overview")
+//   const [stats, setStats] = useState<DashboardStats | null>(null)
+//   const [accounts, setAccounts] = useState<WarmupAccount[]>([])
+//   const [activities, setActivities] = useState<RecentActivity[]>([])
+//   const [userTier, setUserTier] = useState<"FREE" | "STARTER" | "PRO" | "AGENCY">("FREE")
+//   const [loading, setLoading] = useState(true)
+
+//   const fetchDashboardData = useCallback(async () => {
+//     try {
+//       const [statsRes, accountsRes, activitiesRes, tierRes] = await Promise.all([
+//         fetch("/api/warmup/dashboard/stats"),
+//         fetch("/api/warmup/dashboard/accounts"),
+//         fetch("/api/warmup/dashboard/activities"),
+//         fetch("/api/user/subscription"),
+//       ])
+
+//       if (statsRes.ok) {
+//         const statsData = await statsRes.json()
+//         setStats(statsData)
+//       }
+
+//       if (accountsRes.ok) {
+//         const accountsData = await accountsRes.json()
+//         setAccounts(accountsData.accounts || [])
+//       }
+
+//       if (activitiesRes.ok) {
+//         const activitiesData = await activitiesRes.json()
+//         setActivities(activitiesData.activities || [])
+//       }
+
+//       if (tierRes.ok) {
+//         const tierData = await tierRes.json()
+//         setUserTier(tierData.tier || "FREE")
+//       }
+//     } catch (error) {
+//       console.error("Error fetching dashboard data:", error)
+//       toast.error("Failed to load dashboard data")
+//     } finally {
+//       setLoading(false)
+//     }
+//   }, [])
+
+//   useEffect(() => {
+//     fetchDashboardData()
+
+//     // Refresh data every 30 seconds
+//     const interval = setInterval(fetchDashboardData, 30000)
+//     return () => clearInterval(interval)
+//   }, [fetchDashboardData])
+
+//   const getTrendIcon = (trend: "up" | "down" | "stable") => {
+//     switch (trend) {
+//       case "up":
+//         return <TrendingUp className="h-4 w-4 text-success" />
+//       case "down":
+//         return <TrendingDown className="h-4 w-4 text-destructive" />
+//       default:
+//         return <Minus className="h-4 w-4 text-muted-foreground" />
+//     }
+//   }
+
+//   const getInboxRateColor = (rate: number) => {
+//     if (rate >= 95) return "text-success"
+//     if (rate >= 90) return "text-warning"
+//     return "text-destructive"
+//   }
+
+//   if (loading) {
+//     return (
+//       <div className="flex flex-col items-center justify-center py-20 gap-4">
+//         <WaveLoader color="bg-foreground" size="lg" speed="normal" />
+//         <p className="text-sm text-muted-foreground">Loading warmup dashboard...</p>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+//         {/* Active Warmup Accounts */}
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Active Warmup Accounts</CardTitle>
+//             <Mail className="h-4 w-4 text-muted-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="flex items-baseline gap-2">
+//               <span className="text-3xl font-bold">{stats?.activeAccounts || 0}</span>
+//               <div className="flex items-center gap-1">
+//                 {stats && getTrendIcon(stats.activeAccountsTrend)}
+//                 {stats?.activeAccountsTrendValue !== 0 && (
+//                   <span
+//                     className={`text-xs ${stats?.activeAccountsTrend === "up" ? "text-success" : stats?.activeAccountsTrend === "down" ? "text-destructive" : "text-muted-foreground"}`}
+//                   >
+//                     {stats?.activeAccountsTrendValue > 0 ? "+" : ""}
+//                     {stats?.activeAccountsTrendValue}
+//                   </span>
+//                 )}
+//               </div>
+//             </div>
+//             <p className="text-xs text-muted-foreground mt-1">Currently warming up</p>
+//           </CardContent>
+//         </Card>
+
+//         {/* Emails Sent Today */}
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Emails Sent Today</CardTitle>
+//             <Send className="h-4 w-4 text-muted-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="flex items-baseline gap-2">
+//               <span className="text-3xl font-bold">{stats?.emailsSentToday || 0}</span>
+//               <span className="text-sm text-muted-foreground">/ {stats?.emailsTarget || 0}</span>
+//             </div>
+//             <Progress
+//               value={((stats?.emailsSentToday || 0) / (stats?.emailsTarget || 1)) * 100}
+//               className="h-1.5 mt-2"
+//             />
+//             <p className="text-xs text-muted-foreground mt-1">
+//               {Math.round(((stats?.emailsSentToday || 0) / (stats?.emailsTarget || 1)) * 100)}% of daily target
+//             </p>
+//           </CardContent>
+//         </Card>
+
+//         {/* Average Inbox Rate */}
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Average Inbox Rate</CardTitle>
+//             <Activity className="h-4 w-4 text-muted-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="flex items-baseline gap-2">
+//               <span className={`text-3xl font-bold ${getInboxRateColor(stats?.avgInboxRate || 0)}`}>
+//                 {stats?.avgInboxRate || 0}%
+//               </span>
+//               {stats && getTrendIcon(stats.inboxRateTrend)}
+//             </div>
+//             <p className="text-xs text-muted-foreground mt-1">
+//               {(stats?.avgInboxRate || 0) >= 95
+//                 ? "Excellent deliverability"
+//                 : (stats?.avgInboxRate || 0) >= 90
+//                   ? "Good deliverability"
+//                   : "Needs improvement"}
+//             </p>
+//           </CardContent>
+//         </Card>
+
+//         {/* Network Health Score */}
+//         <Card className="border border-border">
+//           <CardHeader className="flex flex-row items-center justify-between pb-2">
+//             <CardTitle className="text-sm font-medium text-muted-foreground">Network Health Score</CardTitle>
+//             <Zap className="h-4 w-4 text-muted-foreground" />
+//           </CardHeader>
+//           <CardContent>
+//             <div className="flex items-baseline gap-2">
+//               <span className="text-3xl font-bold">{stats?.networkHealthScore || 0}</span>
+//               <span className="text-sm text-muted-foreground">/ 100</span>
+//               <Badge
+//                 className={
+//                   (stats?.networkHealthScore || 0) >= 90
+//                     ? "bg-success/10 text-success border-success/20"
+//                     : (stats?.networkHealthScore || 0) >= 70
+//                       ? "bg-warning/10 text-warning border-warning/20"
+//                       : "bg-destructive/10 text-destructive border-destructive/20"
+//                 }
+//                 variant="outline"
+//               >
+//                 {stats?.networkHealthGrade || "N/A"}
+//               </Badge>
+//             </div>
+//             <p className="text-xs text-muted-foreground mt-1">Overall system performance</p>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+//         <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+//           <TabsTrigger value="overview" className="gap-2">
+//             <LayoutDashboard className="h-4 w-4" />
+//             <span className="hidden sm:inline">Overview</span>
+//           </TabsTrigger>
+//           <TabsTrigger value="accounts" className="gap-2">
+//             <Mail className="h-4 w-4" />
+//             <span className="hidden sm:inline">Email Accounts</span>
+//           </TabsTrigger>
+//           <TabsTrigger value="network" className="gap-2">
+//             <Users className="h-4 w-4" />
+//             <span className="hidden sm:inline">Network Insights</span>
+//           </TabsTrigger>
+//           <TabsTrigger value="settings" className="gap-2">
+//             <Settings className="h-4 w-4" />
+//             <span className="hidden sm:inline">Settings</span>
+//           </TabsTrigger>
+//         </TabsList>
+
+//         <TabsContent value="overview" className="mt-6">
+//           <WarmupOverviewTab
+//             accounts={accounts}
+//             activities={activities}
+//             userTier={userTier}
+//             onRefresh={fetchDashboardData}
+//           />
+//         </TabsContent>
+
+//         <TabsContent value="accounts" className="mt-6">
+//           <WarmupAccountsTab accounts={accounts} onAccountsChange={fetchDashboardData} />
+//         </TabsContent>
+
+//         <TabsContent value="network" className="mt-6">
+//           <WarmupNetworkTab userTier={userTier} />
+//         </TabsContent>
+
+//         <TabsContent value="settings" className="mt-6">
+//           <WarmupSettingsTab userTier={userTier} />
+//         </TabsContent>
+//       </Tabs>
+//     </div>
+//   )
+// }
+
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Flame, Users, CheckCircle2 } from "lucide-react"
-import { WarmupAccountCard } from "./warmup-account-card"
-import { FirstTimeRequirementsModal } from "./first-time-requirements-modal"
-import { P2PNetworkDashboard } from "./p2p-network-dashboard"
-import { WarmupAccountDetailModal } from "./warmup-account-modal"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { WaveLoader } from "@/components/loader/wave-loader"
-import { AccountWarmupSelector } from "./account-warmup-selector"
+import { WarmupOverviewTab } from "./tabs/warmup-overview-tab"
+import { WarmupAccountsTab } from "./tabs/warmup-accounts-tab"
+import { WarmupNetworkTab } from "./tabs/warmup-network-tab"
+import { WarmupSettingsTab } from "./tabs/warmup-settings-tab"
+import { AddAccountModal } from "./modals/add-account-modal"
+import { Mail, TrendingUp, Activity, Shield, Plus, AlertTriangle, X } from "lucide-react"
 
-export interface WarmupAccount {
+// Type definitions
+export interface EmailAccount {
   id: string
   email: string
-  healthScore: number
-  warmupStage: "NEW" | "WARMING" | "WARM" | "ACTIVE" | "ESTABLISHED"
-  warmupProgress: number
-  openRate: number
-  replyRate: number
-  spamRate: number
-  bounceRate: number
-  inboxPlacementRate: number
-  dailyLimit: number
-  emailsSentToday: number
-  warmupEnabled: boolean
-  warmupStartDate: Date
-  daysInStage: number
-  daysUntilNext: number
+  provider: "gmail" | "outlook" | "yahoo" | "custom"
+  status: "active" | "paused" | "warming" | "issues" | "completed"
+  smtpConfig: {
+    host: string
+    port: number
+    username: string
+  }
+  imapConfig: {
+    host: string
+    port: number
+  }
+  warmupConfig: {
+    startVolume: number
+    targetVolume: number
+    currentVolume: number
+    rampSpeed: "conservative" | "moderate" | "aggressive"
+    daysActive: number
+    scheduleEnabled: boolean
+    weekendSending: boolean
+  }
+  stats: {
+    emailsSentToday: number
+    emailsSentTotal: number
+    inboxRate: number
+    spamRate: number
+    reputationScore: number
+    openRate: number
+    replyRate: number
+    trend: "up" | "down" | "stable"
+  }
+  createdAt: Date
+  lastActivity: Date
 }
 
-export function EnhancedWarmupDashboard() {
-  const [accounts, setAccounts] = useState<WarmupAccount[]>([])
-  const [loading, setLoading] = useState(true)
+export interface NetworkHealth {
+  score: number
+  totalSize: number
+  composition: {
+    googleWorkspace: number
+    office365: number
+    other: number
+  }
+  averageReputation: number
+  lastUpdated: Date
+}
+
+interface AlertBanner {
+  id: string
+  type: "warning" | "error" | "info"
+  message: string
+  link?: string
+}
+
+export function ComprehensiveWarmupDashboard() {
+  const [accounts, setAccounts] = useState<EmailAccount[]>([])
+  const [networkHealth, setNetworkHealth] = useState<NetworkHealth | null>(null)
   const [userTier, setUserTier] = useState<"FREE" | "STARTER" | "PRO" | "AGENCY">("FREE")
-  const [networkStats, setNetworkStats] = useState({
-    avgHealth: 0,
+  const [loading, setLoading] = useState(true)
+  const [addAccountOpen, setAddAccountOpen] = useState(false)
+  const [alerts, setAlerts] = useState<AlertBanner[]>([])
+
+  // Stats - Add default values to avoid undefined errors
+  const [stats, setStats] = useState({
     activeAccounts: 0,
-    readyAccounts: 0,
+    activeAccountsTrendValue: 0,
+    emailsSentToday: 0,
+    targetToday: 0,
+    avgInboxRate: 0,
+    networkHealthScore: 0,
   })
-  const [selectedAccount, setSelectedAccount] = useState<WarmupAccount | null>(null)
-  const [detailModalOpen, setDetailModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchWarmupAccounts()
-    fetchUserTier()
-
-    const interval = setInterval(() => {
-      fetchWarmupAccounts()
-    }, 30000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const fetchWarmupAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     try {
-      const response = await fetch("/api/warmup/stats")
+      const response = await fetch("/api/warmup/accounts")
+      if (!response.ok) throw new Error("Failed to fetch accounts")
       const data = await response.json()
 
-      const warmupAccounts = (data.accounts || []).map((acc: any) => {
-        const daysInStage = Math.floor((Date.now() - new Date(acc.warmupStartDate).getTime()) / (1000 * 60 * 60 * 24))
-        const stageDurations: Record<string, number> = { NEW: 7, WARMING: 7, WARM: 7, ACTIVE: 8, ESTABLISHED: 0 }
-        const daysUntilNext =
-          acc.warmupStage === "ESTABLISHED" ? 0 : Math.max(0, stageDurations[acc.warmupStage] - daysInStage)
-
-        return {
-          id: acc.id,
-          email: acc.email,
-          healthScore: acc.healthScore || 0,
-          warmupStage: acc.warmupStage || "NEW",
-          warmupProgress: acc.warmupProgress || 0,
-          openRate: acc.openRate || 0,
-          replyRate: acc.replyRate || 0,
-          spamRate: acc.spamRate || 0,
-          bounceRate: acc.bounceRate || 0,
-          inboxPlacementRate: acc.inboxPlacementRate || 100 - ((acc.bounceRate || 0) + (acc.spamRate || 0)),
-          dailyLimit: acc.warmupDailyLimit || 20,
+      // Transform API data to EmailAccount format
+      const transformedAccounts: EmailAccount[] = (data.accounts || []).map((acc: any) => ({
+        id: acc.id,
+        email: acc.email,
+        provider: acc.provider || "custom",
+        status: acc.warmupEnabled ? (acc.warmupStage === "ESTABLISHED" ? "completed" : "warming") : "paused",
+        smtpConfig: {
+          host: acc.smtpHost || "",
+          port: acc.smtpPort || 587,
+          username: acc.smtpUsername || "",
+        },
+        imapConfig: {
+          host: acc.imapHost || "",
+          port: acc.imapPort || 993,
+        },
+        warmupConfig: {
+          startVolume: 5,
+          targetVolume: acc.warmupDailyLimit || 50,
+          currentVolume: acc.emailsSentToday || 0,
+          rampSpeed: "moderate" as const,
+          daysActive: acc.warmupStartDate
+            ? Math.floor((Date.now() - new Date(acc.warmupStartDate).getTime()) / (1000 * 60 * 60 * 24))
+            : 0,
+          scheduleEnabled: true,
+          weekendSending: false,
+        },
+        stats: {
           emailsSentToday: acc.emailsSentToday || 0,
-          warmupEnabled: acc.warmupEnabled !== false,
-          warmupStartDate: acc.warmupStartDate || new Date(),
-          daysInStage,
-          daysUntilNext,
-        }
+          emailsSentTotal: acc.emailsSentTotal || 0,
+          inboxRate: acc.inboxPlacementRate || 95,
+          spamRate: acc.spamComplaintRate || 2,
+          reputationScore: acc.healthScore || 85,
+          openRate: acc.openRate || 65,
+          replyRate: acc.replyRate || 40,
+          trend: "stable" as const,
+        },
+        createdAt: new Date(acc.createdAt),
+        lastActivity: new Date(acc.updatedAt || acc.createdAt),
+      }))
+
+      setAccounts(transformedAccounts)
+
+      // Calculate stats
+      const activeAccounts = transformedAccounts.filter((a) => a.status !== "paused").length
+      const emailsSentToday = transformedAccounts.reduce((sum, a) => sum + a.stats.emailsSentToday, 0)
+      const targetToday = transformedAccounts.reduce((sum, a) => sum + a.warmupConfig.targetVolume, 0)
+      const avgInboxRate =
+        transformedAccounts.length > 0
+          ? Math.round(transformedAccounts.reduce((sum, a) => sum + a.stats.inboxRate, 0) / transformedAccounts.length)
+          : 0
+
+      setStats({
+        activeAccounts,
+        activeAccountsTrendValue: 0,
+        emailsSentToday,
+        targetToday,
+        avgInboxRate,
+        networkHealthScore: networkHealth?.score || 95,
       })
 
-      setAccounts(warmupAccounts)
-
-      const avgHealth =
-        warmupAccounts.length > 0
-          ? Math.round(
-              warmupAccounts.reduce((sum: number, acc: any) => sum + acc.healthScore, 0) / warmupAccounts.length,
-            )
-          : 0
-      const activeAccounts = warmupAccounts.filter((acc: any) => acc.warmupEnabled).length
-      const readyAccounts = warmupAccounts.filter((acc: any) => acc.healthScore >= 90).length
-
-      setNetworkStats({ avgHealth, activeAccounts, readyAccounts })
+      // Check for alerts
+      const newAlerts: AlertBanner[] = []
+      transformedAccounts.forEach((acc) => {
+        if (acc.stats.inboxRate < 90) {
+          newAlerts.push({
+            id: `low-inbox-${acc.id}`,
+            type: "warning",
+            message: `${acc.email} has inbox rate below 90%`,
+            link: `/dashboard/warmup?account=${acc.id}`,
+          })
+        }
+        if (acc.status === "issues") {
+          newAlerts.push({
+            id: `issues-${acc.id}`,
+            type: "error",
+            message: `${acc.email} has authentication issues`,
+            link: `/dashboard/warmup?account=${acc.id}`,
+          })
+        }
+      })
+      setAlerts(newAlerts)
     } catch (error) {
-      console.error("[v0] Error fetching warmup accounts:", error)
+      console.error("Error fetching accounts:", error)
       toast.error("Failed to load warmup accounts")
-    } finally {
-      setLoading(false)
     }
-  }
+  }, [networkHealth?.score])
 
-  const fetchUserTier = async () => {
+  const fetchNetworkHealth = useCallback(async () => {
+    try {
+      const response = await fetch("/api/warmup/network")
+      if (!response.ok) throw new Error("Failed to fetch network health")
+      const data = await response.json()
+      setNetworkHealth({
+        score: data.score,
+        totalSize: data.totalSize,
+        composition: data.composition,
+        averageReputation: data.averageReputation,
+        lastUpdated: new Date(data.lastUpdated),
+      })
+      setStats((prev) => ({ ...prev, networkHealthScore: data.score }))
+    } catch (error) {
+      console.error("Error fetching network health:", error)
+    }
+  }, [])
+
+  const fetchUserTier = useCallback(async () => {
     try {
       const response = await fetch("/api/user/subscription")
       if (response.ok) {
         const data = await response.json()
-        setUserTier(data.tier)
+        setUserTier(data.tier || "FREE")
       }
     } catch (error) {
-      console.error("[v0] Error fetching user tier:", error)
+      console.error("Error fetching user tier:", error)
     }
+  }, [])
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      await Promise.all([fetchAccounts(), fetchNetworkHealth(), fetchUserTier()])
+      setLoading(false)
+    }
+
+    loadData()
+
+    // Refresh data every 30 seconds
+    const interval = setInterval(() => {
+      fetchAccounts()
+      fetchNetworkHealth()
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [fetchAccounts, fetchNetworkHealth, fetchUserTier])
+
+  const handleAccountUpdate = () => {
+    fetchAccounts()
   }
 
-  const handleTogglePause = async (accountId: string, paused: boolean) => {
-    try {
-      const response = await fetch(`/api/settings/sending-accounts/${accountId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ warmupEnabled: !paused }),
-      })
-
-      if (!response.ok) throw new Error("Failed to toggle warmup")
-
-      toast.success(paused ? "Warmup paused" : "Warmup resumed")
-      await fetchWarmupAccounts()
-    } catch (error) {
-      toast.error("Failed to update warmup status")
-    }
+  const handleAddAccountSuccess = () => {
+    setAddAccountOpen(false)
+    fetchAccounts()
+    toast.success("Email account added successfully!")
   }
 
-  const handleViewDetails = (accountId: string) => {
-    const account = accounts.find((acc) => acc.id === accountId)
-    if (account) {
-      setSelectedAccount(account)
-      setDetailModalOpen(true)
-    }
+  const dismissAlert = (id: string) => {
+    setAlerts((prev) => prev.filter((a) => a.id !== id))
+  }
+
+  const getInboxRateColor = (rate: number) => {
+    if (rate >= 95) return "text-success"
+    if (rate >= 90) return "text-warning"
+    return "text-destructive"
+  }
+
+  const getHealthScoreGrade = (score: number) => {
+    if (score >= 95) return { grade: "A+", color: "text-success" }
+    if (score >= 90) return { grade: "A", color: "text-success" }
+    if (score >= 85) return { grade: "B+", color: "text-warning" }
+    if (score >= 80) return { grade: "B", color: "text-warning" }
+    return { grade: "C", color: "text-destructive" }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <WaveLoader color="bg-foreground" size="md" speed="normal" />
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <WaveLoader color="bg-foreground" size="lg" speed="normal" />
+        <p className="text-muted-foreground text-sm">Loading warmup dashboard...</p>
       </div>
     )
   }
 
+  const healthGrade = getHealthScoreGrade(stats.networkHealthScore)
+
   return (
     <div className="space-y-6">
-      <FirstTimeRequirementsModal />
+      {/* Alert Banners */}
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          {alerts.slice(0, 3).map((alert) => (
+            <div
+              key={alert.id}
+              className={`flex items-center justify-between p-3 rounded-lg border ${
+                alert.type === "error"
+                  ? "bg-destructive/10 border-destructive/20 text-destructive"
+                  : alert.type === "warning"
+                    ? "bg-warning/10 border-warning/20 text-warning"
+                    : "bg-primary/10 border-primary/20 text-primary"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm font-medium">{alert.message}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {alert.link && (
+                  <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
+                    <a href={alert.link}>View Details</a>
+                  </Button>
+                )}
+                <button onClick={() => dismissAlert(alert.id)} className="p-1 hover:bg-background/50 rounded">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <WarmupAccountDetailModal
-        account={selectedAccount}
-        open={detailModalOpen}
-        onClose={() => {
-          setDetailModalOpen(false)
-          setSelectedAccount(null)
-        }}
-      />
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border border-border">
+      {/* Top Stats Row */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Network Health</CardTitle>
-            <Flame className="h-4 w-4 text-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Warmup Accounts</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">{networkStats.avgHealth}</div>
-            <p className="text-xs text-muted-foreground mt-1">Average health score</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground">{stats.activeAccounts}</span>
+              <span className="text-sm text-muted-foreground">/ {accounts.length}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">accounts warming up</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-border">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Accounts</CardTitle>
-            <Users className="h-4 w-4 text-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Emails Sent Today</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground">{networkStats.activeAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Currently warming</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground">{stats.emailsSentToday}</span>
+              <span className="text-sm text-muted-foreground">/ {stats.targetToday}</span>
+            </div>
+            <Progress
+              value={stats.targetToday > 0 ? (stats.emailsSentToday / stats.targetToday) * 100 : 0}
+              className="h-1.5 mt-2"
+            />
           </CardContent>
         </Card>
 
-        <Card className="border border-border">
+        <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Ready to Send</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Average Inbox Rate</CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-success">{networkStats.readyAccounts}</div>
-            <p className="text-xs text-muted-foreground mt-1">Health score ≥ 90</p>
+            <div className="flex items-baseline gap-2">
+              <span className={`text-3xl font-bold ${getInboxRateColor(stats.avgInboxRate)}`}>
+                {stats.avgInboxRate}%
+              </span>
+            </div>
+            <Badge
+              variant="outline"
+              className={`mt-2 ${stats.avgInboxRate >= 95 ? "border-success/30 text-success" : stats.avgInboxRate >= 90 ? "border-warning/30 text-warning" : "border-destructive/30 text-destructive"}`}
+            >
+              {stats.avgInboxRate >= 95 ? "Excellent" : stats.avgInboxRate >= 90 ? "Good" : "Needs Attention"}
+            </Badge>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Network Health Score</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-foreground">{stats.networkHealthScore}</span>
+              <span className="text-sm text-muted-foreground">/ 100</span>
+            </div>
+            <Badge variant="outline" className={`mt-2 ${healthGrade.color}`}>
+              Grade: {healthGrade.grade}
+            </Badge>
           </CardContent>
         </Card>
       </div>
 
-      <P2PNetworkDashboard userTier={userTier} />
+      {/* Main Tabs */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <div className="flex items-center justify-between">
+          <TabsList className="bg-muted/50">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="accounts">Email Accounts</TabsTrigger>
+            <TabsTrigger value="network">Network Insights</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
 
-      <AccountWarmupSelector />
-
-      {accounts.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Warmup Analytics ({accounts.length})</h2>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {accounts.map((account) => (
-              <WarmupAccountCard
-                key={account.id}
-                account={account}
-                onTogglePause={handleTogglePause}
-                onViewDetails={handleViewDetails}
-              />
-            ))}
-          </div>
+          <Button onClick={() => setAddAccountOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Email Account
+          </Button>
         </div>
-      )}
+
+        <TabsContent value="overview">
+          <WarmupOverviewTab accounts={accounts} networkHealth={networkHealth} onRefresh={handleAccountUpdate} />
+        </TabsContent>
+
+        <TabsContent value="accounts">
+          <WarmupAccountsTab
+            accounts={accounts}
+            userTier={userTier}
+            onAccountUpdate={handleAccountUpdate}
+            onAddAccount={() => setAddAccountOpen(true)}
+          />
+        </TabsContent>
+
+        <TabsContent value="network">
+          <WarmupNetworkTab networkHealth={networkHealth} userTier={userTier} accounts={accounts} />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <WarmupSettingsTab userTier={userTier} onSettingsUpdate={handleAccountUpdate} />
+        </TabsContent>
+      </Tabs>
+
+      {/* Add Account Modal */}
+      <AddAccountModal
+        open={addAccountOpen}
+        onClose={() => setAddAccountOpen(false)}
+        onSuccess={handleAddAccountSuccess}
+        userTier={userTier}
+      />
     </div>
   )
 }

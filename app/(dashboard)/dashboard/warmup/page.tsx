@@ -84,8 +84,37 @@
 //   )
 // }
 
+// import { Suspense } from "react"
+// import { EnhancedWarmupDashboard } from "@/components/warmup/warmup-dashboard"
+// import { WaveLoader } from "@/components/loader/wave-loader"
+
+// export const metadata = {
+//   title: "Email Warmup - Mailfra",
+//   description: "Monitor and manage email warmup for optimal deliverability with Mailfra",
+// }
+
+// export default function WarmupPage() {
+//   return (
+//     <div className="flex flex-col gap-6">
+//       <div>
+//         <h1 className="text-3xl font-bold text-foreground">Email Warmup</h1>
+//         <p className="text-muted-foreground mt-1">Build domain reputation with our intelligent warmup system</p>
+//       </div>
+
+//       <Suspense
+//         fallback={
+//           <div className="flex items-center justify-center py-12">
+//             <WaveLoader color="bg-foreground" size="lg" speed="normal" />
+//           </div>
+//         }
+//       >
+//         <EnhancedWarmupDashboard />
+//       </Suspense>
+//     </div>
+//   )
+// }
 import { Suspense } from "react"
-import { EnhancedWarmupDashboard } from "@/components/warmup/warmup-dashboard"
+import { ComprehensiveWarmupDashboard } from "@/components/warmup/comprehensive-dashboard"
 import { WaveLoader } from "@/components/loader/wave-loader"
 
 export const metadata = {
@@ -98,17 +127,20 @@ export default function WarmupPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Email Warmup</h1>
-        <p className="text-muted-foreground mt-1">Build domain reputation with our intelligent warmup system</p>
+        <p className="text-muted-foreground mt-1">
+          Build domain reputation with our intelligent AI-powered warmup system
+        </p>
       </div>
 
       <Suspense
         fallback={
-          <div className="flex items-center justify-center py-12">
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
             <WaveLoader color="bg-foreground" size="lg" speed="normal" />
+            <p className="text-muted-foreground text-sm">Loading warmup dashboard...</p>
           </div>
         }
       >
-        <EnhancedWarmupDashboard />
+        <ComprehensiveWarmupDashboard />
       </Suspense>
     </div>
   )
