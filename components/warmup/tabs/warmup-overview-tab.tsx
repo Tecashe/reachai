@@ -320,29 +320,67 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
               No performance data available yet
             </div>
           ) : (
-            <div className="h-[300px]">
+            <div className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} />
+                <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="hsl(var(--border))"
+                    vertical={false}
+                    strokeOpacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="date"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    dy={10}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    dx={-10}
+                  />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      return (
+                        <div className="rounded-lg border border-border bg-card p-3 shadow-xl">
+                          <div className="flex flex-col gap-2">
+                            <p className="text-sm font-medium text-foreground">{payload[0].payload.date}</p>
+                            {payload.map((entry, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                                <span className="text-sm text-muted-foreground">{entry.name}:</span>
+                                <span className="text-sm font-semibold text-foreground">
+                                  {entry.name === "Inbox Rate %" ? `${entry.value}%` : entry.value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
                     }}
-                    labelStyle={{ color: "hsl(var(--foreground))" }}
                   />
                   {(chartMetric === "all" || chartMetric === "sent") && (
                     <Line
                       type="monotone"
                       dataKey="sent"
                       name="Emails Sent"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
+                      stroke="hsl(var(--chart-1))"
+                      strokeWidth={2.5}
                       dot={false}
-                      activeDot={{ r: 4 }}
+                      activeDot={{
+                        r: 5,
+                        fill: "hsl(var(--chart-1))",
+                        stroke: "hsl(var(--background))",
+                        strokeWidth: 2,
+                      }}
                     />
                   )}
                   {(chartMetric === "all" || chartMetric === "inboxRate") && (
@@ -350,13 +388,27 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                       type="monotone"
                       dataKey="inboxRate"
                       name="Inbox Rate %"
-                      stroke="hsl(var(--success))"
-                      strokeWidth={2}
+                      stroke="hsl(var(--chart-2))"
+                      strokeWidth={2.5}
                       dot={false}
-                      activeDot={{ r: 4 }}
+                      activeDot={{
+                        r: 5,
+                        fill: "hsl(var(--chart-2))",
+                        stroke: "hsl(var(--background))",
+                        strokeWidth: 2,
+                      }}
                     />
                   )}
-                  <Legend />
+                  {chartMetric === "all" && (
+                    <Legend
+                      wrapperStyle={{
+                        paddingTop: "20px",
+                        fontSize: "14px",
+                      }}
+                      iconType="circle"
+                      iconSize={10}
+                    />
+                  )}
                 </LineChart>
               </ResponsiveContainer>
             </div>
