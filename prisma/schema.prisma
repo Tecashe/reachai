@@ -1115,7 +1115,6 @@ model WarmupSession {
   @@index([status])
   @@index([warmupType])
 }
-
 model WarmupInteraction {
   id        String        @id @default(cuid())
   sessionId String
@@ -1140,11 +1139,18 @@ model WarmupInteraction {
   landedInInbox Boolean @default(true)
   landedInSpam  Boolean @default(false)
 
-  warmupId          String?
+  // Warmup identification - Unique identifier for warmup email chain (X-Warmup-ID header)
+  warmupId String?
 
   // Email provider ID (for tracking)
   messageId String?
 
+  // Thread tracking fields for conversation grouping
+  threadId   String? // Email thread identifier for grouping conversations
+  inReplyTo  String? // Message-ID of the email this is replying to
+  references String? // Full thread references for email clients
+
+  // Pending reply tracking
   isPending Boolean @default(false)
 
   createdAt DateTime @default(now())
@@ -1155,6 +1161,8 @@ model WarmupInteraction {
   @@index([sentAt])
   @@index([isPending]) // Index for efficient pending reply queries
   @@index([warmupId])
+  @@index([threadId])
+  @@index([inReplyTo])
 }
 
 model EmailAttachment {

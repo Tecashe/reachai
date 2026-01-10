@@ -1120,6 +1120,638 @@
 //   },
 // }
 
+// import { db as prisma } from "@/lib/db"
+// import nodemailer from "nodemailer"
+// import { ImapFlow } from "imapflow"
+// import crypto from "crypto"
+// import { peerMatchingEngine } from "./peer-matching-engine"
+// import { warmupSubscriptionGate } from "./warmup-subscription-gate"
+// import { warmupEmailGenerator } from "./warmup-email-generator"
+// import { spamRescueService } from "./spam-rescue-service"
+// import { warmupReplyAutomation } from "./warmup-reply-automation"
+// import { warmupNotificationService } from "./warmup-notification-service"
+// import { logger } from "@/lib/logger"
+// import { decryptPassword, encryptPassword } from "@/lib/encryption"
+// import { simpleParser } from "mailparser"
+
+// // Encrypt sensitive data
+// function encrypt(text: string): string {
+//   return encryptPassword(text)
+// }
+
+// // Decrypt sensitive data
+// function decrypt(encrypted: string): string {
+//   return decryptPassword(encrypted)
+// }
+
+// // Determine warmup type based on stage
+// function getWarmupType(stage: string): "POOL" | "PEER" {
+//   return ["NEW", "WARMING"].includes(stage) ? "POOL" : "PEER"
+// }
+
+// // Send warmup email
+// export async function sendWarmupEmail(
+//   sessionId: string,
+//   sendingAccount: any,
+//   warmupEmail?: any,
+//   peerAccountEmail?: string,
+// ): Promise<boolean> {
+//   try {
+//     const credentials = sendingAccount.credentials as any
+
+//     const recipientName = warmupEmail?.name || peerAccountEmail?.split("@")[0] || "there"
+//     const senderName = sendingAccount.name || sendingAccount.email.split("@")[0]
+
+//     // Use AI-powered email generation instead of templates
+//     const emailContent = await warmupEmailGenerator.generateWarmupEmail(
+//       senderName,
+//       recipientName,
+//       sendingAccount.industry || "general",
+//       sendingAccount.warmupStage,
+//     )
+
+//     const { subject, body } = emailContent
+
+//     const warmupId = `warmup-${sendingAccount.id}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`
+
+//     // Create SMTP transporter
+//     const transporter = nodemailer.createTransport({
+//       host: credentials.smtpHost || credentials.host || "smtp.gmail.com",
+//       port: credentials.smtpPort || credentials.port || 587,
+//       secure: (credentials.smtpPort || credentials.port) === 465,
+//       auth: {
+//         user: credentials.smtpUsername || credentials.username || sendingAccount.email,
+//         pass: credentials.smtpPassword || credentials.password || credentials.apiKey,
+//       },
+//     })
+
+//     // Send email
+//     const info = await transporter.sendMail({
+//       from: `${senderName} <${sendingAccount.email}>`,
+//       to: warmupEmail?.email || peerAccountEmail,
+//       subject,
+//       text: body,
+//       html: body.replace(/\n/g, "<br>"),
+//       headers: {
+//         "X-Warmup-ID": warmupId,
+//         "X-Warmup-Session": sessionId,
+//       },
+//     })
+
+//     logger.info("Warmup email sent", {
+//       messageId: info.messageId,
+//       warmupId,
+//       accountId: sendingAccount.id,
+//     })
+
+//     // Record interaction
+//     await prisma.warmupInteraction.create({
+//       data: {
+//         sessionId,
+//         sendingAccountId: sendingAccount.id,
+//         warmupEmailId: warmupEmail?.id || null,
+//         direction: "OUTBOUND",
+//         subject,
+//         snippet: body.slice(0, 100),
+//         sentAt: new Date(),
+//         deliveredAt: new Date(),
+//         messageId: info.messageId,
+//         // warmupId, // Will be enabled after DB migration
+//         landedInInbox: true,
+//         landedInSpam: false,
+//       },
+//     })
+
+//     // Update session stats
+//     await prisma.warmupSession.update({
+//       where: { id: sessionId },
+//       data: {
+//         emailsSent: { increment: 1 },
+//         lastSentAt: new Date(),
+//       },
+//     })
+
+//     const originalEmail = {
+//       subject,
+//       body,
+//       from: sendingAccount.email,
+//       warmupId,
+//     }
+
+//     const shouldReply = warmupReplyAutomation.shouldReply({
+//       replyRate: 45, // 45% reply rate
+//       consecutiveReplies: 0,
+//     })
+
+//     if (warmupEmail && shouldReply) {
+//       // Calculate realistic reply delay (15 mins - 24 hours)
+//       const replyDelayMinutes = warmupReplyAutomation.calculateReplyDelay()
+
+//       // Generate AI-powered reply
+//       const replyBody = await warmupReplyAutomation.generateReply(originalEmail)
+
+//       await prisma.warmupInteraction.create({
+//         data: {
+//           sessionId,
+//           sendingAccountId: sendingAccount.id,
+//           warmupEmailId: warmupEmail.id,
+//           direction: "INBOUND",
+//           subject: `Re: ${subject}`,
+//           snippet: replyBody.slice(0, 100),
+//           sentAt: new Date(Date.now() + replyDelayMinutes * 60 * 1000),
+//           // warmupId: `${warmupId}-reply-1`, // Will be enabled after DB migration
+//           landedInInbox: true,
+//           landedInSpam: false,
+//           isPending: true,
+//         },
+//       })
+//     }
+
+//     return true
+//   } catch (error) {
+//     logger.error("Error sending warmup email", error as Error, { accountId: sendingAccount.id })
+//     return false
+//   }
+// }
+
+// // Process scheduled replies
+// export async function processScheduledReplies(): Promise<void> {
+//   const pendingReplies = await prisma.warmupInteraction.findMany({
+//     where: {
+//       direction: "INBOUND",
+//       isPending: true,
+//       sentAt: { lte: new Date() },
+//     },
+//     include: {
+//       session: {
+//         include: {
+//           sendingAccount: true,
+//           warmupEmail: true,
+//         },
+//       },
+//     },
+//   })
+
+//   for (const reply of pendingReplies) {
+//     if (!reply.session.warmupEmail) continue
+
+//     try {
+//       const warmupEmail = reply.session.warmupEmail
+//       const sendingAccount = reply.session.sendingAccount
+//       const senderName = sendingAccount.name || sendingAccount.email.split("@")[0]
+//       const originalSubject = reply.subject.replace("Re: ", "")
+
+//       // Use AI to generate natural reply
+//       const replyContent = await warmupEmailGenerator.generateReply(originalSubject, reply.snippet || "", {
+//         senderName: warmupEmail.name,
+//         recipientName: senderName,
+//         warmupStage: sendingAccount.warmupStage,
+//       })
+
+//       const warmupEmailPassword = decrypt(warmupEmail.imapPassword)
+
+//       const transporter = nodemailer.createTransport({
+//         host: warmupEmail.smtpHost || "smtp.gmail.com",
+//         port: warmupEmail.smtpPort || 587,
+//         secure: warmupEmail.smtpPort === 465,
+//         auth: {
+//           user: warmupEmail.smtpUsername || warmupEmail.email,
+//           pass: warmupEmail.smtpPassword ? decrypt(warmupEmail.smtpPassword) : warmupEmailPassword,
+//         },
+//       })
+
+//       await transporter.sendMail({
+//         from: `${warmupEmail.name} <${warmupEmail.email}>`,
+//         to: sendingAccount.email,
+//         subject: replyContent.subject,
+//         text: replyContent.body + "\n" + warmupEmail.name,
+//         html: (replyContent.body + "<br>" + warmupEmail.name).replace(/\n/g, "<br>"),
+//       })
+
+//       // Mark as processed
+//       await prisma.warmupInteraction.update({
+//         where: { id: reply.id },
+//         data: {
+//           isPending: false,
+//           deliveredAt: new Date(),
+//         },
+//       })
+
+//       // Update session stats
+//       await prisma.warmupSession.update({
+//         where: { id: reply.sessionId },
+//         data: {
+//           emailsReplied: { increment: 1 },
+//         },
+//       })
+//     } catch (error) {
+//       logger.error("Error processing scheduled reply", error as Error, { replyId: reply.id })
+//     }
+//   }
+// }
+
+// // Check inbox placement for a warmup email
+// export async function checkInboxPlacement(warmupEmail: any): Promise<{ inbox: number; spam: number }> {
+//   try {
+//     const client = new ImapFlow({
+//       host: warmupEmail.imapHost,
+//       port: warmupEmail.imapPort,
+//       secure: warmupEmail.imapPort === 993,
+//       auth: {
+//         user: warmupEmail.imapUsername || warmupEmail.email,
+//         pass: decrypt(warmupEmail.imapPassword),
+//       },
+//     })
+
+//     await client.connect()
+
+//     // Check Inbox
+//     let lock = await client.getMailboxLock("INBOX")
+//     const inboxStatus = await client.status("INBOX", { messages: true })
+//     const inboxCount = inboxStatus.messages || 0
+//     lock.release()
+
+//     // Check Spam/Junk
+//     let spamCount = 0
+//     try {
+//       lock = await client.getMailboxLock("[Gmail]/Spam")
+//       const spamStatus = await client.status("[Gmail]/Spam", { messages: true })
+//       spamCount = spamStatus.messages || 0
+//       lock.release()
+//     } catch {
+//       // Spam folder might not exist or have different name
+//     }
+
+//     await client.logout()
+
+//     return { inbox: inboxCount, spam: spamCount }
+//   } catch (error) {
+//     logger.error("Error checking inbox placement", error as Error, { emailId: warmupEmail.id })
+//     return { inbox: 0, spam: 0 }
+//   }
+// }
+
+// // Get active peer accounts for warmup
+// export async function getActivePeerAccounts(userId: string, limit = 10): Promise<string[]> {
+//   const sendingAccount = await prisma.sendingAccount.findFirst({
+//     where: { userId },
+//     include: { user: true },
+//   })
+
+//   if (!sendingAccount || !sendingAccount.user) {
+//     return []
+//   }
+
+//   // Check subscription tier eligibility
+//   const canUsePeer = await warmupSubscriptionGate.canEnablePeerWarmup(userId)
+//   if (!canUsePeer) {
+//     logger.info("User not eligible for P2P warmup - upgrade required", { userId })
+//     return []
+//   }
+
+//   // Get tier-specific pool
+//   const tierPool = await warmupSubscriptionGate.getTierSpecificPeerPool(
+//     userId,
+//     sendingAccount.user.subscriptionTier as "FREE" | "STARTER" | "PRO" | "AGENCY",
+//   )
+
+//   // Use intelligent peer matching
+//   const matches = await peerMatchingEngine.findMatchesForAccount(sendingAccount, limit, tierPool)
+
+//   return matches.map((match) => match.email)
+// }
+
+// export async function processIncomingWarmupEmails(accountId: string): Promise<void> {
+//   try {
+//     const account = await prisma.sendingAccount.findUnique({
+//       where: { id: accountId },
+//     })
+
+//     if (!account || !account.imapHost) return
+
+//     logger.info("Processing incoming emails for account", { accountId, email: account.email })
+
+//     // Check spam folder and rescue warmup emails
+//     const rescueResult = await spamRescueService.rescueFromSpam(accountId)
+//     logger.info("Spam rescue completed", {
+//       accountId,
+//       checked: rescueResult.checked,
+//       rescued: rescueResult.rescued,
+//     })
+
+//     // Monitor inbox for new warmup emails (with X-Warmup-ID header)
+//     const client = new ImapFlow({
+//       host: account.imapHost,
+//       port: account.imapPort || 993,
+//       secure: account.imapTls !== false,
+//       auth: {
+//         user: account.imapUsername || account.email,
+//         pass: decrypt(account.imapPassword || ""),
+//       },
+//     })
+
+//     await client.connect()
+
+//     const lock = await client.getMailboxLock("INBOX")
+//     try {
+//       // Search for unread warmup emails (with X-Warmup-ID header)
+//       for await (const message of client.fetch({ seen: false }, { envelope: true, source: true, headers: true })) {
+//         const parsed = await simpleParser(message.source as any)
+//         const warmupIdHeader = parsed.headers.get("x-warmup-id")
+
+//         if (warmupIdHeader) {
+//           // This is a warmup email - mark as read and important
+//           await client.messageFlagsAdd(message.uid, ["\\Seen", "\\Flagged"])
+
+//           // Find corresponding session
+//           const session = await prisma.warmupSession.findFirst({
+//             where: {
+//               sendingAccountId: accountId,
+//               status: "ACTIVE",
+//             },
+//           })
+
+//           if (session) {
+//             // Record the interaction
+//             await prisma.warmupInteraction.create({
+//               data: {
+//                 sessionId: session.id,
+//                 sendingAccountId: accountId,
+//                 direction: "INBOUND",
+//                 subject: message.envelope?.subject || "No subject",
+//                 snippet: "Warmup email received",
+//                 // warmupId: Array.isArray(warmupIdHeader) ? warmupIdHeader[0] : warmupIdHeader,
+//                 landedInInbox: true,
+//                 landedInSpam: false,
+//                 deliveredAt: new Date(),
+//                 openedAt: new Date(), // Auto-open warmup emails
+//               },
+//             })
+
+//             // Update session stats
+//             await prisma.warmupSession.update({
+//               where: { id: session.id },
+//               data: {
+//                 emailsOpened: { increment: 1 },
+//               },
+//             })
+//           }
+//         }
+//       }
+//     } finally {
+//       lock.release()
+//     }
+
+//     await client.logout()
+//   } catch (error) {
+//     logger.error("Error processing incoming emails", error as Error, { accountId })
+//   }
+// }
+
+// // Process warmup for a sending account
+// export async function processAccountWarmup(sendingAccountId: string): Promise<void> {
+//   const sendingAccount = await prisma.sendingAccount.findUnique({
+//     where: { id: sendingAccountId },
+//     include: { user: true },
+//   })
+
+//   if (!sendingAccount || !sendingAccount.warmupEnabled) return
+
+//   await processIncomingWarmupEmails(sendingAccountId)
+
+//   const warmupType = getWarmupType(sendingAccount.warmupStage)
+//   const dailyLimit = sendingAccount.warmupDailyLimit
+
+//   const previousHealth = sendingAccount.healthScore
+//   // Calculate current health score (simplified - you have separate service for this)
+//   const currentHealth = await calculateHealthScore(sendingAccountId)
+
+//   if (currentHealth !== previousHealth) {
+//     await warmupNotificationService.checkHealthAlerts(sendingAccountId, previousHealth, currentHealth)
+//   }
+
+//   logger.info(`Processing ${warmupType} warmup`, { accountId: sendingAccountId, email: sendingAccount.email })
+
+//   if (warmupType === "POOL") {
+//     // Use 30-email pool for early stages
+//     const warmupEmails = await prisma.warmupEmail.findMany({
+//       where: { isActive: true },
+//       orderBy: { lastUsedFor: "asc" }, // Rotate through pool
+//       take: Math.min(dailyLimit, 5), // Send to 5 different emails per day
+//     })
+
+//     for (const warmupEmail of warmupEmails) {
+//       // Create or get session
+//       let session = await prisma.warmupSession.findFirst({
+//         where: {
+//           sendingAccountId,
+//           warmupEmailId: warmupEmail.id,
+//           status: "ACTIVE",
+//           warmupType: "POOL",
+//         },
+//         include: {
+//           warmupEmail: true,
+//         },
+//       })
+
+//       if (!session) {
+//         session = await prisma.warmupSession.create({
+//           data: {
+//             sendingAccountId,
+//             warmupEmailId: warmupEmail.id,
+//             warmupType: "POOL",
+//             dailyLimit,
+//           },
+//           include: {
+//             warmupEmail: true,
+//           },
+//         })
+//       }
+
+//       if (session.warmupEmail) {
+//         // Send warmup email
+//         await sendWarmupEmail(session.id, sendingAccount, session.warmupEmail)
+
+//         // Update last used
+//         await prisma.warmupEmail.update({
+//           where: { id: warmupEmail.id },
+//           data: { lastUsedFor: sendingAccount.email, lastEmailSentAt: new Date() },
+//         })
+//       }
+
+//       // Random delay between emails (5-15 minutes)
+//       await new Promise((resolve) => setTimeout(resolve, Math.random() * 600000 + 300000))
+//     }
+//   } else {
+//     // Use peer network for later stages
+//     const peerEmails = await getActivePeerAccounts(sendingAccount.userId, Math.min(dailyLimit, 10))
+
+//     // Filter out own email address
+//     const filteredPeers = peerEmails.filter((email) => email !== sendingAccount.email)
+
+//     for (const peerEmail of filteredPeers) {
+//       // Create or get session
+//       let session = await prisma.warmupSession.findFirst({
+//         where: {
+//           sendingAccountId,
+//           peerAccountEmail: peerEmail,
+//           status: "ACTIVE",
+//           warmupType: "PEER",
+//         },
+//         include: {
+//           warmupEmail: true,
+//         },
+//       })
+
+//       if (!session) {
+//         session = await prisma.warmupSession.create({
+//           data: {
+//             sendingAccountId,
+//             peerAccountEmail: peerEmail,
+//             warmupType: "PEER",
+//             dailyLimit,
+//           },
+//           include: {
+//             warmupEmail: true,
+//           },
+//         })
+//       }
+
+//       // Send warmup email to peer
+//       await sendWarmupEmail(session.id, sendingAccount, undefined, peerEmail)
+
+//       // Random delay between emails
+//       await new Promise((resolve) => setTimeout(resolve, Math.random() * 600000 + 300000))
+//     }
+//   }
+// }
+
+// async function calculateHealthScore(accountId: string): Promise<number> {
+//   const interactions = await prisma.warmupInteraction.findMany({
+//     where: {
+//       sendingAccountId: accountId,
+//       sentAt: {
+//         gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+//       },
+//     },
+//   })
+
+//   if (interactions.length === 0) return 100
+
+//   const totalSent = interactions.filter((i) => i.direction === "OUTBOUND").length
+//   const inboxCount = interactions.filter((i) => i.landedInInbox).length
+//   const spamCount = interactions.filter((i) => i.landedInSpam).length
+//   const openedCount = interactions.filter((i) => i.openedAt).length
+//   const repliedCount = interactions.filter((i) => i.direction === "INBOUND").length
+
+//   const inboxRate = totalSent > 0 ? (inboxCount / totalSent) * 100 : 100
+//   const openRate = inboxCount > 0 ? (openedCount / inboxCount) * 100 : 0
+//   const replyRate = inboxCount > 0 ? (repliedCount / inboxCount) * 100 : 0
+//   const spamRate = totalSent > 0 ? (spamCount / totalSent) * 100 : 0
+
+//   // Weighted health score
+//   const healthScore =
+//     inboxRate * 0.4 + // 40% weight on inbox placement
+//     openRate * 0.2 + // 20% weight on opens
+//     replyRate * 0.15 + // 15% weight on replies
+//     (100 - spamRate) * 0.15 + // 15% weight on spam rate inverse
+//     90 * 0.1 // 10% base score
+
+//   return Math.round(Math.min(100, Math.max(0, healthScore)))
+// }
+
+// // Warmup email manager export object
+// export const warmupEmailManager = {
+//   sendWarmupEmail,
+//   checkInboxPlacement,
+//   getActivePeerAccounts,
+//   processAccountWarmup,
+//   processScheduledReplies,
+//   processIncomingWarmupEmails,
+
+//   async getWarmupPoolStats() {
+//     const totalEmails = await prisma.warmupEmail.count()
+//     const activeEmails = await prisma.warmupEmail.count({ where: { isActive: true } })
+
+//     const totalInteractions = await prisma.warmupInteraction.count()
+//     const inboxInteractions = await prisma.warmupInteraction.count({
+//       where: { landedInInbox: true },
+//     })
+
+//     const emails = await prisma.warmupEmail.findMany({
+//       select: { inboxPlacement: true },
+//     })
+
+//     const avgInboxPlacement =
+//       emails.length > 0 ? emails.reduce((sum, e) => sum + e.inboxPlacement, 0) / emails.length : 0
+
+//     const peerNetworkSize = await prisma.sendingAccount.count({
+//       where: {
+//         peerWarmupOptIn: true,
+//         peerWarmupEnabled: true,
+//         isActive: true,
+//         healthScore: { gte: 80 },
+//       },
+//     })
+
+//     const accountsInPoolStage = await prisma.sendingAccount.count({
+//       where: {
+//         warmupEnabled: true,
+//         warmupStage: { in: ["NEW", "WARMING"] },
+//       },
+//     })
+
+//     const accountsInPeerStage = await prisma.sendingAccount.count({
+//       where: {
+//         warmupEnabled: true,
+//         warmupStage: { in: ["WARM", "ACTIVE", "ESTABLISHED"] },
+//       },
+//     })
+
+//     return {
+//       poolSize: totalEmails,
+//       poolActive: activeEmails,
+//       peerNetworkSize,
+//       activeAccounts: accountsInPoolStage + accountsInPeerStage,
+//       accountsInPoolStage,
+//       accountsInPeerStage,
+//       totalEmailsSent: totalInteractions,
+//       totalRepliesReceived: await prisma.warmupInteraction.count({
+//         where: { direction: "INBOUND" },
+//       }),
+//       avgInboxPlacement,
+//       inboxRate: totalInteractions > 0 ? (inboxInteractions / totalInteractions) * 100 : 100,
+//       replyRate: 0,
+//       totalInteractions,
+//     }
+//   },
+
+//   async addWarmupEmail(data: any) {
+//     try {
+//       const warmupEmail = await prisma.warmupEmail.create({
+//         data: {
+//           email: data.email,
+//           name: data.name,
+//           provider: data.provider,
+//           imapHost: data.imapHost,
+//           imapPort: data.imapPort,
+//           imapUsername: data.imapUsername || data.email,
+//           imapPassword: encrypt(data.imapPassword),
+//           smtpHost: data.smtpHost,
+//           smtpPort: data.smtpPort,
+//           smtpUsername: data.smtpUsername || data.email,
+//           smtpPassword: data.smtpPassword ? encrypt(data.smtpPassword) : null,
+//         },
+//       })
+
+//       return { success: true, warmupEmailId: warmupEmail.id }
+//     } catch (error) {
+//       logger.error("Error adding warmup email", error as Error, { email: data.email })
+//       return { success: false, error: "Failed to add warmup email" }
+//     }
+//   },
+// }
+
 import { db as prisma } from "@/lib/db"
 import nodemailer from "nodemailer"
 import { ImapFlow } from "imapflow"
@@ -1132,7 +1764,8 @@ import { warmupReplyAutomation } from "./warmup-reply-automation"
 import { warmupNotificationService } from "./warmup-notification-service"
 import { logger } from "@/lib/logger"
 import { decryptPassword, encryptPassword } from "@/lib/encryption"
-import { simpleParser } from "mailparser"
+// import { simpleParser } from "mailparser"
+import { simpleParser, AddressObject, StructuredHeader, HeaderValue } from "mailparser"
 
 // Encrypt sensitive data
 function encrypt(text: string): string {
@@ -1174,6 +1807,8 @@ export async function sendWarmupEmail(
 
     const warmupId = `warmup-${sendingAccount.id}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`
 
+    const threadId = `thread-${crypto.randomBytes(8).toString("hex")}`
+
     // Create SMTP transporter
     const transporter = nodemailer.createTransport({
       host: credentials.smtpHost || credentials.host || "smtp.gmail.com",
@@ -1195,12 +1830,15 @@ export async function sendWarmupEmail(
       headers: {
         "X-Warmup-ID": warmupId,
         "X-Warmup-Session": sessionId,
+        "X-Warmup-Thread": threadId,
+        "Message-ID": `<${warmupId}@${sendingAccount.email.split("@")[1]}>`,
       },
     })
 
     logger.info("Warmup email sent", {
       messageId: info.messageId,
       warmupId,
+      threadId,
       accountId: sendingAccount.id,
     })
 
@@ -1216,7 +1854,8 @@ export async function sendWarmupEmail(
         sentAt: new Date(),
         deliveredAt: new Date(),
         messageId: info.messageId,
-        // warmupId, // Will be enabled after DB migration
+        warmupId,
+        threadId,
         landedInInbox: true,
         landedInSpam: false,
       },
@@ -1250,6 +1889,9 @@ export async function sendWarmupEmail(
       // Generate AI-powered reply
       const replyBody = await warmupReplyAutomation.generateReply(originalEmail)
 
+      const replyWarmupId = `${warmupId}-reply-1`
+      const replyMessageId = `<${replyWarmupId}@${(warmupEmail.email as string).split("@")[1]}>`
+
       await prisma.warmupInteraction.create({
         data: {
           sessionId,
@@ -1259,7 +1901,10 @@ export async function sendWarmupEmail(
           subject: `Re: ${subject}`,
           snippet: replyBody.slice(0, 100),
           sentAt: new Date(Date.now() + replyDelayMinutes * 60 * 1000),
-          // warmupId: `${warmupId}-reply-1`, // Will be enabled after DB migration
+          warmupId: replyWarmupId,
+          threadId,
+          inReplyTo: info.messageId,
+          references: info.messageId,
           landedInInbox: true,
           landedInSpam: false,
           isPending: true,
@@ -1421,6 +2066,125 @@ export async function getActivePeerAccounts(userId: string, limit = 10): Promise
   return matches.map((match) => match.email)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// export async function processIncomingWarmupEmails(accountId: string): Promise<void> {
+//   try {
+//     const account = await prisma.sendingAccount.findUnique({
+//       where: { id: accountId },
+//     })
+
+//     if (!account || !account.imapHost) return
+
+//     logger.info("Processing incoming emails for account", { accountId, email: account.email })
+
+//     // Check spam folder and rescue warmup emails
+//     const rescueResult = await spamRescueService.rescueFromSpam(accountId)
+//     logger.info("Spam rescue completed", {
+//       accountId,
+//       checked: rescueResult.checked,
+//       rescued: rescueResult.rescued,
+//     })
+
+//     // Monitor inbox for new warmup emails (with X-Warmup-ID header)
+//     const client = new ImapFlow({
+//       host: account.imapHost,
+//       port: account.imapPort || 993,
+//       secure: account.imapTls !== false,
+//       auth: {
+//         user: account.imapUsername || account.email,
+//         pass: decrypt(account.imapPassword || ""),
+//       },
+//     })
+
+//     await client.connect()
+
+//     const lock = await client.getMailboxLock("INBOX")
+//     try {
+//       // Search for unread warmup emails (with X-Warmup-ID header)
+//       for await (const message of client.fetch({ seen: false }, { envelope: true, source: true, headers: true })) {
+//         const parsed = await simpleParser(message.source as any)
+//         const warmupIdHeader = parsed.headers.get("x-warmup-id")
+//         const threadIdHeader = parsed.headers.get("x-warmup-thread")
+//         const inReplyToHeader = parsed.headers.get("in-reply-to")
+//         const referencesHeader = parsed.headers.get("references")
+
+//         function getHeaderString(header: string | string[] | Date | AddressObject | StructuredHeader | null | undefined): string | null {
+//           if (!header) return null
+//           if (typeof header === 'string') return header
+//           if (Array.isArray(header)) return header[0] || null
+//           if (header instanceof Date) return header.toISOString()
+//           return String(header)
+//         }
+
+
+
+        
+
+//        if (warmupIdHeader) {
+//           // This is a warmup email - mark as read and important
+//           await client.messageFlagsAdd(message.uid, ["\\Seen", "\\Flagged"])
+
+//           // Find corresponding session
+//           const session = await prisma.warmupSession.findFirst({
+//             where: {
+//               sendingAccountId: accountId,
+//               status: "ACTIVE",
+//             },
+//           })
+
+//           if (session) {
+//             // Record the interaction
+//             await prisma.warmupInteraction.create({
+//               data: {
+//                 sessionId: session.id,
+//                 sendingAccountId: accountId,
+//                 direction: "INBOUND",
+//                 subject: message.envelope?.subject || "No subject",
+//                 snippet: "Warmup email received",
+//                 warmupId: getHeaderString(warmupIdHeader),
+//                 threadId: getHeaderString(threadIdHeader),
+//                 inReplyTo: getHeaderString(inReplyToHeader),
+//                 references: getHeaderString(referencesHeader),
+//                 landedInInbox: true,
+//                 landedInSpam: false,
+//                 deliveredAt: new Date(),
+//                 openedAt: new Date(), // Auto-open warmup emails
+//               },
+//             })
+
+//             // Update session stats
+//             await prisma.warmupSession.update({
+//               where: { id: session.id },
+//               data: {
+//                 emailsOpened: { increment: 1 },
+//               },
+//             })
+//           }
+//         }
+//       }
+//     } finally {
+//       lock.release()
+//     }
+
+//     await client.logout()
+//   } catch (error) {
+//     logger.error("Error processing incoming emails", error as Error, { accountId })
+//   }
+// }
+
+
 export async function processIncomingWarmupEmails(accountId: string): Promise<void> {
   try {
     const account = await prisma.sendingAccount.findUnique({
@@ -1438,6 +2202,28 @@ export async function processIncomingWarmupEmails(accountId: string): Promise<vo
       checked: rescueResult.checked,
       rescued: rescueResult.rescued,
     })
+
+    // Helper function to extract string from header
+   // Helper function to extract string from header
+    function getHeaderString(header: HeaderValue | undefined): string | null {
+      if (!header) return null
+      
+      if (typeof header === 'string') return header
+      
+      if (Array.isArray(header)) {
+        const firstItem = header[0]
+        return typeof firstItem === 'string' ? firstItem : null
+      }
+      
+      if (header instanceof Date) return header.toISOString()
+      
+      // For structured headers or address objects, try to extract meaningful string
+      try {
+        return JSON.stringify(header)
+      } catch {
+        return null
+      }
+    }
 
     // Monitor inbox for new warmup emails (with X-Warmup-ID header)
     const client = new ImapFlow({
@@ -1458,6 +2244,9 @@ export async function processIncomingWarmupEmails(accountId: string): Promise<vo
       for await (const message of client.fetch({ seen: false }, { envelope: true, source: true, headers: true })) {
         const parsed = await simpleParser(message.source as any)
         const warmupIdHeader = parsed.headers.get("x-warmup-id")
+        const threadIdHeader = parsed.headers.get("x-warmup-thread")
+        const inReplyToHeader = parsed.headers.get("in-reply-to")
+        const referencesHeader = parsed.headers.get("references")
 
         if (warmupIdHeader) {
           // This is a warmup email - mark as read and important
@@ -1480,7 +2269,10 @@ export async function processIncomingWarmupEmails(accountId: string): Promise<vo
                 direction: "INBOUND",
                 subject: message.envelope?.subject || "No subject",
                 snippet: "Warmup email received",
-                // warmupId: Array.isArray(warmupIdHeader) ? warmupIdHeader[0] : warmupIdHeader,
+                warmupId: getHeaderString(warmupIdHeader),
+                threadId: getHeaderString(threadIdHeader),
+                inReplyTo: getHeaderString(inReplyToHeader),
+                references: getHeaderString(referencesHeader),
                 landedInInbox: true,
                 landedInSpam: false,
                 deliveredAt: new Date(),
@@ -1507,6 +2299,21 @@ export async function processIncomingWarmupEmails(accountId: string): Promise<vo
     logger.error("Error processing incoming emails", error as Error, { accountId })
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Process warmup for a sending account
 export async function processAccountWarmup(sendingAccountId: string): Promise<void> {
