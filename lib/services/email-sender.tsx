@@ -864,12 +864,267 @@
 //   return emailSender.sendCampaignEmail(params)
 // }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //with the new method
 
+// import { db } from "@/lib/db"
+// import { accountRotationService } from "./account-rotation"
+// import { checkDomainHealth } from "./domain-health-checker"
+// import { emailTracking } from "./email-tracking"
+// import nodemailer from "nodemailer"
+
+// interface SendEmailParams {
+//   to: string
+//   subject: string
+//   html: string
+//   userId?: string
+//   campaignId?: string
+//   prospectId?: string
+//   skipValidation?: boolean
+// }
+
+// // Fix: Allow null values in addition to undefined to match Prisma's return types
+// interface SendingAccountWithCredentials {
+//   id: string
+//   email: string
+//   provider: string
+//   credentials: any
+//   dailyLimit: number
+//   hourlyLimit: number
+//   emailsSentToday: number
+//   emailsSentThisHour: number
+//   isActive: boolean
+//   domain?: any
+//   smtpHost?: string | null
+//   smtpPort?: number | null
+//   smtpSecure?: boolean | null
+//   smtpUsername?: string | null
+//   smtpPassword?: string | null
+// }
+
+// /**
+//  * Email Sender Service
+//  *
+//  * IMPORTANT: This service uses EACH USER'S sending accounts, NOT the platform owner's.
+//  *
+//  * For transactional emails (password resets, invitations), use lib/resend.tsx
+//  * For campaign emails (cold outreach), use this service with user's sending accounts
+//  */
+// export class EmailSenderService {
+//   /**
+//    * Send email using user's connected sending account with intelligent rotation
+//    */
+//   async sendCampaignEmail(
+//     params: SendEmailParams,
+//   ): Promise<{ success: boolean; messageId?: string; error?: string; logId?: string }> {
+//     const { to, subject, html, userId, campaignId, prospectId, skipValidation } = params
+
+//     console.log("[v0] Sending campaign email to:", to, "for user:", userId)
+
+//     try {
+//       let actualUserId = userId
+//       if (!actualUserId && campaignId) {
+//         const campaign = await db.campaign.findUnique({
+//           where: { id: campaignId },
+//           select: { userId: true },
+//         })
+//         actualUserId = campaign?.userId
+//       }
+
+//       if (!actualUserId) {
+//         return {
+//           success: false,
+//           error: "User ID not found",
+//         }
+//       }
+
+//       const rotationResult = await accountRotationService.getNextAccount(actualUserId, { type: "HEALTH_BASED" })
+
+//       if (!rotationResult) {
+//         return {
+//           success: false,
+//           error: "No active sending account available. Please connect a sending account in Settings.",
+//         }
+//       }
+
+//       const sendingAccount = await db.sendingAccount.findUnique({
+//         where: { id: rotationResult.accountId },
+//         include: { domain: true },
+//       })
+
+//       if (!sendingAccount) {
+//         return {
+//           success: false,
+//           error: "Sending account not found",
+//         }
+//       }
+
+//       if (!skipValidation && sendingAccount.domain) {
+//         const domainHealth = await checkDomainHealth(sendingAccount.domain.domain)
+
+//         if (domainHealth.reputation && domainHealth.reputation.overall < 60) {
+//           console.warn("[v0] Domain health too low for sending:", domainHealth.reputation.overall)
+//           return {
+//             success: false,
+//             error: `Domain ${sendingAccount.domain.domain} has poor health (score: ${domainHealth.reputation.overall}). Please fix DNS issues before sending.`,
+//           }
+//         }
+
+//         if (sendingAccount.domain.isBlacklisted && sendingAccount.domain.blacklistedOn.length > 0) {
+//           console.warn("[v0] Domain is blacklisted:", sendingAccount.domain.blacklistedOn)
+//           return {
+//             success: false,
+//             error: `Domain ${sendingAccount.domain.domain} is blacklisted on: ${sendingAccount.domain.blacklistedOn.join(", ")}. Cannot send emails.`,
+//           }
+//         }
+//       }
+
+//       if (sendingAccount.emailsSentThisHour >= sendingAccount.hourlyLimit) {
+//         return {
+//           success: false,
+//           error: "Hourly sending limit reached. Please wait before sending more emails.",
+//         }
+//       }
+
+//       if (sendingAccount.emailsSentToday >= sendingAccount.dailyLimit) {
+//         return {
+//           success: false,
+//           error: "Daily sending limit reached. Please try again tomorrow.",
+//         }
+//       }
+
+//       let messageId: string | undefined
+
+//       if (campaignId && prospectId) {
+//         const emailLog = await db.emailLog.create({
+//           data: {
+//             prospectId,
+//             sendingAccountId: sendingAccount.id,
+//             subject,
+//             body: html,
+//             fromEmail: sendingAccount.email,
+//             toEmail: to,
+//             status: "QUEUED",
+//             provider: sendingAccount.provider,
+//           },
+//         })
+//         const logId = emailLog.id
+
+//         const trackedHtml = emailTracking.injectTracking(html, logId)
+
+//         messageId = await this.sendViaSMTP(sendingAccount, to, subject, trackedHtml)
+
+//         await db.emailLog.update({
+//           where: { id: logId },
+//           data: {
+//             status: "SENT",
+//             providerId: messageId || undefined,
+//             sentAt: new Date(),
+//           },
+//         })
+
+//         await db.prospect.update({
+//           where: { id: prospectId },
+//           data: {
+//             emailsReceived: { increment: 1 },
+//             lastContactedAt: new Date(),
+//           },
+//         })
+//       } else {
+//         messageId = await this.sendViaSMTP(sendingAccount, to, subject, html)
+//       }
+
+//       await db.sendingAccount.update({
+//         where: { id: sendingAccount.id },
+//         data: {
+//           emailsSentToday: { increment: 1 },
+//           emailsSentThisHour: { increment: 1 },
+//         },
+//       })
+
+//       console.log("[v0] Email sent successfully via SMTP, messageId:", messageId)
+
+//       return { success: true, messageId }
+//     } catch (error) {
+//       console.error("[v0] Failed to send email:", error)
+//       return {
+//         success: false,
+//         error: error instanceof Error ? error.message : "Failed to send email",
+//       }
+//     }
+//   }
+
+//   /**
+//    * Send email via SMTP using nodemailer
+//    * Works with Gmail, Outlook, Yahoo, and custom SMTP providers
+//    */
+//   private async sendViaSMTP(
+//     account: SendingAccountWithCredentials,
+//     to: string,
+//     subject: string,
+//     html: string,
+//   ): Promise<string> {
+//     try {
+//       if (!account.smtpHost || !account.smtpUsername || !account.smtpPassword) {
+//         throw new Error("SMTP configuration incomplete for account")
+//       }
+
+//       const { decryptPassword } = await import("@/lib/encryption")
+
+//       const smtpPassword = decryptPassword(account.smtpPassword)
+
+//       const transporter = nodemailer.createTransport({
+//         host: account.smtpHost,
+//         port: account.smtpPort || 587,
+//         secure: account.smtpSecure === true, // true for 465, false for 587
+//         auth: {
+//           user: account.smtpUsername,
+//           pass: smtpPassword,
+//         },
+//         connectionTimeout: 10000,
+//         socketTimeout: 10000,
+//       })
+
+//       const info = await transporter.sendMail({
+//         from: account.email,
+//         to,
+//         subject,
+//         html,
+//         text: html.replace(/<[^>]*>/g, ""), // Strip HTML for plain text
+//       })
+
+//       return info.messageId || ""
+//     } catch (error) {
+//       console.error("[v0] SMTP sending error:", error)
+//       throw new Error(`SMTP sending failed: ${error instanceof Error ? error.message : "Unknown error"}`)
+//     }
+//   }
+// }
+
+// export const emailSender = new EmailSenderService()
+
+// export async function sendEmail(
+//   params: SendEmailParams,
+// ): Promise<{ success: boolean; messageId?: string; error?: string; logId?: string }> {
+//   return emailSender.sendCampaignEmail(params)
+// }
+
 import { db } from "@/lib/db"
-import { accountRotationService } from "./account-rotation"
-import { checkDomainHealth } from "./domain-health-checker"
-import { emailTracking } from "./email-tracking"
 import nodemailer from "nodemailer"
 
 interface SendEmailParams {
@@ -882,7 +1137,6 @@ interface SendEmailParams {
   skipValidation?: boolean
 }
 
-// Fix: Allow null values in addition to undefined to match Prisma's return types
 interface SendingAccountWithCredentials {
   id: string
   email: string
@@ -904,8 +1158,7 @@ interface SendingAccountWithCredentials {
 /**
  * Email Sender Service
  *
- * IMPORTANT: This service uses EACH USER'S sending accounts, NOT the platform owner's.
- *
+ * This service uses EACH USER'S sending accounts, NOT the platform owner's.
  * For transactional emails (password resets, invitations), use lib/resend.tsx
  * For campaign emails (cold outreach), use this service with user's sending accounts
  */
@@ -918,7 +1171,7 @@ export class EmailSenderService {
   ): Promise<{ success: boolean; messageId?: string; error?: string; logId?: string }> {
     const { to, subject, html, userId, campaignId, prospectId, skipValidation } = params
 
-    console.log("[v0] Sending campaign email to:", to, "for user:", userId)
+    console.log("[EmailSender] Sending campaign email to:", to, "for user:", userId)
 
     try {
       let actualUserId = userId
@@ -937,47 +1190,28 @@ export class EmailSenderService {
         }
       }
 
-      const rotationResult = await accountRotationService.getNextAccount(actualUserId, { type: "HEALTH_BASED" })
+      // Get available sending account using rotation
+      const sendingAccount = await this.getNextAvailableAccount(actualUserId)
 
-      if (!rotationResult) {
+      if (!sendingAccount) {
         return {
           success: false,
           error: "No active sending account available. Please connect a sending account in Settings.",
         }
       }
 
-      const sendingAccount = await db.sendingAccount.findUnique({
-        where: { id: rotationResult.accountId },
-        include: { domain: true },
-      })
-
-      if (!sendingAccount) {
-        return {
-          success: false,
-          error: "Sending account not found",
-        }
-      }
-
+      // Check domain health if not skipping validation
       if (!skipValidation && sendingAccount.domain) {
-        const domainHealth = await checkDomainHealth(sendingAccount.domain.domain)
-
-        if (domainHealth.reputation && domainHealth.reputation.overall < 60) {
-          console.warn("[v0] Domain health too low for sending:", domainHealth.reputation.overall)
+        if (sendingAccount.domain.isBlacklisted && sendingAccount.domain.blacklistedOn?.length > 0) {
+          console.warn("[EmailSender] Domain is blacklisted:", sendingAccount.domain.blacklistedOn)
           return {
             success: false,
-            error: `Domain ${sendingAccount.domain.domain} has poor health (score: ${domainHealth.reputation.overall}). Please fix DNS issues before sending.`,
-          }
-        }
-
-        if (sendingAccount.domain.isBlacklisted && sendingAccount.domain.blacklistedOn.length > 0) {
-          console.warn("[v0] Domain is blacklisted:", sendingAccount.domain.blacklistedOn)
-          return {
-            success: false,
-            error: `Domain ${sendingAccount.domain.domain} is blacklisted on: ${sendingAccount.domain.blacklistedOn.join(", ")}. Cannot send emails.`,
+            error: `Domain ${sendingAccount.domain.domain} is blacklisted. Cannot send emails.`,
           }
         }
       }
 
+      // Check rate limits
       if (sendingAccount.emailsSentThisHour >= sendingAccount.hourlyLimit) {
         return {
           success: false,
@@ -993,7 +1227,9 @@ export class EmailSenderService {
       }
 
       let messageId: string | undefined
+      let logId: string | undefined
 
+      // Create email log and send
       if (campaignId && prospectId) {
         const emailLog = await db.emailLog.create({
           data: {
@@ -1007,11 +1243,9 @@ export class EmailSenderService {
             provider: sendingAccount.provider,
           },
         })
-        const logId = emailLog.id
+        logId = emailLog.id
 
-        const trackedHtml = emailTracking.injectTracking(html, logId)
-
-        messageId = await this.sendViaSMTP(sendingAccount, to, subject, trackedHtml)
+        messageId = await this.sendViaSMTP(sendingAccount, to, subject, html)
 
         await db.emailLog.update({
           where: { id: logId },
@@ -1033,6 +1267,7 @@ export class EmailSenderService {
         messageId = await this.sendViaSMTP(sendingAccount, to, subject, html)
       }
 
+      // Update sending account stats
       await db.sendingAccount.update({
         where: { id: sendingAccount.id },
         data: {
@@ -1041,11 +1276,11 @@ export class EmailSenderService {
         },
       })
 
-      console.log("[v0] Email sent successfully via SMTP, messageId:", messageId)
+      console.log("[EmailSender] Email sent successfully via SMTP, messageId:", messageId)
 
-      return { success: true, messageId }
+      return { success: true, messageId, logId }
     } catch (error) {
-      console.error("[v0] Failed to send email:", error)
+      console.error("[EmailSender] Failed to send email:", error)
       return {
         success: false,
         error: error instanceof Error ? error.message : "Failed to send email",
@@ -1054,8 +1289,26 @@ export class EmailSenderService {
   }
 
   /**
+   * Get next available sending account for user
+   */
+  private async getNextAvailableAccount(userId: string): Promise<SendingAccountWithCredentials | null> {
+    const account = await db.sendingAccount.findFirst({
+      where: {
+        userId,
+        isActive: true,
+        emailsSentToday: {
+          lt: db.sendingAccount.fields.dailyLimit,
+        },
+      },
+      include: { domain: true },
+      orderBy: { emailsSentToday: "asc" },
+    })
+
+    return account as SendingAccountWithCredentials | null
+  }
+
+  /**
    * Send email via SMTP using nodemailer
-   * Works with Gmail, Outlook, Yahoo, and custom SMTP providers
    */
   private async sendViaSMTP(
     account: SendingAccountWithCredentials,
@@ -1068,14 +1321,20 @@ export class EmailSenderService {
         throw new Error("SMTP configuration incomplete for account")
       }
 
-      const { decryptPassword } = await import("@/lib/encryption")
+      let smtpPassword = account.smtpPassword
 
-      const smtpPassword = decryptPassword(account.smtpPassword)
+      // Try to decrypt password if encryption module exists
+      try {
+        const { decryptPassword } = await import("@/lib/encryption")
+        smtpPassword = decryptPassword(account.smtpPassword)
+      } catch {
+        // If encryption module doesn't exist, use password as-is
+      }
 
       const transporter = nodemailer.createTransport({
         host: account.smtpHost,
         port: account.smtpPort || 587,
-        secure: account.smtpSecure === true, // true for 465, false for 587
+        secure: account.smtpSecure === true,
         auth: {
           user: account.smtpUsername,
           pass: smtpPassword,
@@ -1089,12 +1348,12 @@ export class EmailSenderService {
         to,
         subject,
         html,
-        text: html.replace(/<[^>]*>/g, ""), // Strip HTML for plain text
+        text: html.replace(/<[^>]*>/g, ""),
       })
 
       return info.messageId || ""
     } catch (error) {
-      console.error("[v0] SMTP sending error:", error)
+      console.error("[EmailSender] SMTP sending error:", error)
       throw new Error(`SMTP sending failed: ${error instanceof Error ? error.message : "Unknown error"}`)
     }
   }

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, CheckCircle2, XCircle, PlayCircle } from "lucide-react"
+import { CheckCircle2, XCircle, PlayCircle } from "lucide-react"
 import { WaveLoader } from "@/components/loader/wave-loader"
 
 const cronJobs = [

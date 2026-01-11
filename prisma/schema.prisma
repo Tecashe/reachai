@@ -1377,6 +1377,7 @@ enum CampaignStatus {
 enum ProspectStatus {
   ACTIVE
   CONTACTED
+  CONVERTED  
   REPLIED
   BOUNCED
   UNSUBSCRIBED
@@ -1772,6 +1773,7 @@ model Sequence {
   totalSteps    Int    @default(0)
   totalEnrolled Int    @default(0)
   totalCompleted Int   @default(0)
+  totalExited    Int   @default(0)
   avgOpenRate   Float?
   avgReplyRate  Float?
   avgClickRate  Float?
@@ -1822,6 +1824,7 @@ model SequenceStep {
   conditions    Json?
   skipIfReplied Boolean @default(true)
   skipIfBounced Boolean @default(true)
+  isEnabled     Boolean @default(true)
   
   // LinkedIn fields
   linkedInAction  LinkedInAction?
@@ -1835,6 +1838,15 @@ model SequenceStep {
   taskTitle       String?
   taskDescription String?       @db.Text
   taskPriority    TaskPriority? @default(MEDIUM)
+
+  
+  reviewNote       String?
+  estimatedTime    Int?
+  requireProof     Boolean   @default(false)
+  bestTimeToCall   String?
+  callOutcome      String?
+  useInMail        Boolean   @default(false)
+  dailyLimit       Int?
   
   // Stats
   sent      Int @default(0)
@@ -1923,6 +1935,13 @@ model SequenceEnrollment {
   
   exitReason ExitReason?
   exitedAt   DateTime?
+
+  
+  resumedAt        DateTime?
+  linksClicked     Int       @default(0)
+  currentStepIndex Int             @default(0)
+  lastActivityAt   DateTime?
+  metadata         Json?
   
   emailsSent    Int     @default(0)
   emailsOpened  Int     @default(0)
@@ -1965,6 +1984,7 @@ model SequenceStepExecution {
   repliedAt   DateTime?
   bounced     Boolean   @default(false)
   bouncedAt   DateTime?
+  metadata    Json?
   
   errorMessage String?
   
@@ -2089,6 +2109,17 @@ enum StepType {
   TASK
   DELAY
   CONDITION
+
+  AB_SPLIT
+  WAIT_UNTIL
+  EXIT_TRIGGER
+  MANUAL_REVIEW
+  MULTI_CHANNEL_TOUCH
+  CONTENT_REFERENCE
+  BEHAVIOR_BRANCH
+  RANDOM_VARIANT
+  VOICEMAIL_DROP
+  DIRECT_MAIL
 }
 
 enum DelayUnit {
@@ -2115,6 +2146,7 @@ enum TaskPriority {
 enum EnrollmentStatus {
   ACTIVE
   PAUSED
+  EXITED
   COMPLETED
   BOUNCED
   REPLIED
@@ -2139,6 +2171,7 @@ enum ExecutionStatus {
   DELIVERED
   FAILED
   SKIPPED
+  TIMEOUT
 }
 
 enum AutomationTrigger {
@@ -2340,3 +2373,54 @@ model UserSettings {
 
   @@index([userId])
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

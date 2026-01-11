@@ -1765,7 +1765,7 @@ import { warmupNotificationService } from "./warmup-notification-service"
 import { logger } from "@/lib/logger"
 import { decryptPassword, encryptPassword } from "@/lib/encryption"
 // import { simpleParser } from "mailparser"
-import { simpleParser, AddressObject, StructuredHeader, HeaderValue } from "mailparser"
+import { simpleParser, HeaderValue } from "mailparser"
 
 // Encrypt sensitive data
 function encrypt(text: string): string {

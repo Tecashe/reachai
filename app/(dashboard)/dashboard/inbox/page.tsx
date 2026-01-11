@@ -9,7 +9,7 @@ import { InboxStats } from "@/components/inbox/inbox-stats"
 import { InboxStatsSkeleton } from "@/components/inbox/inbox-skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Inbox, ArchiveIcon, Loader2, Keyboard } from "lucide-react"
+import { ArrowLeft, Inbox, ArchiveIcon, Keyboard } from "lucide-react"
 import Link from "next/link"
 import { WaveLoader } from "@/components/loader/wave-loader"
 
@@ -98,7 +98,6 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
             fallback={
               <div className="flex items-center justify-center h-full">
                 <div className="flex flex-col items-center gap-4">
-                  {/* <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> */}
                   <WaveLoader size="sm" bars={8} gap="tight" />
                   <p className="text-sm text-muted-foreground">Loading messages...</p>
                 </div>
