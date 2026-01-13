@@ -1610,31 +1610,31 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                       strokeDasharray="4 4"
                       stroke="hsl(var(--border))"
                       vertical={false}
-                      strokeOpacity={0.25}
+                      strokeOpacity={0.4}
                       horizontalPoints={[]}
                     />
 
                     <XAxis
                       dataKey="date"
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="hsl(var(--foreground))"
                       fontSize={12}
                       fontWeight={500}
                       tickLine={false}
                       axisLine={false}
                       tickMargin={12}
                       dy={6}
-                      tick={{ fill: "hsl(var(--muted-foreground))", opacity: 0.7 }}
+                      tick={{ fill: "hsl(var(--foreground))", opacity: 0.8 }}
                     />
 
                     <YAxis
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="hsl(var(--foreground))"
                       fontSize={12}
                       fontWeight={500}
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
                       dx={-4}
-                      tick={{ fill: "hsl(var(--muted-foreground))", opacity: 0.7 }}
+                      tick={{ fill: "hsl(var(--foreground))", opacity: 0.8 }}
                       width={45}
                     />
 
@@ -1763,7 +1763,11 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                         iconType="circle"
                         iconSize={8}
                         onClick={(e) => handleLegendClick(e.payload)}
-                       
+                        // contentStyle={{
+                        //   fontSize: "13px",
+                        //   fontWeight: 500,
+                        //   color: "hsl(var(--muted-foreground))",
+                        // }}
                       />
                     )}
                   </LineChart>
