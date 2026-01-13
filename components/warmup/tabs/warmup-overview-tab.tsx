@@ -2159,7 +2159,7 @@
 
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -2175,7 +2175,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  ReferenceLine,
   PieChart,
   Pie,
   Cell,
@@ -2194,7 +2193,6 @@ import {
   AlertCircle,
   AlertTriangle,
   Clock,
-  X,
 } from "lucide-react"
 
 interface EmailAccount {
@@ -2268,14 +2266,23 @@ interface WarmupSession {
   startedAt: Date
 }
 
+interface Activity {
+  id: string
+  type: string
+  accountEmail: string
+  message: string
+  timestamp: Date
+  status: string
+}
+
 export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: WarmupOverviewTabProps) {
   const [chartMetric, setChartMetric] = useState<ChartMetric>("all")
   const [chartData, setChartData] = useState<PerformanceData[]>([])
-  const [activities, setActivities] = useState<any[]>([])
   const [sessions, setSessions] = useState<WarmupSession[]>([])
+  const [activities, setActivities] = useState<Activity[]>([])
   const [loadingChart, setLoadingChart] = useState(true)
-  const [loadingActivities, setLoadingActivities] = useState(true)
   const [loadingSessions, setLoadingSessions] = useState(true)
+  const [loadingActivities, setLoadingActivities] = useState(true)
   const [activeChartLines, setActiveChartLines] = useState<Set<string>>(new Set(["sent", "inboxRate"]))
   const [hoveredLine, setHoveredLine] = useState<string | null>(null)
 
@@ -2289,14 +2296,12 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
   }, [])
 
   useEffect(() => {
-    fetchActivities()
-    const interval = setInterval(fetchActivities, 30000)
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
     fetchSessions()
   }, [accounts])
+
+  useEffect(() => {
+    fetchActivities()
+  }, [])
 
   const fetchPerformanceData = async () => {
     try {
@@ -2314,20 +2319,6 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
       })
     } finally {
       setLoadingChart(false)
-    }
-  }
-
-  const fetchActivities = async () => {
-    try {
-      setLoadingActivities(true)
-      const res = await fetch("/api/warmup/activities?limit=8")
-      if (!res.ok) throw new Error("Failed to fetch activities")
-      const data = await res.json()
-      setActivities(data.activities || [])
-    } catch (error) {
-      console.error("[v0] Error fetching activities:", error)
-    } finally {
-      setLoadingActivities(false)
     }
   }
 
@@ -2350,8 +2341,18 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
     }
   }
 
-  const handleMetricChange = (value: string) => {
-    setChartMetric(value as ChartMetric)
+  const fetchActivities = async () => {
+    try {
+      setLoadingActivities(true)
+      const res = await fetch("/api/warmup/activities?limit=8")
+      if (!res.ok) throw new Error("Failed to fetch activities")
+      const data = await res.json()
+      setActivities(data.activities || [])
+    } catch (error) {
+      console.error("[v0] Error fetching activities:", error)
+    } finally {
+      setLoadingActivities(false)
+    }
   }
 
   const handleLegendClick = (data: any) => {
@@ -2364,31 +2365,8 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
     setActiveChartLines(newActiveLines)
   }
 
-  const handleDownloadReport = async () => {
-    try {
-      const res = await fetch("/api/warmup/export?format=csv")
-      if (!res.ok) throw new Error("Failed to export data")
-      const blob = await res.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `warmup-report-${new Date().toISOString().split("T")[0]}.csv`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-      toast({
-        title: "Success",
-        description: "Report downloaded successfully",
-      })
-    } catch (error) {
-      console.error("[v0] Error downloading report:", error)
-      toast({
-        title: "Error",
-        description: "Failed to download report",
-        variant: "destructive",
-      })
-    }
+  const handleMetricChange = (value: string) => {
+    setChartMetric(value as ChartMetric)
   }
 
   const handlePauseResume = async (sessionId: string, currentStatus: string) => {
@@ -2461,6 +2439,63 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
     }
   }
 
+  const handleDownloadReport = async () => {
+    try {
+      const res = await fetch("/api/warmup/report")
+      if (!res.ok) throw new Error("Failed to download report")
+      const blob = await res.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `warmup-report-${new Date().toISOString().split("T")[0]}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast({
+        title: "Success",
+        description: "Report downloaded successfully",
+      })
+    } catch (error) {
+      console.error("[v0] Error downloading report:", error)
+      toast({
+        title: "Error",
+        description: "Failed to download report",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "success":
+        return <CheckCircle2 className="h-4 w-4 text-success" />
+      case "warning":
+        return <AlertTriangle className="h-4 w-4 text-warning" />
+      case "error":
+        return <AlertCircle className="h-4 w-4 text-destructive" />
+      case "info":
+        return <Clock className="h-4 w-4 text-primary" />
+      default:
+        return <Clock className="h-4 w-4 text-muted-foreground" />
+    }
+  }
+
+  const getActivityStatus = (type: string) => {
+    switch (type) {
+      case "success":
+        return "Success"
+      case "warning":
+        return "Warning"
+      case "error":
+        return "Error"
+      case "info":
+        return "Info"
+      default:
+        return "Unknown"
+    }
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
@@ -2477,26 +2512,6 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
         return <Badge variant="outline">{status}</Badge>
     }
   }
-
-  const getActivityIcon = (type: string) => {
-    if (type === "sent") return <Mail className="h-4 w-4 text-primary" />
-    if (type === "reply") return <CheckCircle2 className="h-4 w-4 text-success" />
-    if (type === "warning") return <AlertTriangle className="h-4 w-4 text-warning" />
-    return <AlertCircle className="h-4 w-4 text-destructive" />
-  }
-
-  const getActivityStatus = (type: string) => {
-    if (type === "sent" || type === "reply" || type === "received") return "success"
-    if (type === "warning") return "warning"
-    return "error"
-  }
-
-  const avgStats = useMemo(() => {
-    if (chartData.length === 0) return { sent: 0, inboxRate: 0 }
-    const avgSent = Math.round(chartData.reduce((sum, d) => sum + d.sent, 0) / chartData.length)
-    const avgInbox = Math.round((chartData.reduce((sum, d) => sum + d.inboxRate, 0) / chartData.length) * 10) / 10
-    return { sent: avgSent, inboxRate: avgInbox }
-  }, [chartData])
 
   const networkCompositionData = networkHealth
     ? [
@@ -2517,7 +2532,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
             <CardTitle className="text-xl font-semibold">Warmup Performance</CardTitle>
             <CardDescription className="text-sm">Email delivery metrics over the last 30 days</CardDescription>
           </div>
-          <Select value={chartMetric} onValueChange={(value) => setChartMetric(value as ChartMetric)}>
+          <Select value={chartMetric} onValueChange={handleMetricChange}>
             <SelectTrigger className="w-[160px] text-sm">
               <SelectValue placeholder="Select metric" />
             </SelectTrigger>
@@ -2552,7 +2567,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
 
                     <XAxis
                       dataKey="date"
-                      stroke="hsl(var(--foreground))"
+                      stroke="hsl(var(--muted-foreground))"
                       fontSize={12}
                       fontWeight={500}
                       tickLine={false}
@@ -2560,7 +2575,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                       tickMargin={12}
                       dy={6}
                       interval={4}
-                      tick={{ fill: "hsl(var(--foreground))", opacity: 1 }}
+                      tick={{ fill: "hsl(var(--muted-foreground))", opacity: 1, fontWeight: 500 }}
                       tickFormatter={(date: string) => {
                         if (typeof date === "string" && date.includes("-")) {
                           const parts = date.split("-")
@@ -2613,43 +2628,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                       wrapperStyle={{ outline: "none" }}
                     />
 
-                    {(chartMetric === "all" || chartMetric === "sent") && activeChartLines.has("sent") && (
-                      <ReferenceLine
-                        y={avgStats.sent}
-                        stroke="hsl(var(--chart-1))"
-                        strokeDasharray="5 5"
-                        strokeOpacity={0.3}
-                        label={{
-                          value: `Avg: ${avgStats.sent}`,
-                          position: "insideTopRight",
-                          fill: "hsl(var(--muted-foreground))",
-                          fontSize: 11,
-                          fontWeight: 500,
-                          offset: 10,
-                          opacity: 0.6,
-                        }}
-                      />
-                    )}
-
-                    {(chartMetric === "all" || chartMetric === "inboxRate") && activeChartLines.has("inboxRate") && (
-                      <ReferenceLine
-                        y={avgStats.inboxRate}
-                        stroke="hsl(var(--chart-2))"
-                        strokeDasharray="5 5"
-                        strokeOpacity={0.3}
-                        label={{
-                          value: `Avg: ${avgStats.inboxRate}%`,
-                          position: "insideBottomRight",
-                          fill: "hsl(var(--muted-foreground))",
-                          fontSize: 11,
-                          fontWeight: 500,
-                          offset: 10,
-                          opacity: 0.6,
-                        }}
-                      />
-                    )}
-
-                    {(chartMetric === "all" || chartMetric === "sent") && activeChartLines.has("sent") && (
+                    {chartMetric === "all" && activeChartLines.has("sent") && (
                       <Line
                         type="natural"
                         dataKey="sent"
@@ -2672,7 +2651,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                       />
                     )}
 
-                    {(chartMetric === "all" || chartMetric === "inboxRate") && activeChartLines.has("inboxRate") && (
+                    {chartMetric === "all" && activeChartLines.has("inboxRate") && (
                       <Line
                         type="natural"
                         dataKey="inboxRate"
@@ -2927,7 +2906,6 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
 
                 <div className="pt-2 border-t border-border/50 mt-4">
                   <p className="text-xs text-muted-foreground flex items-center gap-2">
-                    <Clock className="h-3 w-3" />
                     Updated {new Date(networkHealth.lastUpdated).toLocaleString()}
                   </p>
                 </div>
@@ -2941,6 +2919,74 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
         </Card>
       </div>
 
+      {/* Recent Activities - World Class */}
+      <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-300">
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <div className="space-y-1.5">
+            <CardTitle className="text-xl font-semibold">Recent Activities</CardTitle>
+            <CardDescription className="text-sm">Latest events and status updates</CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleDownloadReport} className="h-9 px-4 bg-transparent">
+            <Mail className="h-4 w-4 mr-2" /> Download Report
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {loadingActivities ? (
+            <div className="flex items-center justify-center py-12">
+              <WaveLoader size="md" />
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Mail className="h-12 w-12 text-muted-foreground/30 mb-4" />
+              <p className="text-sm text-muted-foreground">No recent activities to display.</p>
+            </div>
+          ) : (
+            <div className="overflow-y-auto h-[300px] -mx-6 px-6">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border/50 hover:bg-transparent">
+                    <TableHead className="font-semibold text-xs uppercase tracking-wide w-1/4">Account</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wide">Message</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wide">Status</TableHead>
+                    <TableHead className="font-semibold text-xs uppercase tracking-wide text-right">Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {activities.slice(0, 8).map((activity) => (
+                    <TableRow
+                      key={activity.id}
+                      className="border-border/50 hover:bg-muted/40 transition-colors duration-200"
+                    >
+                      <TableCell className="font-medium text-sm py-3 truncate">
+                        <div className="flex items-center gap-2.5">
+                          {getActivityIcon(activity.type)}
+                          <span className="text-muted-foreground">{activity.accountEmail}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm truncate max-w-[300px]">{activity.message}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="capitalize text-xs font-medium border-border/50 bg-muted/30"
+                        >
+                          {getActivityStatus(activity.type)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground text-right">
+                        {new Date(activity.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {selectedSession && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
           <Card className="border-border/50 max-w-md w-full animate-in slide-in-from-bottom-4 duration-300">
@@ -2950,7 +2996,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                 <CardDescription className="text-sm">{selectedSession.accountEmail}</CardDescription>
               </div>
               <button onClick={() => setSelectedSession(null)} className="p-1 hover:bg-muted rounded transition-colors">
-                <X className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
               </button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -3021,7 +3067,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                 onClick={() => setSettingsSessionId(null)}
                 className="p-1 hover:bg-muted rounded transition-colors"
               >
-                <X className="h-4 w-4" />
+                <Mail className="h-4 w-4" />
               </button>
             </CardHeader>
             <CardContent className="space-y-4">
