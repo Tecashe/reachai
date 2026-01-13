@@ -1043,7 +1043,7 @@ export function SequenceBuilderContent({ initialSequence, isNew = false, userId 
   const handleZoomOut = () => setZoomLevel((z) => Math.max(z - 10, 50))
   const handleFitToScreen = () => setZoomLevel(100)
 
-  // Replace your handleAddStep function with this:
+ 
 
 const handleAddStep = async (stepType: StepType, afterIndex: number) => {
   // ✅ Create step with temporary ID
