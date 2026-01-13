@@ -218,9 +218,6 @@ export function ApolloLeadFinderDialog({
                   <TrendingUp className="mr-2 h-4 w-4" />
                   Upgrade to Pro
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setDebugMode(true)}>
-                  Show Debug Info
-                </Button>
               </div>
             </AlertDescription>
           </Alert>

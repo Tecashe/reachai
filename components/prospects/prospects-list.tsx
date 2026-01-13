@@ -13,6 +13,7 @@ import { getProspects } from "@/lib/actions/prospects"
 import { ProspectActions } from "./prospect-actions"
 import { analyzeProspectQuality } from "@/lib/services/prospect-quality-analyzer"
 import { SmartImportDialog } from "./smart-import-dialog"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface ProspectsListProps {
   status?: string
@@ -104,6 +105,7 @@ export function ProspectsList({
     return (
       <Card>
         <CardContent className="p-12 text-center">
+          <WaveLoader size="sm" bars={8} gap="tight" />
           <p className="text-muted-foreground">Loading prospects...</p>
         </CardContent>
       </Card>
