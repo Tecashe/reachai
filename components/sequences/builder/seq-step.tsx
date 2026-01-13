@@ -63,6 +63,7 @@ import type {
 } from "@/lib/types/sequence"
 import { STEP_TYPE_CONFIG } from "@/lib/types/sequence"
 import { EmailBodyPreview } from "@/components/templates/email-body-preview"
+import { EmailComposerClient } from './email-composer-client'
 
 interface SequenceStepPanelProps {
   step: SequenceStep
@@ -2432,6 +2433,14 @@ Best regards,
   return (
     <TooltipProvider>
       <div className="space-y-6 p-6 max-h-[90vh] overflow-y-auto">{renderStepContent()}</div>
+       {showEmailComposer && (
+      <EmailComposerClient
+        step={step}
+        userId={userId}
+        onSave={handleEmailComposerSave}
+        onClose={() => setShowEmailComposer(false)}
+      />
+    )}
     </TooltipProvider>
   )
 }
