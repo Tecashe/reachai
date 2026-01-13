@@ -1141,7 +1141,8 @@ const handleAddStep = async (stepType: StepType, afterIndex: number) => {
 
   const handleAddStepOLD = async (stepType: StepType, afterIndex: number) => {
     const newStep: SequenceStep = {
-      id: `temp_${Date.now()}`,
+      // id: `temp_${Date.now()}`,
+      id: `temp_${++tempStepCounter}`,
       sequenceId: sequence.id,
       order: afterIndex + 1,
       stepType,
@@ -1257,7 +1258,8 @@ const handleAddStep = async (stepType: StepType, afterIndex: number) => {
 
     const newStep: SequenceStep = {
       ...stepToDuplicate,
-      id: `temp_${Date.now()}`,
+      // id: `temp_${Date.now()}`,
+      id: `temp_${++tempStepCounter}`,
       order: stepToDuplicate.order + 1,
       sent: 0,
       delivered: 0,
