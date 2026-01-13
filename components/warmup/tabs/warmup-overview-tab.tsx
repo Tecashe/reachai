@@ -2559,15 +2559,15 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                   <LineChart data={chartData} margin={{ top: 16, right: 20, left: -20, bottom: 4 }}>
                     <CartesianGrid
                       strokeDasharray="4 4"
-                      stroke="hsl(var(--border))"
+                      stroke="hsl(0, 0%, 30%)"
                       vertical={false}
-                      strokeOpacity={0.4}
+                      strokeOpacity={0.6}
                       horizontalPoints={[]}
                     />
 
                     <XAxis
                       dataKey="date"
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="hsl(0, 0%, 65%)"
                       fontSize={12}
                       fontWeight={500}
                       tickLine={false}
@@ -2575,7 +2575,7 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                       tickMargin={12}
                       dy={6}
                       interval={4}
-                      tick={{ fill: "hsl(var(--muted-foreground))", opacity: 1, fontWeight: 500 }}
+                      tick={{ fill: "hsl(0, 0%, 75%)", opacity: 1, fontWeight: 500 }}
                       tickFormatter={(date: string) => {
                         if (typeof date === "string" && date.includes("-")) {
                           const parts = date.split("-")
@@ -2586,14 +2586,14 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                     />
 
                     <YAxis
-                      stroke="hsl(var(--foreground))"
+                      stroke="hsl(0, 0%, 65%)"
                       fontSize={12}
                       fontWeight={500}
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
                       dx={-4}
-                      tick={{ fill: "hsl(var(--foreground))", opacity: 0.8 }}
+                      tick={{ fill: "hsl(0, 0%, 75%)", opacity: 1 }}
                       width={45}
                     />
 
