@@ -700,12 +700,6 @@ export function CreateCampaignWizard() {
   const router = useRouter()
 
   const steps: Step[] = ["info", "ai", "sending", "tracking"]
-  const stepLabels = {
-    info: "Campaign Info",
-    ai: "AI Settings",
-    sending: "Sending Configuration",
-    tracking: "Tracking Preferences",
-  }
 
   const handleNext = () => {
     const currentIndex = steps.indexOf(currentStep)
@@ -759,29 +753,28 @@ export function CreateCampaignWizard() {
   const currentIndex = steps.indexOf(currentStep)
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-lg">
-        {/* Simplified header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-foreground">Create Campaign</h1>
-        </div>
+    <div className="w-full h-screen flex flex-col bg-background">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-md">
+          <div className="mb-4">
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Create Campaign</h1>
+          </div>
 
-        <Card className="shadow-sm">
-          <div className="p-8">
-            <div className="min-h-80">
+          <Card className="shadow-sm border border-border/30">
+            <div className="p-5">
               {/* Campaign Info Step */}
               <div
                 className={`transition-all duration-700 ease-out ${
                   currentStep === "info"
                     ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none"
+                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
                 }`}
               >
-                <div className="space-y-5">
-                  <h2 className="text-lg font-semibold text-foreground">Campaign Information</h2>
-                  <div className="space-y-4">
+                <div className="space-y-3">
+                  <h2 className="text-base font-semibold text-foreground">Campaign Information</h2>
+                  <div className="space-y-3">
                     <div>
-                      <Label htmlFor="name" className="text-sm font-medium">
+                      <Label htmlFor="name" className="text-xs font-medium">
                         Campaign Name
                       </Label>
                       <Input
@@ -789,13 +782,13 @@ export function CreateCampaignWizard() {
                         placeholder="e.g., Q1 Outreach"
                         value={formState.name}
                         onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                        className="mt-2 border-border/40 focus:border-primary/60"
+                        className="mt-1.5 text-sm border-border/40 focus:border-primary/60"
                         autoFocus
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="description" className="text-sm font-medium">
+                      <Label htmlFor="description" className="text-xs font-medium">
                         Description
                       </Label>
                       <Textarea
@@ -803,8 +796,8 @@ export function CreateCampaignWizard() {
                         placeholder="Brief description..."
                         value={formState.description}
                         onChange={(e) => setFormState({ ...formState, description: e.target.value })}
-                        rows={3}
-                        className="mt-2 border-border/40 focus:border-primary/60 resize-none"
+                        rows={2}
+                        className="mt-1.5 text-sm border-border/40 focus:border-primary/60 resize-none"
                       />
                     </div>
                   </div>
@@ -816,28 +809,28 @@ export function CreateCampaignWizard() {
                 className={`transition-all duration-700 ease-out ${
                   currentStep === "ai"
                     ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none"
+                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
                 }`}
               >
-                <div className="space-y-5">
-                  <h2 className="text-lg font-semibold text-foreground">AI Configuration</h2>
-                  <div className="space-y-4">
+                <div className="space-y-3">
+                  <h2 className="text-base font-semibold text-foreground">AI Configuration</h2>
+                  <div className="space-y-3">
                     <div>
-                      <Label htmlFor="research-depth" className="text-sm font-medium">
+                      <Label htmlFor="research-depth" className="text-xs font-medium">
                         Research Depth
                       </Label>
                       <Select
                         value={formState.researchDepth}
                         onValueChange={(value) => setFormState({ ...formState, researchDepth: value })}
                       >
-                        <SelectTrigger id="research-depth" className="mt-2 border-border/40">
+                        <SelectTrigger id="research-depth" className="mt-1.5 text-sm border-border/40">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {RESEARCH_DEPTH_OPTIONS.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               <div>
-                                <div className="font-medium">{option.label}</div>
+                                <div className="font-medium text-sm">{option.label}</div>
                                 <div className="text-xs text-muted-foreground">{option.description}</div>
                               </div>
                             </SelectItem>
@@ -847,21 +840,21 @@ export function CreateCampaignWizard() {
                     </div>
 
                     <div>
-                      <Label htmlFor="personalization" className="text-sm font-medium">
+                      <Label htmlFor="personalization" className="text-xs font-medium">
                         Personalization Level
                       </Label>
                       <Select
                         value={formState.personalizationLevel}
                         onValueChange={(value) => setFormState({ ...formState, personalizationLevel: value })}
                       >
-                        <SelectTrigger id="personalization" className="mt-2 border-border/40">
+                        <SelectTrigger id="personalization" className="mt-1.5 text-sm border-border/40">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {PERSONALIZATION_LEVELS.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               <div>
-                                <div className="font-medium">{option.label}</div>
+                                <div className="font-medium text-sm">{option.label}</div>
                                 <div className="text-xs text-muted-foreground">{option.description}</div>
                               </div>
                             </SelectItem>
@@ -871,14 +864,14 @@ export function CreateCampaignWizard() {
                     </div>
 
                     <div>
-                      <Label htmlFor="tone" className="text-sm font-medium">
+                      <Label htmlFor="tone" className="text-xs font-medium">
                         Tone of Voice
                       </Label>
                       <Select
                         value={formState.tone}
                         onValueChange={(value) => setFormState({ ...formState, tone: value })}
                       >
-                        <SelectTrigger id="tone" className="mt-2 border-border/40">
+                        <SelectTrigger id="tone" className="mt-1.5 text-sm border-border/40">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -899,18 +892,18 @@ export function CreateCampaignWizard() {
                 className={`transition-all duration-700 ease-out ${
                   currentStep === "sending"
                     ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none"
+                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
                 }`}
               >
-                <div className="space-y-5">
-                  <h2 className="text-lg font-semibold text-foreground">Sending Configuration</h2>
-                  <div className="space-y-4">
+                <div className="space-y-3">
+                  <h2 className="text-base font-semibold text-foreground">Sending Configuration</h2>
+                  <div className="space-y-3">
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <Label htmlFor="daily-limit" className="text-sm font-medium">
+                      <div className="flex items-center justify-between mb-2">
+                        <Label htmlFor="daily-limit" className="text-xs font-medium">
                           Daily Send Limit
                         </Label>
-                        <span className="text-xl font-semibold text-foreground">{formState.dailyLimit}</span>
+                        <span className="text-lg font-semibold text-foreground">{formState.dailyLimit}</span>
                       </div>
                       <Slider
                         id="daily-limit"
@@ -931,26 +924,22 @@ export function CreateCampaignWizard() {
                 className={`transition-all duration-700 ease-out ${
                   currentStep === "tracking"
                     ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none"
+                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
                 }`}
               >
-                <div className="space-y-5">
-                  <h2 className="text-lg font-semibold text-foreground">Tracking Preferences</h2>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/20">
-                      <div>
-                        <Label className="text-sm font-medium cursor-pointer">Track Email Opens</Label>
-                      </div>
+                <div className="space-y-3">
+                  <h2 className="text-base font-semibold text-foreground">Tracking Preferences</h2>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-2.5 rounded-md border border-border/20">
+                      <Label className="text-xs font-medium cursor-pointer">Track Email Opens</Label>
                       <Switch
                         checked={formState.trackOpens}
                         onCheckedChange={(checked) => setFormState({ ...formState, trackOpens: checked })}
                       />
                     </div>
 
-                    <div className="flex items-center justify-between p-3 rounded-lg border border-border/20">
-                      <div>
-                        <Label className="text-sm font-medium cursor-pointer">Track Link Clicks</Label>
-                      </div>
+                    <div className="flex items-center justify-between p-2.5 rounded-md border border-border/20">
+                      <Label className="text-xs font-medium cursor-pointer">Track Link Clicks</Label>
                       <Switch
                         checked={formState.trackClicks}
                         onCheckedChange={(checked) => setFormState({ ...formState, trackClicks: checked })}
@@ -960,28 +949,32 @@ export function CreateCampaignWizard() {
                 </div>
               </div>
             </div>
-          </div>
-        </Card>
+          </Card>
 
-        <div className="flex gap-3 mt-8">
-          {currentIndex > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              className="flex-1 border-border/40 hover:bg-muted/50 bg-transparent"
-            >
-              Back
-            </Button>
-          )}
-          {currentIndex < steps.length - 1 ? (
-            <Button onClick={handleNext} disabled={!isCurrentStepValid()} className="flex-1">
-              Next
-            </Button>
-          ) : (
-            <Button onClick={handleSubmit} disabled={!isCurrentStepValid() || isPending} className="flex-1">
-              {isPending ? "Creating..." : "Create Campaign"}
-            </Button>
-          )}
+          <div className="flex gap-2 mt-3">
+            {currentIndex > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                className="flex-1 h-9 text-sm border-border/40 hover:bg-muted/50 bg-transparent"
+              >
+                Back
+              </Button>
+            )}
+            {currentIndex < steps.length - 1 ? (
+              <Button onClick={handleNext} disabled={!isCurrentStepValid()} className="flex-1 h-9 text-sm">
+                Next
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                disabled={!isCurrentStepValid() || isPending}
+                className="flex-1 h-9 text-sm"
+              >
+                {isPending ? "Creating..." : "Create Campaign"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
