@@ -830,10 +830,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
-import type { Sequence, SequenceStep, SequenceStatus, StepType } from "@/lib/types/sequence"
+import { type Sequence, type SequenceStep, type SequenceStatus, type StepType, STEP_TYPE_CONFIG } from "@/lib/types/sequence"
 import { SequenceCanvas } from "./sequence-canvas"
 // import { SequenceStepPanel } from "./sequence-step-panel"
 import { SequenceStepPanel } from "./seq-step"
@@ -1786,9 +1786,43 @@ const handleSave = async () => {
                   </div>
                 </div>
               )}
+              {/* Mobile Step Panel (Sheet) */}
+                {isMobile && (
+                  <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+                    <SheetContent side="bottom" className="h-[85vh] p-0">
+                      {selectedStep && (
+                        <>
+                          {/* Add SheetHeader with title */}
+                          <SheetHeader className="px-6 pt-6 pb-4 border-b">
+                            <SheetTitle>
+                              {STEP_TYPE_CONFIG[selectedStep.stepType]?.label || "Configure Step"}
+                            </SheetTitle>
+                          </SheetHeader>
+                          
+                          <div className="flex-1 overflow-y-auto h-full">
+                            <SequenceStepPanel
+                              step={selectedStep}
+                              sequenceId={sequence.id}
+                              userId={userId}
+                              onUpdate={(updates) => handleUpdateStep(selectedStep.id, updates)}
+                              onClose={() => {
+                                setSelectedStepId(null)
+                                setMobileSheetOpen(false)
+                              }}
+                              onDelete={() => {
+                                handleDeleteStep(selectedStep.id)
+                                setMobileSheetOpen(false)
+                              }}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </SheetContent>
+                  </Sheet>
+                )}
 
               {/* Mobile Step Panel (Sheet) */}
-              {isMobile && (
+              {/* {isMobile && (
                 <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
                   <SheetContent side="bottom" className="h-[85vh] p-0">
                     {selectedStep && (
@@ -1811,7 +1845,7 @@ const handleSave = async () => {
                     )}
                   </SheetContent>
                 </Sheet>
-              )}
+              )} */}
 
               {/* Settings Panel - Desktop */}
               {activePanel === "settings" && !selectedStep && !isMobile && (
@@ -1827,7 +1861,26 @@ const handleSave = async () => {
               )}
 
               {/* Settings Panel - Mobile (Sheet) */}
+              {/* Settings Panel - Mobile (Sheet) */}
               {isMobile && activePanel === "settings" && (
+                <Sheet open={activePanel === "settings"} onOpenChange={() => setActivePanel(null)}>
+                  <SheetContent side="bottom" className="h-[85vh] p-0">
+                    {/* Add SheetHeader with title */}
+                    <SheetHeader className="px-6 pt-6 pb-4 border-b">
+                      <SheetTitle>Sequence Settings</SheetTitle>
+                    </SheetHeader>
+                    
+                    <div className="flex-1 overflow-y-auto h-full">
+                      <SequenceSettingsPanel
+                        sequence={sequence}
+                        onUpdate={handleSettingsChange}
+                        onClose={() => setActivePanel(null)}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+              {/* {isMobile && activePanel === "settings" && (
                 <Sheet open={activePanel === "settings"} onOpenChange={() => setActivePanel(null)}>
                   <SheetContent side="bottom" className="h-[85vh] p-0">
                     <div className="flex-1 overflow-y-auto h-full">
@@ -1839,7 +1892,7 @@ const handleSave = async () => {
                     </div>
                   </SheetContent>
                 </Sheet>
-              )}
+              )} */}
             </>
           )}
 
