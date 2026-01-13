@@ -744,237 +744,244 @@ export function CreateCampaignWizard() {
   const isCurrentStepValid = () => {
     switch (currentStep) {
       case "info":
-        return formState.name.trim().length > 0
-      default:
+        return formState.name.trim() !== ""
+      case "ai":
         return true
+      case "sending":
+        return true
+      case "tracking":
+        return true
+      default:
+        return false
     }
   }
 
   const currentIndex = steps.indexOf(currentStep)
 
   return (
-    <div className="w-full h-screen flex flex-col bg-background">
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-md">
-          <div className="mb-4">
-            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Create Campaign</h1>
-          </div>
+    <div className="w-full min-h-screen flex flex-col items-center justify-center py-6 px-4 sm:py-8 sm:px-6 bg-background">
+      <div className="w-full max-w-sm">
+        {/* Header - compact */}
+        <div className="mb-5">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Create Campaign</h1>
+        </div>
 
-          <Card className="shadow-sm border border-border/30">
-            <div className="p-5">
-              {/* Campaign Info Step */}
-              <div
-                className={`transition-all duration-700 ease-out ${
-                  currentStep === "info"
-                    ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
-                }`}
-              >
-                <div className="space-y-3">
-                  <h2 className="text-base font-semibold text-foreground">Campaign Information</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="name" className="text-xs font-medium">
-                        Campaign Name
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="e.g., Q1 Outreach"
-                        value={formState.name}
-                        onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                        className="mt-1.5 text-sm border-border/40 focus:border-primary/60"
-                        autoFocus
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description" className="text-xs font-medium">
-                        Description
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Brief description..."
-                        value={formState.description}
-                        onChange={(e) => setFormState({ ...formState, description: e.target.value })}
-                        rows={2}
-                        className="mt-1.5 text-sm border-border/40 focus:border-primary/60 resize-none"
-                      />
-                    </div>
+        {/* Card - tight padding */}
+        <Card className="shadow-sm border border-border/20">
+          <div className="p-4 sm:p-5">
+            {/* Campaign Info Step */}
+            <div
+              className={`transition-all duration-700 ease-out ${
+                currentStep === "info"
+                  ? "opacity-100 scale-100 blur-0 pointer-events-auto"
+                  : "opacity-0 scale-95 blur-md pointer-events-none absolute"
+              }`}
+            >
+              <div className="space-y-2.5">
+                <h2 className="text-sm font-semibold text-foreground">Campaign Information</h2>
+                <div className="space-y-2.5">
+                  <div>
+                    <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">
+                      Campaign Name
+                    </Label>
+                    <Input
+                      id="name"
+                      placeholder="e.g., Q1 Outreach"
+                      value={formState.name}
+                      onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                      className="mt-1 text-sm border-border/40 focus:border-primary/60 h-9"
+                      autoFocus
+                    />
                   </div>
-                </div>
-              </div>
 
-              {/* AI Settings Step */}
-              <div
-                className={`transition-all duration-700 ease-out ${
-                  currentStep === "ai"
-                    ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
-                }`}
-              >
-                <div className="space-y-3">
-                  <h2 className="text-base font-semibold text-foreground">AI Configuration</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="research-depth" className="text-xs font-medium">
-                        Research Depth
-                      </Label>
-                      <Select
-                        value={formState.researchDepth}
-                        onValueChange={(value) => setFormState({ ...formState, researchDepth: value })}
-                      >
-                        <SelectTrigger id="research-depth" className="mt-1.5 text-sm border-border/40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {RESEARCH_DEPTH_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              <div>
-                                <div className="font-medium text-sm">{option.label}</div>
-                                <div className="text-xs text-muted-foreground">{option.description}</div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="personalization" className="text-xs font-medium">
-                        Personalization Level
-                      </Label>
-                      <Select
-                        value={formState.personalizationLevel}
-                        onValueChange={(value) => setFormState({ ...formState, personalizationLevel: value })}
-                      >
-                        <SelectTrigger id="personalization" className="mt-1.5 text-sm border-border/40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PERSONALIZATION_LEVELS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              <div>
-                                <div className="font-medium text-sm">{option.label}</div>
-                                <div className="text-xs text-muted-foreground">{option.description}</div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="tone" className="text-xs font-medium">
-                        Tone of Voice
-                      </Label>
-                      <Select
-                        value={formState.tone}
-                        onValueChange={(value) => setFormState({ ...formState, tone: value })}
-                      >
-                        <SelectTrigger id="tone" className="mt-1.5 text-sm border-border/40">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TONE_OPTIONS.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option.charAt(0).toUpperCase() + option.slice(1)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sending Settings Step */}
-              <div
-                className={`transition-all duration-700 ease-out ${
-                  currentStep === "sending"
-                    ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
-                }`}
-              >
-                <div className="space-y-3">
-                  <h2 className="text-base font-semibold text-foreground">Sending Configuration</h2>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label htmlFor="daily-limit" className="text-xs font-medium">
-                          Daily Send Limit
-                        </Label>
-                        <span className="text-lg font-semibold text-foreground">{formState.dailyLimit}</span>
-                      </div>
-                      <Slider
-                        id="daily-limit"
-                        min={10}
-                        max={200}
-                        step={10}
-                        value={[formState.dailyLimit]}
-                        onValueChange={(value) => setFormState({ ...formState, dailyLimit: value[0] })}
-                        className="cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tracking Settings Step */}
-              <div
-                className={`transition-all duration-700 ease-out ${
-                  currentStep === "tracking"
-                    ? "opacity-100 scale-100 blur-0 pointer-events-auto"
-                    : "opacity-0 scale-95 blur-md pointer-events-none absolute"
-                }`}
-              >
-                <div className="space-y-3">
-                  <h2 className="text-base font-semibold text-foreground">Tracking Preferences</h2>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-2.5 rounded-md border border-border/20">
-                      <Label className="text-xs font-medium cursor-pointer">Track Email Opens</Label>
-                      <Switch
-                        checked={formState.trackOpens}
-                        onCheckedChange={(checked) => setFormState({ ...formState, trackOpens: checked })}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-2.5 rounded-md border border-border/20">
-                      <Label className="text-xs font-medium cursor-pointer">Track Link Clicks</Label>
-                      <Switch
-                        checked={formState.trackClicks}
-                        onCheckedChange={(checked) => setFormState({ ...formState, trackClicks: checked })}
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="description" className="text-xs font-medium text-muted-foreground">
+                      Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      placeholder="Brief description..."
+                      value={formState.description}
+                      onChange={(e) => setFormState({ ...formState, description: e.target.value })}
+                      rows={2}
+                      className="mt-1 text-sm border-border/40 focus:border-primary/60 resize-none"
+                    />
                   </div>
                 </div>
               </div>
             </div>
-          </Card>
 
-          <div className="flex gap-2 mt-3">
-            {currentIndex > 0 && (
-              <Button
-                variant="outline"
-                onClick={handleBack}
-                className="flex-1 h-9 text-sm border-border/40 hover:bg-muted/50 bg-transparent"
-              >
-                Back
-              </Button>
-            )}
-            {currentIndex < steps.length - 1 ? (
-              <Button onClick={handleNext} disabled={!isCurrentStepValid()} className="flex-1 h-9 text-sm">
-                Next
-              </Button>
-            ) : (
-              <Button
-                onClick={handleSubmit}
-                disabled={!isCurrentStepValid() || isPending}
-                className="flex-1 h-9 text-sm"
-              >
-                {isPending ? "Creating..." : "Create Campaign"}
-              </Button>
-            )}
+            {/* AI Settings Step */}
+            <div
+              className={`transition-all duration-700 ease-out ${
+                currentStep === "ai"
+                  ? "opacity-100 scale-100 blur-0 pointer-events-auto"
+                  : "opacity-0 scale-95 blur-md pointer-events-none absolute"
+              }`}
+            >
+              <div className="space-y-2.5">
+                <h2 className="text-sm font-semibold text-foreground">AI Configuration</h2>
+                <div className="space-y-2.5">
+                  <div>
+                    <Label htmlFor="research-depth" className="text-xs font-medium text-muted-foreground">
+                      Research Depth
+                    </Label>
+                    <Select
+                      value={formState.researchDepth}
+                      onValueChange={(value) => setFormState({ ...formState, researchDepth: value })}
+                    >
+                      <SelectTrigger id="research-depth" className="mt-1 text-sm border-border/40 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RESEARCH_DEPTH_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div>
+                              <div className="font-medium text-sm">{option.label}</div>
+                              <div className="text-xs text-muted-foreground">{option.description}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="personalization" className="text-xs font-medium text-muted-foreground">
+                      Personalization Level
+                    </Label>
+                    <Select
+                      value={formState.personalizationLevel}
+                      onValueChange={(value) => setFormState({ ...formState, personalizationLevel: value })}
+                    >
+                      <SelectTrigger id="personalization" className="mt-1 text-sm border-border/40 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PERSONALIZATION_LEVELS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div>
+                              <div className="font-medium text-sm">{option.label}</div>
+                              <div className="text-xs text-muted-foreground">{option.description}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tone" className="text-xs font-medium text-muted-foreground">
+                      Tone of Voice
+                    </Label>
+                    <Select
+                      value={formState.tone}
+                      onValueChange={(value) => setFormState({ ...formState, tone: value })}
+                    >
+                      <SelectTrigger id="tone" className="mt-1 text-sm border-border/40 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TONE_OPTIONS.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option.charAt(0).toUpperCase() + option.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sending Settings Step */}
+            <div
+              className={`transition-all duration-700 ease-out ${
+                currentStep === "sending"
+                  ? "opacity-100 scale-100 blur-0 pointer-events-auto"
+                  : "opacity-0 scale-95 blur-md pointer-events-none absolute"
+              }`}
+            >
+              <div className="space-y-2.5">
+                <h2 className="text-sm font-semibold text-foreground">Sending Configuration</h2>
+                <div className="space-y-2.5">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label htmlFor="daily-limit" className="text-xs font-medium text-muted-foreground">
+                        Daily Send Limit
+                      </Label>
+                      <span className="text-sm font-semibold text-foreground">{formState.dailyLimit}</span>
+                    </div>
+                    <Slider
+                      id="daily-limit"
+                      min={10}
+                      max={200}
+                      step={10}
+                      value={[formState.dailyLimit]}
+                      onValueChange={(value) => setFormState({ ...formState, dailyLimit: value[0] })}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tracking Settings Step */}
+            <div
+              className={`transition-all duration-700 ease-out ${
+                currentStep === "tracking"
+                  ? "opacity-100 scale-100 blur-0 pointer-events-auto"
+                  : "opacity-0 scale-95 blur-md pointer-events-none absolute"
+              }`}
+            >
+              <div className="space-y-2.5">
+                <h2 className="text-sm font-semibold text-foreground">Tracking Preferences</h2>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 rounded-md border border-border/20">
+                    <Label className="text-xs font-medium cursor-pointer text-muted-foreground">
+                      Track Email Opens
+                    </Label>
+                    <Switch
+                      checked={formState.trackOpens}
+                      onCheckedChange={(checked) => setFormState({ ...formState, trackOpens: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-2 rounded-md border border-border/20">
+                    <Label className="text-xs font-medium cursor-pointer text-muted-foreground">
+                      Track Link Clicks
+                    </Label>
+                    <Switch
+                      checked={formState.trackClicks}
+                      onCheckedChange={(checked) => setFormState({ ...formState, trackClicks: checked })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        </Card>
+
+        {/* Buttons - always visible, compact */}
+        <div className="flex gap-2 mt-4">
+          {currentIndex > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              className="flex-1 h-8 text-sm border-border/40 hover:bg-muted/50 bg-transparent"
+            >
+              Back
+            </Button>
+          )}
+          {currentIndex < steps.length - 1 ? (
+            <Button onClick={handleNext} disabled={!isCurrentStepValid()} className="flex-1 h-8 text-sm">
+              Next
+            </Button>
+          ) : (
+            <Button onClick={handleSubmit} disabled={!isCurrentStepValid() || isPending} className="flex-1 h-8 text-sm">
+              {isPending ? "Creating..." : "Create Campaign"}
+            </Button>
+          )}
         </div>
       </div>
     </div>
