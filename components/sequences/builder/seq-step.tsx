@@ -2458,8 +2458,49 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
           />
           <p className="text-[10px] text-muted-foreground">{(step.subject || "").length} characters</p>
         </div>
-
         <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
+                    <VariableQuickInsert field="body" />
+                  </div>
+        
+                  {hasHtmlContent ? (
+                    // Show rich HTML preview when body contains HTML
+                    <EmailBodyPreview htmlContent={step.body || ""} onOpenEditor={() => setShowEmailComposer(true)} />
+                  ) : (
+                    // Show plain textarea for simple text with "Use Rich Editor" button
+                    <>
+                      <div className="flex justify-end mb-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-7 gap-1.5 px-2 text-xs shadow-sm bg-transparent"
+                          onClick={() => setShowEmailComposer(true)}
+                        >
+                          <Wand2 className="h-3.5 w-3.5" />
+                          Use Rich Editor
+                        </Button>
+                      </div>
+                      <Textarea
+                        ref={bodyRef}
+                        value={step.body || ""}
+                        onChange={(e) => onUpdate({ body: e.target.value })}
+                        onFocus={() => setActiveField("body")}
+                        placeholder="Write your email content..."
+                        className="min-h-[200px] text-sm resize-none font-mono"
+                      />
+                    </>
+                  )}
+        
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-muted-foreground">{(step.body || "").length} characters</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {((step.body || "").match(/\{\{[^}]+\}\}/g) || []).length} variables used
+                    </p>
+                  </div>
+                </div>
+
+        {/* <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
             <VariableQuickInsert field="body" />
@@ -2497,7 +2538,7 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
               {((step.body || "").match(/\{\{[^}]+\}\}/g) || []).length} variables used
             </p>
           </div>
-        </div>
+        </div> */}
 
         <Collapsible>
           <CollapsibleTrigger asChild>
