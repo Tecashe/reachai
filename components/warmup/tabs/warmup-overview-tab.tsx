@@ -1763,11 +1763,6 @@ export function WarmupOverviewTab({ accounts, networkHealth, onRefresh }: Warmup
                         iconType="circle"
                         iconSize={8}
                         onClick={(e) => handleLegendClick(e.payload)}
-                        // contentStyle={{
-                        //   fontSize: "13px",
-                        //   fontWeight: 500,
-                        //   color: "hsl(var(--muted-foreground))",
-                        // }}
                       />
                     )}
                   </LineChart>
