@@ -1,6 +1,5 @@
 
 import { CreateCampaignWizard } from "@/components/campaigns/create-campaign-form"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function NewCampaignPage() {
