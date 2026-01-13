@@ -892,6 +892,8 @@ interface SequenceBuilderContentProps {
   userId: string
 }
 
+let tempStepCounter = 0;
+
 const defaultNewSequence: Sequence = {
   id: "new",
   userId: "",
@@ -1049,7 +1051,8 @@ export function SequenceBuilderContent({ initialSequence, isNew = false, userId 
 const handleAddStep = async (stepType: StepType, afterIndex: number) => {
   // ✅ Create step with temporary ID
   const newStep: SequenceStep = {
-    id: `temp_${Date.now()}_${Math.random()}`, // ✅ More unique temp ID
+    // id: `temp_${Date.now()}_${Math.random()}`, // ✅ More unique temp ID
+    id: `temp_${++tempStepCounter}`,
     sequenceId: sequence.id,
     order: afterIndex + 1,
     stepType,
