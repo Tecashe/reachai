@@ -1948,6 +1948,13 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
     </Popover>
   )
 
+
+
+
+
+
+
+  
   const renderEmailContent = () => {
     const spamScore = getSpamScore()
     const wordCount = getWordCount()
@@ -2114,6 +2121,14 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
       </>
     )
   }
+
+
+
+
+
+
+
+
 
   const renderDelayContent = () => (
     <>
