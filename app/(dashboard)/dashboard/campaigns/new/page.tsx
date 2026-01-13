@@ -1,4 +1,6 @@
-import { CreateCampaignForm } from "@/components/campaigns/create-campaign-form"
+
+import { CreateCampaignWizard } from "@/components/campaigns/create-campaign-form"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function NewCampaignPage() {
@@ -15,7 +17,7 @@ export default function NewCampaignPage() {
           <CardDescription>Configure your campaign settings and AI personalization options</CardDescription>
         </CardHeader>
         <CardContent>
-          <CreateCampaignForm />
+          <CreateCampaignWizard />
         </CardContent>
       </Card>
     </div>
