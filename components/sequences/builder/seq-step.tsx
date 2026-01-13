@@ -252,173 +252,193 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
   )
 
   
-    const renderEmailContent = () => {
-      const spamScore = getSpamScore()
-      const wordCount = getWordCount()
-      const isWordCountGood = wordCount >= 50 && wordCount <= 125
-      const hasHtmlContent = /<[^>]+>/.test(step.body || "")
-  
-      return (
-        <>
-          {/* Spam Score & Word Count Indicators */}
-          <div className="flex gap-2 mb-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className={cn(
-                    "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
-                    spamScore <= 3
-                      ? "bg-green-500/10 text-green-600"
-                      : spamScore <= 6
-                        ? "bg-amber-500/10 text-amber-600"
-                        : "bg-red-500/10 text-red-600",
-                  )}
-                >
-                  <AlertTriangle className="h-3 w-3" />
-                  Spam: {spamScore}/10
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {spamScore <= 3
-                  ? "Good - Low spam risk"
-                  : spamScore <= 6
-                    ? "Fair - Some spam triggers detected"
-                    : "Poor - High spam risk"}
-              </TooltipContent>
-            </Tooltip>
-  
-            <div
-              className={cn(
-                "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
-                isWordCountGood ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600",
-              )}
-            >
-              {wordCount} words
-            </div>
-          </div>
-  
-          {/* Pre-header text */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium text-muted-foreground">Pre-header Text</Label>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">Preview text shown in inbox before opening</TooltipContent>
-              </Tooltip>
-            </div>
-            <Input
-              value={step.preHeaderText || ""}
-              onChange={(e) => onUpdate({ preHeaderText: e.target.value })}
-              placeholder="Preview text..."
-              className="text-sm"
-            />
-          </div>
-  
-          {/* Subject Line */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium text-muted-foreground">Subject Line</Label>
-              <VariableQuickInsert field="subject" />
-            </div>
-            <Input
-              ref={subjectRef}
-              value={step.subject || ""}
-              onChange={(e) => onUpdate({ subject: e.target.value })}
-              onFocus={() => setActiveField("subject")}
-              placeholder="Enter subject line..."
-              className="text-sm"
-            />
-            <p className="text-[10px] text-muted-foreground">{(step.subject || "").length} characters</p>
-          </div>
-  
-          {/* Email Body */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
-              <VariableQuickInsert field="body" />
-            </div>
-  
-            {hasHtmlContent ? (
-              // Show rich HTML preview when body contains HTML
-              <EmailBodyPreview htmlContent={step.body || ""} onOpenEditor={() => setShowEmailComposer(true)} />
-            ) : (
-              // Show plain textarea for simple text with "Use Rich Editor" button
-              <>
-                <div className="flex justify-end mb-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 gap-1.5 px-2 text-xs shadow-sm bg-transparent"
-                    onClick={() => setShowEmailComposer(true)}
-                  >
-                    <Wand2 className="h-3.5 w-3.5" />
-                    Use Rich Editor
-                  </Button>
-                </div>
-                <Textarea
-                  ref={bodyRef}
-                  value={step.body || ""}
-                  onChange={(e) => onUpdate({ body: e.target.value })}
-                  onFocus={() => setActiveField("body")}
-                  placeholder="Write your email content..."
-                  className="min-h-[200px] text-sm resize-none font-mono"
-                />
-              </>
+
+
+
+
+
+
+
+
+
+  const renderEmailContent = () => {
+    const spamScore = getSpamScore()
+    const wordCount = getWordCount()
+    const isWordCountGood = wordCount >= 50 && wordCount <= 125
+    const hasHtmlContent = /<[^>]+>/.test(step.body || "")
+
+    return (
+      <>
+        {/* Spam Score & Word Count Indicators */}
+        <div className="flex gap-2 mb-4">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                className={cn(
+                  "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
+                  spamScore <= 3
+                    ? "bg-green-500/10 text-green-600"
+                    : spamScore <= 6
+                      ? "bg-amber-500/10 text-amber-600"
+                      : "bg-red-500/10 text-red-600",
+                )}
+              >
+                <AlertTriangle className="h-3 w-3" />
+                Spam: {spamScore}/10
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              {spamScore <= 3
+                ? "Good - Low spam risk"
+                : spamScore <= 6
+                  ? "Fair - Some spam triggers detected"
+                  : "Poor - High spam risk"}
+            </TooltipContent>
+          </Tooltip>
+
+          <div
+            className={cn(
+              "flex items-center gap-1.5 px-2 py-1 rounded-md text-xs",
+              isWordCountGood ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600",
             )}
-  
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-muted-foreground">{(step.body || "").length} characters</p>
-              <p className="text-[10px] text-muted-foreground">
-                {((step.body || "").match(/\{\{[^}]+\}\}/g) || []).length} variables used
-              </p>
-            </div>
+          >
+            {wordCount} words
           </div>
-  
-          {/* Custom From Name & Reply To */}
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between h-8 text-xs">
-                Advanced email settings
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-3 pt-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-xs">Custom From Name</Label>
-                  <Input
-                    value={step.customFromName || ""}
-                    onChange={(e) => onUpdate({ customFromName: e.target.value })}
-                    placeholder="Your Name"
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Reply-to Address</Label>
-                  <Input
-                    value={step.replyToAddress || ""}
-                    onChange={(e) => onUpdate({ replyToAddress: e.target.value })}
-                    placeholder="reply@example.com"
-                    className="h-8 text-xs"
-                  />
-                </div>
+        </div>
+
+        {/* Pre-header text */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">Pre-header Text</Label>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="h-3.5 w-3.5 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">Preview text shown in inbox before opening</TooltipContent>
+            </Tooltip>
+          </div>
+          <Input
+            value={step.preHeaderText || ""}
+            onChange={(e) => onUpdate({ preHeaderText: e.target.value })}
+            placeholder="Preview text..."
+            className="text-sm"
+          />
+        </div>
+
+        {/* Subject Line */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">Subject Line</Label>
+            <VariableQuickInsert field="subject" />
+          </div>
+          <Input
+            ref={subjectRef}
+            value={step.subject || ""}
+            onChange={(e) => onUpdate({ subject: e.target.value })}
+            onFocus={() => setActiveField("subject")}
+            placeholder="Enter subject line..."
+            className="text-sm"
+          />
+          <p className="text-[10px] text-muted-foreground">{(step.subject || "").length} characters</p>
+        </div>
+
+        {/* Email Body */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-medium text-muted-foreground">Email Body</Label>
+            <VariableQuickInsert field="body" />
+          </div>
+
+          {hasHtmlContent ? (
+            // Show rich HTML preview when body contains HTML
+            <EmailBodyPreview htmlContent={step.body || ""} onOpenEditor={() => setShowEmailComposer(true)} />
+          ) : (
+            // Show plain textarea for simple text with "Use Rich Editor" button
+            <>
+              <div className="flex justify-end mb-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 px-2 text-xs shadow-sm bg-transparent"
+                  onClick={() => setShowEmailComposer(true)}
+                >
+                  <Wand2 className="h-3.5 w-3.5" />
+                  Use Rich Editor
+                </Button>
               </div>
-  
-              <div className="flex items-center justify-between">
-                <span className="text-xs">AI Optimize Send Time</span>
-                <Switch
-                  checked={step.aiOptimizeSendTime || false}
-                  onCheckedChange={(checked) => onUpdate({ aiOptimizeSendTime: checked })}
+              <Textarea
+                ref={bodyRef}
+                value={step.body || ""}
+                onChange={(e) => onUpdate({ body: e.target.value })}
+                onFocus={() => setActiveField("body")}
+                placeholder="Write your email content..."
+                className="min-h-[200px] text-sm resize-none font-mono"
+              />
+            </>
+          )}
+
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-muted-foreground">{(step.body || "").length} characters</p>
+            <p className="text-[10px] text-muted-foreground">
+              {((step.body || "").match(/\{\{[^}]+\}\}/g) || []).length} variables used
+            </p>
+          </div>
+        </div>
+
+        {/* Custom From Name & Reply To */}
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between h-8 text-xs">
+              Advanced email settings
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Custom From Name</Label>
+                <Input
+                  value={step.customFromName || ""}
+                  onChange={(e) => onUpdate({ customFromName: e.target.value })}
+                  placeholder="Your Name"
+                  className="h-8 text-xs"
                 />
               </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </>
-      )
-    }
-  
+              <div className="space-y-1">
+                <Label className="text-xs">Reply-to Address</Label>
+                <Input
+                  value={step.replyToAddress || ""}
+                  onChange={(e) => onUpdate({ replyToAddress: e.target.value })}
+                  placeholder="reply@example.com"
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-xs">AI Optimize Send Time</span>
+              <Switch
+                checked={step.aiOptimizeSendTime || false}
+                onCheckedChange={(checked) => onUpdate({ aiOptimizeSendTime: checked })}
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </>
+    )
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
