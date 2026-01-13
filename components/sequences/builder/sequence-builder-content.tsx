@@ -1043,7 +1043,99 @@ export function SequenceBuilderContent({ initialSequence, isNew = false, userId 
   const handleZoomOut = () => setZoomLevel((z) => Math.max(z - 10, 50))
   const handleFitToScreen = () => setZoomLevel(100)
 
-  const handleAddStep = async (stepType: StepType, afterIndex: number) => {
+  // Replace your handleAddStep function with this:
+
+const handleAddStep = async (stepType: StepType, afterIndex: number) => {
+  // ✅ Create step with temporary ID
+  const newStep: SequenceStep = {
+    id: `temp_${Date.now()}_${Math.random()}`, // ✅ More unique temp ID
+    sequenceId: sequence.id,
+    order: afterIndex + 1,
+    stepType,
+    delayValue: 1,
+    delayUnit: "DAYS",
+    subject: stepType === "EMAIL" ? "" : null,
+    body: stepType === "EMAIL" ? "" : null,
+    bodyHtml: null,
+    templateId: null,
+    variables: null,
+    spintaxEnabled: false,
+    conditions: null,
+    skipIfReplied: true,
+    skipIfBounced: true,
+    linkedInAction: stepType.startsWith("LINKEDIN_") ? (stepType.replace("LINKEDIN_", "") as any) : null,
+    linkedInMessage: null,
+    callScript: null,
+    callDuration: null,
+    taskTitle: stepType === "TASK" ? "Follow up task" : null,
+    taskDescription: null,
+    taskPriority: "MEDIUM",
+    sent: 0,
+    delivered: 0,
+    opened: 0,
+    clicked: 0,
+    replied: 0,
+    bounced: 0,
+    internalNotes: null,
+    variants: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+
+  // ✅ Increment orders for all steps after insertion point
+  const updatedSteps = steps.map((s) => 
+    s.order > afterIndex ? { ...s, order: s.order + 1 } : s
+  )
+  
+  // ✅ Insert new step at correct position
+  const newSteps = [...updatedSteps, newStep].sort((a, b) => a.order - b.order)
+
+  setSteps(newSteps)
+  pushHistory(newSteps)
+  setSelectedStepId(newStep.id)
+  setHasUnsavedChanges(true)
+
+  // ✅ Only create in DB if sequence is already saved
+  if (sequence.id !== "new") {
+    try {
+      // ✅ First, update order of existing steps in DB
+      await reorderSteps(
+        sequence.id,
+        userId,
+        updatedSteps.filter(s => !s.id.startsWith('temp_')).map(s => s.id)
+      )
+      
+      // ✅ Then create the new step
+      const createdStep = await createStep(sequence.id, userId, {
+        order: newStep.order,
+        stepType: newStep.stepType,
+        delayValue: newStep.delayValue,
+        delayUnit: newStep.delayUnit,
+        subject: newStep.subject,
+        body: newStep.body,
+      })
+
+      // ✅ Replace temp ID with real ID
+      setSteps((prev) => 
+        prev.map((s) => (s.id === newStep.id ? { ...s, id: createdStep.id } : s))
+      )
+      setSelectedStepId(createdStep.id)
+      
+    } catch (error) {
+      console.error("Failed to create step:", error)
+      toast({ 
+        title: "Error", 
+        description: "Failed to create step.", 
+        variant: "destructive" 
+      })
+      // ✅ Rollback on error
+      setSteps(steps)
+      pushHistory(steps)
+    }
+  }
+}
+
+  const handleAddStepOLD = async (stepType: StepType, afterIndex: number) => {
     const newStep: SequenceStep = {
       id: `temp_${Date.now()}`,
       sequenceId: sequence.id,
@@ -1188,13 +1280,92 @@ export function SequenceBuilderContent({ initialSequence, isNew = false, userId 
     handleUpdateStep(stepId, { isEnabled: enabled })
   }
 
-  const handleSave = async () => {
+  // Replace your handleSave function with this:
+
+const handleSave = async () => {
+  setIsSaving(true)
+  try {
+    if (sequence.id === "new" || isNew) {
+      // Create new sequence
+      const created = await createSequence(userId, {
+        name: sequenceName,
+        description: sequence.description,
+        status: "DRAFT",
+        ...pendingSequenceChanges,
+      })
+
+      // ✅ FIX: Sort steps by order and create them sequentially
+      const sortedSteps = [...steps].sort((a, b) => a.order - b.order)
+      
+      // ✅ FIX: Re-index orders starting from 0 to ensure uniqueness
+      for (let i = 0; i < sortedSteps.length; i++) {
+        const step = sortedSteps[i]
+        
+        await createStep(created.id, userId, {
+          order: i, // ✅ Use loop index to guarantee unique order
+          stepType: step.stepType,
+          delayValue: step.delayValue,
+          delayUnit: step.delayUnit,
+          subject: step.subject,
+          body: step.body,
+          // Add node configs
+          waitUntilConfig: step.waitUntilConfig,
+          exitTriggerConfig: step.exitTriggerConfig,
+          manualReviewConfig: step.manualReviewConfig,
+          abSplitConfig: step.abSplitConfig,
+          behaviorBranchConfig: step.behaviorBranchConfig,
+          multiChannelConfig: step.multiChannelConfig,
+          randomVariantConfig: step.randomVariantConfig,
+          contentReferenceConfig: step.contentReferenceConfig,
+          voicemailDropConfig: step.voicemailDropConfig,
+          directMailConfig: step.directMailConfig,
+        })
+      }
+
+      toast({ 
+        title: "Sequence created!", 
+        description: "Your sequence has been saved." 
+      })
+      
+      router.push(`/dashboard/sequences/${created.id}`)
+
+    } else {
+      // Update existing sequence
+      if (Object.keys(pendingSequenceChanges).length > 0) {
+        await updateSequence(sequence.id, userId, pendingSequenceChanges)
+      }
+
+      // Update modified steps
+      for (const [stepId, changes] of pendingStepChanges) {
+        if (!stepId.startsWith("temp_")) {
+          await updateStep(stepId, sequence.id, userId, changes)
+        }
+      }
+
+      toast({ 
+        title: "Saved!", 
+        description: "All changes have been saved." 
+      })
+
+      setPendingStepChanges(new Map())
+      setPendingSequenceChanges({})
+      setHasUnsavedChanges(false)
+    }
+  } catch (error) {
+    console.error("Save error:", error)
+    toast({ 
+      title: "Error", 
+      description: error instanceof Error ? error.message : "Failed to save sequence.", 
+      variant: "destructive" 
+    })
+  } finally {
+    setIsSaving(false)
+  }
+}
+
+  const handleSaveOLD = async () => {
     setIsSaving(true)
     try {
-      
-
-
-
       if (sequence.id === "new" || isNew) {
         // Use batch save for new sequences
         const created = await createSequence(userId, {
