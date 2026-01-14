@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { AlertTriangle, CheckCircle2, TrendingUp, Mail, Shield, Zap } from "lucide-react"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface AccountHealth {
   id: string
@@ -67,7 +68,8 @@ export function DeliverabilityDashboard() {
     return (
       <Card className="p-6">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          {/* <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </div>
       </Card>
     )

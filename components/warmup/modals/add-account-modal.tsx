@@ -24,6 +24,7 @@ import {
   Users,
   Zap,
 } from "lucide-react"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface AddAccountModalProps {
   open: boolean
@@ -319,7 +320,7 @@ export function AddAccountModal({ open, onClose, onSuccess, userTier }: AddAccou
             >
               {testingConnection ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Testing Connection...
                 </>
               ) : connectionTested ? (
@@ -527,7 +528,7 @@ export function AddAccountModal({ open, onClose, onSuccess, userTier }: AddAccou
             <Button onClick={handleSubmit} disabled={loading}>
               {loading ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <WaveLoader size="sm" bars={8} gap="tight" />
                   Adding Account...
                 </>
               ) : (

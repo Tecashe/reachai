@@ -23,6 +23,7 @@ import {
   Brain,
   CheckCircle2,
   Settings,
+  Rocket,
 } from "lucide-react"
 import { CrmIntegrationSetup } from "@/components/crm/crm-integration-setup"
 import { CrmPipeline } from "@/components/crm/crm-pipeline"
@@ -31,6 +32,7 @@ import { CrmDealScoring } from "@/components/crm/crm-deal-scoring"
 import { useToast } from "@/hooks/use-toast"
 import { AnimatedCounter } from "@/components/dashboard-stats/animated-counter"
 import Image from "next/image"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface CRMStats {
   totalLeads: number
@@ -157,7 +159,7 @@ export default function CrmPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+           <WaveLoader size="sm" bars={8} gap="tight" />
           <p className="text-sm text-muted-foreground">Loading CRM...</p>
         </div>
       </div>
@@ -214,7 +216,7 @@ export default function CrmPage() {
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold tracking-tight">CRM & Deal Intelligence</h1>
             <Badge variant="outline" className="bg-foreground/5 border-foreground/10">
-              <Sparkles className="w-3 h-3 mr-1" />
+              <Rocket size={60} color="#e6e6ea" absoluteStrokeWidth />
               AI Powered
             </Badge>
           </div>

@@ -21,6 +21,7 @@ import {
   calculateDeliverabilityImpact,
   getImageDimensions,
 } from "@/lib/utils/image-optimizer"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface UploadedImage {
   id: string
@@ -244,7 +245,7 @@ export function ImageUploadDialog({ open, onOpenChange, onImageSelect, existingI
 
               {compressing || uploading ? (
                 <>
-                  <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+                 <WaveLoader size="sm" bars={8} gap="tight" />
                   <p className="text-sm font-medium">{compressing ? "Optimizing for cold email..." : "Uploading..."}</p>
                   <p className="text-xs text-muted-foreground mt-2">
                     {compressing ? "Compressing and analyzing deliverability" : "Almost done"}

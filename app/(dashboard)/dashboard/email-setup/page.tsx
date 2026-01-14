@@ -2,7 +2,6 @@
 import { Suspense } from "react"
 import { EmailSetupDashboard } from "@/components/email-setup/email-setup-dashboard"
 import { Spinner } from "@/components/ui/spinner"
-
 export const metadata = {
   title: "Domain Setup | Cold Email",
   description: "Configure your domains for maximum email deliverability",

@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Circle, Zap, Mail, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface Sequence {
   id: string
@@ -50,7 +51,7 @@ export function SequenceSelector({ selectedSequenceId, onSelect }: SequenceSelec
       <div className="space-y-2">
         <Label>Select Sequence</Label>
         <div className="rounded-lg border p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+         <WaveLoader size="sm" bars={8} gap="tight" />
           <p className="text-sm text-muted-foreground mt-2">Loading sequences...</p>
         </div>
       </div>

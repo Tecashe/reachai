@@ -467,7 +467,7 @@ export function ApolloLeadFinderDialog({
               onClick={handleSearch}
               disabled={!canUseApollo || !hasEnoughCredits || !targetDescription.trim() || loading}
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
               {!loading && <Search className="mr-2 h-4 w-4" />}
               Find Leads ({totalCost} credits)
             </Button>

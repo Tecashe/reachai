@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Users, Shield, TrendingUp, Lock, Crown, Zap } from "lucide-react"
 import Link from "next/link"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface P2PNetworkStats {
   network: {
@@ -94,7 +95,8 @@ export function P2PNetworkDashboard({ userTier }: P2PNetworkDashboardProps) {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            {/* <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /> */}
+            <WaveLoader size="sm" bars={8} gap="tight" />
           </div>
         </CardContent>
       </Card>

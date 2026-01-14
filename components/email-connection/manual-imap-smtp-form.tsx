@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { WaveLoader } from "../loader/wave-loader"
 
 const PROVIDERS = {
   gmail: { smtp: { host: "smtp.gmail.com", port: 587 }, imap: { host: "imap.gmail.com", port: 993 } },
@@ -202,7 +203,7 @@ export function ManualImapSmtpForm({ onSuccess }: { onSuccess?: () => void }) {
         )}
 
         <Button onClick={handleSubmit} disabled={testing} className="w-full">
-          {testing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {testing ? <WaveLoader size="sm" bars={8} gap="tight" /> : null}
           {testing ? "Testing..." : "Connect Account"}
         </Button>
       </CardContent>

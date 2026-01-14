@@ -16,6 +16,7 @@ import {
 } from "@/lib/actions/notifications"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
+import { WaveLoader } from "../loader/wave-loader"
 
 type Notification = {
   id: string
@@ -101,7 +102,8 @@ export function NotificationsPopover() {
         <ScrollArea className="h-[400px]">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+              {/* <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto" /> */}
+              <WaveLoader size="sm" bars={8} gap="tight" />
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center">

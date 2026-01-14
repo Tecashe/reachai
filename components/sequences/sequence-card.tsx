@@ -51,6 +51,7 @@ import {
   deleteSequence,
 } from "@/lib/actions/sequence-actions"
 import { toast } from "sonner"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface SequenceCardProps {
   sequence: Sequence
@@ -188,7 +189,7 @@ export function SequenceCard({
         {/* Loading overlay */}
         {isLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-background/80 backdrop-blur-sm">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <WaveLoader size="sm" bars={8} gap="tight" />
           </div>
         )}
 

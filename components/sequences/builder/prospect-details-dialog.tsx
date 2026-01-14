@@ -19,6 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import type { Prospect } from "@prisma/client"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface ProspectDetailsDialogProps {
   prospectId: string
@@ -56,7 +57,8 @@ export function ProspectDetailsDialog({ prospectId, open, onOpenChange }: Prospe
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl">
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+            {/* <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" /> */}
+            <WaveLoader size="sm" bars={8} gap="tight" />
           </div>
         </DialogContent>
       </Dialog>

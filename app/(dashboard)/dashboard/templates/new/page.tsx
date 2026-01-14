@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import { getTemplateCategories } from "@/lib/actions/template-actions"
 import { TemplateEditor } from "@/components/templates/template-editor"
 import type { TemplateCategory } from "@/lib/types"
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 export const metadata = {
   title: "New Template",
@@ -47,7 +48,8 @@ export default function NewTemplatePage() {
     <Suspense
       fallback={
         <div className="h-screen bg-background flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" />
+          {/* <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent" /> */}
+          <WaveLoader size="sm" bars={8} gap="tight" />
         </div>
       }
     >

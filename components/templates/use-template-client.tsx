@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { duplicateTemplate } from "@/lib/actions/templates"
 import { Loader2, FileText, Copy } from "lucide-react"
+import { WaveLoader } from "../loader/wave-loader"
 
 interface UseTemplateClientProps {
   templateId: string
@@ -57,7 +58,7 @@ export function UseTemplateClient({ templateId, templateName }: UseTemplateClien
                   Duplicating <span className="font-medium text-foreground">{templateName}</span> to your library...
                 </p>
               </div>
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+              <WaveLoader size="sm" bars={8} gap="tight" />
             </>
           )}
 
