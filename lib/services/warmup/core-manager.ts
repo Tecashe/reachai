@@ -889,7 +889,7 @@ export class CoreWarmupManager {
             warmupStage: nextStage as WarmupStage,
             warmupDailyLimit: stageMap[nextStage as keyof typeof stageMap].dailyLimit,
             warmupProgress: 0,
-            // Enable peer warmup when reaching WARM 
+            // Enable peer warmup when reaching WARM stage
             peerWarmupEnabled: ['WARM', 'ACTIVE', 'ESTABLISHED'].includes(nextStage),
           },
         })
