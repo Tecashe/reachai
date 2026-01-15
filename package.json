@@ -75,6 +75,7 @@
     "googleapis": "^164.1.0",
     "imap": "^0.8.19",
     "imapflow": "^1.1.1",
+    "inngest": "^3.49.1",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "mailparser": "^3.9.1",

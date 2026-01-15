@@ -634,6 +634,7 @@ model SendingAccount {
   lastHealthCheck   DateTime?
   pausedReason      String?
   pausedAt          DateTime?
+  lastWarmupAt      DateTime?
 
   rotatedAt     DateTime? // Last time account was rotated due to health issues
   rotationCount Int       @default(0) // Number of times account has been rotated
@@ -1444,6 +1445,7 @@ enum NotificationType {
   SUBSCRIPTION_EXPIRING
   TEAM_INVITE
   SYSTEM_UPDATE
+  ACCOUNT_PAUSED
 }
 
 enum ScheduleStatus {
