@@ -589,8 +589,8 @@ model SendingAccount {
   smtpUsername      String?
   smtpPassword      String?  @db.Text
   
-  imapHost          String?
-  imapPort          Int?
+
+  
   imapTls           Boolean? @default(true)
   imapUsername      String?
   imapPassword      String?  @db.Text
@@ -604,18 +604,7 @@ model SendingAccount {
   
   imapHost     String?
   imapPort     Int?     @default(993)
-  imapUsername String?
-  imapPassword String?  @db.Text
-  imapTls      Boolean? @default(true)
-
-  smtpHost     String?
-  smtpPort     Int?     @default(587)
-  smtpUsername String?
-  smtpPassword String?  @db.Text
-  smtpTls      Boolean? @default(true)
-
-
-
+  
 
 
   // Credentials (encrypted)
