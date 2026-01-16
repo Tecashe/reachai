@@ -1,43 +1,70 @@
-import { NextResponse } from "next/server"
-import { getCurrentUserFromDb } from "@/lib/auth"
+import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import { reputationProfiler } from "@/lib/services/warmup/reputation-profiler"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUserFromDb()
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const searchParams = request.nextUrl.searchParams
+    const userId = searchParams.get("userId")
+
+    if (!userId) {
+      return NextResponse.json({ error: "User ID is required" }, { status: 400 })
     }
 
-    // Fetch ALL sending accounts for this user (both warmup enabled and not)
+    // Get all accounts with warmup status
     const accounts = await prisma.sendingAccount.findMany({
-      where: { userId: user.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        provider: true,
-        warmupEnabled: true,
-        warmupStage: true,
-        warmupDailyLimit: true,
-        warmupStartDate: true,
-        emailsSentToday: true,
-        healthScore: true,
-        openRate: true,
-        replyRate: true,
-        spamComplaintRate: true,
-        bounceRate: true,
-        // inboxPlacementRate: true,
-        createdAt: true,
-        updatedAt: true,
+      where: { userId },
+      include: {
+        warmupSessions: {
+          where: { status: "ACTIVE" },
+          orderBy: { startedAt: "desc" },
+          take: 1,
+        },
+        reputationProfile: true,
+        _count: {
+          select: {
+            emailLogs: true,
+            warmupSessions: true,
+          },
+        },
       },
-      orderBy: { createdAt: "desc" },
     })
 
-    return NextResponse.json({ accounts })
+    // Enhance with reputation profiles
+    const accountsWithProfiles = await Promise.all(
+      accounts.map(async (account) => {
+        const profile = account.reputationProfile || 
+          await reputationProfiler.analyzeAccount(account.id)
+        const currentSession = account.warmupSessions[0]
+
+        return {
+          id: account.id,
+          email: account.email,
+          provider: account.provider,
+          isActive: account.isActive,
+          dailyLimit: account.dailyLimit,
+          warmupEnabled: account.warmupEnabled,
+          warmupStage: account.warmupStage,
+          healthScore: account.healthScore,
+          createdAt: account.createdAt,
+          profile,
+          currentSession: currentSession
+            ? {
+                id: currentSession.id,
+                status: currentSession.status,
+                emailsSent: currentSession.emailsSent,
+                emailsReceived: currentSession.emailsReceived,
+                startedAt: currentSession.startedAt,
+              }
+            : null,
+          totalEmails: account._count.emailLogs,
+        }
+      }),
+    )
+
+    return NextResponse.json({ accounts: accountsWithProfiles })
   } catch (error) {
-    console.error("Error fetching warmup accounts:", error)
+    console.error("[v0] Error fetching warmup accounts:", error)
     return NextResponse.json({ error: "Failed to fetch accounts" }, { status: 500 })
   }
 }
-

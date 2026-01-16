@@ -1,165 +1,191 @@
-// import { NextResponse } from "next/server"
-// import { auth } from "@clerk/nextjs/server"
-// import { db } from "@/lib/db"
-// import { NetworkQualityControl } from "@/lib/services/netwrok-quality-control"
+// import { type NextRequest, NextResponse } from "next/server"
+// import { prisma } from "@/lib/db"
+// import { conversationThreadManager } from "@/lib/services/warmup/conversation-thread-manager"
+// import { retryQueue } from "@/lib/services/warmup/retry-queue"
 
-// const qualityControl = new NetworkQualityControl()
-
-// export async function GET() {
+// /**
+//  * GET /api/warmup/stats
+//  * Get comprehensive warmup system statistics
+//  */
+// export async function GET(request: NextRequest) {
 //   try {
-//     const { userId } = await auth()
+//     const searchParams = request.nextUrl.searchParams
+//     const userId = searchParams.get("userId")
+
 //     if (!userId) {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+//       return NextResponse.json({ error: "User ID required" }, { status: 400 })
 //     }
 
-//     const accounts = await db.sendingAccount.findMany({
-//       where: {
-//         userId,
-//         warmupEnabled: true,
-//       },
-//       include: {
-//         warmupSessions: {
-//           take: 1,
-//           orderBy: { startedAt: "desc" },
-//           where: {
-//             status: "ACTIVE",
-//           },
-//         },
-//       },
+//     // Get account stats
+//     const accountStats = await prisma.sendingAccount.aggregate({
+//       where: { userId, warmupEnabled: true },
+//       _count: { id: true },
+//       _avg: { healthScore: true, warmupProgress: true },
 //     })
 
-//     // Calculate health scores and prepare account data
-//     const accountsWithHealth = await Promise.all(
-//       accounts.map(async (account) => {
-//         const healthScore = await qualityControl.calculateCompositeHealthScore(account.id)
-//         const session = account.warmupSessions[0]
+//     // Gettoday's email stats
+//     const today = new Date()
+//     today.setHours(0, 0, 0, 0)
 
-//         return {
-//           id: account.id,
-//           email: account.email,
-//           healthScore: healthScore,
-//           warmupStage: account.warmupStage || "NEW",
-//           warmupProgress: session?.emailsSent || 0,
-//           openRate: account.openRate || 0,
-//           replyRate: account.replyRate || 0,
-//           spamRate: account.spamComplaintRate || 0,
-//           bounceRate: account.bounceRate || 0,
-//           inboxPlacementRate: session?.inboxPlacementRate || 100,
-//           warmupDailyLimit: account.warmupDailyLimit || 20,
-//           emailsSentToday: account.emailsSentToday || 0,
-//           warmupEnabled: account.warmupEnabled,
-//           warmupStartDate: session?.startedAt || account.warmupStartDate,
-//           daysInStage: session ? Math.floor((Date.now() - session.startedAt.getTime()) / (1000 * 60 * 60 * 24)) : 0,
-//           daysUntilNext: session ? calculateDaysUntilNext(account.warmupStage, session.startedAt) : 0,
-//         }
-//       }),
-//     )
+//     const todayStats = await prisma.warmupInteraction.groupBy({
+//       by: ["direction"],
+//       where: {
+//         session: { userId },
+//         sentAt: { gte: today },
+//       },
+//       _count: { id: true },
+//     })
+
+//     // Get thread stats
+//     const threadStats = await conversationThreadManager.getThreadStats()
+
+//     // Get retry queue stats
+//     const retryStats = await retryQueue.getStats()
+
+//     // Get reputation distribution
+//     const reputationDistribution = await prisma.reputationProfile.groupBy({
+//       by: ["reputationTier"],
+//       where: { sendingAccount: { userId } },
+//       _count: { id: true },
+//     })
+
+//     // Get stage distribution
+//     const stageDistribution = await prisma.sendingAccount.groupBy({
+//       by: ["warmupStage"],
+//       where: { userId, warmupEnabled: true },
+//       _count: { id: true },
+//     })
+
+//     // Get 30-day trend
+//     const thirtyDaysAgo = new Date()
+//     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+//     const dailyTrend = await prisma.warmupInteraction.groupBy({
+//       by: ["sentAt"],
+//       where: {
+//         session: { userId },
+//         sentAt: { gte: thirtyDaysAgo },
+//         direction: "OUTBOUND",
+//       },
+//       _count: { id: true },
+//     })
 
 //     return NextResponse.json({
-//       accounts: accountsWithHealth,
-//       totalAccounts: accounts.length,
-//       avgHealth:
-//         accountsWithHealth.length > 0
-//           ? Math.round(accountsWithHealth.reduce((sum, acc) => sum + acc.healthScore, 0) / accountsWithHealth.length)
-//           : 0,
+//       accounts: {
+//         total: accountStats._count.id,
+//         avgHealthScore: Math.round(accountStats._avg.healthScore || 0),
+//         avgProgress: Math.round(accountStats._avg.warmupProgress || 0),
+//       },
+//       today: {
+//         sent: todayStats.find((s) => s.direction === "OUTBOUND")?._count.id || 0,
+//         received: todayStats.find((s) => s.direction === "INBOUND")?._count.id || 0,
+//       },
+//       threads: threadStats,
+//       retryQueue: retryStats,
+//       reputationDistribution: reputationDistribution.map((r) => ({
+//         tier: r.reputationTier,
+//         count: r._count.id,
+//       })),
+//       stageDistribution: stageDistribution.map((s) => ({
+//         stage: s.warmupStage,
+//         count: s._count.id,
+//       })),
+//       trend: dailyTrend.map((d) => ({
+//         date: d.sentAt,
+//         count: d._count.id,
+//       })),
 //     })
 //   } catch (error) {
 //     console.error("[v0] Error fetching warmup stats:", error)
-//     return NextResponse.json({ error: "Failed to fetch warmup stats" }, { status: 500 })
+//     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })
 //   }
 // }
 
-// function calculateDaysUntilNext(stage: string, startedAt: Date): number {
-//   const daysInStage = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60 * 60 * 24))
-//   const stageDurations: Record<string, number> = {
-//     NEW: 3,
-//     WARMING: 7,
-//     WARM: 7,
-//     ACTIVE: 7,
-//     ESTABLISHED: 0, // No next stage
-//   }
-//   const duration = stageDurations[stage] || 0
-//   return Math.max(0, duration - daysInStage)
-// }
-import { NextResponse } from "next/server"
-import { auth } from "@clerk/nextjs/server"
-import { db } from "@/lib/db"
-import { NetworkQualityControl } from "@/lib/services/netwrok-quality-control"
+import { type NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/db"
 
-const qualityControl = new NetworkQualityControl()
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const searchParams = request.nextUrl.searchParams
+    const userId = searchParams.get("userId")
+
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ error: "User ID required" }, { status: 400 })
     }
 
-    const accounts = await db.sendingAccount.findMany({
-      where: {
-        userId,
-        // Removed warmupEnabled filter to show all connected accounts
-      },
-      include: {
-        warmupSessions: {
-          take: 1,
-          orderBy: { startedAt: "desc" },
-          where: {
-            status: "ACTIVE",
-          },
-        },
-      },
+    // Get account stats
+    const accountStats = await prisma.sendingAccount.aggregate({
+      where: { userId, warmupEnabled: true },
+      _count: { id: true },
+      _avg: { healthScore: true, warmupProgress: true },
     })
 
-    const accountsWithHealth = await Promise.all(
-      accounts.map(async (account) => {
-        const healthScore = await qualityControl.calculateCompositeHealthScore(account.id)
-        const session = account.warmupSessions[0]
+    // Get today's email stats
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-        return {
-          id: account.id,
-          email: account.email,
-          healthScore: healthScore,
-          warmupStage: account.warmupStage || "NEW",
-          warmupProgress: session?.emailsSent || 0,
-          openRate: account.openRate || 0,
-          replyRate: account.replyRate || 0,
-          spamRate: account.spamComplaintRate || 0,
-          bounceRate: account.bounceRate || 0,
-          inboxPlacementRate: session?.inboxPlacementRate || 100,
-          warmupDailyLimit: account.warmupDailyLimit || 20,
-          emailsSentToday: account.emailsSentToday || 0,
-          warmupEnabled: account.warmupEnabled,
-          warmupStartDate: session?.startedAt || account.warmupStartDate,
-          daysInStage: session ? Math.floor((Date.now() - session.startedAt.getTime()) / (1000 * 60 * 60 * 24)) : 0,
-          daysUntilNext: session ? calculateDaysUntilNext(account.warmupStage, session.startedAt) : 0,
-        }
-      }),
-    )
+    const todayStats = await prisma.warmupInteraction.groupBy({
+      by: ["direction"],
+      where: {
+        session: { sendingAccount: { userId } },
+        sentAt: { gte: today },
+      },
+      _count: { id: true },
+    })
+
+    // Get reputation distribution
+    const reputationDistribution = await prisma.reputationProfile.groupBy({
+      by: ["reputationTier"],
+      where: { account: { userId } },
+      _count: { id: true },
+    })
+
+    // Get stage distribution
+    const stageDistribution = await prisma.sendingAccount.groupBy({
+      by: ["warmupStage"],
+      where: { userId, warmupEnabled: true },
+      _count: { id: true },
+    })
+
+    // Get 30-day trend
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const dailyTrend = await prisma.warmupInteraction.groupBy({
+      by: ["sentAt"],
+      where: {
+        session: { sendingAccount: { userId } },
+        sentAt: { gte: thirtyDaysAgo },
+        direction: "OUTBOUND",
+      },
+      _count: { id: true },
+    })
 
     return NextResponse.json({
-      accounts: accountsWithHealth,
-      totalAccounts: accounts.length,
-      avgHealth:
-        accountsWithHealth.length > 0
-          ? Math.round(accountsWithHealth.reduce((sum, acc) => sum + acc.healthScore, 0) / accountsWithHealth.length)
-          : 0,
+      accounts: {
+        total: accountStats._count.id,
+        avgHealthScore: Math.round(accountStats._avg.healthScore || 0),
+        avgProgress: Math.round(accountStats._avg.warmupProgress || 0),
+      },
+      today: {
+        sent: todayStats.find((s) => s.direction === "OUTBOUND")?._count.id || 0,
+        received: todayStats.find((s) => s.direction === "INBOUND")?._count.id || 0,
+      },
+      reputationDistribution: reputationDistribution.map((r) => ({
+        tier: r.reputationTier,
+        count: r._count.id,
+      })),
+      stageDistribution: stageDistribution.map((s) => ({
+        stage: s.warmupStage,
+        count: s._count.id,
+      })),
+      trend: dailyTrend.map((d) => ({
+        date: d.sentAt,
+        count: d._count.id,
+      })),
     })
   } catch (error) {
     console.error("[v0] Error fetching warmup stats:", error)
-    return NextResponse.json({ error: "Failed to fetch warmup stats" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })
   }
-}
-
-function calculateDaysUntilNext(stage: string, startedAt: Date): number {
-  const daysInStage = Math.floor((Date.now() - startedAt.getTime()) / (1000 * 60 * 60 * 24))
-  const stageDurations: Record<string, number> = {
-    NEW: 3,
-    WARMING: 7,
-    WARM: 7,
-    ACTIVE: 7,
-    ESTABLISHED: 0,
-  }
-  const duration = stageDurations[stage] || 0
-  return Math.max(0, duration - daysInStage)
 }
