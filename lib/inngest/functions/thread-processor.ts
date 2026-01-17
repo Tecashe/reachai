@@ -10,7 +10,7 @@ export const threadProcessor = inngest.createFunction(
   {
     id: "thread-processor",
     name: "Process Conversation Threads",
-    concurrency: { limit: 20 },
+    concurrency: { limit: 4 },
   },
   { cron: "*/30 * * * *" }, // Every 30 minutes
   async ({ step }) => {
