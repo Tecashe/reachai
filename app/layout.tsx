@@ -8,7 +8,7 @@ import { ClerkProvider } from "@clerk/nextjs"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ScrollToTop } from "@/components/scroll-to-top"
-import { ExpandingButton } from "@/components/expanding-button"
+// import { ExpandingButton } from "@/components/expanding-button"
 import { Toaster } from "sonner"
 import "./globals.css"
 
@@ -75,7 +75,7 @@ export default function RootLayout({
             <ScrollToTop />
             {children}
             <Toaster position="top-right" richColors />
-            <ExpandingButton />
+            {/* <ExpandingButton /> */}
           </ThemeProvider>
           <Analytics />
         </body>
