@@ -164,7 +164,7 @@ export default function NotFound() {
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
           <Button asChild size="lg">
-            <Link href="/">Discard & Go Home</Link>
+            <Link href="/dashboard">Discard & Go Home</Link>
           </Button>
         </div>
       </div>
