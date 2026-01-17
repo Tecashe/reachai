@@ -13,10 +13,10 @@ export const warmupAccountProcessor = inngest.createFunction(
     id: 'warmup-account',
     name: 'Process Account Warmup',
     concurrency: {
-      limit: 50, // Process 50 accounts simultaneously
+      limit: 4, // Process 50 accounts simultaneously
     },
     rateLimit: {
-      limit: 100, // Max 100 accounts per minute
+      limit: 4, // Max 100 accounts per minute
       period: '1m',
     },
     retries: 2,
