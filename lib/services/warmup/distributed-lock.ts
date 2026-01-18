@@ -166,35 +166,59 @@ export class DistributedLock {
    * Acquire a distributed lock
    * Returns lock ID if successful, null if already locked
    */
+    async acquire(
+      resourceId: string,
+      ttlSeconds: number = this.DEFAULT_TTL
+    ): Promise<string | null> {
+      const lockKey = `${REDIS_KEYS.LOCK}account:${resourceId}`
+      const lockId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
+      try {
+        const result = await redis.set(lockKey, lockId, {
+          nx: true,
+          ex: ttlSeconds,
+        })
 
-  
-  async acquire(
-    resourceId: string,
-    ttlSeconds: number = this.DEFAULT_TTL
-  ): Promise<string | null> {
-    const lockKey = `${REDIS_KEYS.LOCK}account:${resourceId}`
-    const lockId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        if (result === 'OK') {
+          logger.debug('Lock acquired', { resourceId, lockId, ttl: ttlSeconds })
+          return lockId
+        }
 
-    try {
-      // SET NX (only if not exists) with expiry
-      const result = await redis.set(lockKey, lockId, {
-        nx: true,
-        ex: ttlSeconds,
-      })
-
-      if (result === 'OK') {
-        logger.debug('Lock acquired', { resourceId, lockId, ttl: ttlSeconds })
-        return lockId
+        logger.debug('Lock already held', { resourceId })
+        return null
+      } catch (error) {
+        logger.error('Failed to acquire lock', error as Error, { resourceId })
+        throw error // ← CHANGE THIS LINE
       }
-
-      logger.debug('Lock already held', { resourceId })
-      return null
-    } catch (error) {
-      logger.error('Failed to acquire lock', error, { resourceId })
-      return null
     }
-  }
+
+
+  // async acquire(
+  //   resourceId: string,
+  //   ttlSeconds: number = this.DEFAULT_TTL
+  // ): Promise<string | null> {
+  //   const lockKey = `${REDIS_KEYS.LOCK}account:${resourceId}`
+  //   const lockId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
+  //   try {
+  //     // SET NX (only if not exists) with expiry
+  //     const result = await redis.set(lockKey, lockId, {
+  //       nx: true,
+  //       ex: ttlSeconds,
+  //     })
+
+  //     if (result === 'OK') {
+  //       logger.debug('Lock acquired', { resourceId, lockId, ttl: ttlSeconds })
+  //       return lockId
+  //     }
+
+  //     logger.debug('Lock already held', { resourceId })
+  //     return null
+  //   } catch (error) {
+  //     logger.error('Failed to acquire lock', error, { resourceId })
+  //     return null
+  //   }
+  // }
 
   /**
    * Release a lock
