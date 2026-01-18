@@ -80,7 +80,6 @@
 //     return false
 //   }
 // }
-
 import { Redis } from '@upstash/redis'
 
 // Validate environment variables
@@ -149,14 +148,21 @@ export async function checkRedisHealth(): Promise<{
       return { healthy: false, error: 'Unexpected ping response' }
     }
 
-    // Test read/write
+    // Test read/write with simple string
     const testKey = 'health:check:test'
-    const testValue = Date.now().toString()
+    const testValue = `test-${Date.now()}`
     
     await redis.set(testKey, testValue, { ex: 10 })
-    const retrieved = await redis.get(testKey)
+    const retrieved = await redis.get<string>(testKey)
+    
+    // Clean up test key
+    await redis.del(testKey)
     
     if (retrieved !== testValue) {
+      console.error('Read/write test failed:', { 
+        expected: testValue, 
+        received: retrieved 
+      })
       return { 
         healthy: false, 
         error: 'Read/write test failed',
@@ -179,31 +185,40 @@ export async function checkRedisHealth(): Promise<{
   }
 }
 
-// Initialize and test connection on startup
+// Initialize and test connection on startup (non-blocking)
 let isInitialized = false
+let initializationPromise: Promise<void> | null = null
 
 export async function initializeRedis(): Promise<void> {
   if (isInitialized) return
+  if (initializationPromise) return initializationPromise
 
-  console.log('Initializing Redis connection...')
-  
-  const health = await checkRedisHealth()
-  
-  if (!health.healthy) {
-    console.error('Redis initialization failed:', health.error)
-    throw new Error(`Redis connection failed: ${health.error}`)
-  }
+  initializationPromise = (async () => {
+    console.log('Initializing Redis connection...')
+    
+    const health = await checkRedisHealth()
+    
+    if (!health.healthy) {
+      console.error('Redis initialization failed:', health.error)
+      // Don't throw - let the app continue, Redis errors will be handled per-operation
+      console.warn('⚠️  Redis is not healthy but application will continue')
+      return
+    }
 
-  console.log('Redis connected successfully', {
-    latency: health.latency,
-  })
-  
-  isInitialized = true
+    console.log('✅ Redis connected successfully', {
+      latency: `${health.latency}ms`,
+    })
+    
+    isInitialized = true
+  })()
+
+  return initializationPromise
 }
 
-// Optional: Auto-initialize in serverless environments
+// Optional: Auto-initialize in serverless environments (non-blocking)
 if (typeof window === 'undefined') {
+  // Fire and forget - don't block app startup
   initializeRedis().catch((error) => {
-    console.error('Redis auto-initialization failed:', error)
+    console.error('❌ Redis auto-initialization failed:', error)
   })
 }
