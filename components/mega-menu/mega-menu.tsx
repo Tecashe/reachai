@@ -272,13 +272,13 @@ export function MegaMenu({ label, sections }: MegaMenuProps) {
     }, 150)
   }
 
-  
- const handleMouseEnter = () => {
+  const handleMouseEnter = () => {
     if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
     }
     setIsOpen(true)
     }
+
 
   const previewContent = hoveredItem
     ? sections
@@ -325,9 +325,9 @@ export function MegaMenu({ label, sections }: MegaMenuProps) {
         <div
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className="absolute left-0 top-full pt-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300 hidden lg:block"
+          className="absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50 animate-in fade-in slide-in-from-top-2 duration-300 hidden lg:block"
         >
-          <div className="relative bg-background/98 backdrop-blur-2xl border border-border/40 rounded-3xl shadow-2xl shadow-black/30 overflow-hidden min-w-[1000px]">
+          <div className="relative bg-background/98 backdrop-blur-2xl border border-border/40 rounded-3xl shadow-2xl shadow-black/30 overflow-hidden w-[1000px]">
             {/* Ambient background effects */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/8 rounded-full blur-3xl -z-10" />
