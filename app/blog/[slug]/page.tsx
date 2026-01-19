@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: post.excerpt,
       images: [post.image],
       type: "article",
-      publishedTime: post.publishedDate,
+      publishedTime: post.publishedAt,
       authors: [post.author.name],
     },
     twitter: {
@@ -82,7 +82,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <div className="flex flex-wrap items-center gap-6 mb-12 pb-8 border-b-2 border-neutral-200">
                 <div className="flex items-center gap-4">
                   <Image
-                    src={post.author.avatar || "/placeholder.svg"}
+                    src={post.author.image || "/placeholder.svg"}
                     alt={post.author.name}
                     width={60}
                     height={60}
@@ -90,11 +90,11 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
                   />
                   <div>
                     <p className="font-bold text-neutral-900 text-lg">{post.author.name}</p>
-                    <p className="text-sm text-neutral-600">{post.author.bio}</p>
+                    {/* <p className="text-sm text-neutral-600">{post.author.role}</p> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-neutral-600 ml-auto font-medium">
-                  <span>{post.date}</span>
+                  <span>{post.publishedAt}</span>
                   <span>·</span>
                   <span className="flex items-center gap-1.5">
                     <Clock className="w-4 h-4" />

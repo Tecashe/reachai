@@ -521,7 +521,7 @@ export default function BlogPage() {
                       </p>
                       <div className="flex items-center gap-4">
                         <Image
-                          src={featuredPost.author.avatar || "/placeholder.svg"}
+                          src={featuredPost.author.image || "/placeholder.svg"}
                           alt={featuredPost.author.name}
                           width={48}
                           height={48}
@@ -530,7 +530,7 @@ export default function BlogPage() {
                         <div>
                           <p className="text-white font-semibold">{featuredPost.author.name}</p>
                           <p className="text-sm text-neutral-400 flex items-center gap-2">
-                            {featuredPost.date} <span className="w-1 h-1 rounded-full bg-neutral-600" />{" "}
+                            {featuredPost.publishedAt} <span className="w-1 h-1 rounded-full bg-neutral-600" />{" "}
                             {featuredPost.readTime}
                           </p>
                         </div>
@@ -602,7 +602,7 @@ export default function BlogPage() {
                         </p>
                         <div className="flex items-center gap-3 pt-4 border-t border-neutral-100">
                           <Image
-                            src={post.author.avatar || "/placeholder.svg"}
+                            src={post.author.image || "/placeholder.svg"}
                             alt={post.author.name}
                             width={36}
                             height={36}
@@ -610,7 +610,7 @@ export default function BlogPage() {
                           />
                           <div className="flex-1">
                             <p className="text-sm font-semibold text-neutral-900">{post.author.name}</p>
-                            <p className="text-xs text-neutral-500">{post.date}</p>
+                            <p className="text-xs text-neutral-500">{post.publishedAt}</p>
                           </div>
                           <ArrowRight className="w-5 h-5 text-neutral-400 group-hover:text-neutral-900 group-hover:translate-x-1 transition-all" />
                         </div>
