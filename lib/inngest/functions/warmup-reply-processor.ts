@@ -14,7 +14,7 @@ export const warmupReplyProcessor = inngest.createFunction(
       limit: 4, // Process 10 reply batches simultaneously
     },
   },
-  { cron: '*/15 * * * *' }, // Every 15 minutes
+  { cron: '*/45 * * * *' }, // Every 15 minutes TODO: change back to 15
   async ({ step }) => {
     logger.info('Reply processor started')
 

@@ -216,7 +216,7 @@ export function WorkspaceDelegationFlow({ onAccountAdded }: Props) {
 
   const handleProceedToOAuth = () => {
     // After admin completes delegation, user can proceed with regular OAuth
-    window.location.href = "/api/auth/gmail"
+    window.location.href = "/api/oauth/gmail"
   }
 
   return (
