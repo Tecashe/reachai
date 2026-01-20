@@ -189,14 +189,14 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    console.log("[v0] Request body:", body) // Debug log
+    // console.log("[v0] Request body:", body) // Debug log
     
     // Fix: The frontend sends 'accountName', not 'name'
     const { accountName, email, appPassword, provider } = body
 
     // Fix: Use accountName instead of name
     if (!accountName || !email || !appPassword || provider !== "gmail") {
-      console.log("[v0] Validation failed:", { accountName, email, appPassword: appPassword ? "***" : null, provider })
+      // console.log("[v0] Validation failed:", { accountName, email, appPassword: appPassword ? "***" : null, provider })
       return NextResponse.json({ 
         error: "Missing required fields",
         details: {
