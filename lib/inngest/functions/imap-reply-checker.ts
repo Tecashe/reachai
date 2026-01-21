@@ -59,6 +59,7 @@
 //     return results
 //   }
 // )
+
 // src/inngest/functions/imap-reply-checker.ts
 import { inngest } from '../client'
 import { logger } from '@/lib/logger'
@@ -75,29 +76,27 @@ export const imapReplyChecker = inngest.createFunction(
   async ({ step }) => {
     logger.info('Starting IMAP reply check')
 
-    const accounts = await step.run('fetch-accounts', async () => {
-      logger.info('Fetching accounts from database')
-      
-      const result = await prisma.sendingAccount.findMany({
-        where: {
-          isActive: true,
-          pausedAt: null,
-          warmupEnabled: true,
-          peerWarmupEnabled: true,
-        },
-        take: 50,
-      })
-      
-      logger.info('Accounts fetched', { count: result.length })
-      
-      if (result.length === 0) {
-        logger.warn('No accounts found matching criteria')
-      } else {
-        logger.info('Account IDs found', { ids: result.map(a => a.id) })
-      }
-      
-      return result
+    // Fetch accounts directly - don't wrap in step.run to preserve Date types
+    logger.info('Fetching accounts from database')
+    
+    const accounts = await prisma.sendingAccount.findMany({
+      where: {
+        isActive: true,
+        pausedAt: null,
+        warmupEnabled: true,
+        peerWarmupEnabled: true,
+      },
+      take: 50,
     })
+    
+    logger.info('Accounts fetched', { count: accounts.length })
+    
+    if (accounts.length === 0) {
+      logger.warn('No accounts found matching criteria')
+      return { accountsChecked: 0, totalReplies: 0 }
+    }
+    
+    logger.info('Account IDs found', { ids: accounts.map(a => a.id) })
 
     const results = await step.run('check-imap-replies', async () => {
       logger.info('Starting IMAP check loop', { totalAccounts: accounts.length })
@@ -117,7 +116,11 @@ export const imapReplyChecker = inngest.createFunction(
           logger.info('Credentials parsed', { 
             accountId: account.id,
             hasImapHost: !!credentials?.imapHost,
-            hasSmtpHost: !!credentials?.smtpHost 
+            hasSmtpHost: !!credentials?.smtpHost,
+            hasImapUsername: !!credentials?.imapUsername,
+            hasImapPassword: !!credentials?.imapPassword,
+            hasSmtpUsername: !!credentials?.smtpUsername,
+            hasSmtpPassword: !!credentials?.smtpPassword
           })
           
           // Skip if no IMAP config
@@ -141,7 +144,8 @@ export const imapReplyChecker = inngest.createFunction(
         } catch (error) {
           logger.error('Failed to check IMAP', error as Error, { 
             accountId: account.id,
-            errorMessage: error instanceof Error ? error.message : 'Unknown error'
+            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            errorStack: error instanceof Error ? error.stack : undefined
           })
         }
       }
