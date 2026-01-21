@@ -652,47 +652,135 @@ export class ImapReader {
   /**
    * Get IMAP configuration from account
    */
-  private getImapConfig(account: SendingAccount): ImapConfig | null {
-    try {
-      // First, try to get IMAP fields from credentials JSON
-      const credentials =
-        typeof account.credentials === "string" 
-          ? JSON.parse(account.credentials) 
-          : account.credentials as Record<string, any>
 
-      // Try credentials object with IMAP fields
-      if (credentials && typeof credentials === "object") {
-        if (credentials.imapHost && credentials.imapUsername && credentials.imapPassword) {
-          return {
-            user: credentials.imapUsername as string,
-            password: decryptPassword(credentials.imapPassword as string),
-            host: credentials.imapHost as string,
-            port: (credentials.imapPort as number) || 993,
-            tls: credentials.imapTls !== undefined ? (credentials.imapTls as boolean) : true,
-          }
-        }
+  /**
+ * Get IMAP configuration from account
+ */
+private getImapConfig(account: SendingAccount): ImapConfig | null {
+  try {
+    // First, check if IMAP fields are directly on the account (NEW APPROACH)
+    if (account.imapHost && account.imapUsername && account.imapPassword) {
+      return {
+        user: account.imapUsername,
+        password: decryptPassword(account.imapPassword),
+        host: account.imapHost,
+        port: account.imapPort || 993,
+        tls: account.imapTls !== undefined ? (account.imapTls as boolean) : true,
+      }
+    }
 
-        // Try SMTP fields (many providers use same credentials)
-        if (credentials.smtpHost && credentials.smtpUsername && credentials.smtpPassword) {
-          const host = (credentials.smtpHost as string).replace("smtp", "imap")
-          return {
-            user: credentials.smtpUsername as string,
-            password: decryptPassword(credentials.smtpPassword as string),
-            host,
-            port: 993,
-            tls: true,
-          }
+    // Fallback: Try SMTP fields directly on account (many providers use same credentials)
+    if (account.smtpHost && account.smtpUsername && account.smtpPassword) {
+      const host = account.smtpHost.replace("smtp", "imap")
+      return {
+        user: account.smtpUsername,
+        password: decryptPassword(account.smtpPassword),
+        host,
+        port: account.imapPort || 993,
+        tls: account.imapTls !== undefined ? (account.imapTls as boolean) : true,
+      }
+    }
+
+    // Legacy: Try to get IMAP fields from credentials JSON
+    const credentials =
+      typeof account.credentials === "string" 
+        ? JSON.parse(account.credentials) 
+        : account.credentials as Record<string, any>
+
+    // Try credentials object with IMAP fields
+    if (credentials && typeof credentials === "object") {
+      if (credentials.imapHost && credentials.imapUsername && credentials.imapPassword) {
+        return {
+          user: credentials.imapUsername as string,
+          password: decryptPassword(credentials.imapPassword as string),
+          host: credentials.imapHost as string,
+          port: (credentials.imapPort as number) || 993,
+          tls: credentials.imapTls !== undefined ? (credentials.imapTls as boolean) : true,
         }
       }
 
-      return null
-    } catch (error) {
-      logger.error("Failed to get IMAP config", error, {
-        accountId: account.id,
-      })
-      return null
+      // Try SMTP fields from credentials (many providers use same credentials)
+      if (credentials.smtpHost && credentials.smtpUsername && credentials.smtpPassword) {
+        const host = (credentials.smtpHost as string).replace("smtp", "imap")
+        return {
+          user: credentials.smtpUsername as string,
+          password: decryptPassword(credentials.smtpPassword as string),
+          host,
+          port: 993,
+          tls: true,
+        }
+      }
     }
+
+    return null
+  } catch (error) {
+    logger.error("Failed to get IMAP config", error, {
+      accountId: account.id,
+    })
+    return null
   }
+}
+  // private getImapConfig(account: SendingAccount): ImapConfig | null {
+  //   try {
+  //     // First, try to get IMAP fields from credentials JSON
+  //     const credentials =
+  //       typeof account.credentials === "string" 
+  //         ? JSON.parse(account.credentials) 
+  //         : account.credentials as Record<string, any>
+
+  //     // Try credentials object with IMAP fields
+  //     if (credentials && typeof credentials === "object") {
+  //       if (credentials.imapHost && credentials.imapUsername && credentials.imapPassword) {
+  //         return {
+  //           user: credentials.imapUsername as string,
+  //           password: decryptPassword(credentials.imapPassword as string),
+  //           host: credentials.imapHost as string,
+  //           port: (credentials.imapPort as number) || 993,
+  //           tls: credentials.imapTls !== undefined ? (credentials.imapTls as boolean) : true,
+  //         }
+  //       }
+
+  //       // Try SMTP fields (many providers use same credentials)
+  //       if (credentials.smtpHost && credentials.smtpUsername && credentials.smtpPassword) {
+  //         const host = (credentials.smtpHost as string).replace("smtp", "imap")
+  //         return {
+  //           user: credentials.smtpUsername as string,
+  //           password: decryptPassword(credentials.smtpPassword as string),
+  //           host,
+  //           port: 993,
+  //           tls: true,
+  //         }
+  //       }
+  //     }
+
+  //     return null
+  //   } catch (error) {
+  //     logger.error("Failed to get IMAP config", error, {
+  //       accountId: account.id,
+  //     })
+  //     return null
+  //   }
+  // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /**
    * Open mailbox
