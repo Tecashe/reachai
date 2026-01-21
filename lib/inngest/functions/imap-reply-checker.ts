@@ -61,6 +61,7 @@
 // )
 
 // src/inngest/functions/imap-reply-checker.ts
+
 import { inngest } from '../client'
 import { logger } from '@/lib/logger'
 import { prisma } from '@/lib/db'
@@ -99,60 +100,122 @@ export const imapReplyChecker = inngest.createFunction(
     logger.info('Account IDs found', { ids: accounts.map(a => a.id) })
 
     const results = await step.run('check-imap-replies', async () => {
-      logger.info('Starting IMAP check loop', { totalAccounts: accounts.length })
+  logger.info('Starting IMAP check loop', { totalAccounts: accounts.length })
+  
+  let totalReplies = 0
+  let accountsChecked = 0
+  
+  for (const account of accounts) {
+    logger.info('Processing account', { accountId: account.id, email: account.email })
+    
+    try {
+      logger.info('Account IMAP/SMTP config', { 
+        accountId: account.id,
+        hasImapHost: !!account.imapHost,
+        hasSmtpHost: !!account.smtpHost,
+        hasImapUsername: !!account.imapUsername,
+        hasImapPassword: !!account.imapPassword,
+        hasSmtpUsername: !!account.smtpUsername,
+        hasSmtpPassword: !!account.smtpPassword,
+        imapPort: account.imapPort,
+        smtpPort: account.smtpPort
+      })
       
-      let totalReplies = 0
-      let accountsChecked = 0
-      
-      for (const account of accounts) {
-        logger.info('Processing account', { accountId: account.id, email: account.email })
-        
-        try {
-          // Parse credentials
-          const credentials = typeof account.credentials === 'string' 
-            ? JSON.parse(account.credentials) 
-            : account.credentials as Record<string, any>
-          
-          logger.info('Credentials parsed', { 
-            accountId: account.id,
-            hasImapHost: !!credentials?.imapHost,
-            hasSmtpHost: !!credentials?.smtpHost,
-            hasImapUsername: !!credentials?.imapUsername,
-            hasImapPassword: !!credentials?.imapPassword,
-            hasSmtpUsername: !!credentials?.smtpUsername,
-            hasSmtpPassword: !!credentials?.smtpPassword
-          })
-          
-          // Skip if no IMAP config
-          if (!credentials?.imapHost && !credentials?.smtpHost) {
-            logger.warn('Skipping account - no IMAP/SMTP config', { accountId: account.id })
-            continue
-          }
-          
-          logger.info('Checking IMAP for replies', { accountId: account.id })
-          const replies = await imapReader.checkWarmupReplies(account)
-          
-          logger.info('IMAP check complete for account', { 
-            accountId: account.id, 
-            repliesFound: replies 
-          })
-          
-          totalReplies += replies
-          accountsChecked++
-          
-          await new Promise(resolve => setTimeout(resolve, 500))
-        } catch (error) {
-          logger.error('Failed to check IMAP', error as Error, { 
-            accountId: account.id,
-            errorMessage: error instanceof Error ? error.message : 'Unknown error',
-            errorStack: error instanceof Error ? error.stack : undefined
-          })
-        }
+      // Skip if no IMAP config
+      if (!account.imapHost && !account.smtpHost) {
+        logger.warn('Skipping account - no IMAP/SMTP config', { accountId: account.id })
+        continue
       }
       
-      logger.info('IMAP loop completed', { accountsChecked, totalReplies })
-      return { accountsChecked, totalReplies }
-    })
+      logger.info('Checking IMAP for replies', { accountId: account.id })
+      const replies = await imapReader.checkWarmupReplies(account)
+      
+      logger.info('IMAP check complete for account', { 
+        accountId: account.id, 
+        repliesFound: replies 
+      })
+      
+      totalReplies += replies
+      accountsChecked++
+      
+      await new Promise(resolve => setTimeout(resolve, 500))
+    } catch (error) {
+      logger.error('Failed to check IMAP', error as Error, { 
+        accountId: account.id,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorStack: error instanceof Error ? error.stack : undefined
+      })
+    }
+  }
+  
+  logger.info('IMAP loop completed', { accountsChecked, totalReplies })
+  return { accountsChecked, totalReplies }
+})
+
+    // const results = await step.run('check-imap-replies', async () => {
+    //   logger.info('Starting IMAP check loop', { totalAccounts: accounts.length })
+      
+    //   let totalReplies = 0
+    //   let accountsChecked = 0
+      
+    //   for (const account of accounts) {
+    //     logger.info('Processing account', { accountId: account.id, email: account.email })
+        
+    //     try {
+    //       // Parse credentials
+    //       const credentials = typeof account.credentials === 'string' 
+    //         ? JSON.parse(account.credentials) 
+    //         : account.credentials as Record<string, any>
+          
+    //       logger.info('Credentials parsed', { 
+    //         accountId: account.id,
+    //         hasImapHost: !!credentials?.imapHost,
+    //         hasSmtpHost: !!credentials?.smtpHost,
+    //         hasImapUsername: !!credentials?.imapUsername,
+    //         hasImapPassword: !!credentials?.imapPassword,
+    //         hasSmtpUsername: !!credentials?.smtpUsername,
+    //         hasSmtpPassword: !!credentials?.smtpPassword
+    //       })
+          
+    //       // Skip if no IMAP config
+    //       if (!credentials?.imapHost && !credentials?.smtpHost) {
+    //         logger.warn('Skipping account - no IMAP/SMTP config', { accountId: account.id })
+    //         continue
+    //       }
+          
+    //       logger.info('Checking IMAP for replies', { accountId: account.id })
+    //       const replies = await imapReader.checkWarmupReplies(account)
+          
+    //       logger.info('IMAP check complete for account', { 
+    //         accountId: account.id, 
+    //         repliesFound: replies 
+    //       })
+          
+    //       totalReplies += replies
+    //       accountsChecked++
+          
+    //       await new Promise(resolve => setTimeout(resolve, 500))
+    //     } catch (error) {
+    //       logger.error('Failed to check IMAP', error as Error, { 
+    //         accountId: account.id,
+    //         errorMessage: error instanceof Error ? error.message : 'Unknown error',
+    //         errorStack: error instanceof Error ? error.stack : undefined
+    //       })
+    //     }
+    //   }
+      
+    //   logger.info('IMAP loop completed', { accountsChecked, totalReplies })
+    //   return { accountsChecked, totalReplies }
+    // })
+
+
+
+
+
+
+
+
+
 
     logger.info('IMAP check completed', results)
     return results
