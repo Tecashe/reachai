@@ -622,7 +622,7 @@ export function AccountCard({ account, onPauseResume, actionLoading }: AccountCa
                 )}
               </Button>
               <Button size="sm" className="flex-1 gap-2 group" asChild>
-                <Link href={`/warmup/${account.id}`}>
+                <Link href={`dashboard/warmup/${account.id}`}>
                   <Eye className="h-3.5 w-3.5" />
                   View Details
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -637,7 +637,7 @@ export function AccountCard({ account, onPauseResume, actionLoading }: AccountCa
               <p className="text-sm text-muted-foreground">Not enrolled in warmup</p>
             </div>
             <Button className="w-full gap-2" asChild>
-              <Link href={`/warmup/enroll?accountId=${account.id}`}>
+              <Link href={`/dashboard/warmup/enroll?accountId=${account.id}`}>
                 <Play className="h-4 w-4" />
                 Start Warmup
               </Link>
