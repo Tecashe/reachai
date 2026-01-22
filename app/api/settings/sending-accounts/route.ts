@@ -33,6 +33,7 @@ export async function GET() {
         isActive: true,
         dailyLimit: true,
         emailsSentToday: true,
+        warmupEnabled: true,
       },
     })
 

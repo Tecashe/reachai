@@ -3,7 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { ShieldCheck, AlertTriangle, ShieldAlert, Mail } from "lucide-react"
+import { ShieldCheck, AlertTriangle, ShieldAlert, Mail, MoreHorizontal, PauseCircle, PlayCircle, Settings } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 interface Account {
     id: string
@@ -19,9 +21,10 @@ interface Account {
 
 interface AccountHealthGridProps {
     accounts: Account[]
+    onAction?: (accountId: string, action: 'pause' | 'resume') => void
 }
 
-export function AccountHealthGrid({ accounts }: AccountHealthGridProps) {
+export function AccountHealthGrid({ accounts, onAction }: AccountHealthGridProps) {
     const getHealthColor = (score: number) => {
         if (score >= 90) return "border-green-500/50 bg-green-500/5"
         if (score >= 70) return "border-yellow-500/50 bg-yellow-500/5"
@@ -45,12 +48,36 @@ export function AccountHealthGrid({ accounts }: AccountHealthGridProps) {
                             </CardTitle>
                             <p className="text-xs text-muted-foreground capitalize">{account.provider}</p>
                         </div>
-                        {getHealthIcon(account.healthScore)}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {account.stage === 'PAUSED' ? (
+                                    <DropdownMenuItem onClick={() => onAction?.(account.id, 'resume')}>
+                                        <PlayCircle className="mr-2 h-4 w-4" /> Resume Warmup
+                                    </DropdownMenuItem>
+                                ) : (
+                                    <DropdownMenuItem onClick={() => onAction?.(account.id, 'pause')}>
+                                        <PauseCircle className="mr-2 h-4 w-4" /> Pause Warmup
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem>
+                                    <Settings className="mr-2 h-4 w-4" /> Settings
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </CardHeader>
                     <CardContent className="px-4 pb-4 space-y-3">
                         {/* Health Score */}
                         <div className="flex justify-between items-end">
-                            <div className="text-2xl font-bold">{account.healthScore}</div>
+                            <div className="flex items-center gap-2">
+                                <div className="text-2xl font-bold">{account.healthScore}</div>
+                                {getHealthIcon(account.healthScore)}
+                            </div>
                             <div className="text-xs text-muted-foreground mb-1">Health Score</div>
                         </div>
 
@@ -81,7 +108,9 @@ export function AccountHealthGrid({ accounts }: AccountHealthGridProps) {
                         </div>
 
                         <div className="flex justify-between items-center pt-1">
-                            <Badge variant="outline" className="text-[10px] h-5 px-1.5">{account.stage}</Badge>
+                            <Badge variant={account.stage === 'PAUSED' ? 'destructive' : 'outline'} className="text-[10px] h-5 px-1.5">
+                                {account.stage}
+                            </Badge>
                         </div>
                     </CardContent>
                 </Card>
