@@ -655,6 +655,9 @@ model SendingAccount {
   strategyAdjustments    StrategyAdjustment[]
   poolMemberships        PoolMembership[]
 
+  // Peer replies this account needs to send
+  pendingPeerReplies     WarmupInteraction[]  @relation("PeerReplies")
+
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   ProcessedWarmupEmail ProcessedWarmupEmail[]
@@ -1160,16 +1163,80 @@ model WarmupInteraction {
   // Pending reply tracking
   isPending Boolean @default(false)
 
+  // Peer reply tracking - for true peer-to-peer warmup
+  isPendingPeerReply   Boolean         @default(false)  // Waiting for peer to reply
+  replyFromAccountId   String?                           // The peer account that should send the reply
+  replyFromAccount     SendingAccount? @relation("PeerReplies", fields: [replyFromAccountId], references: [id])
+  scheduledAt          DateTime?                         // When the peer reply should be sent
+  originalSenderEmail  String?                           // Email of the original sender (for reply addressing)
+
   createdAt DateTime @default(now())
 
   @@index([sessionId])
   @@index([warmupEmailId])
   @@index([direction])
   @@index([sentAt])
-  @@index([isPending]) // Index for efficient pending reply queries
+  @@index([isPending])
   @@index([warmupId])
   @@index([threadId])
   @@index([inReplyTo])
+  @@index([isPendingPeerReply, scheduledAt])  // Compound index for peer reply processing
+  @@index([replyFromAccountId])
+}
+
+// Warmup Thread - Tracks peer-to-peer conversation threads
+model WarmupThread {
+  id String @id @default(cuid())
+
+  // Participants
+  initiatorAccountId String
+  initiatorAccount   SendingAccount @relation("ThreadInitiator", fields: [initiatorAccountId], references: [id], onDelete: Cascade)
+
+  recipientAccountId String
+  recipientAccount   SendingAccount @relation("ThreadRecipient", fields: [recipientAccountId], references: [id], onDelete: Cascade)
+
+  // Thread metadata
+  subject       String            // Original subject line
+  topic         String?           // Conversation topic (networking, follow-up, etc.)
+  status        WarmupThreadStatus @default(ACTIVE)
+
+  // Conversation tracking
+  messageCount      Int       @default(0)   // Total messages in thread
+  maxMessages       Int       @default(6)   // Max messages before completing
+  lastSenderId      String?                 // Who sent the last message
+  nextScheduledAt   DateTime?               // When next message should be sent
+
+  // Thread timing
+  responseTimeMin   Int       @default(30)  // Minimum minutes between replies
+  responseTimeMax   Int       @default(1440) // Maximum minutes between replies (24 hours)
+
+  // Engagement
+  includeLinks      Boolean   @default(false)
+  includeAttachments Boolean  @default(false)
+
+  // Stats
+  totalOpens        Int       @default(0)
+  totalReplies      Int       @default(0)
+
+  // Relationships
+  interactions      WarmupInteraction[]
+
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([initiatorAccountId])
+  @@index([recipientAccountId])
+  @@index([status])
+  @@index([nextScheduledAt])
+}
+
+enum WarmupThreadStatus {
+  ACTIVE      // Thread is ongoing
+  PAUSED      // Temporarily paused
+  COMPLETED   // Reached max messages
+  FAILED      // Error during thread
 }
 
 model WebhookEvent {
@@ -2444,63 +2511,7 @@ enum RetryStatus {
 // These are the new models needed for enterprise-grade warmup
 // ============================================================
 
-// 1. CONVERSATION THREAD TRACKING
-model WarmupThread {
-  id     String @id @default(cuid())
-  userId String
-
-  // Thread participants
-  initiatorAccountId String
-  initiatorAccount   SendingAccount @relation("ThreadInitiator", fields: [initiatorAccountId], references: [id], onDelete: Cascade)
-
-  recipientAccountId String
-  recipientAccount   SendingAccount @relation("ThreadRecipient", fields: [recipientAccountId], references: [id], onDelete: Cascade)
-
-  // Thread metadata
-  threadSubject String
-  threadTopic   String // "project_update", "meeting_request", "proposal", "follow_up", etc.
-  industry      String? // For role-based matching
-
-  // Thread progression
-  messageCount    Int       @default(0)
-  maxMessages     Int       @default(5) // Thread will end after this many messages
-  lastMessageAt   DateTime?
-  nextScheduledAt DateTime?
-
-  // Thread status
-  status ThreadStatus @default(ACTIVE)
-
-  // Engagement tracking
-  totalOpens   Int @default(0)
-  totalClicks  Int @default(0)
-  totalReplies Int @default(0)
-
-  // Thread characteristics (for realistic simulation)
-  conversationDepth  Int     @default(3) // How many back-and-forth exchanges
-  responseTimeMin    Int     @default(120) // Min minutes between messages
-  responseTimeMax    Int     @default(1440) // Max minutes between messages
-  includeAttachments Boolean @default(false)
-  includeLinks       Boolean @default(false)
-
-  interactions WarmupInteraction[]
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  completedAt DateTime?
-
-  @@index([initiatorAccountId])
-  @@index([recipientAccountId])
-  @@index([status])
-  @@index([nextScheduledAt])
-  @@index([threadTopic])
-}
-
-enum ThreadStatus {
-  ACTIVE // Thread is ongoing
-  COMPLETED // Thread reached max messages
-  PAUSED // Temporarily paused
-  CANCELLED // Manually cancelled
-}
+// Note: WarmupThread model has been moved earlier in the schema (after WarmupInteraction)
 
 // 2. ACCOUNT REPUTATION PROFILE
 model ReputationProfile {

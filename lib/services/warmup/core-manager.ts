@@ -547,7 +547,7 @@
 
 //     // Step 1: Acquire distributed lock
 //     const lockId = await distributedLock.acquire(accountId, 300) // 5 min lock
-   
+
 
 //     if (!lockId) {
 //       logger.debug('Account already being processed', { accountId })
@@ -1788,19 +1788,19 @@ export class CoreWarmupManager {
         emailsSent: 1,
       })
 
-      // Step 9: Schedule auto-reply from peer (simulate natural conversation)
-      if (sendResult.warmupId && replyAutomation.shouldReply()) {
-        await replyAutomation.scheduleReply(
+      // Step 9: Schedule auto-reply from peer (true peer-to-peer conversation)
+      // When Account A sends to Account B, this schedules Account B to reply back
+      if (sendResult.warmupId && sendResult.threadId && replyAutomation.shouldReply()) {
+        await replyAutomation.schedulePeerReply(
           session.id,
+          accountId,           // Account A (sender)
+          peerAccount.id,      // Account B (will reply)
           {
-            subject: 'Warmup Email',
-            body: 'This is a warmup email',
-            from: account.email,
-            warmupId: sendResult.warmupId,
-            threadId: sendResult.threadId!,
-            messageId: sendResult.messageId!,
-          },
-          peerAccount // Peer will reply to this account
+            threadId: sendResult.threadId,
+            originalMessageId: sendResult.messageId!,
+            originalSubject: 'Warmup Email',
+            senderEmail: account.email,  // Account A's email for reply addressing
+          }
         )
       }
 
@@ -2018,7 +2018,7 @@ export class CoreWarmupManager {
 
       const daysInStage = Math.floor(
         (Date.now() - account.warmupStartDate.getTime()) /
-          (1000 * 60 * 60 * 24)
+        (1000 * 60 * 60 * 24)
       )
 
       // Stage advancement logic

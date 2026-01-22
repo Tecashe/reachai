@@ -34,7 +34,7 @@ export class ReplyAutomation {
    */
   calculateReplyDelay(config: Partial<ReplyConfig> = {}): number {
     const finalConfig = { ...this.DEFAULT_CONFIG, ...config }
-    
+
     // Weighted random: favor shorter delays but allow long ones
     const weights = [
       { max: 60, weight: 0.4 },    // 40% within 1 hour
@@ -51,7 +51,7 @@ export class ReplyAutomation {
       if (random <= cumulative) {
         return Math.floor(
           Math.random() * (max - finalConfig.minDelayMinutes) +
-            finalConfig.minDelayMinutes
+          finalConfig.minDelayMinutes
         )
       }
     }
@@ -184,7 +184,7 @@ export class ReplyAutomation {
    */
   private async sendReply(reply: any): Promise<void> {
     const { session } = reply
-    
+
     if (!session.warmupEmail || !session.sendingAccount) {
       throw new Error('Missing warmup email or sending account')
     }
@@ -298,13 +298,303 @@ export class ReplyAutomation {
 
     const result = await prisma.warmupInteraction.deleteMany({
       where: {
-        isPending: true,
-        sentAt: { lte: cutoffDate },
+        OR: [
+          { isPending: true, sentAt: { lte: cutoffDate } },
+          { isPendingPeerReply: true, scheduledAt: { lte: cutoffDate } },
+        ],
       },
     })
 
     logger.info('Stale pending replies cleaned up', { deleted: result.count })
     return result.count
+  }
+
+  // ============================================
+  // PEER-TO-PEER WARMUP REPLY METHODS
+  // ============================================
+
+  /**
+   * Schedule a peer reply for true peer-to-peer warmup
+   * When Account A sends to Account B, this schedules Account B to reply back
+   */
+  async schedulePeerReply(
+    sessionId: string,
+    senderAccountId: string,     // Account A (who sent the original)
+    recipientAccountId: string,  // Account B (who should reply)
+    threadContext: {
+      threadId: string
+      originalMessageId: string
+      originalSubject: string
+      senderEmail: string        // Account A's email (for To: header)
+    }
+  ): Promise<void> {
+    try {
+      const delayMinutes = this.calculateReplyDelay()
+      const scheduledAt = new Date(Date.now() + delayMinutes * 60 * 1000)
+      const replyWarmupId = `peer-reply-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
+      // Generate reply subject
+      const replySubject = threadContext.originalSubject.startsWith('Re:')
+        ? threadContext.originalSubject
+        : `Re: ${threadContext.originalSubject}`
+
+      // Create pending peer reply interaction
+      await prisma.warmupInteraction.create({
+        data: {
+          sessionId,
+          sendingAccountId: recipientAccountId, // Account B will be the sender
+          direction: 'OUTBOUND',                // Outbound from B to A
+          subject: replySubject,
+          snippet: 'Pending peer reply...',
+          warmupId: replyWarmupId,
+          threadId: threadContext.threadId,
+          inReplyTo: threadContext.originalMessageId,
+          references: threadContext.originalMessageId,
+          // Peer reply tracking fields
+          isPendingPeerReply: true,
+          replyFromAccountId: recipientAccountId,
+          scheduledAt,
+          originalSenderEmail: threadContext.senderEmail,
+        },
+      })
+
+      // Update thread message count and next scheduled time
+      if (threadContext.threadId) {
+        await prisma.warmupThread.update({
+          where: { id: threadContext.threadId },
+          data: {
+            messageCount: { increment: 1 },
+            lastSenderId: senderAccountId,
+            nextScheduledAt: scheduledAt,
+          },
+        }).catch(() => {
+          // Thread may not exist yet, that's OK
+        })
+      }
+
+      logger.info('Peer reply scheduled', {
+        warmupId: replyWarmupId,
+        from: recipientAccountId,
+        to: threadContext.senderEmail,
+        delayMinutes,
+        scheduledAt,
+        threadId: threadContext.threadId,
+      })
+    } catch (error) {
+      logger.error('Failed to schedule peer reply', error as Error, {
+        senderAccountId,
+        recipientAccountId,
+      })
+    }
+  }
+
+  /**
+   * Process pending peer replies (called by Inngest cron job)
+   * Uses the peer account's own SMTP credentials to send replies
+   */
+  async processPendingPeerReplies(batchSize = 100): Promise<{
+    processed: number
+    succeeded: number
+    failed: number
+  }> {
+    const pendingPeerReplies = await prisma.warmupInteraction.findMany({
+      where: {
+        isPendingPeerReply: true,
+        scheduledAt: { lte: new Date() },
+      },
+      include: {
+        replyFromAccount: true,  // Account B's SMTP credentials
+        thread: true,
+      },
+      take: batchSize,
+      orderBy: { scheduledAt: 'asc' },
+    })
+
+    logger.info('Processing pending peer replies', { count: pendingPeerReplies.length })
+
+    let succeeded = 0
+    let failed = 0
+
+    for (const reply of pendingPeerReplies) {
+      try {
+        await this.sendPeerReply(reply)
+        succeeded++
+      } catch (error) {
+        logger.error('Failed to send peer reply', error as Error, {
+          replyId: reply.id,
+          accountId: reply.replyFromAccountId,
+        })
+        failed++
+      }
+    }
+
+    logger.info('Pending peer replies processed', {
+      total: pendingPeerReplies.length,
+      succeeded,
+      failed,
+    })
+
+    return {
+      processed: pendingPeerReplies.length,
+      succeeded,
+      failed,
+    }
+  }
+
+  /**
+   * Send a peer reply using the peer account's SMTP credentials
+   */
+  private async sendPeerReply(reply: any): Promise<void> {
+    const account = reply.replyFromAccount
+
+    if (!account) {
+      throw new Error('Peer account not found for reply')
+    }
+
+    if (!reply.originalSenderEmail) {
+      throw new Error('Original sender email not found')
+    }
+
+    // Get SMTP credentials from the peer account
+    let password: string | null = null
+    let smtpConfig: { host: string; port: number; secure: boolean; user: string } | null = null
+
+    // Try OAuth first, then SMTP password
+    if (account.oauthAccessToken) {
+      // For OAuth accounts (Gmail, Outlook), use OAuth2 transport
+      // This is simplified - in production you'd refresh the token if expired
+      password = account.oauthAccessToken
+      smtpConfig = {
+        host: account.provider === 'gmail' ? 'smtp.gmail.com' : 'smtp.office365.com',
+        port: 587,
+        secure: false,
+        user: account.email,
+      }
+    } else if (account.smtpPassword) {
+      password = decryptPassword(account.smtpPassword)
+      smtpConfig = {
+        host: account.smtpHost || 'smtp.gmail.com',
+        port: account.smtpPort || 587,
+        secure: account.smtpPort === 465,
+        user: account.smtpUsername || account.email,
+      }
+    } else {
+      throw new Error('No SMTP credentials available for peer account')
+    }
+
+    // Generate reply content
+    const replyContent = await warmupEmailGenerator.generateReply(
+      reply.subject,
+      'Previous message in thread',
+      {
+        senderName: account.name || account.email.split('@')[0],
+        recipientName: reply.originalSenderEmail.split('@')[0],
+        warmupStage: account.warmupStage || 'WARM',
+      }
+    )
+
+    // Create SMTP transporter
+    const transporter = nodemailer.createTransport({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      secure: smtpConfig.secure,
+      auth: account.oauthAccessToken
+        ? {
+          type: 'OAuth2',
+          user: smtpConfig.user,
+          accessToken: password,
+        }
+        : {
+          user: smtpConfig.user,
+          pass: password,
+        },
+    } as any)
+
+    // Send the reply
+    const info = await transporter.sendMail({
+      from: `${account.name || account.email.split('@')[0]} <${account.email}>`,
+      to: reply.originalSenderEmail,
+      subject: replyContent.subject,
+      text: replyContent.body,
+      html: `<p>${replyContent.body.replace(/\n/g, '<br>')}</p>`,
+      headers: {
+        'In-Reply-To': reply.inReplyTo,
+        'References': reply.references,
+        'X-Warmup-ID': reply.warmupId,
+        'X-Warmup-Thread': reply.threadId,
+        'X-Warmup-Type': 'peer-reply',
+      },
+    })
+
+    // Mark interaction as sent
+    await prisma.warmupInteraction.update({
+      where: { id: reply.id },
+      data: {
+        isPendingPeerReply: false,
+        deliveredAt: new Date(),
+        sentAt: new Date(),
+        messageId: info.messageId,
+        snippet: replyContent.body.slice(0, 100),
+        subject: replyContent.subject,
+      },
+    })
+
+    // Update account stats
+    await prisma.sendingAccount.update({
+      where: { id: account.id },
+      data: {
+        emailsSentToday: { increment: 1 },
+        lastWarmupAt: new Date(),
+      },
+    })
+
+    // Update warmup session stats
+    await prisma.warmupSession.update({
+      where: { id: reply.sessionId },
+      data: {
+        emailsReplied: { increment: 1 },
+        lastSentAt: new Date(),
+      },
+    })
+
+    // Check if thread should continue (schedule next reply from original sender)
+    if (reply.thread && reply.thread.messageCount < reply.thread.maxMessages) {
+      // Schedule the original sender (Account A) to reply back
+      const shouldContinue = this.shouldReply({ replyRate: 60 }) // 60% chance to continue thread
+
+      if (shouldContinue) {
+        await this.schedulePeerReply(
+          reply.sessionId,
+          account.id,                    // Now Account B is the sender
+          reply.thread.initiatorAccountId === account.id
+            ? reply.thread.recipientAccountId
+            : reply.thread.initiatorAccountId, // Account A becomes recipient
+          {
+            threadId: reply.threadId,
+            originalMessageId: info.messageId,
+            originalSubject: replyContent.subject,
+            senderEmail: account.email,
+          }
+        )
+      } else {
+        // Complete the thread
+        await prisma.warmupThread.update({
+          where: { id: reply.threadId },
+          data: {
+            status: 'COMPLETED',
+            completedAt: new Date(),
+          },
+        })
+      }
+    }
+
+    logger.info('Peer reply sent successfully', {
+      replyId: reply.id,
+      from: account.email,
+      to: reply.originalSenderEmail,
+      messageId: info.messageId,
+      threadId: reply.threadId,
+    })
   }
 }
 
