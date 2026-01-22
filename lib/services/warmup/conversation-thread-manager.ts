@@ -820,6 +820,7 @@ import { prisma } from "@/lib/db"
 import { redis } from "@/lib/redis"
 import { logger } from "@/lib/logger"
 import { contentGenerator } from "./content-generator"
+import { emailSender } from "./email-sender"
 
 /**
  * CONVERSATION THREAD MANAGER
@@ -976,17 +977,89 @@ class ConversationThreadManager {
       })
 
       // Create the interaction linked to the session (not directly to recipient)
-      const interaction = await prisma.warmupInteraction.create({
-        data: {
-          sessionId: session.id,
-          sendingAccountId: senderAccountId,
-          threadId,
-          subject: thread.messageCount === 0 ? thread.threadSubject : `Re: ${thread.threadSubject}`,
-          snippet: messageContent.body.substring(0, 100),
-          direction: "OUTBOUND",
-          isPending: true,
-        },
-      })
+      // const interaction = await prisma.warmupInteraction.create({
+      //   data: {
+      //     sessionId: session.id,
+      //     sendingAccountId: senderAccountId,
+      //     threadId,
+      //     subject: thread.messageCount === 0 ? thread.threadSubject : `Re: ${thread.threadSubject}`,
+      //     snippet: messageContent.body.substring(0, 100),
+      //     direction: "OUTBOUND",
+      //     isPending: true,
+      //   },
+      // })
+      
+  const interaction = await prisma.warmupInteraction.create({
+    data: {
+      sessionId: session.id,
+      sendingAccountId: senderAccountId,
+      threadId,
+      subject: thread.messageCount === 0 ? thread.threadSubject : `Re: ${thread.threadSubject}`,
+      snippet: messageContent.body.substring(0, 100),
+      direction: "OUTBOUND",
+      isPending: true, // ← Mark as pending first
+    },
+  })
+
+  // 🔥 ADD THIS: Actually send the email
+  const recipientAccountId = isInitiatorTurn ? thread.recipientAccountId : thread.initiatorAccountId
+
+  const [senderAccount, recipientAccount] = await Promise.all([
+    prisma.sendingAccount.findUnique({ where: { id: senderAccountId } }),
+    prisma.sendingAccount.findUnique({ where: { id: recipientAccountId } }),
+  ])
+
+  if (!senderAccount || !recipientAccount) {
+    throw new Error("Accounts not found")
+  }
+
+  // Send the actual email using your email sender
+  const sendResult = await emailSender.sendWarmupEmail(
+    session.id,
+    senderAccount,
+    recipientAccount.email,
+    recipientAccount.name,
+    recipientAccountId
+  )
+
+  if (sendResult.success) {
+    // Update interaction with sent details
+    await prisma.warmupInteraction.update({
+      where: { id: interaction.id },
+      data: {
+        isPending: false,
+        messageId: sendResult.messageId,
+        warmupId: sendResult.warmupId,
+        sentAt: new Date(),
+        deliveredAt: new Date(),
+      },
+    })
+  } else {
+    logger.error("[ConversationThreadManager] Failed to send thread message", {
+      threadId,
+      error: sendResult.error,
+    })
+    throw new Error(`Failed to send: ${sendResult.error}`)
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       const nextResponseTime = this.calculateNextResponseTime(thread.responseTimeMin, thread.responseTimeMax)
 
@@ -1232,3 +1305,19 @@ class ConversationThreadManager {
 }
 
 export const conversationThreadManager = new ConversationThreadManager()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// In conversation-thread-manager.ts - processThreadMessage function
+// After creating the interaction:
