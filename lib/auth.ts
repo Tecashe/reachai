@@ -50,3 +50,5 @@ export async function requireAuth() {
 
   return userId
 }
+
+export { auth }
