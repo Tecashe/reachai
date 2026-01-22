@@ -826,7 +826,7 @@
 
 
 import { Suspense } from "react"
-import { DetailedWarmupDashboard } from "@/components/warmup/detailed-warmup-dashboard"
+import { WarmupMasterDashboard } from "@/components/warmup/warmup-master-dashboard"
 import { WaveLoader } from "@/components/loader/wave-loader"
 
 export const metadata = {
@@ -852,7 +852,7 @@ export default function WarmupPage() {
           </div>
         }
       >
-        <DetailedWarmupDashboard />
+        <WarmupMasterDashboard />
       </Suspense>
     </div>
   )
