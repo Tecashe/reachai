@@ -50,9 +50,9 @@ export function PlacementFunnel({ trends }: PlacementData) {
     }, { sent: 0, inbox: 0 })
 
     const funnelData = [
-        { name: "Sent", value: totalSent.sent, color: "#3b82f6" }, // Blue
-        { name: "Inbox", value: totalSent.inbox, color: "#22c55e" }, // Green
-        { name: "Spam/Missing", value: totalSent.sent - totalSent.inbox, color: "#ef4444" }, // Red
+        { name: "Sent", value: totalSent.sent, color: "hsl(var(--chart-1))" },
+        { name: "Inbox", value: totalSent.inbox, color: "hsl(var(--chart-2))" },
+        { name: "Spam/Missing", value: totalSent.sent - totalSent.inbox, color: "hsl(var(--chart-3))" },
     ]
 
     return (

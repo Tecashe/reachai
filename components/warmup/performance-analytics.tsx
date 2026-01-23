@@ -168,13 +168,8 @@ export function PerformanceAnalytics({
     const replyRate = totalSent > 0 ? Math.round((totalReplied / totalSent) * 100) : 0
     const bounceRate = totalSent > 0 ? Math.round((totalBounced / totalSent) * 100) : 0
 
-    // Default provider breakdown if not provided
-    const providers = providerBreakdown || [
-        { name: 'Gmail', value: 45, color: '#ea4335' },
-        { name: 'Outlook', value: 35, color: '#0078d4' },
-        { name: 'Yahoo', value: 15, color: '#6001d2' },
-        { name: 'Other', value: 5, color: '#6b7280' },
-    ]
+    // Provider breakdown from API, empty = will show "No provider data" if not passed
+    const providers = providerBreakdown || []
 
     // Default insights if not provided
     const displayInsights = insights.length > 0 ? insights : [
@@ -185,35 +180,30 @@ export function PerformanceAnalytics({
 
     return (
         <div className="space-y-6">
-            {/* Summary Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <MetricCard
                     label="Emails Sent"
                     value={totalSent.toLocaleString()}
-                    change={12}
                     icon={Mail}
-                    color="bg-blue-500"
+                    color="bg-primary"
                 />
                 <MetricCard
                     label="Open Rate"
                     value={`${openRate}%`}
-                    change={5}
                     icon={Eye}
-                    color="bg-emerald-500"
+                    color="bg-primary"
                 />
                 <MetricCard
                     label="Reply Rate"
                     value={`${replyRate}%`}
-                    change={-2}
                     icon={MessageSquare}
-                    color="bg-purple-500"
+                    color="bg-muted-foreground"
                 />
                 <MetricCard
                     label="Bounce Rate"
                     value={`${bounceRate}%`}
-                    change={-8}
                     icon={AlertTriangle}
-                    color="bg-rose-500"
+                    color="bg-muted-foreground"
                 />
             </div>
 
@@ -269,16 +259,16 @@ export function PerformanceAnalytics({
                                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="fillSent" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                                         </linearGradient>
                                         <linearGradient id="fillOpened" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
                                         </linearGradient>
                                         <linearGradient id="fillReplied" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="hsl(var(--chart-3))" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="hsl(var(--chart-3))" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -304,7 +294,7 @@ export function PerformanceAnalytics({
                                     <Area
                                         type="monotone"
                                         dataKey="sent"
-                                        stroke="#3b82f6"
+                                        stroke="hsl(var(--chart-1))"
                                         fill="url(#fillSent)"
                                         strokeWidth={2}
                                         name="Sent"
@@ -312,7 +302,7 @@ export function PerformanceAnalytics({
                                     <Area
                                         type="monotone"
                                         dataKey="opened"
-                                        stroke="#10b981"
+                                        stroke="hsl(var(--chart-2))"
                                         fill="url(#fillOpened)"
                                         strokeWidth={2}
                                         name="Opened"
@@ -320,7 +310,7 @@ export function PerformanceAnalytics({
                                     <Area
                                         type="monotone"
                                         dataKey="replied"
-                                        stroke="#a855f7"
+                                        stroke="hsl(var(--chart-3))"
                                         fill="url(#fillReplied)"
                                         strokeWidth={2}
                                         name="Replied"
@@ -347,9 +337,9 @@ export function PerformanceAnalytics({
                                         fontSize={12}
                                     />
                                     <Tooltip content={<CustomTooltip />} />
-                                    <Bar dataKey="sent" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Sent" />
-                                    <Bar dataKey="opened" fill="#10b981" radius={[4, 4, 0, 0]} name="Opened" />
-                                    <Bar dataKey="replied" fill="#a855f7" radius={[4, 4, 0, 0]} name="Replied" />
+                                    <Bar dataKey="sent" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name="Sent" />
+                                    <Bar dataKey="opened" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Opened" />
+                                    <Bar dataKey="replied" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} name="Replied" />
                                 </BarChart>
                             )}
                         </ResponsiveContainer>
@@ -358,15 +348,15 @@ export function PerformanceAnalytics({
                     {/* Legend */}
                     <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-border/30">
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-blue-500" />
+                            <div className="w-3 h-3 rounded-full bg-foreground" />
                             <span className="text-sm text-muted-foreground">Sent</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                            <div className="w-3 h-3 rounded-full bg-muted-foreground" />
                             <span className="text-sm text-muted-foreground">Opened</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-purple-500" />
+                            <div className="w-3 h-3 rounded-full bg-muted" />
                             <span className="text-sm text-muted-foreground">Replied</span>
                         </div>
                     </div>
@@ -386,34 +376,40 @@ export function PerformanceAnalytics({
                     <CardContent>
                         <div className="flex items-center gap-6">
                             <div className="w-[140px] h-[140px]">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={providers}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={35}
-                                            outerRadius={60}
-                                            paddingAngle={4}
-                                            dataKey="value"
-                                        >
-                                            {providers.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
-                                        </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                {providers.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={providers}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={35}
+                                                outerRadius={60}
+                                                paddingAngle={4}
+                                                dataKey="value"
+                                            >
+                                                {providers.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={`hsl(var(--chart-${(index % 5) + 1}))`} />
+                                                ))}
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground text-sm">No data</div>
+                                )}
                             </div>
                             <div className="flex-1 space-y-3">
-                                {providers.map((provider, index) => (
+                                {providers.length > 0 ? providers.map((provider, index) => (
                                     <div key={index} className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: provider.color }} />
+                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: `hsl(var(--chart-${(index % 5) + 1}))` }} />
                                             <span className="text-sm">{provider.name}</span>
                                         </div>
                                         <span className="text-sm font-semibold">{provider.value}%</span>
                                     </div>
-                                ))}
+                                )) : (
+                                    <p className="text-muted-foreground text-sm">Provider data will appear once warmup activity is tracked</p>
+                                )}
                             </div>
                         </div>
                     </CardContent>

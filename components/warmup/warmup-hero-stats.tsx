@@ -132,7 +132,7 @@ function StatCard({ stat, index }: { stat: HeroStat; index: number }) {
                         {stat.trend !== undefined && (
                             <div className={cn(
                                 "flex items-center gap-1 text-xs font-medium",
-                                stat.trend > 0 ? "text-emerald-300" : stat.trend < 0 ? "text-rose-300" : "text-white/60"
+                                stat.trend > 0 ? "text-white/80" : stat.trend < 0 ? "text-white/60" : "text-white/50"
                             )}>
                                 <TrendIcon className="w-3 h-3" />
                                 <span>{stat.trend > 0 ? "+" : ""}{stat.trend}%</span>
@@ -169,7 +169,7 @@ function StatCard({ stat, index }: { stat: HeroStat; index: number }) {
 }
 
 export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
-    // Primary theme color: hsl(262.1 83.3% 57.8%) = approximately rgb(124, 58, 237) / #7c3aed
+    // Use monochrome theme based on CSS variables (primary is black in light mode)
     const heroStats: HeroStat[] = [
         {
             id: "active-accounts",
@@ -178,8 +178,8 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             trend: trends?.accounts,
             trendLabel: "vs last week",
             icon: <Users className="w-5 h-5 text-white/90" />,
-            gradient: "hsl(262.1 83.3% 57.8% / 0.9) 0%, hsl(262.1 83.3% 45% / 0.9) 100%",
-            accentColor: "hsl(262.1 83.3% 57.8%)",
+            gradient: "hsl(0 0% 9% / 0.95) 0%, hsl(0 0% 15% / 0.9) 100%",
+            accentColor: "hsl(0 0% 9%)",
         },
         {
             id: "emails-today",
@@ -188,8 +188,8 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             trend: trends?.emails,
             trendLabel: "vs yesterday",
             icon: <Mail className="w-5 h-5 text-white/90" />,
-            gradient: "hsl(262.1 83.3% 62% / 0.9) 0%, hsl(262.1 83.3% 50% / 0.9) 100%",
-            accentColor: "hsl(262.1 83.3% 62%)",
+            gradient: "hsl(0 0% 15% / 0.95) 0%, hsl(0 0% 22% / 0.9) 100%",
+            accentColor: "hsl(0 0% 15%)",
         },
         {
             id: "inbox-rate",
@@ -199,8 +199,8 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             trend: trends?.inboxRate,
             trendLabel: "this month",
             icon: <Inbox className="w-5 h-5 text-white/90" />,
-            gradient: "hsl(262.1 83.3% 67% / 0.9) 0%, hsl(262.1 83.3% 55% / 0.9) 100%",
-            accentColor: "hsl(262.1 83.3% 67%)",
+            gradient: "hsl(0 0% 22% / 0.95) 0%, hsl(0 0% 30% / 0.9) 100%",
+            accentColor: "hsl(0 0% 22%)",
         },
         {
             id: "health-score",
@@ -209,24 +209,24 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             suffix: "%",
             trend: trends?.healthScore,
             icon: <Activity className="w-5 h-5 text-white/90" />,
-            gradient: "hsl(262.1 83.3% 52% / 0.9) 0%, hsl(262.1 83.3% 40% / 0.9) 100%",
-            accentColor: "hsl(262.1 83.3% 52%)",
+            gradient: "hsl(0 0% 9% / 0.95) 0%, hsl(0 0% 18% / 0.9) 100%",
+            accentColor: "hsl(0 0% 9%)",
         },
         {
             id: "active-threads",
             label: "Active Threads",
             value: stats.activeThreads,
             icon: <MessageSquare className="w-5 h-5 text-white/90" />,
-            gradient: "hsl(262.1 83.3% 72% / 0.9) 0%, hsl(262.1 83.3% 60% / 0.9) 100%",
-            accentColor: "hsl(262.1 83.3% 72%)",
+            gradient: "hsl(0 0% 30% / 0.95) 0%, hsl(0 0% 40% / 0.9) 100%",
+            accentColor: "hsl(0 0% 30%)",
         },
         {
             id: "spam-rescued",
             label: "Spam Rescued",
             value: stats.spamRescued,
             icon: <ShieldAlert className="w-5 h-5 text-white/90" />,
-            gradient: "hsl(262.1 83.3% 47% / 0.9) 0%, hsl(262.1 83.3% 35% / 0.9) 100%",
-            accentColor: "hsl(262.1 83.3% 47%)",
+            gradient: "hsl(0 0% 18% / 0.95) 0%, hsl(0 0% 28% / 0.9) 100%",
+            accentColor: "hsl(0 0% 18%)",
         },
     ]
 

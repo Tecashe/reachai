@@ -236,7 +236,7 @@ export function WarmupMasterDashboard() {
         return (
             <div className="flex flex-col items-center justify-center py-20 gap-6">
                 <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-full" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-muted/20 to-primary/20 blur-3xl rounded-full" />
                     <WaveLoader color="bg-primary" size="lg" speed="normal" />
                 </div>
                 <div className="text-center space-y-2">

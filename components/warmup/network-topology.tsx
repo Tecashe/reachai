@@ -91,9 +91,9 @@ function ThreadStatusBadge({ status }: { status: string }) {
 // Node component for the connection visualization
 function ConnectionNodeComponent({ node, side }: { node: ConnectionNode; side: 'left' | 'right' }) {
     const getHealthColor = () => {
-        if (node.healthScore >= 80) return 'border-emerald-500'
-        if (node.healthScore >= 60) return 'border-amber-500'
-        return 'border-rose-500'
+        if (node.healthScore >= 80) return 'border-primary'
+        if (node.healthScore >= 60) return 'border-muted-foreground'
+        return 'border-destructive'
     }
 
     return (
@@ -141,9 +141,9 @@ function ThreadCard({ thread, onClick }: { thread: ThreadConnection; onClick?: (
             {/* Status indicator */}
             <div className={cn(
                 "absolute top-0 left-0 right-0 h-0.5 rounded-t-xl",
-                thread.status === 'ACTIVE' ? "bg-emerald-500" :
-                    thread.status === 'PAUSED' ? "bg-amber-500" :
-                        thread.status === 'COMPLETED' ? "bg-blue-500" : "bg-rose-500"
+                thread.status === 'ACTIVE' ? "bg-primary" :
+                    thread.status === 'PAUSED' ? "bg-muted-foreground" :
+                        thread.status === 'COMPLETED' ? "bg-muted" : "bg-destructive"
             )} />
 
             {/* Connection visualization */}
@@ -156,27 +156,27 @@ function ThreadCard({ thread, onClick }: { thread: ThreadConnection; onClick?: (
                     <div className={cn(
                         "absolute top-1/2 -translate-y-1/2 flex items-center justify-center",
                         "w-8 h-8 rounded-full bg-background border-2",
-                        thread.status === 'ACTIVE' ? "border-emerald-500" : "border-muted"
+                        thread.status === 'ACTIVE' ? "border-primary" : "border-muted"
                     )}>
                         {thread.status === 'ACTIVE' && (
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                         )}
                         {thread.status === 'PAUSED' && (
-                            <PauseCircle className="w-4 h-4 text-amber-500" />
+                            <PauseCircle className="w-4 h-4 text-muted-foreground" />
                         )}
                         {thread.status === 'COMPLETED' && (
-                            <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                            <CheckCircle2 className="w-4 h-4 text-muted" />
                         )}
                         {thread.status === 'FAILED' && (
-                            <AlertCircle className="w-4 h-4 text-rose-500" />
+                            <AlertCircle className="w-4 h-4 text-destructive" />
                         )}
                     </div>
                     {/* Animated data flow */}
                     {thread.status === 'ACTIVE' && (
                         <>
-                            <div className="absolute h-1 bg-gradient-to-r from-emerald-500/50 to-transparent animate-flow-right"
+                            <div className="absolute h-1 bg-gradient-to-r from-primary/50 to-transparent animate-flow-right"
                                 style={{ left: '20%', width: '20%' }} />
-                            <div className="absolute h-1 bg-gradient-to-l from-emerald-500/50 to-transparent animate-flow-left"
+                            <div className="absolute h-1 bg-gradient-to-l from-primary/50 to-transparent animate-flow-left"
                                 style={{ right: '20%', width: '20%' }} />
                         </>
                     )}

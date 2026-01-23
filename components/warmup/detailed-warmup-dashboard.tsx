@@ -100,18 +100,18 @@ export function DetailedWarmupDashboard() {
   }
 
   const getHealthGrade = (score: number) => {
-    if (score >= 90) return { grade: "A+", color: "text-green-600 dark:text-green-400" }
-    if (score >= 80) return { grade: "A", color: "text-green-600 dark:text-green-400" }
-    if (score >= 70) return { grade: "B", color: "text-blue-600 dark:text-blue-400" }
-    if (score >= 60) return { grade: "C", color: "text-yellow-600 dark:text-yellow-400" }
-    return { grade: "D", color: "text-red-600 dark:text-red-400" }
+    if (score >= 90) return { grade: "A+", color: "text-foreground" }
+    if (score >= 80) return { grade: "A", color: "text-foreground" }
+    if (score >= 70) return { grade: "B", color: "text-muted-foreground" }
+    if (score >= 60) return { grade: "C", color: "text-muted-foreground" }
+    return { grade: "D", color: "text-destructive" }
   }
 
   const formatTrend = (value: number) => {
     if (value === 0) return null
     const isPositive = value > 0
     return (
-      <span className={`flex items-center gap-1 text-xs ${isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+      <span className={`flex items-center gap-1 text-xs ${isPositive ? "text-foreground" : "text-destructive"}`}>
         {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
         {Math.abs(value)}%
       </span>
@@ -418,15 +418,15 @@ export function DetailedWarmupDashboard() {
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Warmup Engine</span>
-              <Badge variant="default" className="bg-green-600 dark:bg-green-500 text-white">
-                <span className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
+              <Badge variant="default" className="bg-primary text-primary-foreground">
+                <span className="w-2 h-2 bg-primary-foreground rounded-full mr-1 animate-pulse" />
                 Active
               </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Email Delivery</span>
-              <Badge variant="default" className="bg-green-600 dark:bg-green-500 text-white">
-                <span className="w-2 h-2 bg-white rounded-full mr-1 animate-pulse" />
+              <Badge variant="default" className="bg-primary text-primary-foreground">
+                <span className="w-2 h-2 bg-primary-foreground rounded-full mr-1 animate-pulse" />
                 Operational
               </Badge>
             </div>

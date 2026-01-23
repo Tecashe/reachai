@@ -22,13 +22,13 @@ export function DeliverabilityHeatmap({ data }: DeliverabilityHeatmapProps) {
 
     const getColor = (rate: number, sent: number) => {
         if (sent === 0) return "bg-muted/30"
-        // Use opacity based on volume, Hue based on rate
-        // High Rate = Green, Low = Red
-        // High Volume = Darker
+        // Use opacity based on volume, shade based on rate
+        // High Rate = Darker primary, Low = Lighter (muted)
+        const opacity = Math.min(sent * 10 + 30, 95)
 
-        if (rate >= 90) return `bg-green-500/${Math.min(sent * 10 + 20, 90)}`
-        if (rate >= 70) return `bg-yellow-500/${Math.min(sent * 10 + 20, 90)}`
-        return `bg-red-500/${Math.min(sent * 10 + 20, 90)}`
+        if (rate >= 90) return `bg-primary/${opacity}`
+        if (rate >= 70) return `bg-muted-foreground/${opacity}`
+        return `bg-muted/${opacity}`
     }
 
     return (
@@ -61,7 +61,7 @@ export function DeliverabilityHeatmap({ data }: DeliverabilityHeatmapProps) {
                                                 <TooltipContent>
                                                     <div className="text-xs">
                                                         <p className="font-bold mb-1">{day} @ {hour}:00</p>
-                                                        <p>Inbox Rate: <span className={cell.rate >= 90 ? "text-green-500" : "text-amber-500"}>{cell.rate}%</span></p>
+                                                        <p>Inbox Rate: <span className={cell.rate >= 90 ? "text-foreground font-semibold" : "text-muted-foreground"}>{cell.rate}%</span></p>
                                                         <p>Volume: {cell.sent} emails</p>
                                                         <p className="text-[10px] text-muted-foreground mt-1">
                                                             {cell.inbox} Inbox / {cell.spam} Spam

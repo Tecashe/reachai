@@ -34,8 +34,8 @@ export function VolumeTrendChart({ trends }: VolumeData) {
                         <AreaChart data={chartData}>
                             <defs>
                                 <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+                                    <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <XAxis
@@ -44,20 +44,22 @@ export function VolumeTrendChart({ trends }: VolumeData) {
                                 tickLine={false}
                                 axisLine={false}
                                 minTickGap={30}
+                                stroke="hsl(var(--muted-foreground))"
                             />
                             <YAxis
                                 fontSize={12}
                                 tickLine={false}
                                 axisLine={false}
                                 width={30}
+                                stroke="hsl(var(--muted-foreground))"
                             />
                             <Tooltip
-                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))', backgroundColor: 'hsl(var(--popover))', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                             />
                             <Area
                                 type="monotone"
                                 dataKey="volume"
-                                stroke="#8884d8"
+                                stroke="hsl(var(--chart-1))"
                                 fillOpacity={1}
                                 fill="url(#colorVolume)"
                                 strokeWidth={2}
