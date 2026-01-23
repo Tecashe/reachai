@@ -124,11 +124,59 @@ export async function GET() {
 
     const sentTrend = prevSent > 0 ? ((recentSent - prevSent) / prevSent) * 100 : 0
 
+    // Aggregate DNS records
+    const dnsAggregation = {
+      SPF: { valid: 0, total: 0 },
+      DKIM: { valid: 0, total: 0 },
+      DMARC: { valid: 0, total: 0 },
+    }
+
+    accounts.forEach(acc => {
+      // Assuming domainReputation is stored as JSON: { SPF: { status: 'valid', ... }, DKIM: ... }
+      // If undefined, assume missing
+      const reputation = acc.domainReputation as any || {}
+
+      if (reputation.SPF?.status === 'valid') dnsAggregation.SPF.valid++
+      dnsAggregation.SPF.total++
+
+      if (reputation.DKIM?.status === 'valid') dnsAggregation.DKIM.valid++
+      dnsAggregation.DKIM.total++
+
+      if (reputation.DMARC?.status === 'valid') dnsAggregation.DMARC.valid++
+      dnsAggregation.DMARC.total++
+    })
+
+    const dnsRecords = [
+      {
+        type: 'SPF',
+        status: dnsAggregation.SPF.total > 0
+          ? (dnsAggregation.SPF.valid === dnsAggregation.SPF.total ? 'valid' : dnsAggregation.SPF.valid > 0 ? 'invalid' : 'missing')
+          : 'missing',
+        value: `${dnsAggregation.SPF.valid}/${dnsAggregation.SPF.total} accounts secured`
+      },
+      {
+        type: 'DKIM',
+        status: dnsAggregation.DKIM.total > 0
+          ? (dnsAggregation.DKIM.valid === dnsAggregation.DKIM.total ? 'valid' : dnsAggregation.DKIM.valid > 0 ? 'invalid' : 'missing')
+          : 'missing',
+        value: `${dnsAggregation.DKIM.valid}/${dnsAggregation.DKIM.total} accounts secured`
+      },
+      {
+        type: 'DMARC',
+        status: dnsAggregation.DMARC.total > 0
+          ? (dnsAggregation.DMARC.valid === dnsAggregation.DMARC.total ? 'valid' : dnsAggregation.DMARC.valid > 0 ? 'invalid' : 'missing')
+          : 'missing',
+        value: `${dnsAggregation.DMARC.valid}/${dnsAggregation.DMARC.total} accounts secured`
+      },
+    ]
+
     return NextResponse.json({
       activeAccounts: accounts.length,
       emailsSentToday,
       inboxRate: Math.round(inboxRate * 10) / 10,
+      spamRate: Math.round(spamRate * 10) / 10,
       healthScore: Math.min(100, healthScore),
+      dnsRecords,
       trends: {
         activeAccounts: 0, // Can calculate if needed
         emailsSent: Math.round(sentTrend),

@@ -96,6 +96,7 @@ export function WarmupMasterDashboard() {
         totalAccounts: 0,
         emailsSentToday: 0,
         inboxRate: 95,
+        spamRate: 0,
         healthScore: 85,
         activeThreads: 0,
         spamRescued: 0,
@@ -108,7 +109,22 @@ export function WarmupMasterDashboard() {
     })
 
     // DNS records from user's domains - fetched dynamically
-    const [dnsRecords] = useState<Array<{ type: 'SPF' | 'DKIM' | 'DMARC'; status: 'valid' | 'invalid' | 'missing'; value?: string }>>([])
+    const [dnsRecords, setDnsRecords] = useState<Array<{ type: 'SPF' | 'DKIM' | 'DMARC'; status: 'valid' | 'invalid' | 'missing'; value?: string }>>([])
+
+    // Warmup Settings
+    const [warmupSettings, setWarmupSettings] = useState({
+        autoWarmupEnabled: true,
+        aiOptimizationEnabled: true,
+        peerWarmupEnabled: true,
+        defaultDailyLimit: 20,
+        healthAlertsEnabled: true,
+        spamDetectionEnabled: true,
+        dailySummaryEnabled: false,
+        blacklistAlertsEnabled: true,
+        activeDays: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        activeHours: [9, 18],
+    })
+    const [settingsLoading, setSettingsLoading] = useState(true)
 
     const fetchAllData = useCallback(async () => {
         if (!user) return
@@ -148,7 +164,7 @@ export function WarmupMasterDashboard() {
                     },
                     status: t.status || 'ACTIVE',
                     messageCount: t.messageCount || 0,
-                    lastActivity: t.lastMessageAt || t.updatedAt || new Date().toISOString(),
+                    lastActivity: new Date(t.lastMessageAt || t.updatedAt || new Date()).toLocaleString(),
                     subject: t.subject,
                 }))
                 setThreads(transformedThreads)
@@ -166,6 +182,7 @@ export function WarmupMasterDashboard() {
                     totalAccounts: data.activeAccounts || 0,
                     emailsSentToday: data.emailsSentToday || 0,
                     inboxRate: Math.round(data.inboxRate) || 0,
+                    spamRate: Math.round(data.spamRate) || 0,
                     healthScore: Math.min(100, data.healthScore || 0),
                     activeThreads: threads.filter(t => t.status === 'ACTIVE').length,
                     spamRescued: activity.filter(a => a.spam).length,
@@ -176,7 +193,19 @@ export function WarmupMasterDashboard() {
                     inboxRate: data.trends?.inboxRate || 0,
                     healthScore: data.trends?.healthScore || 0,
                 })
+                // Set DNS records from API if available, otherwise empty
+                if (data.dnsRecords) {
+                    setDnsRecords(data.dnsRecords)
+                }
             }
+
+            // Fetch settings
+            const settingsRes = await fetch("/api/warmup/settings")
+            if (settingsRes.ok) {
+                const settings = await settingsRes.json()
+                setWarmupSettings(prev => ({ ...prev, ...settings }))
+            }
+            setSettingsLoading(false)
 
             if (chartRes.ok) {
                 const data = await chartRes.json()
@@ -206,6 +235,27 @@ export function WarmupMasterDashboard() {
         const interval = setInterval(fetchAllData, 30000)
         return () => clearInterval(interval)
     }, [user, fetchAllData])
+
+    const updateSettings = async (key: string, value: any) => {
+        const newSettings = { ...warmupSettings, [key]: value }
+        setWarmupSettings(newSettings)
+
+        try {
+            const res = await fetch("/api/warmup/settings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newSettings),
+            })
+
+            if (!res.ok) throw new Error("Failed to update settings")
+
+            toast.success("Settings saved")
+        } catch (error) {
+            console.error(error)
+            toast.error("Failed to save settings")
+            setWarmupSettings(warmupSettings)
+        }
+    }
 
     const handleAccountAction = async (accountId: string, action: 'pause' | 'resume' | 'settings') => {
         if (action === 'settings') {
@@ -472,7 +522,7 @@ export function WarmupMasterDashboard() {
                 <TabsContent value="deliverability" className="space-y-6">
                     <InboxIntelligence
                         inboxRate={stats.inboxRate}
-                        spamRate={100 - stats.inboxRate > 0 ? Math.round((100 - stats.inboxRate) * 0.3) : 0}
+                        spamRate={stats.spamRate}
                         dnsRecords={dnsRecords}
                         onRefresh={fetchAllData}
                         lastUpdated="Just now"
@@ -506,28 +556,43 @@ export function WarmupMasterDashboard() {
                                         <Label>Auto Warmup</Label>
                                         <p className="text-xs text-muted-foreground">Automatically warmup new accounts</p>
                                     </div>
-                                    <Switch defaultChecked />
+                                    <Switch
+                                        checked={warmupSettings.autoWarmupEnabled}
+                                        onCheckedChange={(v) => updateSettings('autoWarmupEnabled', v)}
+                                    />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <Label>AI Optimization</Label>
                                         <p className="text-xs text-muted-foreground">Let AI adjust sending patterns</p>
                                     </div>
-                                    <Switch defaultChecked />
+                                    <Switch
+                                        checked={warmupSettings.aiOptimizationEnabled}
+                                        onCheckedChange={(v) => updateSettings('aiOptimizationEnabled', v)}
+                                    />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <Label>Peer Mode</Label>
                                         <p className="text-xs text-muted-foreground">Enable peer-to-peer warmup</p>
                                     </div>
-                                    <Switch defaultChecked />
+                                    <Switch
+                                        checked={warmupSettings.peerWarmupEnabled}
+                                        onCheckedChange={(v) => updateSettings('peerWarmupEnabled', v)}
+                                    />
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <Label>Default Daily Limit</Label>
-                                        <span className="text-sm font-medium">20 emails</span>
+                                        <span className="text-sm font-medium">{warmupSettings.defaultDailyLimit} emails</span>
                                     </div>
-                                    <Slider defaultValue={[20]} max={100} step={5} className="w-full" />
+                                    <Slider
+                                        value={[warmupSettings.defaultDailyLimit]}
+                                        onValueChange={(v) => updateSettings('defaultDailyLimit', v[0])}
+                                        max={100}
+                                        step={5}
+                                        className="w-full"
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
@@ -546,28 +611,40 @@ export function WarmupMasterDashboard() {
                                         <Label>Health Alerts</Label>
                                         <p className="text-xs text-muted-foreground">Alert when health drops below 70%</p>
                                     </div>
-                                    <Switch defaultChecked />
+                                    <Switch
+                                        checked={warmupSettings.healthAlertsEnabled}
+                                        onCheckedChange={(v) => updateSettings('healthAlertsEnabled', v)}
+                                    />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <Label>Spam Detection</Label>
                                         <p className="text-xs text-muted-foreground">Alert on spam folder placement</p>
                                     </div>
-                                    <Switch defaultChecked />
+                                    <Switch
+                                        checked={warmupSettings.spamDetectionEnabled}
+                                        onCheckedChange={(v) => updateSettings('spamDetectionEnabled', v)}
+                                    />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <Label>Daily Summary</Label>
                                         <p className="text-xs text-muted-foreground">Send daily warmup report</p>
                                     </div>
-                                    <Switch />
+                                    <Switch
+                                        checked={warmupSettings.dailySummaryEnabled}
+                                        onCheckedChange={(v) => updateSettings('dailySummaryEnabled', v)}
+                                    />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-1">
                                         <Label>Blacklist Alerts</Label>
                                         <p className="text-xs text-muted-foreground">Alert if listed on blacklist</p>
                                     </div>
-                                    <Switch defaultChecked />
+                                    <Switch
+                                        checked={warmupSettings.blacklistAlertsEnabled}
+                                        onCheckedChange={(v) => updateSettings('blacklistAlertsEnabled', v)}
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
@@ -590,9 +667,15 @@ export function WarmupMasterDashboard() {
                                         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
                                             <Button
                                                 key={i}
-                                                variant={i < 5 ? "default" : "outline"}
+                                                variant={warmupSettings.activeDays.includes(day) ? "default" : "outline"}
                                                 size="sm"
                                                 className="w-8 h-8 p-0 text-xs"
+                                                onClick={() => {
+                                                    const newDays = warmupSettings.activeDays.includes(day)
+                                                        ? warmupSettings.activeDays.filter(d => d !== day)
+                                                        : [...warmupSettings.activeDays, day]
+                                                    updateSettings('activeDays', newDays)
+                                                }}
                                             >
                                                 {day}
                                             </Button>
@@ -602,9 +685,16 @@ export function WarmupMasterDashboard() {
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <Label>Active Hours</Label>
-                                        <span className="text-sm font-medium">9 AM - 6 PM</span>
+                                        <span className="text-sm font-medium">{warmupSettings.activeHours[0]}:00 - {warmupSettings.activeHours[1]}:00</span>
                                     </div>
-                                    <Slider defaultValue={[9, 18]} max={24} step={1} className="w-full" />
+                                    <Slider
+                                        value={warmupSettings.activeHours}
+                                        onValueChange={(v) => updateSettings('activeHours', v)}
+                                        max={24}
+                                        step={1}
+                                        minStepsBetweenThumbs={1}
+                                        className="w-full"
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
