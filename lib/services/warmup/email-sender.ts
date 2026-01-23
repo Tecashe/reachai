@@ -442,17 +442,15 @@ export class EmailSender {
       await prisma.warmupThread.create({
         data: {
           id: threadId,
-          userId: session.sendingAccount.userId,
           initiatorAccountId,
           recipientAccountId: recipientId,
-          threadSubject,
-          threadTopic: 'project_update',
+          subject: threadSubject,
+          topic: 'project_update',
           status: 'ACTIVE',
           messageCount: 1,
           maxMessages: Math.floor(Math.random() * 3) + 3, // 3-5 messages
           responseTimeMin: 120, // 2 hours
           responseTimeMax: 1440, // 24 hours
-          lastMessageAt: new Date(),
           nextScheduledAt: new Date(Date.now() + (Math.random() * 24 + 2) * 60 * 60 * 1000),
         },
       })

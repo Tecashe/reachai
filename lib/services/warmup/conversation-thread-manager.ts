@@ -830,12 +830,10 @@ import { emailSender } from "./email-sender"
 
 interface CachedThread {
   id: string
-  userId: string
   initiatorAccountId: string
   recipientAccountId: string
-  threadSubject: string
-  threadTopic: string
-  industry?: string | null
+  subject: string
+  topic: string
   status: string
   messageCount: number
   maxMessages: number
@@ -895,12 +893,10 @@ class ConversationThreadManager {
       // Create thread in database
       const thread = await prisma.warmupThread.create({
         data: {
-          userId: initiator.userId,
           initiatorAccountId,
           recipientAccountId,
-          threadSubject: subjectLine,
-          threadTopic: selectedTopic,
-          industry: industry || initiator.reputationProfile?.industry || undefined,
+          subject: subjectLine,
+          topic: selectedTopic,
           ...threadParams,
           status: "ACTIVE",
           nextScheduledAt: new Date(Date.now() + threadParams.responseTimeMin * 60000),
@@ -967,8 +963,7 @@ class ConversationThreadManager {
       })
 
       const messageContent = await contentGenerator.generateThreadMessage({
-        topic: thread.threadTopic,
-        industry: thread.industry ?? undefined,
+        topic: thread.topic,
         messageNumber: thread.messageCount + 1,
         isReply: thread.messageCount > 0,
         previousMessages: previousMessages.map((m) => m.subject),
@@ -982,65 +977,65 @@ class ConversationThreadManager {
       //     sessionId: session.id,
       //     sendingAccountId: senderAccountId,
       //     threadId,
-      //     subject: thread.messageCount === 0 ? thread.threadSubject : `Re: ${thread.threadSubject}`,
+      //     subject: thread.messageCount === 0 ? thread.subject : `Re: ${thread.subject}`,
       //     snippet: messageContent.body.substring(0, 100),
       //     direction: "OUTBOUND",
       //     isPending: true,
       //   },
       // })
-      
-  const interaction = await prisma.warmupInteraction.create({
-    data: {
-      sessionId: session.id,
-      sendingAccountId: senderAccountId,
-      threadId,
-      subject: thread.messageCount === 0 ? thread.threadSubject : `Re: ${thread.threadSubject}`,
-      snippet: messageContent.body.substring(0, 100),
-      direction: "OUTBOUND",
-      isPending: true, // ← Mark as pending first
-    },
-  })
 
-  // 🔥 ADD THIS: Actually send the email
-  const recipientAccountId = isInitiatorTurn ? thread.recipientAccountId : thread.initiatorAccountId
+      const interaction = await prisma.warmupInteraction.create({
+        data: {
+          sessionId: session.id,
+          sendingAccountId: senderAccountId,
+          threadId,
+          subject: thread.messageCount === 0 ? thread.subject : `Re: ${thread.subject}`,
+          snippet: messageContent.body.substring(0, 100),
+          direction: "OUTBOUND",
+          isPending: true, // ← Mark as pending first
+        },
+      })
 
-  const [senderAccount, recipientAccount] = await Promise.all([
-    prisma.sendingAccount.findUnique({ where: { id: senderAccountId } }),
-    prisma.sendingAccount.findUnique({ where: { id: recipientAccountId } }),
-  ])
+      // 🔥 ADD THIS: Actually send the email
+      const recipientAccountId = isInitiatorTurn ? thread.recipientAccountId : thread.initiatorAccountId
 
-  if (!senderAccount || !recipientAccount) {
-    throw new Error("Accounts not found")
-  }
+      const [senderAccount, recipientAccount] = await Promise.all([
+        prisma.sendingAccount.findUnique({ where: { id: senderAccountId } }),
+        prisma.sendingAccount.findUnique({ where: { id: recipientAccountId } }),
+      ])
 
-  // Send the actual email using your email sender
-  const sendResult = await emailSender.sendWarmupEmail(
-    session.id,
-    senderAccount,
-    recipientAccount.email,
-    recipientAccount.name,
-    recipientAccountId
-  )
+      if (!senderAccount || !recipientAccount) {
+        throw new Error("Accounts not found")
+      }
 
-  if (sendResult.success) {
-    // Update interaction with sent details
-    await prisma.warmupInteraction.update({
-      where: { id: interaction.id },
-      data: {
-        isPending: false,
-        messageId: sendResult.messageId,
-        warmupId: sendResult.warmupId,
-        sentAt: new Date(),
-        deliveredAt: new Date(),
-      },
-    })
-  } else {
-    logger.error("[ConversationThreadManager] Failed to send thread message", {
-      threadId,
-      error: sendResult.error,
-    })
-    throw new Error(`Failed to send: ${sendResult.error}`)
-  }
+      // Send the actual email using your email sender
+      const sendResult = await emailSender.sendWarmupEmail(
+        session.id,
+        senderAccount,
+        recipientAccount.email,
+        recipientAccount.name,
+        recipientAccountId
+      )
+
+      if (sendResult.success) {
+        // Update interaction with sent details
+        await prisma.warmupInteraction.update({
+          where: { id: interaction.id },
+          data: {
+            isPending: false,
+            messageId: sendResult.messageId,
+            warmupId: sendResult.warmupId,
+            sentAt: new Date(),
+            deliveredAt: new Date(),
+          },
+        })
+      } else {
+        logger.error("[ConversationThreadManager] Failed to send thread message", {
+          threadId,
+          error: sendResult.error,
+        })
+        throw new Error(`Failed to send: ${sendResult.error}`)
+      }
 
 
 
@@ -1067,7 +1062,6 @@ class ConversationThreadManager {
         where: { id: threadId },
         data: {
           messageCount: { increment: 1 },
-          lastMessageAt: new Date(),
           nextScheduledAt: new Date(Date.now() + nextResponseTime * 60000),
         },
       })
@@ -1261,10 +1255,30 @@ class ConversationThreadManager {
     })
 
     if (thread) {
-      await this.cacheThread(threadId, thread)
+      // Map Prisma result to CachedThread format
+      const cachedThread: CachedThread = {
+        id: thread.id,
+        initiatorAccountId: thread.initiatorAccountId,
+        recipientAccountId: thread.recipientAccountId,
+        subject: thread.subject,
+        topic: thread.topic ?? "general",
+        status: thread.status,
+        messageCount: thread.messageCount,
+        maxMessages: thread.maxMessages,
+        responseTimeMin: thread.responseTimeMin,
+        responseTimeMax: thread.responseTimeMax,
+        includeLinks: thread.includeLinks,
+        includeAttachments: thread.includeAttachments,
+        conversationDepth: Math.floor(thread.maxMessages / 2), // Calculate from maxMessages
+        nextScheduledAt: thread.nextScheduledAt,
+        createdAt: thread.createdAt,
+        completedAt: thread.completedAt,
+      }
+      await this.cacheThread(threadId, cachedThread)
+      return cachedThread
     }
 
-    return thread
+    return null
   }
 
   private async invalidateCache(threadId: string): Promise<void> {
