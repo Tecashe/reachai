@@ -1654,6 +1654,7 @@ import { emailSender } from './email-sender'
 import { sessionManager } from './session-manager'
 import { replyAutomation } from './reply-automation'
 import { metricsTracker } from './metrics-tracker'
+import { warmupSubscriptionGate } from '../warmup-subscription-gate'
 import type { SendingAccount, WarmupStage } from '@prisma/client'
 
 interface SendingAccountWithUser extends SendingAccount {
@@ -2006,6 +2007,7 @@ export class CoreWarmupManager {
       const account = await prisma.sendingAccount.findUnique({
         where: { id: accountId },
         select: {
+          userId: true,
           warmupProgress: true,
           warmupStartDate: true,
         },
@@ -2016,6 +2018,9 @@ export class CoreWarmupManager {
         return
       }
 
+      // Get user's subscription limits
+      const limits = await warmupSubscriptionGate.getWarmupLimits(account.userId)
+
       const daysInStage = Math.floor(
         (Date.now() - account.warmupStartDate.getTime()) /
         (1000 * 60 * 60 * 24)
@@ -2023,11 +2028,11 @@ export class CoreWarmupManager {
 
       // Stage advancement logic
       const stageMap = {
-        NEW: { duration: 7, nextStage: 'WARMING', dailyLimit: 20 },
-        WARMING: { duration: 14, nextStage: 'WARM', dailyLimit: 40 },
-        WARM: { duration: 21, nextStage: 'ACTIVE', dailyLimit: 60 },
-        ACTIVE: { duration: 30, nextStage: 'ESTABLISHED', dailyLimit: 80 },
-        ESTABLISHED: { duration: Infinity, nextStage: null, dailyLimit: 100 },
+        NEW: { duration: 7, nextStage: 'WARMING', baseDailyLimit: 20 },
+        WARMING: { duration: 14, nextStage: 'WARM', baseDailyLimit: 40 },
+        WARM: { duration: 21, nextStage: 'ACTIVE', baseDailyLimit: 60 },
+        ACTIVE: { duration: 30, nextStage: 'ESTABLISHED', baseDailyLimit: 80 },
+        ESTABLISHED: { duration: Infinity, nextStage: null, baseDailyLimit: 100 },
       }
 
       const currentStageConfig =
@@ -2037,13 +2042,22 @@ export class CoreWarmupManager {
         const nextStage = currentStageConfig.nextStage
 
         if (nextStage) {
+          const nextStageConfig = stageMap[nextStage as keyof typeof stageMap]
+
+          // Cap the daily limit based on user's plan
+          const newDailyLimit = Math.min(nextStageConfig.baseDailyLimit, limits.warmupDailyLimit)
+
+          // Check if peer warmup is allowed for this user AND this stage
+          const isStageReadyForPeer = ['WARM', 'ACTIVE', 'ESTABLISHED'].includes(nextStage)
+          const enablePeerWarmup = isStageReadyForPeer && limits.canUsePeerWarmup
+
           await prisma.sendingAccount.update({
             where: { id: accountId },
             data: {
               warmupStage: nextStage as WarmupStage,
-              warmupDailyLimit:
-                stageMap[nextStage as keyof typeof stageMap].dailyLimit,
+              warmupDailyLimit: newDailyLimit,
               warmupProgress: 0,
+              peerWarmupEnabled: enablePeerWarmup,
             },
           })
 
@@ -2051,6 +2065,9 @@ export class CoreWarmupManager {
             accountId,
             previousStage: currentStage,
             newStage: nextStage,
+            newLimit: newDailyLimit,
+            peerEnabled: enablePeerWarmup,
+            planLimit: limits.warmupDailyLimit,
           })
         }
       } else {

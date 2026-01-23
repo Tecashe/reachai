@@ -104,6 +104,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { reputationProfiler } from "@/lib/services/warmup/reputation-profiler"
+import { warmupSubscriptionGate } from "@/lib/services/warmup-subscription-gate"
 import { logger } from "@/lib/logger"
 
 export async function POST(request: NextRequest) {
@@ -128,9 +129,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Account is already enrolled in warmup" }, { status: 400 })
     }
 
+    // Check if user can add more warmup accounts based on their plan
+    const validation = await warmupSubscriptionGate.validateWarmupAccountCreation(userId)
+    if (!validation.allowed) {
+      return NextResponse.json({ error: validation.reason }, { status: 403 })
+    }
+
+    // Get user's plan limits
+    const planLimits = await warmupSubscriptionGate.getWarmupLimits(userId)
+
     // Analyze and get/create reputation profile
     await reputationProfiler.analyzeAccount(accountId)
-    
+
     const profile = await prisma.reputationProfile.findUnique({
       where: { accountId },
     })
@@ -146,7 +156,6 @@ export async function POST(request: NextRequest) {
       LOW: 20,
       CRITICAL: 10,
     }
-    const initialDailyLimit = limitByTier[profile.reputationTier] || 20
 
     const stageByTier: Record<string, "NEW" | "WARMING" | "WARM" | "ACTIVE" | "ESTABLISHED"> = {
       PRISTINE: "WARM",
@@ -156,6 +165,14 @@ export async function POST(request: NextRequest) {
       CRITICAL: "NEW",
     }
     const initialStage = stageByTier[profile.reputationTier] || "NEW"
+
+    // Cap the initial daily limit based on BOTH reputation AND plan limits
+    const reputationBasedLimit = limitByTier[profile.reputationTier] || 20
+    const initialDailyLimit = Math.min(reputationBasedLimit, planLimits.warmupDailyLimit)
+
+    // Only enable peer warmup if BOTH stage is eligible AND plan allows it
+    const isStageEligibleForPeer = ["WARM", "ACTIVE", "ESTABLISHED"].includes(initialStage)
+    const enablePeerWarmup = isStageEligibleForPeer && planLimits.canUsePeerWarmup
 
     // Create warmup session
     const session = await prisma.warmupSession.create({
@@ -175,7 +192,7 @@ export async function POST(request: NextRequest) {
         warmupDailyLimit: initialDailyLimit,
         warmupStartDate: new Date(),
         warmupProgress: 0,
-        peerWarmupEnabled: ["WARM", "ACTIVE", "ESTABLISHED"].includes(initialStage),
+        peerWarmupEnabled: enablePeerWarmup,
         peerWarmupOptIn: true,
         healthScore: Math.round(100 - profile.riskScore),
       },
@@ -200,7 +217,9 @@ export async function POST(request: NextRequest) {
       accountId,
       tier: profile.reputationTier,
       initialLimit: initialDailyLimit,
+      planLimit: planLimits.warmupDailyLimit,
       stage: initialStage,
+      peerEnabled: enablePeerWarmup,
     })
 
     return NextResponse.json({
@@ -215,7 +234,7 @@ export async function POST(request: NextRequest) {
         riskScore: profile.riskScore,
         industry: profile.industry,
       },
-      message: `Warmup started with ${initialDailyLimit} emails/day based on ${profile.reputationTier} reputation`,
+      message: `Warmup started with ${initialDailyLimit} emails/day based on ${profile.reputationTier} reputation (plan limit: ${planLimits.warmupDailyLimit}/day)`,
     })
   } catch (error) {
     logger.error("[EnrollAPI] Failed to enroll account", { error: (error as Error).message })
