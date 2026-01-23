@@ -75,9 +75,14 @@ interface LogEntry {
 class Logger {
   private log(level: LogLevel, message: string, context?: Record<string, any>, error?: Error | unknown) {
     // Normalize error to Error object or string
-    let normalizedError: Error | string | undefined
+    let normalizedError: Error | string | Record<string, any> | undefined
     if (error instanceof Error) {
-      normalizedError = error
+      normalizedError = {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        ...(error as any) // Include any other properties
+      }
     } else if (error) {
       normalizedError = String(error)
     }
@@ -87,7 +92,7 @@ class Logger {
       message,
       timestamp: new Date().toISOString(),
       context,
-      error: normalizedError,
+      error: normalizedError as any,
     }
 
     // In production, you'd send this to a logging service like Sentry, LogRocket, etc.

@@ -776,13 +776,13 @@
 //    */
 //   private extractEmailAddress(addressObj: AddressObject | AddressObject[] | undefined): string {
 //     if (!addressObj) return ""
-    
+
 //     if (Array.isArray(addressObj)) {
 //       const firstAddr = addressObj[0]
 //       if (!firstAddr) return ""
 //       return firstAddr.value?.[0]?.address || firstAddr.text || ""
 //     }
-    
+
 //     return addressObj.value?.[0]?.address || addressObj.text || ""
 //   }
 
@@ -1063,7 +1063,7 @@ export class ImapReader {
       // Only search last 7 days for warmup emails
       const sevenDaysAgo = new Date()
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      
+
       const uids = await this.searchWarmupEmails(imap, sevenDaysAgo)
 
       if (uids.length === 0) {
@@ -1071,9 +1071,9 @@ export class ImapReader {
         return 0
       }
 
-      logger.info("Found potential warmup emails", { 
-        accountId: account.id, 
-        count: uids.length 
+      logger.info("Found potential warmup emails", {
+        accountId: account.id,
+        count: uids.length
       })
 
       // Process in batches to avoid memory issues
@@ -1086,7 +1086,7 @@ export class ImapReader {
 
         for (const emailBuffer of emails) {
           const email = await this.parseEmail(emailBuffer)
-          
+
           if (email && await this.isUnprocessedWarmupEmail(email, account.id)) {
             // Check if this is a reply from a peer SendingAccount
             const isReply = await this.isWarmupReplyFromPeer(email, account.id)
@@ -1101,22 +1101,22 @@ export class ImapReader {
           }
         }
 
-        logger.debug("Processed batch", { 
-          accountId: account.id, 
+        logger.debug("Processed batch", {
+          accountId: account.id,
           batch: i / batchSize + 1,
-          repliesFound 
+          repliesFound
         })
       }
 
-      logger.info("Warmup reply check complete", { 
-        accountId: account.id, 
-        repliesFound 
+      logger.info("Warmup reply check complete", {
+        accountId: account.id,
+        repliesFound
       })
 
       return repliesFound
     } catch (error) {
-      logger.error("Failed to check warmup replies", error, { 
-        accountId: account.id 
+      logger.error("Failed to check warmup replies", error, {
+        accountId: account.id
       })
       return 0
     }
@@ -1229,20 +1229,20 @@ export class ImapReader {
    * Check if email is unprocessed warmup email
    */
   private async isUnprocessedWarmupEmail(
-    email: ProcessedEmail, 
+    email: ProcessedEmail,
     accountId: string
   ): Promise<boolean> {
     // Check if already processed
     const exists = await prisma.processedWarmupEmail.findFirst({
-      where: { 
+      where: {
         messageId: email.messageId,
-        accountId 
+        accountId
       }
     })
 
     if (exists) {
-      logger.debug("Email already processed", { 
-        messageId: email.messageId 
+      logger.debug("Email already processed", {
+        messageId: email.messageId
       })
       return false
     }
@@ -1288,7 +1288,7 @@ export class ImapReader {
    * CRITICAL: This is peer-to-peer, NOT from prospects
    */
   private async isWarmupReplyFromPeer(
-    email: ProcessedEmail, 
+    email: ProcessedEmail,
     accountId: string
   ): Promise<boolean> {
     // Method 1: Check by In-Reply-To header
@@ -1305,7 +1305,7 @@ export class ImapReader {
         // Verify sender is a SendingAccount (peer), not a prospect
         const isPeerAccount = await this.verifyPeerSender(email.from)
         if (isPeerAccount) {
-          logger.debug("Found peer reply by In-Reply-To", { 
+          logger.debug("Found peer reply by In-Reply-To", {
             messageId: email.inReplyTo,
             peerEmail: email.from
           })
@@ -1327,7 +1327,7 @@ export class ImapReader {
       if (interaction) {
         const isPeerAccount = await this.verifyPeerSender(email.from)
         if (isPeerAccount) {
-          logger.debug("Found peer reply by warmup ID", { 
+          logger.debug("Found peer reply by warmup ID", {
             warmupId: email.warmupId,
             peerEmail: email.from
           })
@@ -1349,7 +1349,7 @@ export class ImapReader {
       if (interaction) {
         const isPeerAccount = await this.verifyPeerSender(email.from)
         if (isPeerAccount) {
-          logger.debug("Found peer reply by thread ID", { 
+          logger.debug("Found peer reply by thread ID", {
             threadId: email.threadId,
             peerEmail: email.from
           })
@@ -1371,7 +1371,7 @@ export class ImapReader {
       if (interaction) {
         const isPeerAccount = await this.verifyPeerSender(email.from)
         if (isPeerAccount) {
-          logger.debug("Found peer reply by references", { 
+          logger.debug("Found peer reply by references", {
             references: email.references,
             peerEmail: email.from
           })
@@ -1406,7 +1406,7 @@ export class ImapReader {
    * PEER-TO-PEER ONLY - Not from prospects
    */
   private async processWarmupReplyFromPeer(
-    email: ProcessedEmail, 
+    email: ProcessedEmail,
     accountId: string
   ): Promise<void> {
     try {
@@ -1435,7 +1435,7 @@ export class ImapReader {
       })
 
       if (!interaction) {
-        logger.warn("Original warmup interaction not found", { 
+        logger.warn("Original warmup interaction not found", {
           originalMessageId,
           warmupId: email.warmupId,
           threadId: email.threadId,
@@ -1467,7 +1467,7 @@ export class ImapReader {
       // Track metrics for the session
       if (interaction.sessionId) {
         await metricsTracker.trackWarmupReply(
-          accountId, 
+          accountId,
           interaction.sessionId
         )
 
@@ -1512,7 +1512,7 @@ export class ImapReader {
    * CRITICAL: We don't mark as read in IMAP to avoid messing with user's inbox
    */
   private async markProcessedInDatabase(
-    email: ProcessedEmail, 
+    email: ProcessedEmail,
     accountId: string
   ): Promise<void> {
     try {
@@ -1541,9 +1541,15 @@ export class ImapReader {
    */
   async connectAccount(account: SendingAccount): Promise<Imap | null> {
     try {
-      // Check if already connected
+      // Check if already connected and valid
       if (this.connections.has(account.id)) {
-        return this.connections.get(account.id)!
+        const imap = this.connections.get(account.id)!
+        if (imap.state === 'authenticated') {
+          return imap
+        }
+        // Connection stale, cleanup
+        try { imap.end() } catch { }
+        this.connections.delete(account.id)
       }
 
       // Get IMAP configuration
@@ -1563,6 +1569,7 @@ export class ImapReader {
         tlsOptions: { rejectUnauthorized: false },
         connTimeout: 30000,
         authTimeout: 30000,
+        keepalive: true, // Keep connection alive
       })
 
       // Setup event handlers
@@ -1631,8 +1638,8 @@ export class ImapReader {
 
       // Legacy: Try credentials JSON
       const credentials =
-        typeof account.credentials === "string" 
-          ? JSON.parse(account.credentials) 
+        typeof account.credentials === "string"
+          ? JSON.parse(account.credentials)
           : account.credentials as Record<string, any>
 
       if (credentials && typeof credentials === "object") {
@@ -1710,13 +1717,13 @@ export class ImapReader {
    */
   private extractEmailAddress(addressObj: any): string {
     if (!addressObj) return ""
-    
+
     if (Array.isArray(addressObj)) {
       const firstAddr = addressObj[0]
       if (!firstAddr) return ""
       return firstAddr.value?.[0]?.address || firstAddr.text || ""
     }
-    
+
     return addressObj.value?.[0]?.address || addressObj.text || ""
   }
 
