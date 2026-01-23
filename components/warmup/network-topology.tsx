@@ -47,7 +47,7 @@ function ThreadStatusBadge({ status }: { status: string }) {
         switch (status) {
             case 'ACTIVE':
                 return {
-                    color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                    color: 'bg-primary/20 text-primary border-primary/30',
                     icon: <Zap className="w-3 h-3" />,
                     label: 'Active'
                 }
@@ -59,7 +59,7 @@ function ThreadStatusBadge({ status }: { status: string }) {
                 }
             case 'COMPLETED':
                 return {
-                    color: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                    color: 'bg-primary/20 text-primary border-primary/30',
                     icon: <CheckCircle2 className="w-3 h-3" />,
                     label: 'Completed'
                 }
@@ -221,26 +221,26 @@ function NetworkStats({ threads }: { threads: ThreadConnection[] }) {
 
     return (
         <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-emerald-400" />
+                    <Zap className="w-4 h-4 text-primary" />
                     <span className="text-xs text-muted-foreground">Active Threads</span>
                 </div>
-                <span className="text-2xl font-bold text-emerald-400">{activeCount}</span>
+                <span className="text-2xl font-bold text-primary">{activeCount}</span>
             </div>
-            <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4 text-blue-400" />
+                    <MessageSquare className="w-4 h-4 text-primary" />
                     <span className="text-xs text-muted-foreground">Total Messages</span>
                 </div>
-                <span className="text-2xl font-bold text-blue-400">{totalMessages}</span>
+                <span className="text-2xl font-bold text-primary">{totalMessages}</span>
             </div>
-            <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
                 <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-4 h-4 text-purple-400" />
+                    <Users className="w-4 h-4 text-primary" />
                     <span className="text-xs text-muted-foreground">Accounts</span>
                 </div>
-                <span className="text-2xl font-bold text-purple-400">{uniqueAccounts}</span>
+                <span className="text-2xl font-bold text-primary">{uniqueAccounts}</span>
             </div>
         </div>
     )

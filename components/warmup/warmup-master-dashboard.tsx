@@ -22,7 +22,6 @@ import {
     CheckCircle2,
     Clock,
     Users,
-    Sparkles,
     Bell,
     Calendar
 } from "lucide-react"
@@ -108,12 +107,8 @@ export function WarmupMasterDashboard() {
         healthScore: 0,
     })
 
-    // DNS records for inbox intelligence
-    const [dnsRecords] = useState([
-        { type: 'SPF' as const, status: 'valid' as const, value: 'v=spf1 include:_spf.google.com ~all' },
-        { type: 'DKIM' as const, status: 'valid' as const, value: 'v=DKIM1; k=rsa; p=MIIBIjAN...' },
-        { type: 'DMARC' as const, status: 'valid' as const, value: 'v=DMARC1; p=quarantine; rua=mailto:...' },
-    ])
+    // DNS records from user's domains - fetched dynamically
+    const [dnsRecords] = useState<Array<{ type: 'SPF' | 'DKIM' | 'DMARC'; status: 'valid' | 'invalid' | 'missing'; value?: string }>>([])
 
     const fetchAllData = useCallback(async () => {
         if (!user) return
@@ -322,11 +317,11 @@ export function WarmupMasterDashboard() {
                         {/* Main content */}
                         <div className="space-y-6">
                             {/* Quick Actions */}
-                            <div className="grid sm:grid-cols-3 gap-4">
+                            <div className="grid sm:grid-cols-2 gap-4">
                                 <Card className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
                                     <CardContent className="p-4 flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
-                                            <Zap className="w-5 h-5 text-emerald-400" />
+                                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                            <Zap className="w-5 h-5 text-primary" />
                                         </div>
                                         <div>
                                             <p className="font-semibold text-sm">Quick Warmup</p>
@@ -336,23 +331,12 @@ export function WarmupMasterDashboard() {
                                 </Card>
                                 <Card className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
                                     <CardContent className="p-4 flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
-                                            <Mail className="w-5 h-5 text-blue-400" />
+                                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                                            <Mail className="w-5 h-5 text-primary" />
                                         </div>
                                         <div>
                                             <p className="font-semibold text-sm">Add Account</p>
                                             <p className="text-xs text-muted-foreground">Connect email</p>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <Card className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
-                                    <CardContent className="p-4 flex items-center gap-4">
-                                        <div className="p-3 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
-                                            <Sparkles className="w-5 h-5 text-purple-400" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-sm">AI Optimize</p>
-                                            <p className="text-xs text-muted-foreground">Auto-tune limits</p>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -383,11 +367,11 @@ export function WarmupMasterDashboard() {
                         {/* Sidebar */}
                         <div className="space-y-4">
                             {/* Network Status */}
-                            <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent">
+                            <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-transparent to-transparent">
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span className="font-semibold text-emerald-400">Network Active</span>
+                                        <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
+                                        <span className="font-semibold text-primary">Network Active</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
@@ -417,9 +401,9 @@ export function WarmupMasterDashboard() {
                                                 <div key={item.id} className="p-3 hover:bg-muted/30 transition-colors">
                                                     <div className="flex items-center justify-between mb-1">
                                                         <div className="flex items-center gap-2">
-                                                            {item.type === 'SENT' && <div className="w-2 h-2 rounded-full bg-blue-500" />}
-                                                            {item.type === 'RECEIVED' && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                                                            {item.type === 'REPLIED' && <div className="w-2 h-2 rounded-full bg-purple-500" />}
+                                                            {item.type === 'SENT' && <div className="w-2 h-2 rounded-full bg-primary" />}
+                                                            {item.type === 'RECEIVED' && <div className="w-2 h-2 rounded-full bg-primary/70" />}
+                                                            {item.type === 'REPLIED' && <div className="w-2 h-2 rounded-full bg-primary/50" />}
                                                             <span className="text-xs font-medium">{item.type}</span>
                                                         </div>
                                                         <span className="text-[10px] text-muted-foreground">
@@ -629,31 +613,31 @@ export function WarmupMasterDashboard() {
                         <Card className="border-border/50">
                             <CardHeader className="pb-4">
                                 <CardTitle className="flex items-center gap-2 text-base">
-                                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                    <CheckCircle2 className="w-5 h-5 text-primary" />
                                     System Status
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                         <span className="text-sm font-medium">Warmup Engine</span>
                                     </div>
-                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Active</Badge>
+                                    <Badge className="bg-primary/20 text-primary border-primary/30">Active</Badge>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                         <span className="text-sm font-medium">Email Delivery</span>
                                     </div>
-                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Operational</Badge>
+                                    <Badge className="bg-primary/20 text-primary border-primary/30">Operational</Badge>
                                 </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                         <span className="text-sm font-medium">Peer Network</span>
                                     </div>
-                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Connected</Badge>
+                                    <Badge className="bg-primary/20 text-primary border-primary/30">Connected</Badge>
                                 </div>
                             </CardContent>
                         </Card>

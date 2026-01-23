@@ -169,6 +169,7 @@ function StatCard({ stat, index }: { stat: HeroStat; index: number }) {
 }
 
 export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
+    // Primary theme color: hsl(262.1 83.3% 57.8%) = approximately rgb(124, 58, 237) / #7c3aed
     const heroStats: HeroStat[] = [
         {
             id: "active-accounts",
@@ -177,8 +178,8 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             trend: trends?.accounts,
             trendLabel: "vs last week",
             icon: <Users className="w-5 h-5 text-white/90" />,
-            gradient: "rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%",
-            accentColor: "#667eea",
+            gradient: "hsl(262.1 83.3% 57.8% / 0.9) 0%, hsl(262.1 83.3% 45% / 0.9) 100%",
+            accentColor: "hsl(262.1 83.3% 57.8%)",
         },
         {
             id: "emails-today",
@@ -187,8 +188,8 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             trend: trends?.emails,
             trendLabel: "vs yesterday",
             icon: <Mail className="w-5 h-5 text-white/90" />,
-            gradient: "rgba(79, 172, 254, 0.9) 0%, rgba(0, 242, 254, 0.9) 100%",
-            accentColor: "#4facfe",
+            gradient: "hsl(262.1 83.3% 62% / 0.9) 0%, hsl(262.1 83.3% 50% / 0.9) 100%",
+            accentColor: "hsl(262.1 83.3% 62%)",
         },
         {
             id: "inbox-rate",
@@ -198,8 +199,8 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             trend: trends?.inboxRate,
             trendLabel: "this month",
             icon: <Inbox className="w-5 h-5 text-white/90" />,
-            gradient: "rgba(17, 153, 142, 0.9) 0%, rgba(56, 239, 125, 0.9) 100%",
-            accentColor: "#11998e",
+            gradient: "hsl(262.1 83.3% 67% / 0.9) 0%, hsl(262.1 83.3% 55% / 0.9) 100%",
+            accentColor: "hsl(262.1 83.3% 67%)",
         },
         {
             id: "health-score",
@@ -208,24 +209,24 @@ export function WarmupHeroStats({ stats, trends }: WarmupHeroStatsProps) {
             suffix: "%",
             trend: trends?.healthScore,
             icon: <Activity className="w-5 h-5 text-white/90" />,
-            gradient: "rgba(250, 112, 154, 0.9) 0%, rgba(254, 225, 64, 0.9) 100%",
-            accentColor: "#fa709a",
+            gradient: "hsl(262.1 83.3% 52% / 0.9) 0%, hsl(262.1 83.3% 40% / 0.9) 100%",
+            accentColor: "hsl(262.1 83.3% 52%)",
         },
         {
             id: "active-threads",
             label: "Active Threads",
             value: stats.activeThreads,
             icon: <MessageSquare className="w-5 h-5 text-white/90" />,
-            gradient: "rgba(168, 85, 247, 0.9) 0%, rgba(236, 72, 153, 0.9) 100%",
-            accentColor: "#a855f7",
+            gradient: "hsl(262.1 83.3% 72% / 0.9) 0%, hsl(262.1 83.3% 60% / 0.9) 100%",
+            accentColor: "hsl(262.1 83.3% 72%)",
         },
         {
             id: "spam-rescued",
             label: "Spam Rescued",
             value: stats.spamRescued,
             icon: <ShieldAlert className="w-5 h-5 text-white/90" />,
-            gradient: "rgba(251, 146, 60, 0.9) 0%, rgba(251, 191, 36, 0.9) 100%",
-            accentColor: "#fb923c",
+            gradient: "hsl(262.1 83.3% 47% / 0.9) 0%, hsl(262.1 83.3% 35% / 0.9) 100%",
+            accentColor: "hsl(262.1 83.3% 47%)",
         },
     ]
 
