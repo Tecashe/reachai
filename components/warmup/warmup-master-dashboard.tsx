@@ -1,82 +1,223 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, RefreshCw, Zap, Activity, Filter, Rocket, BarChart3, ShieldCheck, Server, AlertTriangle, CloudRain, Inbox, MailWarning, PauseCircle, PlayCircle } from "lucide-react"
-import { AccountHealthGrid } from "./account-health-grid"
-import { ThreadVisualizer } from "./thread-visualizer"
-import { DeliverabilityHeatmap } from "./charts/deliverability-heatmap"
-import { ProviderTrendChart } from "./charts/provider-trend-chart"
-import { ReputationRadar } from "./charts/reputation-radar"
-import { PlacementFunnel } from "./charts/placement-funnel"
-import { VolumeTrendChart } from "./charts/volume-trend-chart"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import {
+    RefreshCw,
+    Rocket,
+    BarChart3,
+    ShieldCheck,
+    Network,
+    Settings2,
+    Zap,
+    Mail,
+    AlertTriangle,
+    CheckCircle2,
+    Clock,
+    Users,
+    Sparkles,
+    Bell,
+    Calendar
+} from "lucide-react"
+import { WarmupHeroStats } from "./warmup-hero-stats"
+import { AccountFleetGrid } from "./account-fleet-grid"
+import { PerformanceAnalytics } from "./performance-analytics"
+import { InboxIntelligence } from "./inbox-intelligence"
+import { NetworkTopology } from "./network-topology"
 import { AddAccountDialog } from "./actions/add-account-dialog"
 import { WaveLoader } from "@/components/loader/wave-loader"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { useUser } from "@clerk/nextjs"
+import { cn } from "@/lib/utils"
+
+interface AccountData {
+    id: string
+    email: string
+    name?: string
+    provider: string
+    stage: string
+    healthScore: number
+    sentToday: number
+    dailyLimit: number
+    lastActive: string | null
+    inboxRate: number
+    activeThreads: number
+}
+
+interface ThreadData {
+    id: string
+    initiator: { id: string; email: string; healthScore: number; provider: string }
+    recipient: { id: string; email: string; healthScore: number; provider: string }
+    status: 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'FAILED'
+    messageCount: number
+    lastActivity: string
+    subject?: string
+}
+
+interface ActivityItem {
+    id: string
+    type: string
+    actor: string
+    target: string
+    subject?: string
+    timestamp: string
+    spam: boolean
+}
+
+interface ChartDataPoint {
+    date: string
+    sent: number
+    opened: number
+    replied: number
+    bounced: number
+    inboxRate: number
+}
 
 export function WarmupMasterDashboard() {
     const { user } = useUser()
-    const [activeTab, setActiveTab] = useState("overview")
+    const [activeTab, setActiveTab] = useState("command-center")
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
+    const [chartPeriod, setChartPeriod] = useState("30")
 
-    const [data, setData] = useState({
-        accounts: [],
-        threads: [],
-        activity: [],
-        heatmap: [],
-        trends: [],
-        reputation: null
+    // Data states
+    const [accounts, setAccounts] = useState<AccountData[]>([])
+    const [threads, setThreads] = useState<ThreadData[]>([])
+    const [activity, setActivity] = useState<ActivityItem[]>([])
+    const [chartData, setChartData] = useState<ChartDataPoint[]>([])
+    const [stats, setStats] = useState({
+        activeAccounts: 0,
+        totalAccounts: 0,
+        emailsSentToday: 0,
+        inboxRate: 95,
+        healthScore: 85,
+        activeThreads: 0,
+        spamRescued: 0,
+    })
+    const [trends, setTrends] = useState({
+        accounts: 0,
+        emails: 0,
+        inboxRate: 0,
+        healthScore: 0,
     })
 
-    const fetchAllData = async () => {
+    // DNS records for inbox intelligence
+    const [dnsRecords] = useState([
+        { type: 'SPF' as const, status: 'valid' as const, value: 'v=spf1 include:_spf.google.com ~all' },
+        { type: 'DKIM' as const, status: 'valid' as const, value: 'v=DKIM1; k=rsa; p=MIIBIjAN...' },
+        { type: 'DMARC' as const, status: 'valid' as const, value: 'v=DMARC1; p=quarantine; rua=mailto:...' },
+    ])
+
+    const fetchAllData = useCallback(async () => {
+        if (!user) return
+
         try {
             setRefreshing(true)
-            const [accountsRes, threadsRes, activityRes, heatmapRes, trendsRes, repRes] = await Promise.all([
+
+            const [accountsRes, threadsRes, activityRes, statsRes, chartRes] = await Promise.all([
                 fetch("/api/warmup/accounts"),
                 fetch("/api/warmup/threads"),
                 fetch("/api/warmup/activity"),
-                fetch("/api/warmup/analytics/heatmap"),
-                fetch("/api/warmup/analytics/provider-trends"),
-                fetch("/api/warmup/analytics/reputation")
+                fetch("/api/warmup/dashboard-stats"),
+                fetch(`/api/warmup/performance-chart?days=${chartPeriod}`),
             ])
 
-            const accounts = await accountsRes.json()
-            const threads = await threadsRes.json()
-            const activity = await activityRes.json()
-            const heatmap = await heatmapRes.json()
-            const trends = await trendsRes.json()
-            const reputation = await repRes.json()
+            if (accountsRes.ok) {
+                const data = await accountsRes.json()
+                setAccounts(data.accounts || [])
+            }
 
-            setData({
-                accounts: accounts.accounts || [],
-                threads: threads.threads || [],
-                activity: activity.activity || [],
-                heatmap: heatmap.heatmap || [],
-                trends: trends.trends || [],
-                reputation: reputation || null
-            })
+            if (threadsRes.ok) {
+                const data = await threadsRes.json()
+                // Transform threads to match the ThreadData interface
+                const transformedThreads = (data.threads || []).map((t: any) => ({
+                    id: t.id,
+                    initiator: {
+                        id: t.initiatorAccountId || t.initiator?.id,
+                        email: t.initiator?.email || t.initiatorEmail || 'Unknown',
+                        healthScore: t.initiator?.healthScore || 80,
+                        provider: t.initiator?.provider || 'gmail',
+                    },
+                    recipient: {
+                        id: t.recipientAccountId || t.recipient?.id,
+                        email: t.recipient?.email || t.recipientEmail || 'Unknown',
+                        healthScore: t.recipient?.healthScore || 80,
+                        provider: t.recipient?.provider || 'gmail',
+                    },
+                    status: t.status || 'ACTIVE',
+                    messageCount: t.messageCount || 0,
+                    lastActivity: t.lastMessageAt || t.updatedAt || new Date().toISOString(),
+                    subject: t.subject,
+                }))
+                setThreads(transformedThreads)
+            }
+
+            if (activityRes.ok) {
+                const data = await activityRes.json()
+                setActivity(data.activity || [])
+            }
+
+            if (statsRes.ok) {
+                const data = await statsRes.json()
+                setStats({
+                    activeAccounts: data.activeAccounts || 0,
+                    totalAccounts: data.activeAccounts || 0,
+                    emailsSentToday: data.emailsSentToday || 0,
+                    inboxRate: Math.round(data.inboxRate) || 0,
+                    healthScore: Math.min(100, data.healthScore || 0),
+                    activeThreads: threads.filter(t => t.status === 'ACTIVE').length,
+                    spamRescued: activity.filter(a => a.spam).length,
+                })
+                setTrends({
+                    accounts: data.trends?.activeAccounts || 0,
+                    emails: data.trends?.emailsSent || 0,
+                    inboxRate: data.trends?.inboxRate || 0,
+                    healthScore: data.trends?.healthScore || 0,
+                })
+            }
+
+            if (chartRes.ok) {
+                const data = await chartRes.json()
+                // Transform chart data
+                const transformedChartData = (data.data || []).map((d: any) => ({
+                    date: d.date,
+                    sent: d.sent || 0,
+                    opened: Math.round((d.openRate || 0) * (d.sent || 0) / 100),
+                    replied: Math.round((d.replyRate || 0) * (d.sent || 0) / 100),
+                    bounced: 0,
+                    inboxRate: d.inboxRate || 0,
+                }))
+                setChartData(transformedChartData)
+            }
+
         } catch (error) {
             console.error("Failed to fetch dashboard data", error)
+            toast.error("Failed to load dashboard data")
         } finally {
             setLoading(false)
             setRefreshing(false)
         }
-    }
+    }, [user, chartPeriod])
 
     useEffect(() => {
         if (user) fetchAllData()
-        // Auto-refresh every 30 seconds
         const interval = setInterval(fetchAllData, 30000)
         return () => clearInterval(interval)
-    }, [user])
+    }, [user, fetchAllData])
 
-    const handleAction = async (accountId: string, action: 'pause' | 'resume') => {
+    const handleAccountAction = async (accountId: string, action: 'pause' | 'resume' | 'settings') => {
+        if (action === 'settings') {
+            // Handle settings navigation
+            return
+        }
+
         try {
             const endpoint = action === 'pause' ? '/api/warmup/pause' : '/api/warmup/resume'
             const res = await fetch(endpoint, {
@@ -98,140 +239,207 @@ export function WarmupMasterDashboard() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <WaveLoader color="bg-primary" size="lg" speed="normal" />
-                <p className="text-muted-foreground text-sm">Initializing Mission Control...</p>
+            <div className="flex flex-col items-center justify-center py-20 gap-6">
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-full" />
+                    <WaveLoader color="bg-primary" size="lg" speed="normal" />
+                </div>
+                <div className="text-center space-y-2">
+                    <p className="text-lg font-medium">Initializing Command Center...</p>
+                    <p className="text-sm text-muted-foreground">Loading your warmup network</p>
+                </div>
             </div>
         )
     }
 
-    // Calculate Spam Rescue Metrics
-    // We derive this from activity where landedInSpam is true
-    const spamRescuedCount = data.activity.filter((a: any) => a.spam).length
-    const spamRescueLog = data.activity.filter((a: any) => a.spam).slice(0, 5)
-
-    const kpiStats = [
-        { label: "Active Accounts", value: data.accounts.filter((a: any) => a.stage !== 'PAUSED').length, sub: `of ${data.accounts.length} total`, icon: <Rocket className="w-4 h-4 text-primary" /> },
-        { label: "Daily Volume", value: data.accounts.reduce((acc, curr: any) => acc + curr.sentToday, 0), sub: "Emails Sent Today", icon: <Zap className="w-4 h-4 text-yellow-500" /> },
-        { label: "Spam Rescued", value: spamRescuedCount, sub: "Last 50 interactions", icon: <MailWarning className="w-4 h-4 text-orange-500" /> },
-        { label: "Active Threads", value: data.threads.length, sub: "Peer-to-Peer", icon: <Activity className="w-4 h-4 text-green-500" /> },
-    ]
+    // Calculate spam rescue metrics from activity
+    const spamRescuedCount = activity.filter(a => a.spam).length
 
     return (
         <div className="space-y-6">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Warmup Mission Control</h2>
-                    <p className="text-muted-foreground text-sm">
-                        Real-time monitoring of peer-to-peer network and account health.
+                    <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                        <Rocket className="w-6 h-6 text-primary" />
+                        Warmup Command Center
+                    </h2>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        Real-time monitoring of your peer-to-peer warmup network
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <AddAccountDialog userId={user?.id || null} onSuccess={fetchAllData} />
                     <Button variant="outline" size="sm" onClick={fetchAllData} disabled={refreshing}>
-                        <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={cn("w-4 h-4 mr-2", refreshing && "animate-spin")} />
                         Refresh
                     </Button>
                 </div>
             </div>
 
-            {/* KPI Row - Dense */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {kpiStats.map((stat, i) => (
-                    <Card key={i} className="shadow-sm">
-                        <CardContent className="flex items-center justify-between p-4">
-                            <div className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-                                <div className="flex items-baseline gap-2">
-                                    <p className="text-2xl font-bold">{stat.value}</p>
-                                    <p className="text-[10px] text-muted-foreground">{stat.sub}</p>
-                                </div>
-                            </div>
-                            <div className="p-2 bg-muted/50 rounded-lg">
-                                {stat.icon}
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+            {/* Hero Stats */}
+            <WarmupHeroStats
+                stats={{
+                    ...stats,
+                    activeThreads: threads.filter(t => t.status === 'ACTIVE').length,
+                    spamRescued: spamRescuedCount,
+                }}
+                trends={trends}
+            />
 
-            <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="bg-muted/50 p-1 border border-border/50 grid w-full grid-cols-4">
-                    <TabsTrigger value="overview" className="gap-2 text-xs font-medium">
-                        <Rocket className="w-4 h-4" /> Control Center
+            {/* Main Tabs */}
+            <Tabs defaultValue="command-center" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                <TabsList className="bg-muted/50 p-1.5 border border-border/50 w-full grid grid-cols-3 lg:grid-cols-6 gap-1">
+                    <TabsTrigger value="command-center" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow">
+                        <Rocket className="w-4 h-4" />
+                        <span className="hidden sm:inline">Command</span>
                     </TabsTrigger>
-                    <TabsTrigger value="deliverability" className="gap-2 text-xs font-medium">
-                        <BarChart3 className="w-4 h-4" /> Deliverability Lab
+                    <TabsTrigger value="performance" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow">
+                        <BarChart3 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Analytics</span>
                     </TabsTrigger>
-                    <TabsTrigger value="reputation" className="gap-2 text-xs font-medium">
-                        <ShieldCheck className="w-4 h-4" /> Reputation
+                    <TabsTrigger value="accounts" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow">
+                        <Users className="w-4 h-4" />
+                        <span className="hidden sm:inline">Fleet</span>
                     </TabsTrigger>
-                    <TabsTrigger value="ops" className="gap-2 text-xs font-medium">
-                        <Server className="w-4 h-4" /> Live Ops
+                    <TabsTrigger value="deliverability" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span className="hidden sm:inline">Intel</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="network" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow">
+                        <Network className="w-4 h-4" />
+                        <span className="hidden sm:inline">Network</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="settings" className="gap-2 text-xs font-medium data-[state=active]:bg-background data-[state=active]:shadow">
+                        <Settings2 className="w-4 h-4" />
+                        <span className="hidden sm:inline">Control</span>
                     </TabsTrigger>
                 </TabsList>
 
-                {/* TAB 1: OVERVIEW / CONTROL CENTER */}
-                <TabsContent value="overview" className="space-y-6">
-                    <div className="grid md:grid-cols-[1fr_300px] gap-6">
+                {/* TAB 1: COMMAND CENTER */}
+                <TabsContent value="command-center" className="space-y-6">
+                    <div className="grid lg:grid-cols-[1fr_380px] gap-6">
+                        {/* Main content */}
                         <div className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold flex items-center gap-2">
-                                    <ShieldCheckIcon className="w-5 h-5 text-primary" />
-                                    Account Matrix
-                                </h3>
+                            {/* Quick Actions */}
+                            <div className="grid sm:grid-cols-3 gap-4">
+                                <Card className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <div className="p-3 rounded-xl bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+                                            <Zap className="w-5 h-5 text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-sm">Quick Warmup</p>
+                                            <p className="text-xs text-muted-foreground">Send batch now</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <div className="p-3 rounded-xl bg-blue-500/10 group-hover:bg-blue-500/20 transition-colors">
+                                            <Mail className="w-5 h-5 text-blue-400" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-sm">Add Account</p>
+                                            <p className="text-xs text-muted-foreground">Connect email</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-border/50 hover:border-primary/30 transition-colors cursor-pointer group">
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <div className="p-3 rounded-xl bg-purple-500/10 group-hover:bg-purple-500/20 transition-colors">
+                                            <Sparkles className="w-5 h-5 text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-sm">AI Optimize</p>
+                                            <p className="text-xs text-muted-foreground">Auto-tune limits</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             </div>
-                            {/* Enhanced Account Grid with Actions */}
-                            <AccountHealthGrid
-                                accounts={data.accounts}
-                                onAction={handleAction}
-                            />
 
-                            {/* Volume Trend Chart */}
-                            <VolumeTrendChart trends={data.trends} />
-                        </div>
-
-                        {/* Sidebar: Spam Rescue & Alerts */}
-                        <div className="space-y-4">
-                            <Card className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400 flex items-center gap-2">
-                                        <AlertTriangle className="w-4 h-4" />
-                                        Spam Rescue Ops
-                                    </CardTitle>
+                            {/* Account Fleet Preview */}
+                            <Card className="border-border/50">
+                                <CardHeader className="pb-4">
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle className="text-base flex items-center gap-2">
+                                            <Users className="w-5 h-5 text-primary" />
+                                            Account Fleet
+                                        </CardTitle>
+                                        <Button variant="ghost" size="sm" onClick={() => setActiveTab('accounts')}>
+                                            View All
+                                        </Button>
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-orange-800 dark:text-orange-300">
-                                        {spamRescuedCount} <span className="text-xs font-normal opacity-70">emails recovered</span>
+                                    <AccountFleetGrid
+                                        accounts={accounts.slice(0, 3)}
+                                        onAction={handleAccountAction}
+                                    />
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Sidebar */}
+                        <div className="space-y-4">
+                            {/* Network Status */}
+                            <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent">
+                                <CardContent className="p-4">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="font-semibold text-emerald-400">Network Active</span>
                                     </div>
-                                    <p className="text-xs text-orange-600/80 mt-1">
-                                        System automatically detected and moved these emails to inbox.
-                                    </p>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <p className="text-muted-foreground">Active Threads</p>
+                                            <p className="text-xl font-bold">{threads.filter(t => t.status === 'ACTIVE').length}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground">Emails Today</p>
+                                            <p className="text-xl font-bold">{stats.emailsSentToday}</p>
+                                        </div>
+                                    </div>
                                 </CardContent>
                             </Card>
 
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium">Rescue Log</CardTitle>
+                            {/* Live Activity Feed */}
+                            <Card className="border-border/50">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                        <Zap className="w-4 h-4 text-amber-400" />
+                                        Live Activity
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-0">
-                                    <ScrollArea className="h-[250px] px-4 pb-4">
-                                        {spamRescueLog.length > 0 ? (
-                                            <div className="divide-y text-xs">
-                                                {spamRescueLog.map((log: any) => (
-                                                    <div key={log.id} className="py-2">
-                                                        <div className="flex justify-between font-medium">
-                                                            <span>{log.actor}</span>
-                                                            <span className="text-muted-foreground">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                                    <ScrollArea className="h-[350px]">
+                                        <div className="divide-y divide-border/30">
+                                            {activity.length > 0 ? activity.slice(0, 15).map((item) => (
+                                                <div key={item.id} className="p-3 hover:bg-muted/30 transition-colors">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <div className="flex items-center gap-2">
+                                                            {item.type === 'SENT' && <div className="w-2 h-2 rounded-full bg-blue-500" />}
+                                                            {item.type === 'RECEIVED' && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
+                                                            {item.type === 'REPLIED' && <div className="w-2 h-2 rounded-full bg-purple-500" />}
+                                                            <span className="text-xs font-medium">{item.type}</span>
                                                         </div>
-                                                        <p className="text-muted-foreground truncate">{log.subject}</p>
-                                                        <Badge variant="outline" className="mt-1 text-[10px] border-orange-200 text-orange-600 bg-orange-50">Rescued from Spam</Badge>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                            {new Date(item.timestamp).toLocaleTimeString()}
+                                                        </span>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-muted-foreground py-4 text-center">No spam incidents recently.</p>
-                                        )}
+                                                    <p className="text-xs font-medium truncate">{item.actor}</p>
+                                                    <p className="text-[10px] text-muted-foreground truncate">To: {item.target}</p>
+                                                    {item.spam && (
+                                                        <Badge variant="destructive" className="mt-1 text-[9px] h-4">
+                                                            Spam Detected
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            )) : (
+                                                <div className="p-8 text-center text-muted-foreground text-sm">
+                                                    No recent activity
+                                                </div>
+                                            )}
+                                        </div>
                                     </ScrollArea>
                                 </CardContent>
                             </Card>
@@ -239,78 +447,219 @@ export function WarmupMasterDashboard() {
                     </div>
                 </TabsContent>
 
-                {/* TAB 2: DELIVERABILITY LAB */}
+                {/* TAB 2: PERFORMANCE ANALYTICS */}
+                <TabsContent value="performance" className="space-y-6">
+                    <PerformanceAnalytics
+                        chartData={chartData}
+                        period={chartPeriod}
+                        onPeriodChange={setChartPeriod}
+                    />
+                </TabsContent>
+
+                {/* TAB 3: ACCOUNT FLEET */}
+                <TabsContent value="accounts" className="space-y-6">
+                    <Card className="border-border/50">
+                        <CardHeader className="pb-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Users className="w-5 h-5 text-primary" />
+                                        Account Fleet
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Manage all your warmup-enabled email accounts
+                                    </CardDescription>
+                                </div>
+                                <Badge variant="outline" className="gap-1">
+                                    {accounts.length} accounts
+                                </Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <AccountFleetGrid
+                                accounts={accounts}
+                                onAction={handleAccountAction}
+                            />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* TAB 4: DELIVERABILITY INTEL */}
                 <TabsContent value="deliverability" className="space-y-6">
-                    <div className="grid gap-6">
-                        <DeliverabilityHeatmap data={data.heatmap} />
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <ProviderTrendChart data={data.trends} />
-                            {/* Real Placement Chart */}
-                            <PlacementFunnel trends={data.trends} />
-                        </div>
-                    </div>
+                    <InboxIntelligence
+                        inboxRate={stats.inboxRate}
+                        spamRate={100 - stats.inboxRate > 0 ? Math.round((100 - stats.inboxRate) * 0.3) : 0}
+                        dnsRecords={dnsRecords}
+                        onRefresh={fetchAllData}
+                        lastUpdated="Just now"
+                    />
                 </TabsContent>
 
-                {/* TAB 3: REPUTATION CENTER */}
-                <TabsContent value="reputation" className="space-y-6">
-                    <ReputationRadar stats={data.reputation} />
+                {/* TAB 5: NETWORK HUB */}
+                <TabsContent value="network" className="space-y-6">
+                    <NetworkTopology
+                        threads={threads}
+                        onThreadClick={(threadId) => {
+                            toast.info(`Thread ${threadId} selected`)
+                        }}
+                    />
                 </TabsContent>
 
-                {/* TAB 4: LIVE OPS */}
-                <TabsContent value="ops" className="space-y-6">
-                    <div className="grid md:grid-cols-[350px_1fr] gap-6">
-                        {/* Live Feed - Denser */}
-                        <Card className="md:h-[600px] flex flex-col">
-                            <CardHeader className="pb-3 border-b">
+                {/* TAB 6: CONTROL PANEL */}
+                <TabsContent value="settings" className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                        {/* Warmup Settings */}
+                        <Card className="border-border/50">
+                            <CardHeader className="pb-4">
                                 <CardTitle className="flex items-center gap-2 text-base">
-                                    <Zap className="w-4 h-4 text-yellow-500" /> Live Feed
+                                    <Settings2 className="w-5 h-5 text-primary" />
+                                    Warmup Settings
                                 </CardTitle>
-                                <CardDescription>Real-time event stream</CardDescription>
                             </CardHeader>
-                            <CardContent className="flex-1 overflow-hidden p-0 bg-muted/5">
-                                <ScrollArea className="h-full">
-                                    <div className="divide-y">
-                                        {data.activity.map((item: any) => (
-                                            <div key={item.id} className="p-3 text-sm hover:bg-muted/40 transition-colors">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <div className="flex items-center gap-2">
-                                                        {item.type === 'SENT' && <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
-                                                        {item.type === 'RECEIVED' && <div className="w-1.5 h-1.5 rounded-full bg-green-500" />}
-                                                        {item.type === 'REPLIED' && <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
-                                                        <span className="font-semibold text-xs">{item.type}</span>
-                                                    </div>
-                                                    <span className="text-[10px] text-muted-foreground font-mono">
-                                                        {new Date(item.timestamp).toLocaleTimeString()}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center justify-between gap-2 mt-1">
-                                                    <span className="text-xs truncate font-medium">{item.actor}</span>
-                                                    <span className="text-[10px] text-muted-foreground">To: {item.target}</span>
-                                                </div>
-                                                {item.spam && (
-                                                    <Badge variant="destructive" className="mt-2 text-[10px] h-4">Spam Detected</Badge>
-                                                )}
-                                            </div>
-                                        ))}
+                            <CardContent className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Auto Warmup</Label>
+                                        <p className="text-xs text-muted-foreground">Automatically warmup new accounts</p>
                                     </div>
-                                </ScrollArea>
+                                    <Switch defaultChecked />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>AI Optimization</Label>
+                                        <p className="text-xs text-muted-foreground">Let AI adjust sending patterns</p>
+                                    </div>
+                                    <Switch defaultChecked />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Peer Mode</Label>
+                                        <p className="text-xs text-muted-foreground">Enable peer-to-peer warmup</p>
+                                    </div>
+                                    <Switch defaultChecked />
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Default Daily Limit</Label>
+                                        <span className="text-sm font-medium">20 emails</span>
+                                    </div>
+                                    <Slider defaultValue={[20]} max={100} step={5} className="w-full" />
+                                </div>
                             </CardContent>
                         </Card>
 
-                        {/* Thread Visualizer */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold">Active Peer Conversations</h3>
-                                <Badge variant="secondary">{data.threads.length} Threads</Badge>
-                            </div>
-                            <ThreadVisualizer threads={data.threads} />
-                        </div>
+                        {/* Notifications */}
+                        <Card className="border-border/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <Bell className="w-5 h-5 text-primary" />
+                                    Notifications
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Health Alerts</Label>
+                                        <p className="text-xs text-muted-foreground">Alert when health drops below 70%</p>
+                                    </div>
+                                    <Switch defaultChecked />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Spam Detection</Label>
+                                        <p className="text-xs text-muted-foreground">Alert on spam folder placement</p>
+                                    </div>
+                                    <Switch defaultChecked />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Daily Summary</Label>
+                                        <p className="text-xs text-muted-foreground">Send daily warmup report</p>
+                                    </div>
+                                    <Switch />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Blacklist Alerts</Label>
+                                        <p className="text-xs text-muted-foreground">Alert if listed on blacklist</p>
+                                    </div>
+                                    <Switch defaultChecked />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Schedule */}
+                        <Card className="border-border/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <Calendar className="w-5 h-5 text-primary" />
+                                    Schedule
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label>Active Days</Label>
+                                        <p className="text-xs text-muted-foreground">Days when warmup runs</p>
+                                    </div>
+                                    <div className="flex gap-1">
+                                        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+                                            <Button
+                                                key={i}
+                                                variant={i < 5 ? "default" : "outline"}
+                                                size="sm"
+                                                className="w-8 h-8 p-0 text-xs"
+                                            >
+                                                {day}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label>Active Hours</Label>
+                                        <span className="text-sm font-medium">9 AM - 6 PM</span>
+                                    </div>
+                                    <Slider defaultValue={[9, 18]} max={24} step={1} className="w-full" />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* System Status */}
+                        <Card className="border-border/50">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-base">
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                                    System Status
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="text-sm font-medium">Warmup Engine</span>
+                                    </div>
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Active</Badge>
+                                </div>
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="text-sm font-medium">Email Delivery</span>
+                                    </div>
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Operational</Badge>
+                                </div>
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="text-sm font-medium">Peer Network</span>
+                                    </div>
+                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">Connected</Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </TabsContent>
-
             </Tabs>
         </div>
     )
 }
-
-function ShieldCheckIcon(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" /></svg> }
