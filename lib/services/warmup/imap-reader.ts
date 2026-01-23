@@ -1128,40 +1128,29 @@ export class ImapReader {
    */
   private searchWarmupEmails(imap: Imap, since: Date): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      // Try header search first (most reliable)
+      // Try header search first with SINCE (most specific)
+      // We reordered criteria to put HEADER first, just in case parser is picky
       imap.search(
         [
-          'SINCE', since,
-          'HEADER', 'X-Warmup-ID', ''
+          'HEADER', 'X-Warmup-ID', '',
+          'SINCE', since
         ],
         (err, results) => {
           if (err) {
-            logger.warn("Header search failed, trying X-Warmup-Session", err)
-            // Fallback to X-Warmup-Session header
+            logger.warn("Primary header search failed, falling back to SINCE only", { error: err.message })
+
+            // Fallback: Search just by date (Classic/Standard IMAP)
+            // This will return more emails, but our processing loop filters them efficiently
             imap.search(
               [
-                'SINCE', since,
-                'HEADER', 'X-Warmup-Session', ''
+                'SINCE', since
               ],
               (err2, results2) => {
                 if (err2) {
-                  logger.warn("X-Warmup-Session search failed, trying X-Warmup-Thread", err2)
-                  // Last resort: X-Warmup-Thread header
-                  imap.search(
-                    [
-                      'SINCE', since,
-                      'HEADER', 'X-Warmup-Thread', ''
-                    ],
-                    (err3, results3) => {
-                      if (err3) {
-                        logger.error("All header searches failed", err3)
-                        reject(err3)
-                      } else {
-                        resolve(results3 || [])
-                      }
-                    }
-                  )
+                  logger.error("Fallback SINCE search failed", err2)
+                  reject(err2)
                 } else {
+                  logger.info("Fallback search successful", { count: results2?.length || 0 })
                   resolve(results2 || [])
                 }
               }
@@ -1486,7 +1475,6 @@ export class ImapReader {
           where: { id: email.threadId },
           data: {
             totalReplies: { increment: 1 },
-            lastMessageAt: email.receivedDate,
           }
         })
       }
