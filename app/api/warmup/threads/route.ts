@@ -12,7 +12,10 @@ export async function GET() {
         // Fetch recent active threads
         const threads = await db.warmupThread.findMany({
             where: {
-                userId: user.id,
+                OR: [
+                    { initiatorAccount: { userId: user.id } },
+                    { recipientAccount: { userId: user.id } }
+                ],
                 status: 'ACTIVE'
             },
             include: {

@@ -27,7 +27,7 @@ export async function GET() {
         inboxPlacements: {
           take: 50,
           orderBy: { createdAt: 'desc' },
-          select: { landedInInbox: true }
+          select: { detectedFolder: true }
         },
         warmupThreadsInitiated: {
           where: { status: 'ACTIVE' },
@@ -43,7 +43,7 @@ export async function GET() {
     const detailedAccounts = accounts.map(acc => {
       // Calculate individual inbox rate
       const totalPlacements = acc.inboxPlacements.length
-      const landedInInbox = acc.inboxPlacements.filter(p => p.landedInInbox).length
+      const landedInInbox = acc.inboxPlacements.filter(p => p.detectedFolder === 'PRIMARY').length
       const inboxRate = totalPlacements > 0 ? Math.round((landedInInbox / totalPlacements) * 100) : 100
 
       // Active threads count
