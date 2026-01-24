@@ -41,14 +41,24 @@ export async function GET() {
 
         const formattedThreads = threads.map(t => ({
             id: t.id,
-            subject: t.threadSubject,
-            topic: t.threadTopic,
+            subject: t.subject,
+            topic: t.topic,
             status: t.status,
             messageCount: t.messageCount,
             maxMessages: t.maxMessages,
-            lastMessageAt: t.lastMessageAt || t.updatedAt,
-            initiator: t.initiatorAccount.email,
-            recipient: t.recipientAccount.email,
+            lastMessageAt: t.interactions[0]?.createdAt || t.updatedAt,
+            initiator: {
+                id: t.initiatorAccountId,
+                email: t.initiatorAccount.email,
+                provider: t.initiatorAccount.provider || 'gmail'
+            },
+            recipient: {
+                id: t.recipientAccountId,
+                email: t.recipientAccount.email,
+                provider: t.recipientAccount.provider || 'gmail'
+            },
+            initiatorAccountId: t.initiatorAccountId,
+            recipientAccountId: t.recipientAccountId,
             lastSnippet: t.interactions[0]?.snippet || "",
             nextScheduledAt: t.nextScheduledAt
         }))

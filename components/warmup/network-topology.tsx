@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -15,7 +14,8 @@ import {
     AlertCircle,
     Users,
     Zap,
-    TrendingUp
+    Mail,
+    Send
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -41,169 +41,180 @@ interface NetworkTopologyProps {
     onThreadClick?: (threadId: string) => void
 }
 
-// Thread status badge
-function ThreadStatusBadge({ status }: { status: string }) {
-    const getStatusConfig = () => {
-        switch (status) {
-            case 'ACTIVE':
-                return {
-                    color: 'bg-primary/20 text-primary border-primary/30',
-                    icon: <Zap className="w-3 h-3" />,
-                    label: 'Active'
-                }
-            case 'PAUSED':
-                return {
-                    color: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-                    icon: <PauseCircle className="w-3 h-3" />,
-                    label: 'Paused'
-                }
-            case 'COMPLETED':
-                return {
-                    color: 'bg-primary/20 text-primary border-primary/30',
-                    icon: <CheckCircle2 className="w-3 h-3" />,
-                    label: 'Completed'
-                }
-            case 'FAILED':
-                return {
-                    color: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
-                    icon: <AlertCircle className="w-3 h-3" />,
-                    label: 'Failed'
-                }
-            default:
-                return {
-                    color: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
-                    icon: <Clock className="w-3 h-3" />,
-                    label: status
-                }
-        }
-    }
+// Format relative time
+function formatRelativeTime(dateString: string): string {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
 
-    const config = getStatusConfig()
-
-    return (
-        <Badge variant="outline" className={cn("gap-1 text-[10px]", config.color)}>
-            {config.icon}
-            {config.label}
-        </Badge>
-    )
+    if (diffMins < 1) return "Just now"
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString()
 }
 
-// Node component for the connection visualization
-function ConnectionNodeComponent({ node, side }: { node: ConnectionNode; side: 'left' | 'right' }) {
-    const getHealthColor = () => {
-        if (node.healthScore >= 80) return 'border-primary'
-        if (node.healthScore >= 60) return 'border-muted-foreground'
-        return 'border-destructive'
+// Get provider display info
+function getProviderInfo(provider: string): { label: string; color: string } {
+    const p = provider?.toLowerCase() || 'email'
+    if (p.includes('gmail') || p.includes('google')) {
+        return { label: 'Gmail', color: 'text-red-400' }
     }
-
-    return (
-        <div className={cn(
-            "flex items-center gap-3",
-            side === 'right' && "flex-row-reverse"
-        )}>
-            <div className={cn(
-                "w-12 h-12 rounded-full border-2 flex items-center justify-center",
-                "bg-gradient-to-br from-muted to-muted/50",
-                getHealthColor()
-            )}>
-                <span className="text-lg font-bold">
-                    {node.email.charAt(0).toUpperCase()}
-                </span>
-            </div>
-            <div className={cn(side === 'right' && "text-right")}>
-                <p className="text-sm font-medium truncate max-w-[120px]">
-                    {node.email.split('@')[0]}
-                </p>
-                <p className="text-xs text-muted-foreground capitalize">
-                    {node.provider}
-                </p>
-            </div>
-        </div>
-    )
+    if (p.includes('outlook') || p.includes('microsoft') || p.includes('hotmail')) {
+        return { label: 'Outlook', color: 'text-blue-400' }
+    }
+    if (p.includes('yahoo')) {
+        return { label: 'Yahoo', color: 'text-purple-400' }
+    }
+    if (p.includes('icloud') || p.includes('apple')) {
+        return { label: 'iCloud', color: 'text-gray-400' }
+    }
+    return { label: 'Email', color: 'text-muted-foreground' }
 }
 
-// Thread connection card
-function ThreadCard({ thread, onClick }: { thread: ThreadConnection; onClick?: () => void }) {
-    const [isHovered, setIsHovered] = useState(false)
+// Extract display name from email
+function getDisplayName(email: string): string {
+    if (!email || email === 'Unknown') return 'Unknown'
+    const parts = email.split('@')
+    return parts[0] || email
+}
+
+// Status indicator component
+function StatusIndicator({ status }: { status: string }) {
+    switch (status) {
+        case 'ACTIVE':
+            return (
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-medium text-emerald-400 uppercase tracking-wider">Active</span>
+                </div>
+            )
+        case 'PAUSED':
+            return (
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Paused</span>
+                </div>
+            )
+        case 'COMPLETED':
+            return (
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Done</span>
+                </div>
+            )
+        default:
+            return (
+                <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                    <span className="text-[10px] font-medium text-rose-400 uppercase tracking-wider">Failed</span>
+                </div>
+            )
+    }
+}
+
+// Thread row component - Clean table-like row
+function ThreadRow({ thread, onClick }: { thread: ThreadConnection; onClick?: () => void }) {
+    const initiatorInfo = getProviderInfo(thread.initiator.provider)
+    const recipientInfo = getProviderInfo(thread.recipient.provider)
 
     return (
         <div
             className={cn(
-                "relative p-4 rounded-xl border border-border/50 transition-all cursor-pointer",
-                "bg-gradient-to-br from-card via-card to-muted/20",
-                "hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5",
-                isHovered && "scale-[1.01]"
+                "group relative px-4 py-4 transition-all cursor-pointer",
+                "border-b border-border/30 last:border-0",
+                "hover:bg-muted/30"
             )}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
             onClick={onClick}
         >
-            {/* Status indicator */}
-            <div className={cn(
-                "absolute top-0 left-0 right-0 h-0.5 rounded-t-xl",
-                thread.status === 'ACTIVE' ? "bg-primary" :
-                    thread.status === 'PAUSED' ? "bg-muted-foreground" :
-                        thread.status === 'COMPLETED' ? "bg-muted" : "bg-destructive"
-            )} />
+            {/* Main content grid */}
+            <div className="flex items-center gap-4">
+                {/* Initiator */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-muted/80 border border-border/50 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-semibold text-foreground">
+                                {getDisplayName(thread.initiator.email).charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">
+                                {getDisplayName(thread.initiator.email)}
+                            </p>
+                            <p className={cn("text-[10px] font-medium", initiatorInfo.color)}>
+                                {initiatorInfo.label}
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            {/* Connection visualization */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-                <ConnectionNodeComponent node={thread.initiator} side="left" />
-
-                {/* Connection line with animation */}
-                <div className="flex-1 relative h-8 flex items-center justify-center">
-                    <div className="absolute inset-x-0 top-1/2 h-0.5 bg-border" />
-                    <div className={cn(
-                        "absolute top-1/2 -translate-y-1/2 flex items-center justify-center",
-                        "w-8 h-8 rounded-full bg-background border-2",
-                        thread.status === 'ACTIVE' ? "border-primary" : "border-muted"
-                    )}>
+                {/* Connection indicator */}
+                <div className="flex items-center gap-2 px-3">
+                    <div className="w-12 h-px bg-border relative">
                         {thread.status === 'ACTIVE' && (
-                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                        )}
-                        {thread.status === 'PAUSED' && (
-                            <PauseCircle className="w-4 h-4 text-muted-foreground" />
-                        )}
-                        {thread.status === 'COMPLETED' && (
-                            <CheckCircle2 className="w-4 h-4 text-muted" />
-                        )}
-                        {thread.status === 'FAILED' && (
-                            <AlertCircle className="w-4 h-4 text-destructive" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-pulse" />
                         )}
                     </div>
-                    {/* Animated data flow */}
-                    {thread.status === 'ACTIVE' && (
-                        <>
-                            <div className="absolute h-1 bg-gradient-to-r from-primary/50 to-transparent animate-flow-right"
-                                style={{ left: '20%', width: '20%' }} />
-                            <div className="absolute h-1 bg-gradient-to-l from-primary/50 to-transparent animate-flow-left"
-                                style={{ right: '20%', width: '20%' }} />
-                        </>
-                    )}
+                    <div className={cn(
+                        "w-6 h-6 rounded-full flex items-center justify-center",
+                        thread.status === 'ACTIVE' ? "bg-primary/10 border border-primary/30" :
+                            thread.status === 'PAUSED' ? "bg-amber-500/10 border border-amber-500/30" :
+                                thread.status === 'COMPLETED' ? "bg-muted" : "bg-rose-500/10 border border-rose-500/30"
+                    )}>
+                        {thread.status === 'ACTIVE' && <Send className="w-3 h-3 text-primary" />}
+                        {thread.status === 'PAUSED' && <PauseCircle className="w-3 h-3 text-amber-400" />}
+                        {thread.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 text-muted-foreground" />}
+                        {thread.status === 'FAILED' && <AlertCircle className="w-3 h-3 text-rose-400" />}
+                    </div>
+                    <div className="w-12 h-px bg-border relative">
+                        {thread.status === 'ACTIVE' && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-pulse" />
+                        )}
+                    </div>
                 </div>
 
-                <ConnectionNodeComponent node={thread.recipient} side="right" />
+                {/* Recipient */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 justify-end">
+                        <div className="min-w-0 text-right">
+                            <p className="text-sm font-medium text-foreground truncate">
+                                {getDisplayName(thread.recipient.email)}
+                            </p>
+                            <p className={cn("text-[10px] font-medium", recipientInfo.color)}>
+                                {recipientInfo.label}
+                            </p>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-muted/80 border border-border/50 flex items-center justify-center flex-shrink-0">
+                            <span className="text-xs font-semibold text-foreground">
+                                {getDisplayName(thread.recipient.email).charAt(0).toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Thread info */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <ThreadStatusBadge status={thread.status} />
-                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+            {/* Meta row */}
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/20">
+                <div className="flex items-center gap-4">
+                    <StatusIndicator status={thread.status} />
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                         <MessageSquare className="w-3 h-3" />
-                        {thread.messageCount} messages
-                    </span>
+                        <span>{thread.messageCount} messages</span>
+                    </div>
                 </div>
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                     <Clock className="w-3 h-3" />
-                    {thread.lastActivity}
-                </span>
+                    <span>{formatRelativeTime(thread.lastActivity)}</span>
+                </div>
             </div>
 
-            {/* Subject line if available */}
+            {/* Subject if available */}
             {thread.subject && (
-                <p className="mt-3 pt-3 border-t border-border/30 text-xs text-muted-foreground truncate">
-                    <span className="font-medium text-foreground">Subject:</span> {thread.subject}
+                <p className="mt-2 text-xs text-muted-foreground truncate">
+                    <span className="text-foreground/70">Subject:</span> {thread.subject}
                 </p>
             )}
         </div>
@@ -213,6 +224,8 @@ function ThreadCard({ thread, onClick }: { thread: ThreadConnection; onClick?: (
 // Network statistics summary
 function NetworkStats({ threads }: { threads: ThreadConnection[] }) {
     const activeCount = threads.filter(t => t.status === 'ACTIVE').length
+    const pausedCount = threads.filter(t => t.status === 'PAUSED').length
+    const completedCount = threads.filter(t => t.status === 'COMPLETED').length
     const totalMessages = threads.reduce((sum, t) => sum + t.messageCount, 0)
     const uniqueAccounts = new Set([
         ...threads.map(t => t.initiator.id),
@@ -220,27 +233,34 @@ function NetworkStats({ threads }: { threads: ThreadConnection[] }) {
     ]).size
 
     return (
-        <div className="grid grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Active Threads</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-2 mb-1">
+                    <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-[11px] text-muted-foreground font-medium">Active</span>
                 </div>
-                <span className="text-2xl font-bold text-primary">{activeCount}</span>
+                <span className="text-xl font-bold">{activeCount}</span>
             </div>
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Total Messages</span>
+            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[11px] text-muted-foreground font-medium">Messages</span>
                 </div>
-                <span className="text-2xl font-bold text-primary">{totalMessages}</span>
+                <span className="text-xl font-bold">{totalMessages}</span>
             </div>
-            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
-                <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-4 h-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Accounts</span>
+            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-2 mb-1">
+                    <Users className="w-3.5 h-3.5 text-blue-400" />
+                    <span className="text-[11px] text-muted-foreground font-medium">Accounts</span>
                 </div>
-                <span className="text-2xl font-bold text-primary">{uniqueAccounts}</span>
+                <span className="text-xl font-bold">{uniqueAccounts}</span>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/30 border border-border/50">
+                <div className="flex items-center gap-2 mb-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-[11px] text-muted-foreground font-medium">Completed</span>
+                </div>
+                <span className="text-xl font-bold">{completedCount}</span>
             </div>
         </div>
     )
@@ -256,14 +276,14 @@ export function NetworkTopology({ threads, onThreadClick }: NetworkTopologyProps
 
     if (threads.length === 0) {
         return (
-            <Card className="border-dashed border-2 bg-muted/30">
-                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="p-4 rounded-full bg-primary/10 mb-4">
-                        <Network className="w-8 h-8 text-primary" />
+            <Card className="border-dashed border-2 border-border/50 bg-transparent">
+                <CardContent className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="w-14 h-14 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                        <Network className="w-6 h-6 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">No Active Threads</h3>
-                    <p className="text-sm text-muted-foreground max-w-sm">
-                        Peer-to-peer warmup threads will appear here once they start
+                    <h3 className="text-base font-semibold mb-1">No Active Threads</h3>
+                    <p className="text-sm text-muted-foreground max-w-xs">
+                        Peer-to-peer warmup conversations will appear here once they start
                     </p>
                 </CardContent>
             </Card>
@@ -271,74 +291,49 @@ export function NetworkTopology({ threads, onThreadClick }: NetworkTopologyProps
     }
 
     return (
-        <div className="space-y-6">
-            {/* Network Overview Header */}
-            <Card className="border-border/50 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-                <CardHeader className="pb-4 relative">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                        <Network className="w-5 h-5 text-primary" />
-                        Peer Network Topology
-                    </CardTitle>
-                    <CardDescription>
-                        Live view of peer-to-peer warmup conversations
-                    </CardDescription>
+        <div className="space-y-4">
+            {/* Network Overview */}
+            <Card className="border-border/50 bg-card/50">
+                <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <CardTitle className="text-base flex items-center gap-2">
+                                <Network className="w-4 h-4 text-primary" />
+                                Network Overview
+                            </CardTitle>
+                            <CardDescription className="text-xs mt-0.5">
+                                Peer-to-peer warmup conversation activity
+                            </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] font-medium">
+                            {threads.length} thread{threads.length !== 1 ? 's' : ''}
+                        </Badge>
+                    </div>
                 </CardHeader>
-                <CardContent className="relative">
+                <CardContent className="pt-0">
                     <NetworkStats threads={threads} />
                 </CardContent>
             </Card>
 
             {/* Thread List */}
-            <Card className="border-border/50">
-                <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">Active Connections</CardTitle>
-                        <Badge variant="secondary">{threads.length} threads</Badge>
-                    </div>
+            <Card className="border-border/50 bg-card/50 overflow-hidden">
+                <CardHeader className="pb-3 border-b border-border/30">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Active Connections
+                    </CardTitle>
                 </CardHeader>
-                <CardContent className="p-0">
-                    <ScrollArea className="h-[450px]">
-                        <div className="p-4 space-y-4">
-                            {sortedThreads.map((thread) => (
-                                <ThreadCard
-                                    key={thread.id}
-                                    thread={thread}
-                                    onClick={() => onThreadClick?.(thread.id)}
-                                />
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </CardContent>
+                <ScrollArea className="h-[420px]">
+                    <div className="divide-y divide-border/30">
+                        {sortedThreads.map((thread) => (
+                            <ThreadRow
+                                key={thread.id}
+                                thread={thread}
+                                onClick={() => onThreadClick?.(thread.id)}
+                            />
+                        ))}
+                    </div>
+                </ScrollArea>
             </Card>
-
-            {/* Style for animations */}
-            <style jsx global>{`
-        @keyframes flow-right {
-          0% { transform: translateX(-100%); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateX(100%); opacity: 0; }
-        }
-        @keyframes flow-left {
-          0% { transform: translateX(100%); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateX(-100%); opacity: 0; }
-        }
-        .animate-flow-right {
-          animation: flow-right 2s ease-in-out infinite;
-        }
-        .animate-flow-left {
-          animation: flow-left 2s ease-in-out infinite;
-          animation-delay: 1s;
-        }
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s ease-in-out infinite;
-        }
-      `}</style>
         </div>
     )
 }

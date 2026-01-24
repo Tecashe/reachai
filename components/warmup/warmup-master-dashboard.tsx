@@ -151,20 +151,20 @@ export function WarmupMasterDashboard() {
                 const transformedThreads = (data.threads || []).map((t: any) => ({
                     id: t.id,
                     initiator: {
-                        id: t.initiatorAccountId || t.initiator?.id,
-                        email: t.initiator?.email || t.initiatorEmail || 'Unknown',
+                        id: t.initiator?.id || t.initiatorAccountId,
+                        email: t.initiator?.email || 'Unknown',
                         healthScore: t.initiator?.healthScore || 80,
                         provider: t.initiator?.provider || 'gmail',
                     },
                     recipient: {
-                        id: t.recipientAccountId || t.recipient?.id,
-                        email: t.recipient?.email || t.recipientEmail || 'Unknown',
+                        id: t.recipient?.id || t.recipientAccountId,
+                        email: t.recipient?.email || 'Unknown',
                         healthScore: t.recipient?.healthScore || 80,
                         provider: t.recipient?.provider || 'gmail',
                     },
                     status: t.status || 'ACTIVE',
                     messageCount: t.messageCount || 0,
-                    lastActivity: new Date(t.lastMessageAt || t.updatedAt || new Date()).toLocaleString(),
+                    lastActivity: t.lastMessageAt || t.updatedAt || new Date().toISOString(),
                     subject: t.subject,
                 }))
                 setThreads(transformedThreads)
