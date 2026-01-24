@@ -31,6 +31,7 @@ import { PerformanceAnalytics } from "./performance-analytics"
 import { InboxIntelligence } from "./inbox-intelligence"
 import { NetworkTopology } from "./network-topology"
 import { AddAccountDialog } from "./actions/add-account-dialog"
+import { ThreadDetailDialog } from "./thread-detail-dialog"
 import { WaveLoader } from "@/components/loader/wave-loader"
 import { toast } from "sonner"
 import { useUser } from "@clerk/nextjs"
@@ -85,6 +86,7 @@ export function WarmupMasterDashboard() {
     const [loading, setLoading] = useState(true)
     const [refreshing, setRefreshing] = useState(false)
     const [chartPeriod, setChartPeriod] = useState("30")
+    const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
 
     // Data states
     const [accounts, setAccounts] = useState<AccountData[]>([])
@@ -529,12 +531,18 @@ export function WarmupMasterDashboard() {
                     />
                 </TabsContent>
 
-                {/* TAB 5: NETWORK HUB */}
                 <TabsContent value="network" className="space-y-6">
                     <NetworkTopology
                         threads={threads}
                         onThreadClick={(threadId) => {
-                            toast.info(`Thread ${threadId} selected`)
+                            setSelectedThreadId(threadId)
+                        }}
+                    />
+                    <ThreadDetailDialog
+                        threadId={selectedThreadId}
+                        open={selectedThreadId !== null}
+                        onOpenChange={(open) => {
+                            if (!open) setSelectedThreadId(null)
                         }}
                     />
                 </TabsContent>
