@@ -1128,34 +1128,20 @@ export class ImapReader {
    */
   private searchWarmupEmails(imap: Imap, since: Date): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      // Try header search first with SINCE (most specific)
-      // We reordered criteria to put HEADER first, just in case parser is picky
+      // Search for emails since the given date
+      // Note: Custom X-Warmup-* header searches are not universally supported by IMAP servers,
+      // and the imap library requires a non-empty value for HEADER searches.
+      // We use SINCE-based search and filter by warmup headers in the processing loop.
       imap.search(
         [
-          'HEADER', 'X-Warmup-ID', '',
-          'SINCE', since
+          ['SINCE', since]
         ],
         (err, results) => {
           if (err) {
-            logger.warn("Primary header search failed, falling back to SINCE only", { error: err.message })
-
-            // Fallback: Search just by date (Classic/Standard IMAP)
-            // This will return more emails, but our processing loop filters them efficiently
-            imap.search(
-              [
-                'SINCE', since
-              ],
-              (err2, results2) => {
-                if (err2) {
-                  logger.error("Fallback SINCE search failed", err2)
-                  reject(err2)
-                } else {
-                  logger.info("Fallback search successful", { count: results2?.length || 0 })
-                  resolve(results2 || [])
-                }
-              }
-            )
+            logger.error("IMAP search failed", { error: err.message })
+            reject(err)
           } else {
+            logger.info("IMAP search successful", { count: results?.length || 0 })
             resolve(results || [])
           }
         }
