@@ -14,13 +14,20 @@ export async function GET(
 
         const { id } = await params
 
+        // Get user's email account IDs for authorization check
+        const userAccountIds = await db.sendingAccount.findMany({
+            where: { userId: user.id },
+            select: { id: true }
+        })
+        const accountIds = userAccountIds.map(a => a.id)
+
         // Fetch thread with all details
         const thread = await db.warmupThread.findFirst({
             where: {
                 id,
                 OR: [
-                    { initiatorAccount: { userId: user.id } },
-                    { recipientAccount: { userId: user.id } }
+                    { initiatorAccountId: { in: accountIds } },
+                    { recipientAccountId: { in: accountIds } }
                 ]
             },
             include: {
@@ -29,9 +36,7 @@ export async function GET(
                         id: true,
                         email: true,
                         provider: true,
-                        warmupConfig: {
-                            select: { healthScore: true }
-                        }
+                        healthScore: true
                     }
                 },
                 recipientAccount: {
@@ -39,9 +44,7 @@ export async function GET(
                         id: true,
                         email: true,
                         provider: true,
-                        warmupConfig: {
-                            select: { healthScore: true }
-                        }
+                        healthScore: true
                     }
                 },
                 interactions: {
@@ -89,13 +92,13 @@ export async function GET(
                 id: thread.initiatorAccountId,
                 email: thread.initiatorAccount!.email,
                 provider: thread.initiatorAccount!.provider || 'gmail',
-                healthScore: thread.initiatorAccount!.warmupConfig?.healthScore ?? 80
+                healthScore: thread.initiatorAccount!.healthScore ?? 80
             },
             recipient: {
                 id: thread.recipientAccountId,
                 email: thread.recipientAccount!.email,
                 provider: thread.recipientAccount!.provider || 'gmail',
-                healthScore: thread.recipientAccount!.warmupConfig?.healthScore ?? 80
+                healthScore: thread.recipientAccount!.healthScore ?? 80
             },
             messages: thread.interactions.map(i => ({
                 id: i.id,
