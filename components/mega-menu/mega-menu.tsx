@@ -563,6 +563,9 @@ interface MenuItemContent {
   title: string
   description?: string
   href: string
+  previewImage?: string
+  previewTitle?: string
+  previewDescription?: string
 }
 
 interface MenuSection {
@@ -585,11 +588,11 @@ interface MegaMenuProps {
 }
 
 const defaultPreviewImages: Record<string, string> = {
-  Platform: "/images/megamenu/platform.jpg",
-  Dashboard: "/images/megamenu/dashboard.jpg",
-  Solutions: "/images/megamenu/solutions.jpg",
+  Platform: "/images/megamenu/campaigns.jpg",
+  Dashboard: "/images/megamenu/analytics.jpg",
+  Solutions: "/images/megamenu/compare.jpg",
   Resources: "/images/megamenu/resources.jpg",
-  Company: "/images/megamenu/company.jpg",
+  Company: "/images/megamenu/campaigns.jpg",
 }
 
 export function MegaMenu({ label, sections }: MegaMenuProps) {
@@ -660,9 +663,8 @@ export function MegaMenu({ label, sections }: MegaMenuProps) {
       >
         {label}
         <ChevronDown
-          className={`w-4 h-4 transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+            }`}
         />
         <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-primary to-primary/50 group-hover/button:w-6 transition-all duration-300 -translate-x-1/2 rounded-full" />
       </button>
@@ -697,11 +699,10 @@ export function MegaMenu({ label, sections }: MegaMenuProps) {
                             href={item.href}
                             onMouseEnter={() => setHoveredItem(item.title)}
                             onClick={() => setIsOpen(false)}
-                            className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group/item ${
-                              hoveredItem === item.title
-                                ? "bg-primary/10 text-foreground"
-                                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                            }`}
+                            className={`flex items-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 cursor-pointer group/item ${hoveredItem === item.title
+                              ? "bg-primary/10 text-foreground"
+                              : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                              }`}
                           >
                             <div className="mt-0.5 text-primary group-hover/item:scale-110 transition-transform duration-300">
                               {item.icon}
@@ -726,64 +727,54 @@ export function MegaMenu({ label, sections }: MegaMenuProps) {
 
               {/* Right Column - Preview with Image */}
               <div className="col-span-2 py-10 px-10 relative overflow-hidden flex flex-col">
-                {/* Preview Image */}
-                <div className="mb-6 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-background h-56 relative group/image">
-                  <Image
-                    src={getPreviewImage() || "/placeholder.svg"}
-                    alt={label}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover/image:scale-105"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
-                </div>
+                {/* Get the hovered item for preview */}
+                {(() => {
+                  const hoveredItemData = hoveredItem
+                    ? sections.flatMap(s => s.items).find(item => item.title === hoveredItem)
+                    : null;
 
-                {/* Content Section */}
-                <div className="flex-1">
-                  {sections.map((section) => (
-                    <div key={section.title}>
-                      {section.items.map((item) => (
-                        hoveredItem === item.title && section.preview && (
-                          <div
-                            key={item.title}
-                            className="animate-in fade-in duration-300"
+                  const previewImage = hoveredItemData?.previewImage || getPreviewImage();
+                  const previewTitle = hoveredItemData?.previewTitle || hoveredItemData?.title || `Explore ${label}`;
+                  const previewDescription = hoveredItemData?.previewDescription || hoveredItemData?.description || "Hover over the menu items to discover all the features and resources available to help you succeed with Mailfra.";
+
+                  return (
+                    <>
+                      {/* Preview Image */}
+                      <div className="mb-6 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-background h-56 relative group/image">
+                        <Image
+                          src={previewImage || "/placeholder.svg"}
+                          alt={previewTitle}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover/image:scale-105"
+                          priority
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
+                      </div>
+
+                      {/* Content Section */}
+                      <div className="flex-1 animate-in fade-in duration-300">
+                        <h2 className="text-2xl font-bold text-foreground mb-3">
+                          {previewTitle}
+                        </h2>
+                        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mb-6">
+                          {previewDescription}
+                        </p>
+
+                        {hoveredItemData && (
+                          <Button
+                            asChild
+                            className="group/cta bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-7 h-11 rounded-full transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
                           >
-                            <h2 className="text-2xl font-bold text-foreground mb-3">
-                              {section.preview.title}
-                            </h2>
-                            <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mb-6">
-                              {section.preview.description}
-                            </p>
-
-                            {section.preview.cta && (
-                              <Button
-                                asChild
-                                className="group/cta bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-7 h-11 rounded-full transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
-                              >
-                                <Link href={section.preview.cta.href}>
-                                  {section.preview.cta.label}
-                                  <ArrowRight className="w-4 h-4 ml-2 group-hover/cta:translate-x-1 transition-transform duration-300" />
-                                </Link>
-                              </Button>
-                            )}
-                          </div>
-                        )
-                      ))}
-                    </div>
-                  ))}
-
-                  {/* Default state */}
-                  {!hoveredItem && (
-                    <div className="animate-in fade-in duration-300">
-                      <h2 className="text-2xl font-bold text-foreground mb-3">
-                        Explore {label}
-                      </h2>
-                      <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
-                        Hover over the menu items to discover all the features and resources available to help you succeed with Mailfra.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                            <Link href={hoveredItemData.href}>
+                              {`Explore ${hoveredItemData.title}`}
+                              <ArrowRight className="w-4 h-4 ml-2 group-hover/cta:translate-x-1 transition-transform duration-300" />
+                            </Link>
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

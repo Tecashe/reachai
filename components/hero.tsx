@@ -352,7 +352,7 @@
 //           }}
 //         >
 //           <div className="w-full max-w-4xl mx-auto pointer-events-auto text-center">
-            
+
 
 //             {/* Main CTA Heading */}
 //             <h2
@@ -469,30 +469,82 @@ const megaMenus = [
     label: "Platform",
     sections: [
       {
-        title: "Core Features",
+        title: "Dashboard Features",
         items: [
-          { icon: <Mail className="w-5 h-5" />, title: "Smart Inbox", description: "Intelligent email management", href: "/features/inbox" },
-          { icon: <Zap className="w-5 h-5" />, title: "Sequence Builder", description: "Visual campaign designer", href: "/features/sequences" },
-          { icon: <Brain className="w-5 h-5" />, title: "AI Assistant", description: "Content generation & optimization", href: "/features/ai-assistant" },
+          {
+            icon: <Mail className="w-5 h-5" />,
+            title: "Campaigns",
+            description: "Create and manage cold email campaigns",
+            href: "/dashboard/campaigns",
+            previewImage: "/images/megamenu/campaigns.jpg",
+            previewTitle: "Campaign Management",
+            previewDescription: "Create powerful cold email campaigns with A/B testing, smart scheduling, and real-time performance tracking. Launch sequences that convert with our intuitive campaign builder."
+          },
+          {
+            icon: <BarChart3 className="w-5 h-5" />,
+            title: "Analytics",
+            description: "Real-time campaign performance tracking",
+            href: "/dashboard/analytics",
+            previewImage: "/images/megamenu/analytics.jpg",
+            previewTitle: "Advanced Analytics Dashboard",
+            previewDescription: "Track opens, clicks, replies, and conversions in real-time. Get actionable insights with detailed reports and visualizations to optimize your outreach strategy."
+          },
+          {
+            icon: <Users className="w-5 h-5" />,
+            title: "Prospects & CRM",
+            description: "Manage leads and customer relationships",
+            href: "/dashboard/prospects",
+            previewImage: "/images/megamenu/prospects.jpg",
+            previewTitle: "Prospect Management",
+            previewDescription: "Import, organize, and segment your leads with our built-in CRM. Track interactions, manage pipelines, and never miss a follow-up opportunity."
+          },
+          {
+            icon: <Workflow className="w-5 h-5" />,
+            title: "Sequences",
+            description: "Build automated follow-up sequences",
+            href: "/dashboard/sequences",
+            previewImage: "/images/megamenu/sequences.jpg",
+            previewTitle: "Email Sequence Builder",
+            previewDescription: "Design multi-step email sequences with conditional logic. Automate follow-ups based on prospect behavior and maximize your response rates."
+          },
         ],
         preview: {
-          title: "Smart Inbox",
-          description: "Consolidate all your emails in one unified interface. Filter, tag, and automate responses with intelligent rules and prioritization algorithms.",
-          cta: { label: "Explore Platform", href: "/features/inbox" },
+          title: "Dashboard Features",
+          description: "Access your complete cold email toolkit.",
+          cta: { label: "Go to Dashboard", href: "/dashboard" },
         },
       },
       {
-        title: "Integrations",
+        title: "Deliverability",
         items: [
-          { icon: <Code2 className="w-5 h-5" />, title: "API Suite", description: "Webhooks & REST endpoints", href: "/developers/api" },
-          { icon: <Globe className="w-5 h-5" />, title: "Connectors", description: "50+ third-party apps", href: "/integrations" },
-          { icon: <Workflow className="w-5 h-5" />, title: "Automation", description: "Zapier, Make & more", href: "/features/automation" },
+          {
+            icon: <Zap className="w-5 h-5" />,
+            title: "Email Warmup",
+            description: "Maximize inbox placement & deliverability",
+            href: "/dashboard/warmup",
+            previewImage: "/images/megamenu/warmup.jpg",
+            previewTitle: "Email Warmup Engine",
+            previewDescription: "Automatically warm up your email accounts with our intelligent warmup network. Improve sender reputation and ensure your emails land in the primary inbox."
+          },
+          {
+            icon: <Brain className="w-5 h-5" />,
+            title: "AI Generation",
+            description: "AI-powered email writing and prediction",
+            href: "/dashboard/generate",
+            previewImage: "/images/megamenu/ai-tools.jpg",
+            previewTitle: "AI-Powered Email Generation",
+            previewDescription: "Generate personalized email copies, subject lines, and entire sequences with AI. Our models are trained on millions of successful cold emails."
+          },
+          {
+            icon: <BookOpen className="w-5 h-5" />,
+            title: "Templates",
+            description: "Professional pre-built templates",
+            href: "/dashboard/templates",
+            previewImage: "/images/megamenu/templates.jpg",
+            previewTitle: "Email Templates Library",
+            previewDescription: "Access hundreds of proven email templates for every use case. Customize and save your own templates for quick access."
+          },
         ],
-        preview: {
-          title: "API Suite",
-          description: "Build powerful integrations with our complete REST API and webhooks. Full documentation and SDKs for JavaScript, Python, and Go included.",
-          cta: { label: "View API Docs", href: "/developers/api" },
-        },
       },
     ],
   },
@@ -500,59 +552,147 @@ const megaMenus = [
     label: "Solutions",
     sections: [
       {
-        title: "By Business Type",
+        title: "Compare",
         items: [
-          { icon: <Rocket className="w-5 h-5" />, title: "Growth Teams", description: "Scale acquisition efficiently", href: "/solutions/growth" },
-          { icon: <Users className="w-5 h-5" />, title: "Enterprise", description: "Advanced security & controls", href: "/solutions/enterprise" },
-          { icon: <BarChart3 className="w-5 h-5" />, title: "Agencies", description: "Multi-client management", href: "/solutions/agencies" },
+          {
+            icon: <Shield className="w-5 h-5" />,
+            title: "vs Instantly",
+            description: "See how we compare",
+            href: "/compare/instantly",
+            previewImage: "/images/megamenu/compare.jpg",
+            previewTitle: "Mailfra vs Instantly",
+            previewDescription: "Discover why Mailfra offers better deliverability, more powerful automation, and superior AI capabilities compared to Instantly."
+          },
+          {
+            icon: <Shield className="w-5 h-5" />,
+            title: "vs Smartlead",
+            description: "Feature comparison",
+            href: "/compare/smartlead",
+            previewImage: "/images/megamenu/compare.jpg",
+            previewTitle: "Mailfra vs Smartlead",
+            previewDescription: "Compare features, pricing, and performance. See why teams are switching from Smartlead to Mailfra."
+          },
+          {
+            icon: <Shield className="w-5 h-5" />,
+            title: "vs Lemlist",
+            description: "Detailed comparison",
+            href: "/compare/lemlist",
+            previewImage: "/images/megamenu/analytics.jpg",
+            previewTitle: "Mailfra vs Lemlist",
+            previewDescription: "A detailed look at how Mailfra's features stack up against Lemlist for cold email outreach."
+          },
         ],
         preview: {
-          title: "Growth Teams",
-          description: "Accelerate customer acquisition with proven outreach strategies. Get analytics, A/B testing, and optimization recommendations built-in.",
-          cta: { label: "Start Growing", href: "/solutions/growth" },
+          title: "Why Choose Mailfra",
+          description: "Compare Mailfra with other platforms.",
+          cta: { label: "View Comparisons", href: "/compare" },
         },
       },
       {
-        title: "Verticals",
+        title: "Business",
         items: [
-          { icon: <Lock className="w-5 h-5" />, title: "Financial Services", description: "Compliance-first approach", href: "/solutions/fintech" },
-          { icon: <Workflow className="w-5 h-5" />, title: "B2B SaaS", description: "Enterprise GTM strategies", href: "/solutions/saas" },
+          {
+            icon: <Rocket className="w-5 h-5" />,
+            title: "Pricing",
+            description: "Transparent pricing for all plans",
+            href: "/pricing",
+            previewImage: "/images/megamenu/analytics.jpg",
+            previewTitle: "Simple, Transparent Pricing",
+            previewDescription: "No hidden fees. Choose the plan that fits your needs with unlimited email accounts, sequences, and team members."
+          },
+          {
+            icon: <BarChart3 className="w-5 h-5" />,
+            title: "Case Studies",
+            description: "Real results from real customers",
+            href: "/case-studies",
+            previewImage: "/images/megamenu/prospects.jpg",
+            previewTitle: "Customer Success Stories",
+            previewDescription: "See how teams like yours are using Mailfra to book more meetings, close more deals, and scale their outreach."
+          },
+          {
+            icon: <Globe className="w-5 h-5" />,
+            title: "Integrations",
+            description: "Connect your favorite tools",
+            href: "/integrations",
+            previewImage: "/images/megamenu/integrations.jpg",
+            previewTitle: "Powerful Integrations",
+            previewDescription: "Connect Mailfra with your CRM, calendar, and 50+ other tools. Sync data, automate workflows, and work smarter."
+          },
         ],
-        preview: {
-          title: "Financial Services",
-          description: "SOC 2 Type II certified platform with enterprise-grade security. GDPR, CCPA, and regulatory compliance built into every feature.",
-          cta: { label: "Learn More", href: "/solutions/fintech" },
-        },
       },
     ],
   },
   {
-    label: "Developers",
+    label: "Resources",
     sections: [
       {
-        title: "Documentation",
+        title: "Learning",
         items: [
-          { icon: <BookOpen className="w-5 h-5" />, title: "Getting Started", description: "5-minute setup guide", href: "/docs/quickstart" },
-          { icon: <Code2 className="w-5 h-5" />, title: "API Reference", description: "Complete endpoint docs", href: "/docs/api-reference" },
-          { icon: <MessageSquare className="w-5 h-5" />, title: "Guides", description: "Tutorials & best practices", href: "/docs/guides" },
+          {
+            icon: <BookOpen className="w-5 h-5" />,
+            title: "Blog",
+            description: "Latest insights and strategies",
+            href: "/blog",
+            previewImage: "/images/megamenu/prospects.jpg",
+            previewTitle: "Mailfra Blog",
+            previewDescription: "Expert tips, strategies, and insights on cold email, sales outreach, and lead generation. Updated weekly with actionable content."
+          },
+          {
+            icon: <Code2 className="w-5 h-5" />,
+            title: "Guides & Tutorials",
+            description: "Step-by-step learning resources",
+            href: "/guides",
+            previewImage: "/images/megamenu/sequences.jpg",
+            previewTitle: "Guides & Tutorials",
+            previewDescription: "From beginner to advanced, our comprehensive guides will help you master cold email and get the most out of Mailfra."
+          },
+          {
+            icon: <MessageSquare className="w-5 h-5" />,
+            title: "Help Center",
+            description: "Support and FAQ",
+            href: "/help",
+            previewImage: "/images/megamenu/analytics.jpg",
+            previewTitle: "Help Center",
+            previewDescription: "Get answers to common questions, troubleshooting guides, and step-by-step instructions for every feature."
+          },
         ],
         preview: {
-          title: "Getting Started",
-          description: "Set up your first integration in under 5 minutes. Our interactive guides cover authentication, rate limiting, and common use cases.",
-          cta: { label: "Start Building", href: "/docs/quickstart" },
+          title: "Learn & Grow",
+          description: "Access comprehensive guides and tutorials.",
+          cta: { label: "Browse Resources", href: "/guides" },
         },
       },
       {
-        title: "Community",
+        title: "Company",
         items: [
-          { icon: <Globe className="w-5 h-5" />, title: "Community Forum", description: "Ask questions & share ideas", href: "/community" },
-          { icon: <Headphones className="w-5 h-5" />, title: "Developer Support", description: "Dedicated technical help", href: "/developers/support" },
+          {
+            icon: <Headphones className="w-5 h-5" />,
+            title: "Contact",
+            description: "Get in touch with us",
+            href: "/contact",
+            previewImage: "/images/megamenu/campaigns.jpg",
+            previewTitle: "Contact Us",
+            previewDescription: "Have questions? Our team is here to help. Reach out for sales inquiries, support, or partnership opportunities."
+          },
+          {
+            icon: <Lock className="w-5 h-5" />,
+            title: "About",
+            description: "Our mission and team",
+            href: "/about",
+            previewImage: "/images/megamenu/warmup.jpg",
+            previewTitle: "About Mailfra",
+            previewDescription: "Learn about our mission to revolutionize cold email outreach and the team making it happen."
+          },
+          {
+            icon: <Globe className="w-5 h-5" />,
+            title: "Changelog",
+            description: "Latest product updates",
+            href: "/changelog",
+            previewImage: "/images/megamenu/ai-tools.jpg",
+            previewTitle: "Product Changelog",
+            previewDescription: "Stay up to date with the latest features, improvements, and bug fixes. We ship new updates every week."
+          },
         ],
-        preview: {
-          title: "Community Forum",
-          description: "Join 10,000+ developers building with our platform. Share code, ask questions, and get exclusive beta access to new features.",
-          cta: { label: "Join Community", href: "/community" },
-        },
       },
     ],
   },
@@ -713,9 +853,8 @@ export function Hero() {
                 alt="Mailfra"
                 width={32}
                 height={32}
-                className={`w-5 h-5 object-contain transition-all duration-300 ${
-                  isDark ? "brightness-0" : "brightness-0 invert"
-                }`}
+                className={`w-5 h-5 object-contain transition-all duration-300 ${isDark ? "brightness-0" : "brightness-0 invert"
+                  }`}
                 priority
               />
             </div>
@@ -821,8 +960,8 @@ export function Hero() {
               {/* CTA Section */}
               <div className="px-2 py-6 space-y-3 bg-gradient-to-b from-primary/5 to-transparent mt-4 rounded-lg">
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                  <Button 
-                    size="lg" 
+                  <Button
+                    size="lg"
                     className="w-full rounded-full px-8 h-12 text-base font-medium"
                   >
                     Get Started
@@ -830,9 +969,9 @@ export function Hero() {
                   </Button>
                 </Link>
                 <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block">
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
+                  <Button
+                    size="lg"
+                    variant="outline"
                     className="w-full rounded-full px-8 h-12 text-base font-medium bg-transparent"
                   >
                     Sign In
@@ -954,7 +1093,7 @@ export function Hero() {
           }}
         >
           <div className="w-full max-w-4xl mx-auto pointer-events-auto text-center">
-            
+
 
             {/* Main CTA Heading */}
             <h2
