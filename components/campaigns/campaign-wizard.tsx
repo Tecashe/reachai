@@ -298,8 +298,8 @@ const steps: WizardStep[] = [
   },
   {
     id: "generate",
-    title: "Build Sequence",
-    description: "Create your email sequence with AI research insights",
+    title: "Link Sequence",
+    description: "Create or select a sequence for your campaign",
     icon: Mail,
     component: EmailGenerationStep,
   },

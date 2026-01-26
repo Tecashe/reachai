@@ -6,21 +6,23 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   ArrowLeft,
   Rocket,
   Calendar,
   Clock,
-  Zap,
+  ExternalLink,
   CheckCircle2,
   Mail,
   Users,
-  AlertCircle,
+  AlertTriangle,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { SequenceSelector } from "./sequence-selector"
 import { enrollCampaignInSequence } from "@/lib/actions/sequence-enrollment"
 import { WaveLoader } from "@/components/loader/wave-loader"
 
@@ -33,20 +35,17 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
   const router = useRouter()
   const [isLaunching, setIsLaunching] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [selectedSequenceId, setSelectedSequenceId] = useState<string | null>(null)
   const [linkedSequence, setLinkedSequence] = useState<any>(null)
   const [settings, setSettings] = useState({
     startDate: new Date().toISOString().split("T")[0],
     dailyLimit: campaign.dailySendLimit || 50,
     sendInBusinessHours: true,
-    timezone: "America/New_York",
   })
 
-  // Auto-select the sequence created in the wizard
+  // Load the linked sequence
   useEffect(() => {
     const loadSequence = async () => {
       if (campaign.sequenceId) {
-        setSelectedSequenceId(campaign.sequenceId)
         try {
           const response = await fetch(`/api/sequences/${campaign.sequenceId}`)
           if (response.ok) {
@@ -62,21 +61,24 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
     loadSequence()
   }, [campaign.sequenceId])
 
-  const launchCampaign = async () => {
-    if (!selectedSequenceId) {
-      toast.error("Please select a sequence to enroll prospects")
+  const handleLaunchAndConfigure = async () => {
+    if (!campaign.sequenceId) {
+      toast.error("No sequence linked to this campaign")
       return
     }
 
     setIsLaunching(true)
 
     try {
-      // Enroll all campaign prospects into the selected sequence
-      const result = await enrollCampaignInSequence(campaign.id, selectedSequenceId)
+      // Enroll all campaign prospects into the sequence
+      const result = await enrollCampaignInSequence(campaign.id, campaign.sequenceId)
 
       if (result.success) {
-        toast.success(`Campaign launched! ${result.enrolledCount} prospects enrolled in sequence.`)
-        router.push(`/dashboard/campaigns/${campaign.id}`)
+        toast.success(
+          `${result.enrolledCount} prospects enrolled! Now configure your sequence.`
+        )
+        // Redirect to sequence builder
+        router.push(`/dashboard/sequences/${campaign.sequenceId}`)
       } else {
         throw new Error(result.error || "Failed to launch campaign")
       }
@@ -96,6 +98,8 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
   }
 
   const prospectsCount = campaign._count?.prospects || campaign.prospects?.length || 0
+  const hasSteps = linkedSequence?.totalSteps > 0
+  const isSequenceReady = linkedSequence?.status === "ACTIVE" && hasSteps
 
   return (
     <div className="space-y-6">
@@ -107,9 +111,9 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
           </div>
         </div>
         <div>
-          <h3 className="text-2xl font-bold">Ready to Launch!</h3>
+          <h3 className="text-2xl font-bold">Launch Your Campaign</h3>
           <p className="text-muted-foreground mt-2">
-            Review your settings and launch your campaign
+            Enroll prospects and configure your email sequence
           </p>
         </div>
       </div>
@@ -118,78 +122,107 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
         {/* Campaign Summary */}
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="text-center">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
                 <div className="text-2xl font-bold text-primary">{prospectsCount}</div>
                 <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                   <Users className="h-3 w-3" /> Prospects
                 </div>
               </div>
-              <div className="text-center">
+              <div>
+                <div className="text-2xl font-bold text-purple-600">
+                  <Sparkles className="h-6 w-6 mx-auto" />
+                </div>
+                <div className="text-xs text-muted-foreground">AI Research</div>
+              </div>
+              <div>
                 <div className="text-2xl font-bold text-primary">
-                  {linkedSequence?.totalSteps || "—"}
+                  {linkedSequence?.totalSteps || 0}
                 </div>
                 <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
                   <Mail className="h-3 w-3" /> Steps
                 </div>
               </div>
-              <div className="text-center col-span-2 md:col-span-1">
-                <div className="text-2xl font-bold text-primary">{settings.dailyLimit}</div>
-                <div className="text-xs text-muted-foreground">Emails/day</div>
-              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Sequence Section */}
-        <div className="p-4 rounded-lg border bg-accent/50">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" />
-              <h4 className="font-semibold">Sequence</h4>
-            </div>
-            {linkedSequence && (
-              <Badge variant="secondary" className="bg-green-500/10 text-green-600">
-                <CheckCircle2 className="h-3 w-3 mr-1" />
-                Created in wizard
-              </Badge>
-            )}
-          </div>
-
-          {linkedSequence ? (
-            <div className="p-3 rounded-md border bg-background">
+        {/* Linked Sequence Info */}
+        {linkedSequence ? (
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Linked Sequence
+                </CardTitle>
+                <Badge
+                  variant="secondary"
+                  className={
+                    linkedSequence.status === "ACTIVE"
+                      ? "bg-green-500/10 text-green-600"
+                      : "bg-orange-500/10 text-orange-600"
+                  }
+                >
+                  {linkedSequence.status}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">{linkedSequence.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {linkedSequence.totalSteps} steps •{" "}
-                    {linkedSequence.enableLinkedIn ? "Multi-channel" : "Email only"}
+                  <div className="text-sm text-muted-foreground">
+                    {hasSteps
+                      ? `${linkedSequence.totalSteps} steps configured`
+                      : "No steps configured yet"}
                   </div>
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setLinkedSequence(null)
-                    setSelectedSequenceId(null)
-                  }}
+                  onClick={() =>
+                    router.push(`/dashboard/sequences/${campaign.sequenceId}`)
+                  }
                 >
-                  Change
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Sequence
                 </Button>
               </div>
-            </div>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground mb-4">
-                All {prospectsCount} prospects will be enrolled in the selected sequence
+            </CardContent>
+          </Card>
+        ) : (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>No Sequence Linked</AlertTitle>
+            <AlertDescription>
+              Please go back and select or create a sequence for this campaign.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Important Notice */}
+        {linkedSequence && !hasSteps && (
+          <Alert>
+            <Sparkles className="h-4 w-4 text-purple-500" />
+            <AlertTitle>Next Step: Configure Your Sequence</AlertTitle>
+            <AlertDescription className="space-y-2">
+              <p>
+                After launching, you'll be taken to the sequence builder where you can:
               </p>
-              <SequenceSelector
-                selectedSequenceId={selectedSequenceId}
-                onSelect={(id) => setSelectedSequenceId(id)}
-              />
-            </>
-          )}
-        </div>
+              <ul className="list-disc list-inside text-sm space-y-1 mt-2">
+                <li>Add email steps with personalized content</li>
+                <li>
+                  Use AI research variables like{" "}
+                  <code className="bg-muted px-1 rounded">{"{{companyInfo}}"}</code>,{" "}
+                  <code className="bg-muted px-1 rounded">{"{{painPoint}}"}</code>
+                </li>
+                <li>Set up multi-channel touchpoints (LinkedIn, calls)</li>
+                <li>Configure A/B testing for subject lines</li>
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Settings */}
         <div className="space-y-4">
@@ -205,22 +238,6 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
               onChange={(e) => setSettings({ ...settings, startDate: e.target.value })}
               className="mt-2"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="dailyLimit">Daily Send Limit</Label>
-            <Input
-              id="dailyLimit"
-              type="number"
-              value={settings.dailyLimit}
-              onChange={(e) =>
-                setSettings({ ...settings, dailyLimit: Number.parseInt(e.target.value) })
-              }
-              className="mt-2"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              Recommended: 50-100 emails per day for new accounts
-            </p>
           </div>
 
           <div className="flex items-center justify-between p-4 rounded-lg border">
@@ -244,16 +261,6 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
             />
           </div>
         </div>
-
-        {/* Warning if no sequence selected */}
-        {!selectedSequenceId && (
-          <div className="p-4 rounded-lg border border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-900/50">
-            <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
-              <AlertCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">Please select a sequence to continue</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
@@ -263,13 +270,24 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
           Back
         </Button>
         <Button
-          onClick={launchCampaign}
-          disabled={isLaunching || !selectedSequenceId}
+          onClick={handleLaunchAndConfigure}
+          disabled={isLaunching || !campaign.sequenceId}
           size="lg"
           className="gap-2"
         >
-          <Rocket className="h-4 w-4" />
-          {isLaunching ? "Launching..." : "Launch Campaign"}
+          {isLaunching ? (
+            "Launching..."
+          ) : hasSteps ? (
+            <>
+              <Rocket className="h-4 w-4" />
+              Launch Campaign
+            </>
+          ) : (
+            <>
+              Launch & Configure Sequence
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </div>
     </div>

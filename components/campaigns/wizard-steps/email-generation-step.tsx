@@ -1,14 +1,27 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  ArrowLeft,
+  ArrowRight,
+  Plus,
+  ListChecks,
+  Sparkles,
+  Check,
+  Mail,
+  Clock,
+} from "lucide-react"
 import { toast } from "sonner"
 import { WaveLoader } from "@/components/loader/wave-loader"
-import { EmbeddedSequenceBuilder } from "./components/embedded-sequence-builder"
-import { ProspectEmailPreview } from "./components/prospect-email-preview"
-import { createSequenceForCampaign, updateSequenceFromCampaign } from "@/lib/actions/campaign-sequence-actions"
-import type { SequenceStep } from "@/lib/types/sequence"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Hammer, Eye } from "lucide-react"
+import { createSequenceForCampaign, linkSequenceToCampaign } from "@/lib/actions/campaign-sequence-actions"
+import { cn } from "@/lib/utils"
 
 interface EmailGenerationStepProps {
   campaign: any
@@ -19,114 +32,97 @@ interface EmailGenerationStepProps {
   isPaidUser: boolean
 }
 
-interface Prospect {
+interface ExistingSequence {
   id: string
-  email: string
-  firstName?: string | null
-  lastName?: string | null
-  company?: string | null
-  jobTitle?: string | null
-  researchData?: any
+  name: string
+  totalSteps: number
+  status: string
+  createdAt: string
 }
 
 export function EmailGenerationStep({
   campaign,
   onNext,
   onBack,
-  isPaidUser,
 }: EmailGenerationStepProps) {
   const [isLoading, setIsLoading] = useState(true)
-  const [prospects, setProspects] = useState<Prospect[]>([])
-  const [sampleResearchData, setSampleResearchData] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<"builder" | "preview">("builder")
-  const [currentSteps, setCurrentSteps] = useState<SequenceStep[]>([])
-  const [existingSequenceId, setExistingSequenceId] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [mode, setMode] = useState<"create" | "existing">("create")
+  const [sequenceName, setSequenceName] = useState(`${campaign.name} Sequence`)
+  const [existingSequences, setExistingSequences] = useState<ExistingSequence[]>([])
+  const [selectedSequenceId, setSelectedSequenceId] = useState<string | null>(
+    campaign.sequenceId || null
+  )
 
-  // Fetch prospects with research data
+  // Load existing sequences
   useEffect(() => {
-    const loadContext = async () => {
+    const loadSequences = async () => {
       try {
-        // Fetch first 5 prospects for preview
-        const response = await fetch(`/api/campaigns/${campaign.id}/prospects?limit=5`)
+        const response = await fetch("/api/sequences")
         if (response.ok) {
           const data = await response.json()
-          if (data.prospects && data.prospects.length > 0) {
-            setProspects(data.prospects)
-            setSampleResearchData(data.prospects[0].researchData)
-          }
+          setExistingSequences(data.sequences || [])
         }
 
-        // Check if campaign already has a sequence
+        // If campaign already has a sequence, select it
         if (campaign.sequenceId) {
-          setExistingSequenceId(campaign.sequenceId)
-          // Fetch existing sequence steps
-          const seqResponse = await fetch(`/api/sequences/${campaign.sequenceId}`)
-          if (seqResponse.ok) {
-            const seqData = await seqResponse.json()
-            if (seqData.sequence?.steps) {
-              setCurrentSteps(seqData.sequence.steps)
-            }
-          }
+          setMode("existing")
+          setSelectedSequenceId(campaign.sequenceId)
         }
       } catch (error) {
-        console.error("Failed to load campaign context:", error)
+        console.error("Failed to load sequences:", error)
       } finally {
         setIsLoading(false)
       }
     }
-    loadContext()
-  }, [campaign.id, campaign.sequenceId])
+    loadSequences()
+  }, [campaign.sequenceId])
 
-  const handleSaveSequence = async (steps: SequenceStep[], sequenceName: string) => {
+  const handleContinue = async () => {
+    setIsSaving(true)
+
     try {
-      // Convert steps to the format expected by the server action
-      const stepsInput = steps.map((step) => ({
-        order: step.order,
-        stepType: step.stepType,
-        delayValue: step.delayValue,
-        delayUnit: step.delayUnit,
-        subject: step.subject,
-        body: step.body,
-        linkedInMessage: step.linkedInMessage,
-        callScript: step.callScript,
-        taskTitle: step.taskTitle,
-        taskDescription: step.taskDescription,
-        internalNotes: step.internalNotes,
-      }))
-
-      let result
-      if (existingSequenceId) {
-        // Update existing sequence
-        result = await updateSequenceFromCampaign(
-          campaign.userId,
-          existingSequenceId,
-          sequenceName,
-          stepsInput
-        )
-      } else {
-        // Create new sequence
-        result = await createSequenceForCampaign(
+      if (mode === "create") {
+        // Create a new sequence with just the name
+        const result = await createSequenceForCampaign(
           campaign.userId,
           campaign.id,
           sequenceName,
-          stepsInput
+          [] // Empty steps - user will configure in sequence page
         )
-        if (result.sequenceId) {
-          setExistingSequenceId(result.sequenceId)
+
+        if (!result.success) {
+          throw new Error(result.error || "Failed to create sequence")
         }
+
+        toast.success("Sequence created! You'll configure it after launch.")
+      } else {
+        // Link existing sequence
+        if (!selectedSequenceId) {
+          toast.error("Please select a sequence")
+          setIsSaving(false)
+          return
+        }
+
+        const result = await linkSequenceToCampaign(
+          campaign.userId,
+          campaign.id,
+          selectedSequenceId
+        )
+
+        if (!result.success) {
+          throw new Error(result.error || "Failed to link sequence")
+        }
+
+        toast.success("Sequence linked successfully!")
       }
 
-      if (result.success) {
-        setCurrentSteps(steps)
-        toast.success("Sequence saved successfully!")
-        onNext()
-      } else {
-        throw new Error(result.error || "Failed to save sequence")
-      }
+      onNext()
     } catch (error) {
-      toast.error("Failed to save sequence. Please try again.")
-      console.error(error)
-      throw error // Re-throw so the builder knows save failed
+      console.error("Error:", error)
+      toast.error(error instanceof Error ? error.message : "Something went wrong")
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -134,57 +130,199 @@ export function EmailGenerationStep({
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <WaveLoader size="sm" bars={5} />
-        <p className="text-sm text-muted-foreground">Loading sequence builder...</p>
+        <p className="text-sm text-muted-foreground">Loading sequences...</p>
       </div>
     )
   }
 
+  const prospectsCount = campaign._count?.prospects || 0
+
   return (
-    <div className="space-y-4">
-      {/* Tab selector for Builder / Preview */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "builder" | "preview")}>
-        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
-          <TabsTrigger value="builder" className="gap-2">
-            <Hammer className="h-4 w-4" />
-            Build Sequence
-          </TabsTrigger>
-          <TabsTrigger value="preview" className="gap-2" disabled={currentSteps.length === 0}>
-            <Eye className="h-4 w-4" />
-            Preview Emails
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-6">
+      {/* Header Info */}
+      <div className="text-center space-y-2 pb-4">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Sparkles className="h-4 w-4 text-purple-500" />
+          <span>
+            {prospectsCount} prospects with AI research data will use this sequence
+          </span>
+        </div>
+      </div>
 
-        <TabsContent value="builder" className="mt-4">
-          <EmbeddedSequenceBuilder
-            campaignId={campaign.id}
-            campaignName={campaign.name}
-            userId={campaign.userId}
-            researchData={sampleResearchData}
-            prospectsCount={campaign._count?.prospects || 0}
-            isPaidUser={isPaidUser}
-            initialSteps={currentSteps.length > 0 ? currentSteps : undefined}
-            onSave={handleSaveSequence}
-            onBack={onBack}
-          />
-        </TabsContent>
-
-        <TabsContent value="preview" className="mt-4">
-          {currentSteps.length > 0 && prospects.length > 0 ? (
-            <ProspectEmailPreview
-              prospects={prospects}
-              steps={currentSteps}
-              className="h-[600px]"
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <Eye className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">
-                Build your sequence first to preview emails
+      {/* Mode Selection */}
+      <RadioGroup
+        value={mode}
+        onValueChange={(v) => setMode(v as "create" | "existing")}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        {/* Create New Option */}
+        <Label
+          htmlFor="create"
+          className={cn(
+            "cursor-pointer rounded-lg border-2 p-4 transition-all hover:border-primary/50",
+            mode === "create" ? "border-primary bg-primary/5" : "border-muted"
+          )}
+        >
+          <RadioGroupItem value="create" id="create" className="sr-only" />
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Plus className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold flex items-center gap-2">
+                Create New Sequence
+                {mode === "create" && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Create a fresh sequence for this campaign
               </p>
             </div>
+          </div>
+        </Label>
+
+        {/* Use Existing Option */}
+        <Label
+          htmlFor="existing"
+          className={cn(
+            "cursor-pointer rounded-lg border-2 p-4 transition-all hover:border-primary/50",
+            mode === "existing" ? "border-primary bg-primary/5" : "border-muted"
           )}
-        </TabsContent>
-      </Tabs>
+        >
+          <RadioGroupItem value="existing" id="existing" className="sr-only" />
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+              <ListChecks className="h-5 w-5 text-blue-500" />
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold flex items-center gap-2">
+                Use Existing Sequence
+                {mode === "existing" && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                Choose a sequence you've already created
+              </p>
+            </div>
+          </div>
+        </Label>
+      </RadioGroup>
+
+      {/* Create New Form */}
+      {mode === "create" && (
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Sequence Name</CardTitle>
+            <CardDescription>
+              You'll configure the sequence steps after launching the campaign
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Input
+              value={sequenceName}
+              onChange={(e) => setSequenceName(e.target.value)}
+              placeholder="Enter sequence name..."
+              className="text-base"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              💡 Tip: After launch, you'll be directed to the sequence page to add email steps
+              using your prospects' research data as personalization variables.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Existing Sequences List */}
+      {mode === "existing" && (
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Select a Sequence</CardTitle>
+            <CardDescription>
+              Choose an existing sequence to use for this campaign
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            {existingSequences.length === 0 ? (
+              <div className="p-6 text-center text-muted-foreground">
+                <ListChecks className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                <p>No sequences found</p>
+                <p className="text-sm">Create one by selecting "Create New Sequence"</p>
+              </div>
+            ) : (
+              <ScrollArea className="max-h-[300px]">
+                <div className="divide-y">
+                  {existingSequences.map((seq) => (
+                    <button
+                      key={seq.id}
+                      onClick={() => setSelectedSequenceId(seq.id)}
+                      className={cn(
+                        "w-full p-4 text-left transition-colors hover:bg-muted/50",
+                        selectedSequenceId === seq.id && "bg-primary/5"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "flex h-8 w-8 items-center justify-center rounded-full border-2",
+                              selectedSequenceId === seq.id
+                                ? "border-primary bg-primary text-primary-foreground"
+                                : "border-muted"
+                            )}
+                          >
+                            {selectedSequenceId === seq.id ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <Mail className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium">{seq.name}</div>
+                            <div className="text-xs text-muted-foreground flex items-center gap-2">
+                              <span>{seq.totalSteps} steps</span>
+                              <span>•</span>
+                              <Badge
+                                variant="secondary"
+                                className={cn(
+                                  "text-[10px]",
+                                  seq.status === "ACTIVE" && "bg-green-500/10 text-green-600"
+                                )}
+                              >
+                                {seq.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between pt-4 border-t">
+        <Button variant="outline" onClick={onBack} disabled={isSaving}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          onClick={handleContinue}
+          disabled={
+            isSaving ||
+            (mode === "create" && !sequenceName.trim()) ||
+            (mode === "existing" && !selectedSequenceId)
+          }
+        >
+          {isSaving ? "Saving..." : "Continue"}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   )
 }
