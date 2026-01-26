@@ -433,7 +433,7 @@ const quickStartCode = {
 // MAILFRA_API_KEY=sk_live_xxxxxxxxxxxxxxxx
 
 const API_KEY = process.env.MAILFRA_API_KEY
-const BASE_URL = "https://yourdomain.com/api/v1"
+const BASE_URL = "https://mailfra.com/api/v1"
 
 // Helper function for API calls
 async function mailfraAPI(endpoint, options = {}) {
@@ -801,7 +801,7 @@ export default function DocsPage() {
               <div className="bg-card border border-border rounded-xl p-6 mb-6">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">Example Request</h3>
                 <CodeBlock
-                  code={`curl https://yourdomain.com/api/v1/campaigns \\
+                  code={`curl https://mailfra.com/api/v1/campaigns \\
   -H "Authorization: Bearer sk_live_YOUR_API_KEY" \\
   -H "Content-Type: application/json"`}
                 />
@@ -940,35 +940,35 @@ X-RateLimit-Reset: 1640995200`}
         </div>
       </section>
 
-      {/* SDKs */}
+      {/* REST API Integration */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Official SDKs</h2>
-            <p className="text-lg text-muted-foreground">Get started quickly with our official client libraries</p>
+            <h2 className="text-3xl font-bold mb-4">REST API Integration</h2>
+            <p className="text-lg text-muted-foreground">Use any HTTP client in any language - no SDK required</p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: "JavaScript/TypeScript", pkg: "@mailfra/sdk", version: "2.1.0", icon: "JS" },
-              { name: "Python", pkg: "mailfra", version: "1.8.0", icon: "PY" },
-              { name: "Ruby", pkg: "mailfra-ruby", version: "1.4.0", icon: "RB" },
-              { name: "Go", pkg: "github.com/mailfra/go-sdk", version: "1.2.0", icon: "GO" },
-            ].map((sdk) => (
+              { name: "JavaScript", example: "fetch() / axios", desc: "Node.js & Browser", icon: "JS" },
+              { name: "Python", example: "requests / httpx", desc: "Any Python version", icon: "PY" },
+              { name: "cURL", example: "Command line", desc: "Shell scripts", icon: "SH" },
+              { name: "Any Language", example: "HTTP POST/GET", desc: "Universal REST", icon: "🌐" },
+            ].map((lang) => (
               <motion.div
-                key={sdk.name}
+                key={lang.name}
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-all"
               >
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-4 font-mono font-bold text-xl">
-                  {sdk.icon}
+                  {lang.icon}
                 </div>
-                <h3 className="font-semibold mb-1">{sdk.name}</h3>
-                <code className="text-xs text-muted-foreground block mb-2">{sdk.pkg}</code>
+                <h3 className="font-semibold mb-1">{lang.name}</h3>
+                <code className="text-xs text-muted-foreground block mb-2">{lang.example}</code>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="px-2 py-1 rounded bg-muted text-muted-foreground">v{sdk.version}</span>
+                  <span className="px-2 py-1 rounded bg-muted text-muted-foreground">{lang.desc}</span>
                 </div>
               </motion.div>
             ))}

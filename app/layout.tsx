@@ -50,7 +50,7 @@ export default function RootLayout({
     "@type": "Organization",
     "name": "Mailfra",
     "url": "https://mailfra.com", // Replace with your actual domain
-    "logo": "https://yourdomain.com/mailfra-logo-light.png", // Replace with your actual domain
+    "logo": "https://mailfra.com/mailfra-logo-light.png", // Replace with your actual domain
     "description": "The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.",
     "sameAs": [
       // Add your social media profiles here (optional)

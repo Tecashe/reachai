@@ -24,7 +24,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { getApiKeys } from "@/lib/actions/api-keys"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://yourdomain.com"
+const API_BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://mailfra.com"
 
 const ENDPOINTS = [
   // Campaigns

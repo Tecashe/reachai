@@ -119,8 +119,7 @@ export default function APIDocumentationPage() {
 
                   <Card className="p-6">
                     <h3 className="text-xl font-semibold mb-4">Base URL</h3>
-                    <CodeBlock code="https://yourdomain.com/api/v1" />
-                    <p className="text-sm text-muted-foreground mt-2">Replace <code>yourdomain.com</code> with your actual domain.</p>
+                    <CodeBlock code="https://mailfra.com/api/v1" />
                   </Card>
 
                   <Card className="p-6">
@@ -157,7 +156,7 @@ export default function APIDocumentationPage() {
                         <div>
                           <p className="font-medium">Make Your First Request</p>
                           <CodeBlock
-                            code={`const response = await fetch('https://yourdomain.com/api/v1/campaigns', {
+                            code={`const response = await fetch('https://mailfra.com/api/v1/campaigns', {
   headers: {
     'Authorization': 'Bearer sk_live_YOUR_API_KEY'
   }
@@ -310,7 +309,7 @@ const data = await response.json();`}
                       <div>
                         <h4 className="font-semibold mb-2">Example Request</h4>
                         <CodeBlock
-                          code={`const response = await fetch('https://yourdomain.com/api/v1/campaigns?status=ACTIVE&limit=10', {
+                          code={`const response = await fetch('https://mailfra.com/api/v1/campaigns?status=ACTIVE&limit=10', {
   headers: {
     'Authorization': 'Bearer sk_live_YOUR_API_KEY'
   }

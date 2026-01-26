@@ -70,6 +70,8 @@ import { STEP_TYPE_CONFIG } from "@/lib/types/sequence"
 import { ABTestPanel } from "./ab-test-panel"
 import { EmailComposerClient } from "./email-composer-client"
 import { EmailBodyPreview } from "@/components/templates/email-body-preview"
+import { generateSpintax } from "@/lib/actions/generate-spintax"
+import { Sparkles, Wand2 } from "lucide-react"
 
 interface SequenceStepPanelProps {
   step: SequenceStep
@@ -153,6 +155,7 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
   const [variants, setVariants] = React.useState<SequenceStepVariant[]>(step.variants || [])
   const [activeField, setActiveField] = React.useState<"subject" | "body" | null>(null)
   const [showEmailComposer, setShowEmailComposer] = React.useState(false)
+  const [isGeneratingSpintax, setIsGeneratingSpintax] = React.useState(false)
 
   const subjectRef = React.useRef<HTMLInputElement>(null)
   const bodyRef = React.useRef<HTMLTextAreaElement>(null)
@@ -193,6 +196,32 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
     onUpdate({ subject, body })
     setShowEmailComposer(false)
     toast({ title: "Email content updated" })
+  }
+
+  const handleAiSpintax = async () => {
+    if (!step.body || step.body.length < 10) {
+      toast({ title: "Content too short", description: "Write at least 10 characters first", variant: "destructive" })
+      return
+    }
+
+    setIsGeneratingSpintax(true)
+    try {
+      // Generate for body
+      const bodyResult = await generateSpintax(step.body)
+      if (bodyResult.success && bodyResult.content) {
+        onUpdate({ 
+          body: bodyResult.content,
+          spintaxEnabled: true 
+        })
+        toast({ title: "✨ Spintax Generated", description: "Your email has been optimized with AI variations!" })
+      } else {
+        throw new Error(bodyResult.error)
+      }
+    } catch (error) {
+      toast({ title: "Generation failed", description: "Could not generate spintax. Try again.", variant: "destructive" })
+    } finally {
+      setIsGeneratingSpintax(false)
+    }
   }
 
   const getSpamScore = () => {
@@ -435,49 +464,60 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
               />
             </div>
 
-            {/* Spintax Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs">Enable Spintax</span>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3">
-                    <p className="text-xs font-medium mb-2">Spintax Syntax</p>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Use curly braces with pipe-separated options to create variations:
-                    </p>
-                    <div className="bg-muted rounded p-2 space-y-1.5">
-                      <code className="text-[10px] block">{"{Hi|Hello|Hey}"} → Hi, Hello, or Hey</code>
-                      <code className="text-[10px] block">{"{quick|brief|short}"} call → quick call</code>
-                      <code className="text-[10px] block">{"{I'd love|I would like}"} to...</code>
+            {/* Spintax Section - Mind-blowing Upgrade */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold">AI Spintax Optimizer</span>
+                      <Badge variant="default" className="text-[10px] px-1.5 h-5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-0 shadow-sm">
+                        PRO
+                      </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Each recipient gets a random variation for natural-sounding emails.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
-                  PRO
-                </Badge>
+                    <p className="text-[10px] text-muted-foreground">Automatically generate {`{Hi|Hello}`} variations</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={step.spintaxEnabled || false}
+                  onCheckedChange={(checked) => onUpdate({ spintaxEnabled: checked })}
+                />
               </div>
-              <Switch
-                checked={step.spintaxEnabled || false}
-                onCheckedChange={(checked) => onUpdate({ spintaxEnabled: checked })}
-              />
-            </div>
 
-            {step.spintaxEnabled && (
-              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
-                <p className="text-xs text-muted-foreground">
-                  ✨ Spintax is enabled! Use the syntax in your subject or body:
-                </p>
-                <code className="text-[10px] block text-purple-600">
-                  {"{Hi|Hello|Hey}"} {"{{firstName}}"}, {"{quick question|thought you'd like this}"}...
-                </code>
-              </div>
-            )}
+              {step.spintaxEnabled && (
+                <div className="space-y-3 pt-1">
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full bg-gradient-to-r from-primary to-violet-600 hover:from-primary/90 hover:to-violet-600/90 text-white shadow-md transition-all group"
+                    onClick={handleAiSpintax}
+                    disabled={isGeneratingSpintax || !step.body}
+                  >
+                    {isGeneratingSpintax ? (
+                      <>
+                        <Wand2 className="h-3.5 w-3.5 mr-2 animate-spin" />
+                        Generating Magic...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3.5 w-3.5 mr-2 group-hover:scale-125 transition-transform" />
+                        AI Spintaxify Content
+                      </>
+                    )}
+                  </Button>
+                  
+                  <div className="p-2.5 rounded-lg bg-background/50 border text-xs">
+                    <p className="text-muted-foreground mb-1.5 font-medium">Syntax Preview:</p>
+                    <code className="block text-primary/80 bg-primary/5 p-1.5 rounded border border-primary/10">
+                      {"{Hi|Hello|Hey}"} {"{{firstName}}"}, I {"{saw|noticed|found}"}...
+                    </code>
+                  </div>
+                </div>
+              )}
+            </div>
           </CollapsibleContent>
         </Collapsible>
       </>
