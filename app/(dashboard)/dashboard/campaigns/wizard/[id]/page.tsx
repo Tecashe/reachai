@@ -45,7 +45,10 @@ export default async function CampaignWizardPage({ params }: { params: { id: str
 
   return (
     <div className="max-w-5xl mx-auto">
-      <CampaignWizard campaign={transformedCampaign} />
+      <CampaignWizard
+        campaign={transformedCampaign}
+        isPaidUser={user.subscriptionTier !== "FREE"}
+      />
     </div>
   )
 }

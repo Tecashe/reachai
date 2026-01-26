@@ -319,7 +319,7 @@ const steps: WizardStep[] = [
   },
 ]
 
-export function CampaignWizard({ campaign }: { campaign: Campaign }) {
+export function CampaignWizard({ campaign, isPaidUser = false }: { campaign: Campaign; isPaidUser?: boolean }) {
   const router = useRouter()
   const { toast } = useToast()
 
@@ -411,13 +411,12 @@ export function CampaignWizard({ campaign }: { campaign: Campaign }) {
                   <button
                     onClick={() => handleStepClick(index)}
                     disabled={!isAccessible}
-                    className={`flex flex-col items-center gap-2 w-full p-3 rounded-lg transition-all ${
-                      isCurrent
-                        ? "bg-primary/10 border-2 border-primary"
-                        : isCompleted
-                          ? "bg-green-50 dark:bg-green-950 border-2 border-green-500"
-                          : "bg-muted/50 border-2 border-transparent hover:bg-muted"
-                    } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    className={`flex flex-col items-center gap-2 w-full p-3 rounded-lg transition-all ${isCurrent
+                      ? "bg-primary/10 border-2 border-primary"
+                      : isCompleted
+                        ? "bg-green-50 dark:bg-green-950 border-2 border-green-500"
+                        : "bg-muted/50 border-2 border-transparent hover:bg-muted"
+                      } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <div className="flex items-center gap-2">
                       {isCompleted ? (
@@ -457,13 +456,12 @@ export function CampaignWizard({ campaign }: { campaign: Campaign }) {
                   <button
                     onClick={() => handleStepClick(index)}
                     disabled={!isAccessible}
-                    className={`flex flex-col items-center gap-1.5 w-full p-2 rounded-lg transition-all ${
-                      isCurrent
-                        ? "bg-primary/10 border-2 border-primary"
-                        : isCompleted
-                          ? "bg-green-50 dark:bg-green-950 border-2 border-green-500"
-                          : "bg-muted/50 border-2 border-transparent hover:bg-muted"
-                    } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    className={`flex flex-col items-center gap-1.5 w-full p-2 rounded-lg transition-all ${isCurrent
+                      ? "bg-primary/10 border-2 border-primary"
+                      : isCompleted
+                        ? "bg-green-50 dark:bg-green-950 border-2 border-green-500"
+                        : "bg-muted/50 border-2 border-transparent hover:bg-muted"
+                      } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     {isCompleted ? (
                       <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -511,9 +509,8 @@ export function CampaignWizard({ campaign }: { campaign: Campaign }) {
                     key={step.id}
                     onClick={() => handleStepClick(index)}
                     disabled={!isAccessible}
-                    className={`flex items-center gap-3 p-3 ${isCurrent ? "bg-primary/10" : ""} ${
-                      !isAccessible ? "opacity-50" : ""
-                    }`}
+                    className={`flex items-center gap-3 p-3 ${isCurrent ? "bg-primary/10" : ""} ${!isAccessible ? "opacity-50" : ""
+                      }`}
                   >
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted">
                       {isCompleted ? (
@@ -543,13 +540,12 @@ export function CampaignWizard({ campaign }: { campaign: Campaign }) {
               return (
                 <div
                   key={step.id}
-                  className={`h-2 rounded-full transition-all ${
-                    isCurrent
-                      ? "w-8 bg-primary"
-                      : isCompleted
-                        ? "w-2 bg-green-500"
-                        : "w-2 bg-muted-foreground/30"
-                  }`}
+                  className={`h-2 rounded-full transition-all ${isCurrent
+                    ? "w-8 bg-primary"
+                    : isCompleted
+                      ? "w-2 bg-green-500"
+                      : "w-2 bg-muted-foreground/30"
+                    }`}
                 />
               )
             })}
@@ -577,6 +573,7 @@ export function CampaignWizard({ campaign }: { campaign: Campaign }) {
             onBack={handleBack}
             isFirstStep={currentStepIndex === 0}
             isLastStep={currentStepIndex === steps.length - 1}
+            isPaidUser={isPaidUser}
           />
         </CardContent>
       </Card>

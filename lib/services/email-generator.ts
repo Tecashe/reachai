@@ -86,9 +86,8 @@ PROSPECT INFORMATION:
 - Job Title: ${prospect.jobTitle}
 - Email: ${prospect.email}
 
-${
-  researchData
-    ? `
+${researchData
+      ? `
 RESEARCH INSIGHTS:
 - Company Info: ${researchData.companyInfo || "Not available"}
 - Recent News: ${researchData.recentNews?.join(", ") || "Not available"}
@@ -96,18 +95,17 @@ RESEARCH INSIGHTS:
 - Talking Points: ${researchData.talkingPoints?.join(", ") || "Not available"}
 - Current Tools: ${researchData.competitorTools?.join(", ") || "Not available"}
 `
-    : ""
-}
+      : ""
+    }
 
-${
-  template
-    ? `
+${template
+      ? `
 TEMPLATE GUIDANCE:
 - Subject Template: ${template.subject || "Create from scratch"}
 - Body Template: ${template.body || "Create from scratch"}
 `
-    : ""
-}
+      : ""
+    }
 
 REQUIREMENTS:
 - Tone: ${tone}
@@ -248,4 +246,80 @@ export function scoreEmailQuality(email: { subject: string; body: string }): {
   )
 
   return { overallScore, breakdown }
+}
+
+export async function generateFullSequence(params: {
+  prospect: any
+  researchData?: any
+  tone?: string
+  stepsCount?: number // Default 3
+}): Promise<{ steps: Array<{ subject: string; body: string; delayDays: number }> }> {
+  console.log("[builtbycashe] Generating full sequence for:", params.prospect.email)
+
+  const { prospect, researchData, tone = "professional", stepsCount = 3 } = params
+
+  const prompt = `
+You are an expert cold email strategist. Create a complete ${stepsCount}-step cold email sequence.
+
+PROSPECT: ${prospect.firstName} ${prospect.lastName} (${prospect.jobTitle} at ${prospect.company})
+${researchData ? `RESEARCH: ${JSON.stringify(researchData)}` : ""}
+
+REQUIREMENTS:
+- Tone: ${tone}
+- Steps: ${stepsCount}
+- Goal: Book a meeting
+- Use Spintax where appropriate for variation (e.g. {Hi|Hello|Hey}).
+
+OUTPUT FORMAT (JSON):
+{
+  "steps": [
+    { "subject": "Step 1 Subject", "body": "Step 1 Body...", "delayDays": 0 },
+    { "subject": "Step 2 Subject (RE:)", "body": "Step 2 Body...", "delayDays": 2 }
+  ]
+}
+`
+
+  try {
+    const { object } = await generateObject({
+      model: "openai/gpt-4o",
+      prompt,
+      schema: z.object({
+        steps: z.array(
+          z.object({
+            subject: z.string(),
+            body: z.string(),
+            delayDays: z.number(),
+          }),
+        ),
+      }),
+    })
+
+    return object
+  } catch (error) {
+    console.error("[builtbycashe] Sequence generation failed:", error)
+    throw new Error("Failed to generate sequence")
+  }
+}
+
+export async function generateSpintax(text: string): Promise<string> {
+  const prompt = `
+Rewrite the following text adding Spintax variations {option1|option2|option3} for greetings, openers, and common phrases to increase variability.
+Keep the original meaning.
+
+TEXT: "${text}"
+
+OUTPUT: Just the rewriting text with Spintax.
+`
+  try {
+    const { object } = await generateObject({
+      model: "openai/gpt-4o", // Use a cheaper model if possible for this simple task
+      prompt,
+      schema: z.object({
+        spintaxText: z.string(),
+      }),
+    })
+    return object.spintaxText
+  } catch (error) {
+    return text // Fallback
+  }
 }
