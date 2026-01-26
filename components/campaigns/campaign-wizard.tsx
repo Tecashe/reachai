@@ -266,6 +266,8 @@ interface Campaign {
   id: string
   name: string
   status: string
+  sequenceId?: string | null
+  userId: string
   _count: {
     prospects: number
   }
@@ -319,9 +321,12 @@ const steps: WizardStep[] = [
   },
 ]
 
-export function CampaignWizard({ campaign, isPaidUser = false }: { campaign: Campaign; isPaidUser?: boolean }) {
+export function CampaignWizard({ campaign: initialCampaign, isPaidUser = false }: { campaign: Campaign; isPaidUser?: boolean }) {
   const router = useRouter()
   const { toast } = useToast()
+
+  // Local campaign state that can be refreshed
+  const [campaign, setCampaign] = useState<Campaign>(initialCampaign)
 
   const [currentStepIndex, setCurrentStepIndex] = useState(() => {
     const savedStep = campaign.wizardStep || "prospects"
@@ -337,6 +342,21 @@ export function CampaignWizard({ campaign, isPaidUser = false }: { campaign: Cam
   const currentStep = steps[currentStepIndex]
   const StepComponent = currentStep.component
   const progress = ((currentStepIndex + 1) / steps.length) * 100
+
+  // Refresh campaign data from API
+  const refreshCampaign = async () => {
+    try {
+      const response = await fetch(`/api/campaigns/${campaign.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.campaign) {
+          setCampaign(data.campaign)
+        }
+      }
+    } catch (error) {
+      console.error("Failed to refresh campaign:", error)
+    }
+  }
 
   useEffect(() => {
     const autoSave = async () => {
@@ -355,6 +375,10 @@ export function CampaignWizard({ campaign, isPaidUser = false }: { campaign: Cam
 
   const handleNext = async () => {
     setCompletedSteps((prev) => new Set(prev).add(currentStep.id))
+
+    // Refresh campaign data before moving to next step (to get sequenceId, etc.)
+    await refreshCampaign()
+
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(currentStepIndex + 1)
     }
