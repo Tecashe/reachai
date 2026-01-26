@@ -656,27 +656,50 @@ const navLinks = [
 
 export function PageHeader() {
   const [scrolled, setScrolled] = useState(false)
+  const [visible, setVisible] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { theme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [lastScrollY, setLastScrollY] = useState(0)
 
   useEffect(() => {
     setMounted(true)
-    const handleScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener("scroll", handleScroll)
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+
+      // Add background when scrolled past 50px
+      setScrolled(currentScrollY > 50)
+
+      // Smart navbar: show on scroll up, hide on scroll down
+      if (currentScrollY < 100) {
+        // Always show near top of page
+        setVisible(true)
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling UP - show navbar
+        setVisible(true)
+      } else if (currentScrollY > lastScrollY + 10) {
+        // Scrolling DOWN (with 10px threshold) - hide navbar
+        setVisible(false)
+      }
+
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [lastScrollY])
 
   const currentTheme = mounted ? (theme === "system" ? resolvedTheme : theme) : "light"
   const logoSrc = currentTheme === "dark" ? "/mailfra-logo-dark.png" : "/mailfra-logo-light.png"
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-background backdrop-blur-2xl border-b border-border/40 shadow-lg shadow-black/5"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+          ? "bg-background/95 backdrop-blur-2xl border-b border-border/40 shadow-lg shadow-black/5"
           : "bg-transparent border-b border-transparent"
-      }`}
+        } ${visible ? "translate-y-0" : "-translate-y-full"
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
@@ -785,7 +808,7 @@ export function PageHeader() {
                   </div>
                 </div>
               ))}
-              
+
               {/* Pricing Link */}
               <div className="border-b border-border/30 py-2">
                 <h3 className="px-6 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground bg-background/40">Quick Links</h3>
@@ -803,17 +826,17 @@ export function PageHeader() {
 
               {/* CTA Section */}
               <div className="px-4 py-6 space-y-3 bg-gradient-to-b from-primary/5 to-transparent">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  asChild 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
                   className="w-full justify-center font-semibold border-primary/30 hover:border-primary/60 hover:bg-background transition-all duration-300 bg-transparent"
                 >
                   <Link href="/sign-in">Sign In</Link>
                 </Button>
-                <Button 
-                  size="sm" 
-                  asChild 
+                <Button
+                  size="sm"
+                  asChild
                   className="w-full justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-primary/30"
                 >
                   <Link href="/sign-up" className="flex items-center justify-center gap-2">
