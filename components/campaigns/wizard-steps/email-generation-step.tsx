@@ -1,21 +1,14 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeft, Loader2, Sparkles, Eye, RefreshCw, Copy, Check } from "lucide-react"
 import { toast } from "sonner"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Mail } from "lucide-react"
 import { WaveLoader } from "@/components/loader/wave-loader"
-
-
-import { WizardSequenceBuilder } from "./components/wizard-sequence-builder"
+import { EmbeddedSequenceBuilder } from "./components/embedded-sequence-builder"
+import { ProspectEmailPreview } from "./components/prospect-email-preview"
+import { createSequenceForCampaign, updateSequenceFromCampaign } from "@/lib/actions/campaign-sequence-actions"
+import type { SequenceStep } from "@/lib/types/sequence"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Hammer, Eye } from "lucide-react"
 
 interface EmailGenerationStepProps {
   campaign: any
@@ -26,72 +19,172 @@ interface EmailGenerationStepProps {
   isPaidUser: boolean
 }
 
+interface Prospect {
+  id: string
+  email: string
+  firstName?: string | null
+  lastName?: string | null
+  company?: string | null
+  jobTitle?: string | null
+  researchData?: any
+}
+
 export function EmailGenerationStep({
   campaign,
   onNext,
   onBack,
-  isPaidUser
+  isPaidUser,
 }: EmailGenerationStepProps) {
   const [isLoading, setIsLoading] = useState(true)
+  const [prospects, setProspects] = useState<Prospect[]>([])
   const [sampleResearchData, setSampleResearchData] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState<"builder" | "preview">("builder")
+  const [currentSteps, setCurrentSteps] = useState<SequenceStep[]>([])
+  const [existingSequenceId, setExistingSequenceId] = useState<string | null>(null)
 
-  // Fetch a sample prospect with research data to provide context for AI generation
+  // Fetch prospects with research data
   useEffect(() => {
     const loadContext = async () => {
       try {
-        const response = await fetch(`/api/campaigns/${campaign.id}/prospects?limit=1`)
+        // Fetch first 5 prospects for preview
+        const response = await fetch(`/api/campaigns/${campaign.id}/prospects?limit=5`)
         if (response.ok) {
           const data = await response.json()
           if (data.prospects && data.prospects.length > 0) {
+            setProspects(data.prospects)
             setSampleResearchData(data.prospects[0].researchData)
           }
         }
+
+        // Check if campaign already has a sequence
+        if (campaign.sequenceId) {
+          setExistingSequenceId(campaign.sequenceId)
+          // Fetch existing sequence steps
+          const seqResponse = await fetch(`/api/sequences/${campaign.sequenceId}`)
+          if (seqResponse.ok) {
+            const seqData = await seqResponse.json()
+            if (seqData.sequence?.steps) {
+              setCurrentSteps(seqData.sequence.steps)
+            }
+          }
+        }
       } catch (error) {
-        console.error("Failed to load campaign context")
+        console.error("Failed to load campaign context:", error)
       } finally {
         setIsLoading(false)
       }
     }
     loadContext()
-  }, [campaign.id])
+  }, [campaign.id, campaign.sequenceId])
 
-  const handleSaveSequence = async (steps: any[]) => {
+  const handleSaveSequence = async (steps: SequenceStep[], sequenceName: string) => {
     try {
-      const response = await fetch(`/api/campaigns/${campaign.id}/save-sequence`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ steps }),
-      })
+      // Convert steps to the format expected by the server action
+      const stepsInput = steps.map((step) => ({
+        order: step.order,
+        stepType: step.stepType,
+        delayValue: step.delayValue,
+        delayUnit: step.delayUnit,
+        subject: step.subject,
+        body: step.body,
+        linkedInMessage: step.linkedInMessage,
+        callScript: step.callScript,
+        taskTitle: step.taskTitle,
+        taskDescription: step.taskDescription,
+        internalNotes: step.internalNotes,
+      }))
 
-      if (!response.ok) throw new Error("Failed to save sequence")
+      let result
+      if (existingSequenceId) {
+        // Update existing sequence
+        result = await updateSequenceFromCampaign(
+          campaign.userId,
+          existingSequenceId,
+          sequenceName,
+          stepsInput
+        )
+      } else {
+        // Create new sequence
+        result = await createSequenceForCampaign(
+          campaign.userId,
+          campaign.id,
+          sequenceName,
+          stepsInput
+        )
+        if (result.sequenceId) {
+          setExistingSequenceId(result.sequenceId)
+        }
+      }
 
-      toast.success("Sequence saved successfully")
-      onNext()
+      if (result.success) {
+        setCurrentSteps(steps)
+        toast.success("Sequence saved successfully!")
+        onNext()
+      } else {
+        throw new Error(result.error || "Failed to save sequence")
+      }
     } catch (error) {
-      toast.error("Failed to save sequence")
+      toast.error("Failed to save sequence. Please try again.")
       console.error(error)
+      throw error // Re-throw so the builder knows save failed
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-20">
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
         <WaveLoader size="sm" bars={5} />
+        <p className="text-sm text-muted-foreground">Loading sequence builder...</p>
       </div>
     )
   }
 
   return (
-    <WizardSequenceBuilder
-      prospectsCount={campaign._count?.prospects || 0}
-      researchData={sampleResearchData}
-      isPaidUser={isPaidUser}
-      onNext={handleSaveSequence}
-      onBack={onBack}
-    // Pass existing sequence steps if we had them saved, but for now we start fresh
-    // or we could fetch existing steps if the user goes back to this step
-    />
+    <div className="space-y-4">
+      {/* Tab selector for Builder / Preview */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "builder" | "preview")}>
+        <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+          <TabsTrigger value="builder" className="gap-2">
+            <Hammer className="h-4 w-4" />
+            Build Sequence
+          </TabsTrigger>
+          <TabsTrigger value="preview" className="gap-2" disabled={currentSteps.length === 0}>
+            <Eye className="h-4 w-4" />
+            Preview Emails
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="builder" className="mt-4">
+          <EmbeddedSequenceBuilder
+            campaignId={campaign.id}
+            campaignName={campaign.name}
+            userId={campaign.userId}
+            researchData={sampleResearchData}
+            prospectsCount={campaign._count?.prospects || 0}
+            isPaidUser={isPaidUser}
+            initialSteps={currentSteps.length > 0 ? currentSteps : undefined}
+            onSave={handleSaveSequence}
+            onBack={onBack}
+          />
+        </TabsContent>
+
+        <TabsContent value="preview" className="mt-4">
+          {currentSteps.length > 0 && prospects.length > 0 ? (
+            <ProspectEmailPreview
+              prospects={prospects}
+              steps={currentSteps}
+              className="h-[600px]"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <Eye className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground">
+                Build your sequence first to preview emails
+              </p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   )
 }
-
-

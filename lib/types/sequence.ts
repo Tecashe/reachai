@@ -350,7 +350,7 @@ export type StepType =
   | "EXIT_TRIGGER"
   | "MANUAL_REVIEW"
   | "MULTI_CHANNEL_TOUCH"
-  | "MULTI_CHANNEL_TOUCH" 
+  | "MULTI_CHANNEL_TOUCH"
   | "BEHAVIOR_BRANCH"
   | "RANDOM_VARIANT"
   | "CONTENT_REFERENCE"
@@ -492,7 +492,7 @@ export interface SequenceStep {
   delayRandomMax?: number
   sendAtTime?: string | null
 
-  
+
   reviewNote?: string
   estimatedTime?: number
   requireProof?: boolean
@@ -794,11 +794,11 @@ export interface SequenceEnrollment {
   createdAt: Date
   updatedAt: Date
 
-  currentStepIndex: number  
-  resumedAt?: Date | null  
-  lastActivityAt?: Date | null  
-  linksClicked: number  
-  metadata?: Record<string, any> | null  
+  currentStepIndex: number
+  resumedAt?: Date | null
+  lastActivityAt?: Date | null
+  linksClicked: number
+  metadata?: Record<string, any> | null
 }
 
 export interface SequenceFolder {
@@ -921,6 +921,34 @@ export const DEFAULT_PERSONALIZATION_VARIABLES: Record<string, PersonalizationVa
       defaultValue: "",
       category: "ai",
       description: "AI-generated value proposition",
+    },
+    {
+      key: "companyInfo",
+      label: "Company Summary",
+      defaultValue: "",
+      category: "ai",
+      description: "AI-researched company description",
+    },
+    {
+      key: "recentNews",
+      label: "Recent News",
+      defaultValue: "",
+      category: "ai",
+      description: "Recent company news or announcement",
+    },
+    {
+      key: "talkingPoints",
+      label: "Talking Point",
+      defaultValue: "",
+      category: "ai",
+      description: "AI-generated conversation starter",
+    },
+    {
+      key: "competitorInfo",
+      label: "Competitor Insight",
+      defaultValue: "",
+      category: "ai",
+      description: "Competitor tools or solutions they use",
     },
   ],
 }
