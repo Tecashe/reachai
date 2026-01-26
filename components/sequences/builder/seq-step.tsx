@@ -35,6 +35,7 @@ import {
   MailOpen,
   Zap,
   Target,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -71,7 +72,6 @@ import { ABTestPanel } from "./ab-test-panel"
 import { EmailComposerClient } from "./email-composer-client"
 import { EmailBodyPreview } from "@/components/templates/email-body-preview"
 import { generateSpintax } from "@/lib/actions/generate-spintax"
-import { Sparkles, Wand2 } from "lucide-react"
 
 interface SequenceStepPanelProps {
   step: SequenceStep
