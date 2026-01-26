@@ -127,6 +127,20 @@ const PERSONALIZATION_VARIABLES = {
       { key: "customField2", label: "Custom Field 2", fallback: "" },
     ],
   },
+  aiResearch: {
+    label: "AI Research",
+    icon: Zap,
+    isPremium: true,
+    variables: [
+      { key: "icebreaker", label: "AI Icebreaker", fallback: "", premium: true },
+      { key: "painPoint", label: "Pain Point", fallback: "", premium: true },
+      { key: "companyInfo", label: "Company Summary", fallback: "", premium: true },
+      { key: "recentNews", label: "Recent News", fallback: "", premium: true },
+      { key: "talkingPoints", label: "Talking Point", fallback: "", premium: true },
+      { key: "competitorInfo", label: "Competitor Insight", fallback: "", premium: true },
+      { key: "valueProposition", label: "Value Prop", fallback: "", premium: true },
+    ],
+  },
 }
 
 export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose, onDelete }: SequenceStepPanelProps) {
@@ -223,21 +237,32 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
           <div className="p-2">
             {Object.entries(PERSONALIZATION_VARIABLES).map(([categoryKey, category]) => {
               const CategoryIcon = category.icon
+              const isPremiumCategory = (category as any).isPremium
               return (
                 <div key={categoryKey} className="mb-3 last:mb-0">
                   <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    <CategoryIcon className="h-3.5 w-3.5" />
+                    <CategoryIcon className={cn("h-3.5 w-3.5", isPremiumCategory && "text-purple-500")} />
                     {category.label}
+                    {isPremiumCategory && (
+                      <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                        PRO
+                      </Badge>
+                    )}
                   </div>
                   <div className="space-y-0.5">
-                    {category.variables.map((v) => (
+                    {category.variables.map((v: any) => (
                       <button
                         key={v.key}
                         className="w-full flex items-center justify-between px-3 py-2 text-left rounded-md hover:bg-muted/80 transition-colors group"
                         onClick={() => insertVariable(v.key, field)}
                       >
                         <div className="flex items-center gap-2">
-                          <code className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-xs font-mono">
+                          <code className={cn(
+                            "px-1.5 py-0.5 rounded text-xs font-mono",
+                            v.premium 
+                              ? "bg-purple-500/10 text-purple-600" 
+                              : "bg-primary/10 text-primary"
+                          )}>
                             {`{{${v.key}}}`}
                           </code>
                           <span className="text-sm text-muted-foreground">{v.label}</span>
@@ -409,6 +434,50 @@ export function SequenceStepPanel({ step, sequenceId, userId, onUpdate, onClose,
                 onCheckedChange={(checked) => onUpdate({ aiOptimizeSendTime: checked })}
               />
             </div>
+
+            {/* Spintax Toggle */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs">Enable Spintax</span>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="text-xs font-medium mb-2">Spintax Syntax</p>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Use curly braces with pipe-separated options to create variations:
+                    </p>
+                    <div className="bg-muted rounded p-2 space-y-1.5">
+                      <code className="text-[10px] block">{"{Hi|Hello|Hey}"} → Hi, Hello, or Hey</code>
+                      <code className="text-[10px] block">{"{quick|brief|short}"} call → quick call</code>
+                      <code className="text-[10px] block">{"{I'd love|I would like}"} to...</code>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Each recipient gets a random variation for natural-sounding emails.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                  PRO
+                </Badge>
+              </div>
+              <Switch
+                checked={step.spintaxEnabled || false}
+                onCheckedChange={(checked) => onUpdate({ spintaxEnabled: checked })}
+              />
+            </div>
+
+            {step.spintaxEnabled && (
+              <div className="p-3 rounded-lg border bg-muted/30 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  ✨ Spintax is enabled! Use the syntax in your subject or body:
+                </p>
+                <code className="text-[10px] block text-purple-600">
+                  {"{Hi|Hello|Hey}"} {"{{firstName}}"}, {"{quick question|thought you'd like this}"}...
+                </code>
+              </div>
+            )}
           </CollapsibleContent>
         </Collapsible>
       </>
