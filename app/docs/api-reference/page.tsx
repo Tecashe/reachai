@@ -90,11 +90,10 @@ export default function APIDocumentationPage() {
                   <button
                     key={section.id}
                     onClick={() => setActiveTab(section.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      activeTab === section.id
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted text-muted-foreground"
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === section.id
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted text-muted-foreground"
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{section.label}</span>
@@ -120,7 +119,8 @@ export default function APIDocumentationPage() {
 
                   <Card className="p-6">
                     <h3 className="text-xl font-semibold mb-4">Base URL</h3>
-                    <CodeBlock code="https://mailfra.com/api/v1" />
+                    <CodeBlock code="https://yourdomain.com/api/v1" />
+                    <p className="text-sm text-muted-foreground mt-2">Replace <code>yourdomain.com</code> with your actual domain.</p>
                   </Card>
 
                   <Card className="p-6">
@@ -134,7 +134,7 @@ export default function APIDocumentationPage() {
                           <p className="font-medium">Generate an API Key</p>
                           <p className="text-sm text-muted-foreground">
                             Go to{" "}
-                            <a href="/dashboard/settings?tab=api" className="text-primary hover:underline">
+                            <a href="/dashboard/settings/api" className="text-primary hover:underline">
                               Settings → API Keys
                             </a>{" "}
                             to create your key
@@ -146,8 +146,8 @@ export default function APIDocumentationPage() {
                           2
                         </div>
                         <div>
-                          <p className="font-medium">Install SDK or HTTP Client</p>
-                          <CodeBlock code="npm install axios" />
+                          <p className="font-medium">Set Up Your Environment</p>
+                          <CodeBlock code="export MAILFRA_API_KEY=sk_live_YOUR_API_KEY" />
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -157,15 +157,13 @@ export default function APIDocumentationPage() {
                         <div>
                           <p className="font-medium">Make Your First Request</p>
                           <CodeBlock
-                            code={`const axios = require('axios');
-
-const response = await axios.get('https://mailfra.com/api/v1/campaigns', {
+                            code={`const response = await fetch('https://yourdomain.com/api/v1/campaigns', {
   headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
+    'Authorization': 'Bearer sk_live_YOUR_API_KEY'
   }
 });
 
-console.log(response.data);`}
+const data = await response.json();`}
                           />
                         </div>
                       </div>
@@ -312,9 +310,9 @@ console.log(response.data);`}
                       <div>
                         <h4 className="font-semibold mb-2">Example Request</h4>
                         <CodeBlock
-                          code={`const response = await fetch('https://mailfra.com/api/v1/campaigns?status=ACTIVE&limit=10', {
+                          code={`const response = await fetch('https://yourdomain.com/api/v1/campaigns?status=ACTIVE&limit=10', {
   headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
+    'Authorization': 'Bearer sk_live_YOUR_API_KEY'
   }
 });
 

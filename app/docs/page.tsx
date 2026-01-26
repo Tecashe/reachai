@@ -425,31 +425,51 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
 const quickStartCode = {
-  install: `npm install @mailfra/sdk
-# or
-yarn add @mailfra/sdk`,
-  init: `import { Mailfra } from '@mailfra/sdk'
+  install: `# No SDK required! Use the REST API directly
+# Get your API key from Settings > API Keys
 
-const client = new Mailfra(process.env.MAILFRA_API_KEY)`,
+# Your API key format: sk_live_xxxxxxxxxxxxxxxx`,
+  init: `// Set your API key as an environment variable
+// MAILFRA_API_KEY=sk_live_xxxxxxxxxxxxxxxx
+
+const API_KEY = process.env.MAILFRA_API_KEY
+const BASE_URL = "https://yourdomain.com/api/v1"
+
+// Helper function for API calls
+async function mailfraAPI(endpoint, options = {}) {
+  const response = await fetch(\`\${BASE_URL}\${endpoint}\`, {
+    ...options,
+    headers: {
+      "Authorization": \`Bearer \${API_KEY}\`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  })
+  return response.json()
+}`,
   campaign: `// Create a campaign
-const campaign = await client.campaigns.create({
-  name: "Q1 2024 Outreach",
-  subject: "Quick question about {{company}}",
-  body: "Hi {{firstName}},\\n\\nI noticed your company...",
-  sequenceId: "seq_abc123"
+const campaign = await mailfraAPI("/campaigns", {
+  method: "POST",
+  body: JSON.stringify({
+    name: "Q1 2024 Outreach",
+    description: "Follow up with new leads",
+  })
 })
 
-// Add prospects
-await client.prospects.bulkCreate({
-  campaignId: campaign.id,
-  prospects: [
-    { email: "john@company.com", firstName: "John", company: "Acme Inc" },
-    { email: "jane@tech.com", firstName: "Jane", company: "TechCorp" }
-  ]
+// Add prospects to campaign
+await mailfraAPI("/prospects/bulk", {
+  method: "POST",
+  body: JSON.stringify({
+    campaignId: campaign.id,
+    prospects: [
+      { email: "john@company.com", firstName: "John", company: "Acme Inc" },
+      { email: "jane@tech.com", firstName: "Jane", company: "TechCorp" }
+    ]
+  })
 })
 
 // Launch campaign
-await client.campaigns.launch(campaign.id)`,
+await mailfraAPI(\`/campaigns/\${campaign.id}/launch\`, { method: "POST" })`,
 }
 
 const features = [
@@ -728,15 +748,14 @@ export default function DocsPage() {
                       className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       <span
-                        className={`px-2 py-1 rounded text-xs font-bold ${
-                          endpoint.method === "GET"
-                            ? "bg-emerald-500/10 text-emerald-600"
-                            : endpoint.method === "POST"
-                              ? "bg-blue-500/10 text-blue-600"
-                              : endpoint.method === "PUT"
-                                ? "bg-amber-500/10 text-amber-600"
-                                : "bg-red-500/10 text-red-600"
-                        }`}
+                        className={`px-2 py-1 rounded text-xs font-bold ${endpoint.method === "GET"
+                          ? "bg-emerald-500/10 text-emerald-600"
+                          : endpoint.method === "POST"
+                            ? "bg-blue-500/10 text-blue-600"
+                            : endpoint.method === "PUT"
+                              ? "bg-amber-500/10 text-amber-600"
+                              : "bg-red-500/10 text-red-600"
+                          }`}
                       >
                         {endpoint.method}
                       </span>
@@ -782,8 +801,8 @@ export default function DocsPage() {
               <div className="bg-card border border-border rounded-xl p-6 mb-6">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">Example Request</h3>
                 <CodeBlock
-                  code={`curl https://api.mailfra.com/v1/campaigns \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
+                  code={`curl https://yourdomain.com/api/v1/campaigns \\
+  -H "Authorization: Bearer sk_live_YOUR_API_KEY" \\
   -H "Content-Type: application/json"`}
                 />
               </div>
@@ -792,8 +811,8 @@ export default function DocsPage() {
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="font-semibold mb-2">API Key Format</h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    API keys start with <code className="text-xs bg-muted px-2 py-1 rounded">mf_live_</code> for
-                    production or <code className="text-xs bg-muted px-2 py-1 rounded">mf_test_</code> for testing.
+                    API keys start with <code className="text-xs bg-muted px-2 py-1 rounded">sk_live_</code> followed
+                    by a unique identifier. Keys are hashed with SHA-256 for security.
                   </p>
                 </div>
                 <div className="bg-card border border-border rounded-xl p-6">
