@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { SequenceBuilderContent } from "@/components/sequences/builder/sequence-builder-content"
 import { SequenceBuilderSkeleton } from "@/components/sequences/builder/sequence-builder-skeleton"
 import { getSequenceById } from "@/lib/actions/sequence-actions"
+import { getAvailableResearchVariables } from "@/lib/actions/campaign-sequence-actions"
 import { getCurrentUser } from "@/lib/auth"
 
 export const metadata = {
@@ -27,15 +28,28 @@ async function SequenceBuilderLoader({ sequenceId }: { sequenceId: string }) {
   }
 
   const userId = user.id
-  const sequence = await getSequenceById(sequenceId, userId)
+
+  // Fetch sequence and research data in parallel
+  const [sequence, researchInfo] = await Promise.all([
+    getSequenceById(sequenceId, userId),
+    getAvailableResearchVariables(userId, sequenceId),
+  ])
+
   console.log("[v0] SequenceBuilderLoader - Sequence found:", sequence?.id, sequence?.name)
+  console.log("[v0] SequenceBuilderLoader - Research data available:", researchInfo.hasResearchData)
 
   if (!sequence) {
     console.log("[v0] SequenceBuilderLoader - Sequence not found for id:", sequenceId, "userId:", userId)
     notFound()
   }
 
-  return <SequenceBuilderContent initialSequence={sequence} userId={userId} />
+  return (
+    <SequenceBuilderContent
+      initialSequence={sequence}
+      userId={userId}
+      campaignResearchInfo={researchInfo}
+    />
+  )
 }
 
 export default async function SequenceBuilderPage({ params }: SequenceBuilderPageProps) {

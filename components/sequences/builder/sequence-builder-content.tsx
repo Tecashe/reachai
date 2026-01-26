@@ -886,10 +886,20 @@ const STATUS_CONFIG: Record<SequenceStatus, { label: string; className: string; 
   },
 }
 
+interface CampaignResearchInfo {
+  hasResearchData: boolean
+  campaignId: string | null
+  campaignName: string | null
+  prospectsCount: number
+  availableVariables: string[]
+  sampleData: any
+}
+
 interface SequenceBuilderContentProps {
   initialSequence?: Sequence & { steps: SequenceStep[] }
   isNew?: boolean
   userId: string
+  campaignResearchInfo?: CampaignResearchInfo
 }
 
 let tempStepCounter = 0;
@@ -933,7 +943,7 @@ const defaultNewSequence: Sequence = {
   updatedAt: new Date(),
 }
 
-export function SequenceBuilderContent({ initialSequence, isNew = false, userId }: SequenceBuilderContentProps) {
+export function SequenceBuilderContent({ initialSequence, isNew = false, userId, campaignResearchInfo }: SequenceBuilderContentProps) {
   const router = useRouter()
   const { toast } = useToast()
   const isMobile = useMediaQuery("(max-width: 768px)")
@@ -1046,98 +1056,98 @@ export function SequenceBuilderContent({ initialSequence, isNew = false, userId 
   const handleZoomOut = () => setZoomLevel((z) => Math.max(z - 10, 50))
   const handleFitToScreen = () => setZoomLevel(100)
 
- 
 
-const handleAddStep = async (stepType: StepType, afterIndex: number) => {
-  // ✅ Create step with temporary ID
-  const newStep: SequenceStep = {
-    // id: `temp_${Date.now()}_${Math.random()}`, // ✅ More unique temp ID
-    id: `temp_${++tempStepCounter}`,
-    sequenceId: sequence.id,
-    order: afterIndex + 1,
-    stepType,
-    delayValue: 1,
-    delayUnit: "DAYS",
-    subject: stepType === "EMAIL" ? "" : null,
-    body: stepType === "EMAIL" ? "" : null,
-    bodyHtml: null,
-    templateId: null,
-    variables: null,
-    spintaxEnabled: false,
-    conditions: null,
-    skipIfReplied: true,
-    skipIfBounced: true,
-    linkedInAction: stepType.startsWith("LINKEDIN_") ? (stepType.replace("LINKEDIN_", "") as any) : null,
-    linkedInMessage: null,
-    callScript: null,
-    callDuration: null,
-    taskTitle: stepType === "TASK" ? "Follow up task" : null,
-    taskDescription: null,
-    taskPriority: "MEDIUM",
-    sent: 0,
-    delivered: 0,
-    opened: 0,
-    clicked: 0,
-    replied: 0,
-    bounced: 0,
-    internalNotes: null,
-    variants: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
 
-  // ✅ Increment orders for all steps after insertion point
-  const updatedSteps = steps.map((s) => 
-    s.order > afterIndex ? { ...s, order: s.order + 1 } : s
-  )
-  
-  // ✅ Insert new step at correct position
-  const newSteps = [...updatedSteps, newStep].sort((a, b) => a.order - b.order)
+  const handleAddStep = async (stepType: StepType, afterIndex: number) => {
+    // ✅ Create step with temporary ID
+    const newStep: SequenceStep = {
+      // id: `temp_${Date.now()}_${Math.random()}`, // ✅ More unique temp ID
+      id: `temp_${++tempStepCounter}`,
+      sequenceId: sequence.id,
+      order: afterIndex + 1,
+      stepType,
+      delayValue: 1,
+      delayUnit: "DAYS",
+      subject: stepType === "EMAIL" ? "" : null,
+      body: stepType === "EMAIL" ? "" : null,
+      bodyHtml: null,
+      templateId: null,
+      variables: null,
+      spintaxEnabled: false,
+      conditions: null,
+      skipIfReplied: true,
+      skipIfBounced: true,
+      linkedInAction: stepType.startsWith("LINKEDIN_") ? (stepType.replace("LINKEDIN_", "") as any) : null,
+      linkedInMessage: null,
+      callScript: null,
+      callDuration: null,
+      taskTitle: stepType === "TASK" ? "Follow up task" : null,
+      taskDescription: null,
+      taskPriority: "MEDIUM",
+      sent: 0,
+      delivered: 0,
+      opened: 0,
+      clicked: 0,
+      replied: 0,
+      bounced: 0,
+      internalNotes: null,
+      variants: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
 
-  setSteps(newSteps)
-  pushHistory(newSteps)
-  setSelectedStepId(newStep.id)
-  setHasUnsavedChanges(true)
+    // ✅ Increment orders for all steps after insertion point
+    const updatedSteps = steps.map((s) =>
+      s.order > afterIndex ? { ...s, order: s.order + 1 } : s
+    )
 
-  // ✅ Only create in DB if sequence is already saved
-  if (sequence.id !== "new") {
-    try {
-      // ✅ First, update order of existing steps in DB
-      await reorderSteps(
-        sequence.id,
-        userId,
-        updatedSteps.filter(s => !s.id.startsWith('temp_')).map(s => s.id)
-      )
-      
-      // ✅ Then create the new step
-      const createdStep = await createStep(sequence.id, userId, {
-        order: newStep.order,
-        stepType: newStep.stepType,
-        delayValue: newStep.delayValue,
-        delayUnit: newStep.delayUnit,
-        subject: newStep.subject,
-        body: newStep.body,
-      })
+    // ✅ Insert new step at correct position
+    const newSteps = [...updatedSteps, newStep].sort((a, b) => a.order - b.order)
 
-      // ✅ Replace temp ID with real ID
-      setSteps((prev) => 
-        prev.map((s) => (s.id === newStep.id ? { ...s, id: createdStep.id } : s))
-      )
-      setSelectedStepId(createdStep.id)
-      
-    } catch (error) {
-      console.error("Failed to create step:", error)
-      toast({ 
-        title: "Error", 
-        description: "Failed to create step.", 
-        variant: "destructive" 
-      })
-      // ✅ Rollback on error
-      setSteps(steps)
-      pushHistory(steps)
+    setSteps(newSteps)
+    pushHistory(newSteps)
+    setSelectedStepId(newStep.id)
+    setHasUnsavedChanges(true)
+
+    // ✅ Only create in DB if sequence is already saved
+    if (sequence.id !== "new") {
+      try {
+        // ✅ First, update order of existing steps in DB
+        await reorderSteps(
+          sequence.id,
+          userId,
+          updatedSteps.filter(s => !s.id.startsWith('temp_')).map(s => s.id)
+        )
+
+        // ✅ Then create the new step
+        const createdStep = await createStep(sequence.id, userId, {
+          order: newStep.order,
+          stepType: newStep.stepType,
+          delayValue: newStep.delayValue,
+          delayUnit: newStep.delayUnit,
+          subject: newStep.subject,
+          body: newStep.body,
+        })
+
+        // ✅ Replace temp ID with real ID
+        setSteps((prev) =>
+          prev.map((s) => (s.id === newStep.id ? { ...s, id: createdStep.id } : s))
+        )
+        setSelectedStepId(createdStep.id)
+
+      } catch (error) {
+        console.error("Failed to create step:", error)
+        toast({
+          title: "Error",
+          description: "Failed to create step.",
+          variant: "destructive"
+        })
+        // ✅ Rollback on error
+        setSteps(steps)
+        pushHistory(steps)
+      }
     }
   }
-}
 
   const handleAddStepOLD = async (stepType: StepType, afterIndex: number) => {
     const newStep: SequenceStep = {
@@ -1288,86 +1298,86 @@ const handleAddStep = async (stepType: StepType, afterIndex: number) => {
 
   // Replace your handleSave function with this:
 
-const handleSave = async () => {
-  setIsSaving(true)
-  try {
-    if (sequence.id === "new" || isNew) {
-      // Create new sequence
-      const created = await createSequence(userId, {
-        name: sequenceName,
-        description: sequence.description,
-        status: "DRAFT",
-        ...pendingSequenceChanges,
-      })
-
-      // ✅ FIX: Sort steps by order and create them sequentially
-      const sortedSteps = [...steps].sort((a, b) => a.order - b.order)
-      
-      // ✅ FIX: Re-index orders starting from 0 to ensure uniqueness
-      for (let i = 0; i < sortedSteps.length; i++) {
-        const step = sortedSteps[i]
-        
-        await createStep(created.id, userId, {
-          order: i, // ✅ Use loop index to guarantee unique order
-          stepType: step.stepType,
-          delayValue: step.delayValue,
-          delayUnit: step.delayUnit,
-          subject: step.subject,
-          body: step.body,
-          // Add node configs
-          waitUntilConfig: step.waitUntilConfig,
-          exitTriggerConfig: step.exitTriggerConfig,
-          manualReviewConfig: step.manualReviewConfig,
-          abSplitConfig: step.abSplitConfig,
-          behaviorBranchConfig: step.behaviorBranchConfig,
-          multiChannelConfig: step.multiChannelConfig,
-          randomVariantConfig: step.randomVariantConfig,
-          contentReferenceConfig: step.contentReferenceConfig,
-          voicemailDropConfig: step.voicemailDropConfig,
-          directMailConfig: step.directMailConfig,
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      if (sequence.id === "new" || isNew) {
+        // Create new sequence
+        const created = await createSequence(userId, {
+          name: sequenceName,
+          description: sequence.description,
+          status: "DRAFT",
+          ...pendingSequenceChanges,
         })
-      }
 
-      toast({ 
-        title: "Sequence created!", 
-        description: "Your sequence has been saved." 
-      })
-      
-      router.push(`/dashboard/sequences/${created.id}`)
+        // ✅ FIX: Sort steps by order and create them sequentially
+        const sortedSteps = [...steps].sort((a, b) => a.order - b.order)
 
-    } else {
-      // Update existing sequence
-      if (Object.keys(pendingSequenceChanges).length > 0) {
-        await updateSequence(sequence.id, userId, pendingSequenceChanges)
-      }
+        // ✅ FIX: Re-index orders starting from 0 to ensure uniqueness
+        for (let i = 0; i < sortedSteps.length; i++) {
+          const step = sortedSteps[i]
 
-      // Update modified steps
-      for (const [stepId, changes] of pendingStepChanges) {
-        if (!stepId.startsWith("temp_")) {
-          await updateStep(stepId, sequence.id, userId, changes)
+          await createStep(created.id, userId, {
+            order: i, // ✅ Use loop index to guarantee unique order
+            stepType: step.stepType,
+            delayValue: step.delayValue,
+            delayUnit: step.delayUnit,
+            subject: step.subject,
+            body: step.body,
+            // Add node configs
+            waitUntilConfig: step.waitUntilConfig,
+            exitTriggerConfig: step.exitTriggerConfig,
+            manualReviewConfig: step.manualReviewConfig,
+            abSplitConfig: step.abSplitConfig,
+            behaviorBranchConfig: step.behaviorBranchConfig,
+            multiChannelConfig: step.multiChannelConfig,
+            randomVariantConfig: step.randomVariantConfig,
+            contentReferenceConfig: step.contentReferenceConfig,
+            voicemailDropConfig: step.voicemailDropConfig,
+            directMailConfig: step.directMailConfig,
+          })
         }
+
+        toast({
+          title: "Sequence created!",
+          description: "Your sequence has been saved."
+        })
+
+        router.push(`/dashboard/sequences/${created.id}`)
+
+      } else {
+        // Update existing sequence
+        if (Object.keys(pendingSequenceChanges).length > 0) {
+          await updateSequence(sequence.id, userId, pendingSequenceChanges)
+        }
+
+        // Update modified steps
+        for (const [stepId, changes] of pendingStepChanges) {
+          if (!stepId.startsWith("temp_")) {
+            await updateStep(stepId, sequence.id, userId, changes)
+          }
+        }
+
+        toast({
+          title: "Saved!",
+          description: "All changes have been saved."
+        })
+
+        setPendingStepChanges(new Map())
+        setPendingSequenceChanges({})
+        setHasUnsavedChanges(false)
       }
-
-      toast({ 
-        title: "Saved!", 
-        description: "All changes have been saved." 
+    } catch (error) {
+      console.error("Save error:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save sequence.",
+        variant: "destructive"
       })
-
-      setPendingStepChanges(new Map())
-      setPendingSequenceChanges({})
-      setHasUnsavedChanges(false)
+    } finally {
+      setIsSaving(false)
     }
-  } catch (error) {
-    console.error("Save error:", error)
-    toast({ 
-      title: "Error", 
-      description: error instanceof Error ? error.message : "Failed to save sequence.", 
-      variant: "destructive" 
-    })
-  } finally {
-    setIsSaving(false)
   }
-}
 
   const handleSaveOLD = async () => {
     setIsSaving(true)
@@ -1375,34 +1385,34 @@ const handleSave = async () => {
       if (sequence.id === "new" || isNew) {
         // Use batch save for new sequences
         const created = await createSequence(userId, {
-    name: sequenceName,
-    description: sequence.description,
-    status: "DRAFT",
-    ...pendingSequenceChanges,
-  })
+          name: sequenceName,
+          description: sequence.description,
+          status: "DRAFT",
+          ...pendingSequenceChanges,
+        })
 
-  // Create all steps
-  for (const step of steps) {
-    await createStep(created.id, userId, {
-      order: step.order,
-      stepType: step.stepType,
-      delayValue: step.delayValue,
-      delayUnit: step.delayUnit,
-      subject: step.subject,
-      body: step.body,
-      // Add node configs
-      waitUntilConfig: step.waitUntilConfig,
-      exitTriggerConfig: step.exitTriggerConfig,
-      manualReviewConfig: step.manualReviewConfig,
-      abSplitConfig: step.abSplitConfig,
-      behaviorBranchConfig: step.behaviorBranchConfig,
-      multiChannelConfig: step.multiChannelConfig,
-      randomVariantConfig: step.randomVariantConfig,
-      contentReferenceConfig: step.contentReferenceConfig,
-      voicemailDropConfig: step.voicemailDropConfig,
-      directMailConfig: step.directMailConfig,
-    })
-  }
+        // Create all steps
+        for (const step of steps) {
+          await createStep(created.id, userId, {
+            order: step.order,
+            stepType: step.stepType,
+            delayValue: step.delayValue,
+            delayUnit: step.delayUnit,
+            subject: step.subject,
+            body: step.body,
+            // Add node configs
+            waitUntilConfig: step.waitUntilConfig,
+            exitTriggerConfig: step.exitTriggerConfig,
+            manualReviewConfig: step.manualReviewConfig,
+            abSplitConfig: step.abSplitConfig,
+            behaviorBranchConfig: step.behaviorBranchConfig,
+            multiChannelConfig: step.multiChannelConfig,
+            randomVariantConfig: step.randomVariantConfig,
+            contentReferenceConfig: step.contentReferenceConfig,
+            voicemailDropConfig: step.voicemailDropConfig,
+            directMailConfig: step.directMailConfig,
+          })
+        }
 
         toast({ title: "Sequence created!", description: "Your sequence has been saved." })
         router.push(`/dashboard/sequences/${created.id}`)
@@ -1753,6 +1763,41 @@ const handleSave = async () => {
           )}
         </div>
 
+        {/* Research Data Banner - shows when sequence is linked to a campaign */}
+        {campaignResearchInfo?.hasResearchData && (
+          <div className="shrink-0 border-b border-border bg-purple-50/50 dark:bg-purple-950/20 px-4 py-2">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
+                  <Sparkles className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium flex items-center gap-2">
+                    AI Research Available
+                    <Badge variant="secondary" className="text-[10px] bg-purple-100 dark:bg-purple-900/30">
+                      {campaignResearchInfo.campaignName}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {campaignResearchInfo.prospectsCount} prospects with research data
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {campaignResearchInfo.availableVariables.map((variable) => (
+                  <Badge
+                    key={variable}
+                    variant="outline"
+                    className="text-[10px] font-mono bg-white dark:bg-background"
+                  >
+                    {`{{${variable}}}`}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main content */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {activeTab === "builder" && (
@@ -1792,39 +1837,39 @@ const handleSave = async () => {
                 </div>
               )}
               {/* Mobile Step Panel (Sheet) */}
-                {isMobile && (
-                  <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
-                    <SheetContent side="bottom" className="h-[85vh] p-0">
-                      {selectedStep && (
-                        <>
-                          {/* Add SheetHeader with title */}
-                          <SheetHeader className="px-6 pt-6 pb-4 border-b">
-                            <SheetTitle>
-                              {STEP_TYPE_CONFIG[selectedStep.stepType]?.label || "Configure Step"}
-                            </SheetTitle>
-                          </SheetHeader>
-                          
-                          <div className="flex-1 overflow-y-auto h-full">
-                            <SequenceStepPanel
-                              step={selectedStep}
-                              sequenceId={sequence.id}
-                              userId={userId}
-                              onUpdate={(updates) => handleUpdateStep(selectedStep.id, updates)}
-                              onClose={() => {
-                                setSelectedStepId(null)
-                                setMobileSheetOpen(false)
-                              }}
-                              onDelete={() => {
-                                handleDeleteStep(selectedStep.id)
-                                setMobileSheetOpen(false)
-                              }}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </SheetContent>
-                  </Sheet>
-                )}
+              {isMobile && (
+                <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+                  <SheetContent side="bottom" className="h-[85vh] p-0">
+                    {selectedStep && (
+                      <>
+                        {/* Add SheetHeader with title */}
+                        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+                          <SheetTitle>
+                            {STEP_TYPE_CONFIG[selectedStep.stepType]?.label || "Configure Step"}
+                          </SheetTitle>
+                        </SheetHeader>
+
+                        <div className="flex-1 overflow-y-auto h-full">
+                          <SequenceStepPanel
+                            step={selectedStep}
+                            sequenceId={sequence.id}
+                            userId={userId}
+                            onUpdate={(updates) => handleUpdateStep(selectedStep.id, updates)}
+                            onClose={() => {
+                              setSelectedStepId(null)
+                              setMobileSheetOpen(false)
+                            }}
+                            onDelete={() => {
+                              handleDeleteStep(selectedStep.id)
+                              setMobileSheetOpen(false)
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </SheetContent>
+                </Sheet>
+              )}
 
               {/* Mobile Step Panel (Sheet) */}
               {/* {isMobile && (
@@ -1874,7 +1919,7 @@ const handleSave = async () => {
                     <SheetHeader className="px-6 pt-6 pb-4 border-b">
                       <SheetTitle>Sequence Settings</SheetTitle>
                     </SheetHeader>
-                    
+
                     <div className="flex-1 overflow-y-auto h-full">
                       <SequenceSettingsPanel
                         sequence={sequence}

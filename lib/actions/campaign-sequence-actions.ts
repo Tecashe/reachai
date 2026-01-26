@@ -255,3 +255,90 @@ export async function getCampaignWithSequence(userId: string, campaignId: string
 
     return { campaign, sequence }
 }
+
+/**
+ * Get the campaign that is linked to a sequence (reverse lookup)
+ * Returns the campaign with sample prospects and research data
+ */
+export async function getCampaignForSequence(userId: string, sequenceId: string) {
+    const campaign = await db.campaign.findFirst({
+        where: {
+            userId,
+            sequenceId,
+        },
+        include: {
+            prospects: {
+                take: 10,
+                where: {
+                    researchData: { not: null },
+                },
+                select: {
+                    id: true,
+                    email: true,
+                    firstName: true,
+                    lastName: true,
+                    company: true,
+                    jobTitle: true,
+                    researchData: true,
+                    qualityScore: true,
+                },
+            },
+            _count: {
+                select: { prospects: true },
+            },
+        },
+    })
+
+    return campaign
+}
+
+/**
+ * Get available research variables from campaign prospects
+ * This analyzes the research data to determine which variables have actual values
+ */
+export async function getAvailableResearchVariables(userId: string, sequenceId: string) {
+    const campaign = await getCampaignForSequence(userId, sequenceId)
+
+    if (!campaign || campaign.prospects.length === 0) {
+        return {
+            hasResearchData: false,
+            campaignId: null,
+            campaignName: null,
+            prospectsCount: 0,
+            availableVariables: [],
+            sampleData: null,
+        }
+    }
+
+    // Analyze what research data is available
+    const sampleProspect = campaign.prospects[0]
+    const researchData = sampleProspect.researchData as any
+
+    const availableVariables: string[] = []
+
+    if (researchData) {
+        if (researchData.companyInfo) availableVariables.push("companyInfo")
+        if (researchData.recentNews?.length) availableVariables.push("recentNews")
+        if (researchData.painPoints?.length) availableVariables.push("painPoint")
+        if (researchData.talkingPoints?.length) availableVariables.push("talkingPoints", "icebreaker")
+        if (researchData.competitorTools?.length) availableVariables.push("competitorInfo")
+    }
+
+    return {
+        hasResearchData: true,
+        campaignId: campaign.id,
+        campaignName: campaign.name,
+        prospectsCount: campaign._count.prospects,
+        availableVariables,
+        sampleData: {
+            prospect: {
+                firstName: sampleProspect.firstName,
+                lastName: sampleProspect.lastName,
+                company: sampleProspect.company,
+                jobTitle: sampleProspect.jobTitle,
+            },
+            research: researchData,
+        },
+    }
+}
+
