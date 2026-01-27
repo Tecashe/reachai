@@ -8,11 +8,34 @@ const openai = createOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
 
+import { auth } from "@clerk/nextjs/server"
+import { db } from "@/lib/db"
+
+// ... imports
+
 export async function generateSpintax(
     content: string,
     tone: string = "professional"
 ): Promise<{ success: boolean; content?: string; error?: string }> {
+    const { userId } = await auth()
+    if (!userId) {
+        return { success: false, error: "Unauthorized" }
+    }
+
     try {
+        const user = await db.user.findUnique({ where: { clerkId: userId } })
+        if (!user) {
+            return { success: false, error: "User not found" }
+        }
+
+        // Feature Gate: Spintax is a PRO feature
+        if (user.subscriptionTier === "FREE") {
+            return {
+                success: false,
+                error: "AI Spintax is a PRO feature. Please upgrade your plan."
+            }
+        }
+
         if (!content || content.trim().length < 10) {
             return { success: false, error: "Content too short to generate spintax" }
         }
@@ -32,6 +55,14 @@ export async function generateSpintax(
       7. Return ONLY the spintaxed content, no explanations`,
             prompt: `Rewrite this content with rich Spintax variations:\n\n${content}`,
             temperature: 0.7,
+        })
+
+        // Track usage (optional: increment usage stats)
+        await db.user.update({
+            where: { id: user.id },
+            data: {
+                aiCreditsUsed: { increment: 1 }
+            }
         })
 
         return { success: true, content: text }
