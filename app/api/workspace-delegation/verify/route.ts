@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
           lastVerifiedAt: new Date(),
           isActive: true,
           // errorCount: 0, // Reset error count on successful verification
-          lastError: null,
+          // lastError: null,
         },
       })
 
