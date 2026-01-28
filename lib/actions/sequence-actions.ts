@@ -1664,6 +1664,7 @@ export async function bulkArchiveSequences(sequenceIds: string[], userId: string
 // STEP CRUD
 // ===========================================
 
+
 export async function createStep(
   sequenceId: string,
   userId: string,
@@ -1695,6 +1696,18 @@ export async function createStep(
   if (!sequence) throw new Error("Sequence not found")
 
   // Build the step data with node configs stored in appropriate JSON fields
+
+  await db.sequenceStep.updateMany({
+    where: {
+      sequenceId,
+      order: { gte: data.order },
+    },
+    data: {
+      order: { increment: 1 },
+    },
+  })
+
+  // Build the step data with node configs stored in appropriate JSON fields
   const stepData: any = {
     sequenceId,
     order: data.order,
@@ -1713,6 +1726,24 @@ export async function createStep(
     replied: 0,
     bounced: 0,
   }
+  // const stepData: any = {
+  //   sequenceId,
+  //   order: data.order,
+  //   stepType: data.stepType,
+  //   delayValue: data.delayValue ?? 1,
+  //   delayUnit: data.delayUnit ?? "DAYS",
+  //   subject: data.subject || null,
+  //   body: data.body || null,
+  //   skipIfReplied: true,
+  //   skipIfBounced: true,
+  //   spintaxEnabled: false,
+  //   sent: 0,
+  //   delivered: 0,
+  //   opened: 0,
+  //   clicked: 0,
+  //   replied: 0,
+  //   bounced: 0,
+  // }
 
   // Store node-specific configs in the conditions JSON field
   // This is a workaround since the schema doesn't have dedicated columns
@@ -1733,6 +1764,12 @@ export async function createStep(
     stepData.conditions = nodeConfig
   }
 
+  // const step = await db.sequenceStep.create({
+  //   data: stepData,
+  //   include: {
+  //     variants: true,
+  //   },
+  // })
   const step = await db.sequenceStep.create({
     data: stepData,
     include: {
