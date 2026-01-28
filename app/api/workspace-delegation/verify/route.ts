@@ -20,14 +20,29 @@ import { db } from "@/lib/db" // Your Prisma client
  */
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth()
+    const { userId: clerkId } = await auth()
 
-    if (!userId) {
+    if (!clerkId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       )
     }
+
+    // Resolve internal user ID
+    const user = await db.user.findUnique({
+      where: { clerkId },
+      select: { id: true }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
+    }
+
+    const userId = user.id
 
     const body = await request.json()
     const { email, sendTestEmail = false } = body
@@ -152,18 +167,22 @@ export async function POST(request: NextRequest) {
         create: {
           userId,
           email,
+          name: email, // Required field
+          provider: 'google', // Required field
           connectionType: 'workspace-delegation',
+          connectionMethod: 'workspace-delegation',
           workspaceDomain: domain,
           delegationStatus: 'verified',
           lastVerifiedAt: new Date(),
           isActive: true,
+          credentials: {}, // Required field
         },
         update: {
           delegationStatus: 'verified',
           lastVerifiedAt: new Date(),
           isActive: true,
-          errorCount: 0, // Reset error count on successful verification
-          lastError: null,
+          // errorCount: 0, // Reset error count on successful verification
+
         },
       })
 
