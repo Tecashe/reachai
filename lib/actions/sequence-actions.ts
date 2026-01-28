@@ -1665,6 +1665,147 @@ export async function bulkArchiveSequences(sequenceIds: string[], userId: string
 // ===========================================
 
 
+// export async function createStep(
+//   sequenceId: string,
+//   userId: string,
+//   data: {
+//     order: number
+//     stepType: StepType
+//     delayValue?: number
+//     delayUnit?: DelayUnit
+//     subject?: string | null
+//     body?: string | null
+//     // New node type configs
+//     waitUntilConfig?: any
+//     exitTriggerConfig?: any
+//     manualReviewConfig?: any
+//     abSplitConfig?: any
+//     behaviorBranchConfig?: any
+//     multiChannelConfig?: any
+//     randomVariantConfig?: any
+//     contentReferenceConfig?: any
+//     voicemailDropConfig?: any
+//     directMailConfig?: any
+//   },
+// ): Promise<SequenceStep> {
+//   // Verify ownership
+//   const sequence = await db.sequence.findFirst({
+//     where: { id: sequenceId, userId },
+//   })
+
+//   if (!sequence) throw new Error("Sequence not found")
+
+//   // Build the step data with node configs stored in appropriate JSON fields
+
+//   await db.sequenceStep.updateMany({
+//     where: {
+//       sequenceId,
+//       order: { gte: data.order },
+//     },
+//     data: {
+//       order: { increment: 1 },
+//     },
+//   })
+
+//   // Build the step data with node configs stored in appropriate JSON fields
+//   const stepData: any = {
+//     sequenceId,
+//     order: data.order,
+//     stepType: data.stepType,
+//     delayValue: data.delayValue ?? 1,
+//     delayUnit: data.delayUnit ?? "DAYS",
+//     subject: data.subject || null,
+//     body: data.body || null,
+//     skipIfReplied: true,
+//     skipIfBounced: true,
+//     spintaxEnabled: false,
+//     sent: 0,
+//     delivered: 0,
+//     opened: 0,
+//     clicked: 0,
+//     replied: 0,
+//     bounced: 0,
+//   }
+//   // const stepData: any = {
+//   //   sequenceId,
+//   //   order: data.order,
+//   //   stepType: data.stepType,
+//   //   delayValue: data.delayValue ?? 1,
+//   //   delayUnit: data.delayUnit ?? "DAYS",
+//   //   subject: data.subject || null,
+//   //   body: data.body || null,
+//   //   skipIfReplied: true,
+//   //   skipIfBounced: true,
+//   //   spintaxEnabled: false,
+//   //   sent: 0,
+//   //   delivered: 0,
+//   //   opened: 0,
+//   //   clicked: 0,
+//   //   replied: 0,
+//   //   bounced: 0,
+//   // }
+
+//   // Store node-specific configs in the conditions JSON field
+//   // This is a workaround since the schema doesn't have dedicated columns
+//   const nodeConfig: Record<string, any> = {}
+
+//   if (data.waitUntilConfig) nodeConfig.waitUntilConfig = data.waitUntilConfig
+//   if (data.exitTriggerConfig) nodeConfig.exitTriggerConfig = data.exitTriggerConfig
+//   if (data.manualReviewConfig) nodeConfig.manualReviewConfig = data.manualReviewConfig
+//   if (data.abSplitConfig) nodeConfig.abSplitConfig = data.abSplitConfig
+//   if (data.behaviorBranchConfig) nodeConfig.behaviorBranchConfig = data.behaviorBranchConfig
+//   if (data.multiChannelConfig) nodeConfig.multiChannelConfig = data.multiChannelConfig
+//   if (data.randomVariantConfig) nodeConfig.randomVariantConfig = data.randomVariantConfig
+//   if (data.contentReferenceConfig) nodeConfig.contentReferenceConfig = data.contentReferenceConfig
+//   if (data.voicemailDropConfig) nodeConfig.voicemailDropConfig = data.voicemailDropConfig
+//   if (data.directMailConfig) nodeConfig.directMailConfig = data.directMailConfig
+
+//   if (Object.keys(nodeConfig).length > 0) {
+//     stepData.conditions = nodeConfig
+//   }
+
+//   // const step = await db.sequenceStep.create({
+//   //   data: stepData,
+//   //   include: {
+//   //     variants: true,
+//   //   },
+//   // })
+//   const step = await db.sequenceStep.create({
+//     data: stepData,
+//     include: {
+//       variants: true,
+//     },
+//   })
+
+//   // Update sequence totalSteps
+//   await db.sequence.update({
+//     where: { id: sequenceId },
+//     data: {
+//       totalSteps: { increment: 1 },
+//     },
+//   })
+
+//   revalidatePath(`/sequences/${sequenceId}`)
+
+//   // Map the stored config back to the step object for frontend use
+//   const result = step as SequenceStep
+//   if (step.conditions && typeof step.conditions === "object") {
+//     const config = step.conditions as Record<string, any>
+//     if (config.waitUntilConfig) result.waitUntilConfig = config.waitUntilConfig
+//     if (config.exitTriggerConfig) result.exitTriggerConfig = config.exitTriggerConfig
+//     if (config.manualReviewConfig) result.manualReviewConfig = config.manualReviewConfig
+//     if (config.abSplitConfig) result.abSplitConfig = config.abSplitConfig
+//     if (config.behaviorBranchConfig) result.behaviorBranchConfig = config.behaviorBranchConfig
+//     if (config.multiChannelConfig) result.multiChannelConfig = config.multiChannelConfig
+//     if (config.randomVariantConfig) result.randomVariantConfig = config.randomVariantConfig
+//     if (config.contentReferenceConfig) result.contentReferenceConfig = config.contentReferenceConfig
+//     if (config.voicemailDropConfig) result.voicemailDropConfig = config.voicemailDropConfig
+//     if (config.directMailConfig) result.directMailConfig = config.directMailConfig
+//   }
+
+//   return result
+// }
+
 export async function createStep(
   sequenceId: string,
   userId: string,
@@ -1695,19 +1836,25 @@ export async function createStep(
 
   if (!sequence) throw new Error("Sequence not found")
 
-  // Build the step data with node configs stored in appropriate JSON fields
-
-  await db.sequenceStep.updateMany({
+  // ✅ FIX: Get all steps that need to be shifted and update them in reverse order
+  const stepsToShift = await db.sequenceStep.findMany({
     where: {
       sequenceId,
       order: { gte: data.order },
     },
-    data: {
-      order: { increment: 1 },
-    },
+    orderBy: { order: 'desc' }, // Highest order first
+    select: { id: true, order: true }
   })
 
-  // Build the step data with node configs stored in appropriate JSON fields
+  // Update each step individually in reverse order to avoid conflicts
+  for (const step of stepsToShift) {
+    await db.sequenceStep.update({
+      where: { id: step.id },
+      data: { order: step.order + 1 }
+    })
+  }
+
+  // Build the step data
   const stepData: any = {
     sequenceId,
     order: data.order,
@@ -1726,27 +1873,8 @@ export async function createStep(
     replied: 0,
     bounced: 0,
   }
-  // const stepData: any = {
-  //   sequenceId,
-  //   order: data.order,
-  //   stepType: data.stepType,
-  //   delayValue: data.delayValue ?? 1,
-  //   delayUnit: data.delayUnit ?? "DAYS",
-  //   subject: data.subject || null,
-  //   body: data.body || null,
-  //   skipIfReplied: true,
-  //   skipIfBounced: true,
-  //   spintaxEnabled: false,
-  //   sent: 0,
-  //   delivered: 0,
-  //   opened: 0,
-  //   clicked: 0,
-  //   replied: 0,
-  //   bounced: 0,
-  // }
 
   // Store node-specific configs in the conditions JSON field
-  // This is a workaround since the schema doesn't have dedicated columns
   const nodeConfig: Record<string, any> = {}
 
   if (data.waitUntilConfig) nodeConfig.waitUntilConfig = data.waitUntilConfig
@@ -1764,12 +1892,6 @@ export async function createStep(
     stepData.conditions = nodeConfig
   }
 
-  // const step = await db.sequenceStep.create({
-  //   data: stepData,
-  //   include: {
-  //     variants: true,
-  //   },
-  // })
   const step = await db.sequenceStep.create({
     data: stepData,
     include: {
@@ -1805,6 +1927,21 @@ export async function createStep(
 
   return result
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export async function updateStep(
   stepId: string,
