@@ -61,6 +61,7 @@ model User {
   subscription    Subscription?
   sendingAccounts SendingAccount[]
   prospectFolders ProspectFolder[]
+  workspaceDelegations WorkspaceDelegation[]
 
   // Relationships
   sequences          Sequence[]
@@ -632,6 +633,12 @@ model SendingAccount {
   pausedReason      String?
   pausedAt          DateTime?
   lastWarmupAt      DateTime?
+  lastVerifiedAt    DateTime?
+
+  connectionType   String? // "oauth", "smtp", "workspace-delegation"
+  workspaceDomain  String? // For workspace delegation (e.g., "company.com")
+  delegationStatus String? // "pending", "verified", "failed"
+ 
 
   rotatedAt     DateTime? // Last time account was rotated due to health issues
   rotationCount Int       @default(0) // Number of times account has been rotated
@@ -672,6 +679,46 @@ model SendingAccount {
   @@index([healthScore])
   @@index([domainId])
   @@index([peerWarmupEnabled])
+}
+
+model WorkspaceDelegation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Domain info
+  domain String @unique
+
+  // Delegation status
+  status             String  @default("pending") // "pending", "verified", "failed", "expired"
+  verificationMethod String? // "auto_test", "manual_test"
+
+  // Service account details
+  serviceAccountEmail    String?
+  serviceAccountClientId String?
+  authorizedScopes       String[] @default([])
+
+  // Verification tracking
+  lastVerifiedAt     DateTime?
+  lastVerifiedBy     String? // Email of person who verified
+  verificationResult String? @db.Text
+
+  // Health monitoring
+  healthStatus      String    @default("unknown") // "unknown", "healthy", "degraded", "unhealthy"
+  lastHealthCheckAt DateTime?
+  healthCheckResult Json?
+
+  // Error tracking
+  errorCount Int     @default(0)
+  lastError  String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@index([userId])
+  @@index([domain])
+  @@index([status])
+  @@index([healthStatus])
 }
 
 model EmailBounce {

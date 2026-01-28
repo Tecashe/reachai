@@ -40,7 +40,7 @@
 // }
 
 
-// app/api/auth/gmail/route.ts
+// app/api/oauth/gmail/route.ts
 
 import { type NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const authUrl = gmailXOAuth2.getAuthorizationUrl(userId)
 
     console.log("[v0] Redirecting to Google OAuth...")
-    
+
     // Redirect user to Google's OAuth consent screen
     return NextResponse.redirect(authUrl)
   } catch (error) {
