@@ -883,7 +883,7 @@ export function WorkspaceOAuthFlow({ onAccountAdded }: Props) {
         <div className="flex gap-3">
           <Building2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
           <div className="space-y-1.5">
-            <p className="font-medium text-sm text-foreground">OAuth Setup (Like Instantly)</p>
+            <p className="font-medium text-sm text-foreground">OAuth Setup </p>
             <ul className="text-xs text-muted-foreground space-y-1 leading-relaxed">
               <li>• Admin pre-approves the app once</li>
               <li>• Each user connects individually</li>
@@ -999,7 +999,7 @@ export function WorkspaceOAuthFlow({ onAccountAdded }: Props) {
                   6
                 </span>
                 <p className="text-sm text-foreground flex-1">
-                  Click <strong>"Search"</strong> and select your app from results
+                  Click <strong>"Search"</strong> and select Mailfra from results
                 </p>
               </div>
             </div>

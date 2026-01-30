@@ -1,6 +1,9 @@
 import { Resend as ResendClient } from "resend"
 import { env } from "./env"
 import { logger } from "./logger"
+import { render } from "@react-email/render"
+import WelcomeEmail from "./email-templates/welcome-email"
+import * as React from "react"
 
 class ResendService {
   private client: ResendClient
@@ -46,11 +49,8 @@ class ResendService {
 
   async sendWelcomeEmail(to: string, name: string) {
     try {
-      const { render } = await import("@react-email/render")
-      const { default: WelcomeEmail } = await import("./email-templates/welcome-email")
-
       const emailHtml = await render(
-        WelcomeEmail({ userName: name, userEmail: to })
+        <WelcomeEmail userName={name} userEmail={to} />
       )
 
       const subject = "Welcome to Mailfra! 🚀 Let's 10x Your Cold Email Results"
@@ -237,11 +237,290 @@ class ResendService {
       html,
     })
   }
+  async sendCampaignLaunchedEmail(to: string, campaignName: string, totalProspects: number) {
+    const subject = `Campaign "${campaignName}" is Live! 🚀`
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Campaign Launched! 🚀</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">Your campaign is now sending!</h2>
+            
+            <p style="font-size: 16px; color: #4b5563;">
+              Your campaign "<strong>${campaignName}</strong>" has been launched successfully and is now sending emails to <strong>${totalProspects} prospects</strong>.
+            </p>
+            
+            <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #065f46;">
+                <strong>What's Next?</strong><br>
+                Monitor your campaign performance in real-time. You'll receive notifications when prospects open, click, and reply to your emails.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/campaigns" 
+                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Track Your Campaign
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    return this.send({ from: FROM_EMAIL, to, subject, html })
+  }
+
+  async sendLowCreditsWarning(to: string, name: string, emailCredits: number, researchCredits: number) {
+    const subject = "⚠️ Low Credits Warning - Top Up Now"
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Low Credits Warning</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">Hi ${name}!</h2>
+            
+            <p style="font-size: 16px; color: #4b5563;">
+              Your credits are running low. Top up now to keep your campaigns running smoothly.
+            </p>
+            
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #92400e;">
+                <strong>Current Balance:</strong><br>
+                Email Credits: ${emailCredits}<br>
+                Research Credits: ${researchCredits}
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing" 
+                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Buy More Credits
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    return this.send({ from: FROM_EMAIL, to, subject, html })
+  }
+
+  async sendPaymentSuccessEmail(to: string, amount: number, credits: number, type: string) {
+    const subject = "✅ Payment Successful - Credits Added"
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Payment Successful! ✅</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">Thank you for your purchase!</h2>
+            
+            <p style="font-size: 16px; color: #4b5563;">
+              Your payment of <strong>$${(amount / 100).toFixed(2)}</strong> has been processed successfully.
+            </p>
+            
+            <div style="background: #f0fdf4; border: 2px solid #10b981; padding: 20px; margin: 30px 0; border-radius: 8px; text-align: center;">
+              <p style="margin: 0; font-size: 18px; color: #065f46;">
+                <strong style="font-size: 32px; display: block; margin-bottom: 10px;">${credits} Credits</strong>
+                have been added to your account
+              </p>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px;">
+              <strong>Purchase Type:</strong> ${type}<br>
+              <strong>Date:</strong> ${new Date().toLocaleDateString()}
+            </p>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" 
+                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Start Using Your Credits
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    return this.send({ from: FROM_EMAIL, to, subject, html })
+  }
+
+  async sendPaymentFailedEmail(to: string, reason: string) {
+    const subject = "❌ Payment Failed - Action Required"
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Payment Failed</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">We couldn't process your payment</h2>
+            
+            <p style="font-size: 16px; color: #4b5563;">
+              Your recent payment attempt failed. Please update your payment method to continue using MailFra.
+            </p>
+            
+            <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 20px; margin: 30px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #991b1b;">
+                <strong>Reason:</strong> ${reason}
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing" 
+                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Update Payment Method
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    return this.send({ from: FROM_EMAIL, to, subject, html })
+  }
+
+  async sendWarmupCompletedEmail(to: string, accountEmail: string, finalHealth: number) {
+    const subject = "🎉 Email Warmup Completed - You're Ready to Send!"
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Warmup Complete! 🎉</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">Your email is warmed up and ready!</h2>
+            
+            <p style="font-size: 16px; color: #4b5563;">
+              Great news! Your email account <strong>${accountEmail}</strong> has completed the warmup process and is now ready for campaigns.
+            </p>
+            
+            <div style="background: #f0fdf4; border: 2px solid #10b981; padding: 30px; margin: 30px 0; border-radius: 8px; text-align: center;">
+              <p style="margin: 0; font-size: 18px; color: #065f46;">
+                <strong style="font-size: 48px; display: block; margin-bottom: 10px;">${finalHealth}%</strong>
+                Final Health Score
+              </p>
+            </div>
+            
+            <h3 style="color: #1f2937;">What This Means:</h3>
+            <ul style="color: #4b5563; padding-left: 20px;">
+              <li style="margin-bottom: 10px;">✅ Your emails will land in the inbox, not spam</li>
+              <li style="margin-bottom: 10px;">✅ You can start sending campaigns with confidence</li>
+              <li style="margin-bottom: 10px;">✅ Your domain reputation is strong</li>
+              <li style="margin-bottom: 10px;">✅ Expect high deliverability rates</li>
+            </ul>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/campaigns/new" 
+                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Create Your First Campaign
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    return this.send({ from: FROM_EMAIL, to, subject, html })
+  }
+
+  async sendAccountHealthAlert(to: string, accountEmail: string, healthScore: number, issues: string[]) {
+    const subject = `⚠️ Account Health Alert - ${accountEmail}`
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #dc2626 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Account Health Alert ⚠️</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">Action Required</h2>
+            
+            <p style="font-size: 16px; color: #4b5563;">
+              Your email account <strong>${accountEmail}</strong> is experiencing deliverability issues.
+            </p>
+            
+            <div style="background: #fee2e2; border: 2px solid #dc2626; padding: 30px; margin: 30px 0; border-radius: 8px; text-align: center;">
+              <p style="margin: 0; font-size: 18px; color: #991b1b;">
+                <strong style="font-size: 48px; display: block; margin-bottom: 10px;">${healthScore}%</strong>
+                Current Health Score
+              </p>
+            </div>
+            
+            <h3 style="color: #1f2937;">Issues Detected:</h3>
+            <ul style="color: #4b5563; padding-left: 20px;">
+              ${issues.map((issue) => `<li style="margin-bottom: 10px;">${issue}</li>`).join("")}
+            </ul>
+            
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #92400e;">
+                <strong>Recommended Actions:</strong><br>
+                • Pause campaigns temporarily<br>
+                • Review your email content<br>
+                • Check your sending volume<br>
+                • Monitor bounce and spam rates
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 40px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/warmup" 
+                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                View Account Health
+              </a>
+            </div>
+          </div>
+        </body>
+      </html>
+    `
+
+    return this.send({ from: FROM_EMAIL, to, subject, html })
+  }
 }
 
 export const resend = new ResendService()
 
-export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "Mailfra <noreply@mailfra.app>"
+export const FROM_EMAIL = env.RESEND_FROM_EMAIL || "ReachAI <noreply@reachai.app>"
 
 export async function sendTransactionalEmail({
   to,
