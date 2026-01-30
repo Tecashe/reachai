@@ -89,7 +89,7 @@ export class GoogleServiceAccountAuth {
             scopes: [
                 'https://mail.google.com/', // Required for SMTP/IMAP access
             ],
-            subject: userEmail, // This is the impersonation part!
+            subject: userEmail, // This is the impersonation part!  
         })
     }
 
