@@ -613,6 +613,7 @@ model SendingAccount {
   emailsSentThisHour Int      @default(0)
   lastResetDate      DateTime @default(now())
   lastResetHour      DateTime @default(now())
+  lastSentAt         DateTime?
 
   warmupEnabled    Boolean     @default(true)
   warmupStage      WarmupStage @default(NEW)
@@ -631,6 +632,7 @@ model SendingAccount {
   openRate          Float     @default(0)
   lastHealthCheck   DateTime?
   pausedReason      String?
+  lastError         String?   @db.Text
   pausedAt          DateTime?
   lastWarmupAt      DateTime?
   lastVerifiedAt    DateTime?

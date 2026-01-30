@@ -45,64 +45,48 @@ class ResendService {
   }
 
   async sendWelcomeEmail(to: string, name: string) {
-    const subject = "Welcome to mailfra! 🚀"
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${subject}</title>
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to mailfra!</h1>
-          </div>
-          
-          <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-            <h2 style="color: #1f2937; margin-top: 0;">Hi ${name}! 👋</h2>
-            
-            <p style="font-size: 16px; color: #4b5563;">
-              Welcome to mailfra - the most powerful AI-powered cold email personalization platform.
-            </p>
-            
-            <p style="font-size: 16px; color: #4b5563;">
-              We're excited to help you 10x your response rates and save hours on prospect research.
-            </p>
-            
-            <h3 style="color: #1f2937;">Get Started in 3 Easy Steps:</h3>
-            <ol style="color: #4b5563; padding-left: 20px;">
-              <li style="margin-bottom: 15px;"><strong>Create a Campaign</strong> - Organize your outreach efforts</li>
-              <li style="margin-bottom: 15px;"><strong>Add Prospects</strong> - Upload a CSV or add manually</li>
-              <li style="margin-bottom: 15px;"><strong>Generate & Send</strong> - Let AI personalize and send emails</li>
-            </ol>
-            
-            <div style="text-align: center; margin: 40px 0;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" 
-                 style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                Go to Dashboard
-              </a>
-            </div>
-            
-            <p style="color: #6b7280; font-size: 14px; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-              Need help? Check out our <a href="${process.env.NEXT_PUBLIC_APP_URL}/docs" style="color: #667eea;">documentation</a> or reply to this email.
-            </p>
-          </div>
-          
-          <div style="text-align: center; margin-top: 30px; color: #9ca3af; font-size: 12px;">
-            <p>mailfra - AI-Powered Cold Email Personalization</p>
-          </div>
-        </body>
-      </html>
-    `
+    try {
+      const { render } = await import("@react-email/render")
+      const { default: WelcomeEmail } = await import("./email-templates/welcome-email")
 
-    return this.send({
-      from: FROM_EMAIL,
-      to,
-      subject,
-      html,
-    })
+      const emailHtml = await render(
+        WelcomeEmail({ userName: name, userEmail: to })
+      )
+
+      const subject = "Welcome to Mailfra! 🚀 Let's 10x Your Cold Email Results"
+
+      return this.send({
+        from: FROM_EMAIL,
+        to,
+        subject,
+        html: emailHtml,
+      })
+    } catch (error) {
+      // Fallback to simple welcome email if template fails
+      logger.error("Failed to render welcome email template, using fallback", error as Error)
+
+      const subject = "Welcome to Mailfra! 🚀"
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px;">
+            <h1>Welcome to Mailfra, ${name}! 🚀</h1>
+            <p>Thank you for joining. We're excited to help you transform your cold email outreach with AI-powered personalization.</p>
+            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">Go to your Dashboard →</a></p>
+            <p>Best regards,<br/>The Mailfra Team</p>
+          </body>
+        </html>
+      `
+
+      return this.send({
+        from: FROM_EMAIL,
+        to,
+        subject,
+        html,
+      })
+    }
   }
+
 
   async sendCampaignCompletedEmail(to: string, campaignName: string, stats: any) {
     const subject = `Campaign "${campaignName}" Completed! 📊`
@@ -190,21 +174,20 @@ class ResendService {
           <div style="background: #ffffff; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
             <h2 style="color: #1f2937; margin-top: 0;">Hi ${name}! 👋</h2>
             
-            ${
-              isFirstEmail
-                ? `
+            ${isFirstEmail
+        ? `
               <p style="font-size: 16px; color: #4b5563;">
                 We noticed you started setting up your mailfra account but haven't completed all the steps yet. 
                 You're <strong>${progress}% of the way there</strong>!
               </p>
             `
-                : `
+        : `
               <p style="font-size: 16px; color: #4b5563;">
                 This is your final reminder! You're so close to unlocking the full power of AI-powered cold email outreach.
                 Just <strong>${remainingSteps} step${remainingSteps > 1 ? "s" : ""}</strong> remaining!
               </p>
             `
-            }
+      }
             
             <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 30px 0;">
               <h3 style="margin-top: 0; color: #1f2937;">Your Progress: ${progress}%</h3>

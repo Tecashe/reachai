@@ -212,7 +212,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { GmailAppPasswordFlow } from "./gmail-app-password-flow"
 import { GmailOAuthFlow } from "./gmail-oauth-flow"
-import { WorkspaceDelegationFlow } from "./workspace-delegation-flow"
+import { WorkspaceOAuthFlow } from "./workspace-delegation-flow"
 import { ArrowLeft, Key, Shield, Building2 } from "lucide-react"
 
 interface Props {
@@ -256,7 +256,7 @@ export function GmailConnectionOptions({ onAccountAdded, onBack }: Props) {
           <ArrowLeft className="h-4 w-4" />
           Back to options
         </Button>
-        <WorkspaceDelegationFlow onAccountAdded={onAccountAdded} />
+        <WorkspaceOAuthFlow onAccountAdded={onAccountAdded} />
       </div>
     )
   }
