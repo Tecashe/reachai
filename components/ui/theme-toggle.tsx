@@ -34,6 +34,7 @@
 //     </DropdownMenu>
 //   )
 // }
+
 "use client"
 
 import { Moon, Sun } from "lucide-react"
@@ -61,7 +62,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      className={`relative px-6 py-3 rounded-full font-medium transition-all duration-500 overflow-hidden border-2
+      className={`relative px-4 py-2 rounded-full text-sm transition-all duration-500 overflow-hidden border-2
         ${isDark
           ? 'bg-primary border-primary/50 text-primary-foreground shadow-lg shadow-primary/20'
           : 'bg-secondary border-secondary/50 text-secondary-foreground shadow-lg shadow-secondary/30'
@@ -76,13 +77,13 @@ export function ThemeToggle() {
       />
 
       {/* Content wrapper */}
-      <div className="relative flex items-center gap-2 justify-center">
+      <div className="relative flex items-center gap-1.5 justify-center">
         <span className={`transition-all duration-300 ${isDark ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
-          <Moon className="w-4 h-4" />
+          <Moon className="w-3.5 h-3.5" />
         </span>
-        <span className="font-semibold">{isDark ? 'Dark' : 'Light'}</span>
+        <span className="font-medium">{isDark ? 'Dark' : 'Light'}</span>
         <span className={`transition-all duration-300 ${isDark ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
-          <Sun className="w-4 h-4" />
+          <Sun className="w-3.5 h-3.5" />
         </span>
       </div>
     </button>
