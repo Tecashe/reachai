@@ -42,6 +42,8 @@ export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise
 }> {
   try {
     const apolloApiKey = process.env.APOLLO_API_KEY
+    console.log("[Apollo Debug] Key loaded:", !!apolloApiKey, "Length:", apolloApiKey?.length, "Prefix:", apolloApiKey?.substring(0, 10))
+
     if (!apolloApiKey) {
       return { success: false, error: "Apollo.io API key not configured" }
     }
@@ -71,10 +73,19 @@ export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => null)
+      const errorText = await response.text()
+      console.error("[Apollo Debug] Error Status:", response.status, "Body:", errorText)
+
+      let errorData
+      try {
+        errorData = JSON.parse(errorText)
+      } catch (e) {
+        // Not JSON
+      }
+
       return {
         success: false,
-        error: errorData?.message || `Apollo API error: ${response.statusText}`,
+        error: errorData?.message || `Apollo API error: ${response.status} ${response.statusText} - ${errorText.substring(0, 100)}`,
       }
     }
 
