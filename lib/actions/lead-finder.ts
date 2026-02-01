@@ -46,18 +46,33 @@ export async function findLeadsFromDescription(
   }
 
   try {
-    // Step 1:Use AI to generate target audience from description
-    const audienceResult = await generateTargetAudienceFromKeywords(description)
-    if (!audienceResult.success || !audienceResult.audience) {
-      return { success: false, error: "Failed to generate target audience" }
+    // Step 1: Use AI to generate target audience from description
+    // Fallback logic: If AI fails (e.g. no credit card), use description as keyword
+    let audience = {
+      jobTitles: [] as string[],
+      locations: [] as string[],
+      industries: [] as string[],
+      keywords: [description]
     }
 
-    const audience = audienceResult.audience
+    try {
+      const audienceResult = await generateTargetAudienceFromKeywords(description)
+      if (audienceResult.success && audienceResult.audience) {
+        audience = {
+          ...audienceResult.audience,
+          keywords: [] // Clear keywords if we have structured data
+        }
+      }
+    } catch (aiError) {
+      console.warn("[Lead Finder] AI Audience Generation failed, falling back to keywords:", aiError)
+      // Continue with default audience (using description as keyword)
+    }
 
-    // Step 2: Search Apollo.io with AI-generated criteria
+    // Step 2: Search Apollo.io with AI-generated criteria OR fallback keywords
     const searchResult = await searchLeadsWithApollo({
       jobTitles: audience.jobTitles,
       locations: audience.locations.length > 0 ? audience.locations : undefined,
+      keywords: audience.keywords, // Pass keywords if any
       perPage: 25,
     })
 
@@ -69,34 +84,22 @@ export async function findLeadsFromDescription(
       }
     }
 
-    // Step 3: Enrich each lead with AI insights
-    const enrichedLeads = await Promise.all(
-      searchResult.leads.map(async (lead) => {
-        const aiEnrichment = await enrichLeadWithAI({
-          firstName: lead.firstName,
-          lastName: lead.lastName,
-          company: lead.company.name,
-          title: lead.title,
-          linkedinUrl: lead.linkedinUrl,
-          websiteUrl: lead.company.website,
-        })
-
-        return {
-          ...lead,
-          aiInsights: aiEnrichment.success ? aiEnrichment.enrichedData : null,
-          qualityScore: aiEnrichment.enrichedData?.qualityScore || 50,
-        }
-      }),
-    )
+    // Step 3: Enrich each lead with AI insights (SKIP FOR NOW/FALLBACK)
+    // We will skip AI enrichment to avoid further errors and speed up the process
+    const enrichedLeads = searchResult.leads.map((lead) => {
+      // Basic mapping without AI insights
+      return {
+        ...lead,
+        aiInsights: null,
+        qualityScore: 50, // Default score
+      }
+    })
 
     // Deduct credits only if successful
     await db.user.update({
       where: { id: user.id },
       data: { researchCredits: { decrement: estimatedCost } }
     })
-
-    // Sort by quality score
-    enrichedLeads.sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
 
     return {
       success: true,
