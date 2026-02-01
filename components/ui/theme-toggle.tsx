@@ -81,7 +81,7 @@ export function ThemeToggle() {
         <span className={`transition-all duration-300 ${isDark ? 'opacity-100 w-auto' : 'opacity-0 w-0'}`}>
           <Moon className="w-3.5 h-3.5" />
         </span>
-        <span className="font-medium">{isDark ? 'Dark' : 'Light'}</span>
+        {/* <span className="font-medium">{isDark ? 'Dark' : 'Light'}</span> */}
         <span className={`transition-all duration-300 ${isDark ? 'opacity-0 w-0' : 'opacity-100 w-auto'}`}>
           <Sun className="w-3.5 h-3.5" />
         </span>
