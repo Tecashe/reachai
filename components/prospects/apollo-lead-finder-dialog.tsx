@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   Dialog,
   DialogContent,
@@ -18,30 +17,90 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sparkles, Search, Loader2, CheckCircle2, Rocket, Star, TrendingUp, DollarSign, Lock, AlertCircle } from "lucide-react"
-import { findLeadsWithApollo, enrichLeadsWithAI } from "@/lib/actions/lead-finder"
-import { deductResearchCredits } from "@/lib/actions/user"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Sparkles,
+  Search,
+  Loader2,
+  CheckCircle2,
+  Rocket,
+  Star,
+  TrendingUp,
+  DollarSign,
+  Lock,
+  AlertCircle,
+  ArrowLeft,
+  Users,
+  Building2,
+  MapPin,
+} from "lucide-react"
+import { findLeadsWithApollo, enrichAndImportSelectedLeads } from "@/lib/actions/lead-finder"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { WaveLoader } from "../loader/wave-loader"
 
+// Lead type for better type safety
+interface ApolloLead {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  title: string
+  company: {
+    name: string
+    website?: string
+    industry?: string
+    size?: string
+  }
+  linkedinUrl?: string
+  location?: string
+  phoneNumber?: string
+}
+
 interface ApolloLeadFinderDialogProps {
   subscriptionTier: string
   researchCredits: number
+  campaignId?: string
   onCreditsChange?: () => void
+  onLeadsImported?: () => void
 }
+
+const COMPANY_SIZE_OPTIONS = [
+  { value: "1-10", label: "1-10 employees" },
+  { value: "11-50", label: "11-50 employees" },
+  { value: "51-200", label: "51-200 employees" },
+  { value: "201-500", label: "201-500 employees" },
+  { value: "501-1000", label: "501-1000 employees" },
+  { value: "1001-5000", label: "1001-5000 employees" },
+  { value: "5001+", label: "5000+ employees" },
+]
 
 export function ApolloLeadFinderDialog({
   subscriptionTier,
   researchCredits,
+  campaignId,
   onCreditsChange,
+  onLeadsImported,
 }: ApolloLeadFinderDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState<"input" | "searching" | "results">("input")
-  const [debugMode, setDebugMode] = useState(false)
+  const [step, setStep] = useState<"input" | "searching" | "results" | "importing">("input")
 
   // Form inputs
   const [targetDescription, setTargetDescription] = useState("")
@@ -49,61 +108,65 @@ export function ApolloLeadFinderDialog({
   const [locations, setLocations] = useState("")
   const [companySize, setCompanySize] = useState("")
   const [industries, setIndustries] = useState("")
-  const [limit, setLimit] = useState(50)
+  const [limit, setLimit] = useState(25)
 
-  // Results
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [enrichedResults, setEnrichedResults] = useState<any[]>([])
+  // Results & Selection
+  const [searchResults, setSearchResults] = useState<ApolloLead[]>([])
+  const [selectedLeadIds, setSelectedLeadIds] = useState<Set<string>>(new Set())
   const [progress, setProgress] = useState(0)
 
   // Improved subscription tier checking with normalization
   const normalizedTier = subscriptionTier?.toString().trim().toUpperCase() || "FREE"
-  const canUseApollo = normalizedTier !== "FREE" && normalizedTier !== "" && normalizedTier !== "UNDEFINED" && normalizedTier !== "NULL"
-  
-  const costPerLead = 1 // 1 research credit per lead
-  const totalCost = limit * costPerLead
-  const hasEnoughCredits = researchCredits >= totalCost
+  const canUseApollo =
+    normalizedTier !== "FREE" &&
+    normalizedTier !== "" &&
+    normalizedTier !== "UNDEFINED" &&
+    normalizedTier !== "NULL"
 
-  // Debug logging on mount and when props change
+  const searchCostPerLead = 1
+  const enrichmentCostPerLead = 1
+  const searchCost = limit * searchCostPerLead
+  const hasEnoughCreditsForSearch = researchCredits >= searchCost
+
+  const selectedCount = selectedLeadIds.size
+  const enrichmentCost = selectedCount * enrichmentCostPerLead
+  const hasEnoughCreditsForEnrichment = researchCredits >= enrichmentCost
+
+  // Debug logging
   useEffect(() => {
     console.group("🔍 Apollo Lead Finder Debug Info")
-    console.log("Raw subscriptionTier prop:", subscriptionTier)
     console.log("Normalized tier:", normalizedTier)
     console.log("Can use Apollo:", canUseApollo)
     console.log("Research credits:", researchCredits)
-    console.log("Total cost:", totalCost)
-    console.log("Has enough credits:", hasEnoughCredits)
     console.groupEnd()
-  }, [subscriptionTier, researchCredits, totalCost, normalizedTier, canUseApollo, hasEnoughCredits])
+  }, [normalizedTier, canUseApollo, researchCredits])
 
   const handleSearch = async () => {
     if (!canUseApollo) {
       toast.error("Apollo lead finder is only available on paid plans")
-      console.error("Access denied - subscription tier:", normalizedTier)
       return
     }
 
-    if (!hasEnoughCredits) {
-      toast.error(`You need ${totalCost} research credits. You have ${researchCredits}.`)
+    if (!hasEnoughCreditsForSearch) {
+      toast.error(`You need ${searchCost} research credits. You have ${researchCredits}.`)
       return
     }
 
-    if (!targetDescription.trim()) {
-      toast.error("Please describe your ideal customer")
+    if (!targetDescription.trim() && !jobTitles.trim()) {
+      toast.error("Please describe your ideal customer or enter job titles")
       return
     }
 
-    setLoading(true)
     setStep("searching")
     setProgress(10)
+    setSelectedLeadIds(new Set())
 
     try {
-      // Phase 1: Search Apollo
-      setProgress(30)
+      setProgress(40)
       toast.info("Searching Apollo.io for matching leads...")
 
       const searchResult = await findLeadsWithApollo({
-        targetDescription,
+        targetDescription: targetDescription.trim() || undefined,
         jobTitles: jobTitles
           .split(",")
           .map((t) => t.trim())
@@ -112,13 +175,15 @@ export function ApolloLeadFinderDialog({
           .split(",")
           .map((l) => l.trim())
           .filter(Boolean),
-        companySize,
+        companySize: companySize || undefined,
         industries: industries
           .split(",")
           .map((i) => i.trim())
           .filter(Boolean),
         limit,
       })
+
+      setProgress(100)
 
       if (!searchResult.success) {
         toast.error(searchResult.error || "Failed to search Apollo")
@@ -127,32 +192,9 @@ export function ApolloLeadFinderDialog({
       }
 
       setSearchResults(searchResult.leads || [])
-      setProgress(60)
-
-      // Phase 2: Enrich with AI
-      toast.info("Enriching leads with AI insights...")
-      const enrichResult = await enrichLeadsWithAI(searchResult.leads || [])
-
-      if (!enrichResult.success) {
-        toast.error(enrichResult.error || "Failed to enrich leads")
-        return
-      }
-
-      setEnrichedResults(enrichResult.enrichedLeads || [])
-      setProgress(100)
       setStep("results")
 
-      // Deduct credits after successful search
-      try {
-        const creditsUsed = searchResult.leads?.length || 0
-        await deductResearchCredits(creditsUsed)
-        console.log(`Deducted ${creditsUsed} research credits`)
-      } catch (creditError) {
-        console.error("Failed to deduct credits:", creditError)
-        // Don't fail the whole operation if credit deduction fails
-      }
-
-      toast.success(`Found and enriched ${enrichResult.enrichedLeads?.length || 0} high-quality leads!`)
+      toast.success(`Found ${searchResult.leads?.length || 0} leads! Select the ones to import.`)
 
       if (onCreditsChange) {
         onCreditsChange()
@@ -161,15 +203,96 @@ export function ApolloLeadFinderDialog({
       console.error("Lead search error:", error)
       toast.error(error.message || "Failed to find leads")
       setStep("input")
-    } finally {
-      setLoading(false)
     }
   }
 
-  const handleImportLeads = async () => {
-    // TODO: Implement import to campaign
-    toast.success(`Importing ${enrichedResults.length} leads to your campaign...`)
-    setOpen(false)
+  const handleToggleLead = (leadId: string) => {
+    setSelectedLeadIds((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(leadId)) {
+        newSet.delete(leadId)
+      } else {
+        newSet.add(leadId)
+      }
+      return newSet
+    })
+  }
+
+  const handleToggleAll = () => {
+    if (selectedLeadIds.size === searchResults.length) {
+      setSelectedLeadIds(new Set())
+    } else {
+      setSelectedLeadIds(new Set(searchResults.map((l) => l.id)))
+    }
+  }
+
+  const handleImportSelected = async () => {
+    if (selectedCount === 0) {
+      toast.error("Please select at least one lead to import")
+      return
+    }
+
+    if (!campaignId) {
+      toast.error("No campaign selected. Please select a campaign first.")
+      return
+    }
+
+    if (!hasEnoughCreditsForEnrichment) {
+      toast.error(
+        `You need ${enrichmentCost} credits for AI enrichment. You have ${researchCredits}.`,
+      )
+      return
+    }
+
+    setStep("importing")
+    setProgress(10)
+
+    try {
+      const selectedLeads = searchResults.filter((l) => selectedLeadIds.has(l.id))
+
+      setProgress(30)
+      toast.info(`Enriching ${selectedCount} leads with AI insights...`)
+
+      const result = await enrichAndImportSelectedLeads(selectedLeads, campaignId)
+
+      setProgress(100)
+
+      if (!result.success) {
+        toast.error(result.error || "Failed to import leads")
+        setStep("results")
+        return
+      }
+
+      toast.success(`Successfully imported ${result.imported} leads to your campaign!`)
+
+      if (onCreditsChange) {
+        onCreditsChange()
+      }
+
+      if (onLeadsImported) {
+        onLeadsImported()
+      }
+
+      setOpen(false)
+      resetForm()
+    } catch (error: any) {
+      console.error("Import error:", error)
+      toast.error(error.message || "Failed to import leads")
+      setStep("results")
+    }
+  }
+
+  const resetForm = () => {
+    setStep("input")
+    setTargetDescription("")
+    setJobTitles("")
+    setLocations("")
+    setCompanySize("")
+    setIndustries("")
+    setLimit(25)
+    setSearchResults([])
+    setSelectedLeadIds(new Set())
+    setProgress(0)
   }
 
   const handleUpgrade = () => {
@@ -178,7 +301,13 @@ export function ApolloLeadFinderDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+        if (!isOpen) resetForm()
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" className="relative bg-transparent">
           <Sparkles className="mr-2 h-4 w-4" />
@@ -191,18 +320,20 @@ export function ApolloLeadFinderDialog({
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
             Lead Finder
-            {/* Debug toggle button */}
-            </DialogTitle>
+          </DialogTitle>
           <DialogDescription>
-            Describe your ideal customer
+            {step === "input" && "Describe your ideal customer to find matching leads."}
+            {step === "searching" && "Searching for leads..."}
+            {step === "results" && `Found ${searchResults.length} leads. Select the ones to import.`}
+            {step === "importing" && "Enriching and importing selected leads..."}
           </DialogDescription>
         </DialogHeader>
-        
+
         {/* Free user upgrade prompt */}
         {!canUseApollo && (
           <Alert className="border-primary bg-primary/5">
@@ -210,53 +341,75 @@ export function ApolloLeadFinderDialog({
             <AlertTitle>Upgrade to use Apollo Lead Finder</AlertTitle>
             <AlertDescription>
               <p className="mb-3">
-                This feature is available on paid plans. Get access to millions of leads from Apollo.io with AI
-                enrichment.
+                This feature is available on paid plans. Get access to millions of leads from
+                Apollo.io with AI enrichment.
               </p>
-              <div className="flex gap-2">
-                <Button size="sm" onClick={handleUpgrade}>
-                  <TrendingUp className="mr-2 h-4 w-4" />
-                  Upgrade to Pro
-                </Button>
-              </div>
+              <Button size="sm" onClick={handleUpgrade}>
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Upgrade to Pro
+              </Button>
             </AlertDescription>
           </Alert>
         )}
 
-        {/* Insufficient credits warning */}
-        {canUseApollo && !hasEnoughCredits && (
-          <Alert className="border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950">
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-            <AlertTitle className="text-orange-900 dark:text-orange-100">Insufficient Credits</AlertTitle>
-            <AlertDescription className="text-orange-900 dark:text-orange-100">
-              You need {totalCost} credits but only have {researchCredits}. Please reduce the number of leads or purchase more credits.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Credit display */}
-        {canUseApollo && (
+        {/* Credit display (only on input or results step) */}
+        {canUseApollo && (step === "input" || step === "results") && (
           <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-full bg-primary/10 p-2">
                 <DollarSign className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm font-medium">Research Credits Available</p>
+                <p className="text-sm font-medium">Research Credits</p>
                 <p className="text-2xl font-bold">{researchCredits}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Cost for this search</p>
-              <p className={cn("text-xl font-bold", hasEnoughCredits ? "text-green-600" : "text-red-600")}>
-                {totalCost} credits
-              </p>
-              <p className="text-xs text-muted-foreground">{costPerLead} credit per lead</p>
+              {step === "input" && (
+                <>
+                  <p className="text-sm text-muted-foreground">Search cost</p>
+                  <p
+                    className={cn(
+                      "text-xl font-bold",
+                      hasEnoughCreditsForSearch ? "text-green-600" : "text-red-600",
+                    )}
+                  >
+                    {searchCost} credits
+                  </p>
+                </>
+              )}
+              {step === "results" && selectedCount > 0 && (
+                <>
+                  <p className="text-sm text-muted-foreground">Import cost ({selectedCount} leads)</p>
+                  <p
+                    className={cn(
+                      "text-xl font-bold",
+                      hasEnoughCreditsForEnrichment ? "text-green-600" : "text-red-600",
+                    )}
+                  >
+                    {enrichmentCost} credits
+                  </p>
+                </>
+              )}
             </div>
           </div>
         )}
 
-        {/* Input Step */}
+        {/* Insufficient credits warning for search */}
+        {canUseApollo && step === "input" && !hasEnoughCreditsForSearch && (
+          <Alert className="border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950">
+            <AlertCircle className="h-4 w-4 text-orange-600" />
+            <AlertTitle className="text-orange-900 dark:text-orange-100">
+              Insufficient Credits
+            </AlertTitle>
+            <AlertDescription className="text-orange-900 dark:text-orange-100">
+              You need {searchCost} credits but only have {researchCredits}. Please reduce the
+              number of leads or purchase more credits.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* ======================= INPUT STEP ======================= */}
         {step === "input" && (
           <Tabs defaultValue="simple" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -276,24 +429,24 @@ export function ApolloLeadFinderDialog({
                   disabled={!canUseApollo}
                 />
                 <p className="text-sm text-muted-foreground">
-                  Our AI will automatically extract job titles, locations, company sizes, and industries from your
-                  description
+                  Our AI will automatically extract job titles, locations, company sizes, and
+                  industries from your description
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="limit">Number of Leads</Label>
+                <Label htmlFor="limit">Number of Leads to Find</Label>
                 <Input
                   id="limit"
                   type="number"
                   min={10}
-                  max={500}
+                  max={100}
                   value={limit}
-                  onChange={(e) => setLimit(Number.parseInt(e.target.value) || 50)}
+                  onChange={(e) => setLimit(Math.min(100, Math.max(10, parseInt(e.target.value) || 25)))}
                   disabled={!canUseApollo}
                 />
                 <p className="text-sm text-muted-foreground">
-                  We'll find up to {limit} leads ({limit * costPerLead} credits)
+                  We'll find up to {limit} leads ({limit * searchCostPerLead} credits)
                 </p>
               </div>
             </TabsContent>
@@ -324,13 +477,18 @@ export function ApolloLeadFinderDialog({
 
                 <div className="space-y-2">
                   <Label htmlFor="companySize">Company Size</Label>
-                  <Input
-                    id="companySize"
-                    placeholder="1-10, 11-50, 51-200"
-                    value={companySize}
-                    onChange={(e) => setCompanySize(e.target.value)}
-                    disabled={!canUseApollo}
-                  />
+                  <Select value={companySize} onValueChange={setCompanySize} disabled={!canUseApollo}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMPANY_SIZE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
@@ -351,9 +509,9 @@ export function ApolloLeadFinderDialog({
                   id="limit-advanced"
                   type="number"
                   min={10}
-                  max={500}
+                  max={100}
                   value={limit}
-                  onChange={(e) => setLimit(Number.parseInt(e.target.value) || 50)}
+                  onChange={(e) => setLimit(Math.min(100, Math.max(10, parseInt(e.target.value) || 25)))}
                   disabled={!canUseApollo}
                 />
               </div>
@@ -361,7 +519,7 @@ export function ApolloLeadFinderDialog({
           </Tabs>
         )}
 
-        {/* Searching Step */}
+        {/* ======================= SEARCHING STEP ======================= */}
         {step === "searching" && (
           <div className="space-y-6 py-8">
             <div className="flex flex-col items-center justify-center gap-4">
@@ -369,11 +527,10 @@ export function ApolloLeadFinderDialog({
                 <WaveLoader size="sm" bars={8} gap="tight" />
               </div>
               <div className="text-center">
-                <h3 className="font-semibold">Finding Your Perfect Leads</h3>
-                <p className="text-sm text-muted-foreground">Searching Apollo.io and enriching with AI insights...</p>
+                <h3 className="font-semibold">Searching Apollo.io</h3>
+                <p className="text-sm text-muted-foreground">Finding leads matching your criteria...</p>
               </div>
             </div>
-
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Progress</span>
@@ -381,98 +538,164 @@ export function ApolloLeadFinderDialog({
               </div>
               <Progress value={progress} className="h-2" />
             </div>
-
-            <div className="space-y-2">
-              {progress >= 30 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>Apollo.io search complete</span>
-                </div>
-              )}
-              {progress >= 60 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>AI enrichment in progress</span>
-                </div>
-              )}
-              {progress >= 100 && (
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  <span>Quality scoring complete</span>
-                </div>
-              )}
-            </div>
           </div>
         )}
 
-        {/* Results Step */}
+        {/* ======================= RESULTS STEP ======================= */}
         {step === "results" && (
           <div className="space-y-4">
-            <Alert className="border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <AlertTitle className="text-green-900 dark:text-green-100">
-                Found {enrichedResults.length} High-Quality Leads
-              </AlertTitle>
-              <AlertDescription className="text-green-900 dark:text-green-100">
-                Each lead has been enriched with AI insights and scored for quality
-              </AlertDescription>
-            </Alert>
-
-            <div className="max-h-96 space-y-2 overflow-y-auto">
-              {enrichedResults.slice(0, 5).map((lead, index) => (
-                <div key={index} className="flex items-start justify-between rounded-lg border p-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium">
-                        {lead.firstName} {lead.lastName}
-                      </p>
-                      <Badge variant="outline">{lead.jobTitle}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{lead.company}</p>
-                    <p className="text-sm">{lead.email}</p>
-                    {lead.aiInsights && (
-                      <p className="text-xs text-muted-foreground italic">{lead.aiInsights.substring(0, 100)}...</p>
-                    )}
+            {searchResults.length === 0 ? (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>No leads found</AlertTitle>
+                <AlertDescription>
+                  Try adjusting your search criteria or description.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                {/* Selection summary bar */}
+                <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-2">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="select-all"
+                      checked={selectedLeadIds.size === searchResults.length && searchResults.length > 0}
+                      onCheckedChange={handleToggleAll}
+                    />
+                    <Label htmlFor="select-all" className="text-sm font-medium cursor-pointer">
+                      {selectedLeadIds.size === searchResults.length ? "Deselect All" : "Select All"}
+                    </Label>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-medium">{lead.qualityScore}</span>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">
+                      {selectedCount} of {searchResults.length} selected
+                    </span>
                   </div>
                 </div>
-              ))}
-              {enrichedResults.length > 5 && (
-                <p className="text-center text-sm text-muted-foreground">+{enrichedResults.length - 5} more leads</p>
-              )}
-            </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep("input")} className="flex-1">
-                Search Again
+                {/* Results table */}
+                <div className="rounded-lg border max-h-[400px] overflow-y-auto">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableRow>
+                        <TableHead className="w-[50px]"></TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Company</TableHead>
+                        <TableHead>Location</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {searchResults.map((lead) => (
+                        <TableRow
+                          key={lead.id}
+                          className={cn(
+                            "cursor-pointer transition-colors",
+                            selectedLeadIds.has(lead.id) && "bg-primary/5",
+                          )}
+                          onClick={() => handleToggleLead(lead.id)}
+                        >
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedLeadIds.has(lead.id)}
+                              onCheckedChange={() => handleToggleLead(lead.id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {lead.firstName} {lead.lastName}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="font-normal">
+                              {lead.title || "N/A"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="truncate max-w-[150px]">
+                                {lead.company?.name || "Unknown"}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="truncate max-w-[150px]">{lead.location || "N/A"}</span>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ======================= IMPORTING STEP ======================= */}
+        {step === "importing" && (
+          <div className="space-y-6 py-8">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="rounded-full bg-green-500/10 p-4">
+                <WaveLoader size="sm" bars={8} gap="tight" />
+              </div>
+              <div className="text-center">
+                <h3 className="font-semibold">Enriching & Importing Leads</h3>
+                <p className="text-sm text-muted-foreground">
+                  Running AI enrichment on {selectedCount} leads...
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-medium">{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          </div>
+        )}
+
+        {/* ======================= ACTION BUTTONS ======================= */}
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          {step === "input" && (
+            <>
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
               </Button>
-              <Button onClick={handleImportLeads} className="flex-1">
+              <Button
+                onClick={handleSearch}
+                disabled={
+                  !canUseApollo ||
+                  !hasEnoughCreditsForSearch ||
+                  (!targetDescription.trim() && !jobTitles.trim())
+                }
+              >
+                <Search className="mr-2 h-4 w-4" />
+                Find Leads ({searchCost} credits)
+              </Button>
+            </>
+          )}
+
+          {step === "results" && (
+            <>
+              <Button variant="outline" onClick={() => setStep("input")}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Search
+              </Button>
+              <Button
+                onClick={handleImportSelected}
+                disabled={selectedCount === 0 || !hasEnoughCreditsForEnrichment || !campaignId}
+              >
                 <Rocket className="mr-2 h-4 w-4" />
-                Import to Campaign
+                Import {selectedCount} Lead{selectedCount !== 1 ? "s" : ""} ({enrichmentCost} credits)
               </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Action buttons for input step */}
-        {step === "input" && (
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSearch}
-              disabled={!canUseApollo || !hasEnoughCredits || !targetDescription.trim() || loading}
-            >
-              {loading && <WaveLoader size="sm" bars={8} gap="tight" />}
-              {!loading && <Search className="mr-2 h-4 w-4" />}
-              Find Leads ({totalCost} credits)
-            </Button>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

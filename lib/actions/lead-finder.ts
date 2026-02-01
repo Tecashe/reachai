@@ -343,6 +343,120 @@ export async function enrichLeadsWithAI(leads: any[]): Promise<{
   }
 }
 
+/**
+ * Enrich selected leads with AI and import them directly into a campaign.
+ * This is the new optimized flow: Search -> Select -> Enrich & Import.
+ */
+export async function enrichAndImportSelectedLeads(
+  selectedLeads: any[],
+  campaignId: string,
+): Promise<{
+  success: boolean
+  imported?: number
+  error?: string
+  creditsUsed?: number
+}> {
+  const { userId } = await auth()
+  if (!userId) throw new Error("Unauthorized")
+
+  const user = await db.user.findUnique({ where: { clerkId: userId } })
+  if (!user) throw new Error("User not found")
+
+  // Check subscription tier
+  if (user.subscriptionTier === "FREE") {
+    return { success: false, error: "This feature requires a paid plan" }
+  }
+
+  // Calculate enrichment cost (1 credit per lead for AI enrichment)
+  const enrichmentCost = selectedLeads.length
+  if (user.researchCredits < enrichmentCost) {
+    return {
+      success: false,
+      error: `Insufficient credits. You need ${enrichmentCost} credits for AI enrichment.`,
+    }
+  }
+
+  try {
+    let imported = 0
+
+    for (const lead of selectedLeads) {
+      // Check if prospect already exists
+      const existing = await db.prospect.findUnique({
+        where: {
+          email_campaignId: {
+            email: lead.email,
+            campaignId,
+          },
+        },
+      })
+
+      if (existing) continue
+
+      // Enrich this lead with AI
+      const aiEnrichment = await enrichLeadWithAI({
+        firstName: lead.firstName,
+        lastName: lead.lastName,
+        company: lead.company?.name || lead.company,
+        title: lead.title,
+        linkedinUrl: lead.linkedinUrl,
+        websiteUrl: lead.company?.website,
+      })
+
+      // Create prospect with enriched data
+      await db.prospect.create({
+        data: {
+          userId: user.id,
+          campaignId,
+          email: lead.email,
+          firstName: lead.firstName,
+          lastName: lead.lastName,
+          company: lead.company?.name || lead.company,
+          jobTitle: lead.title || lead.jobTitle,
+          linkedinUrl: lead.linkedinUrl,
+          websiteUrl: lead.company?.website,
+          industry: lead.company?.industry,
+          location: lead.location,
+          phoneNumber: lead.phoneNumber,
+          companySize: lead.company?.size,
+          qualityScore: aiEnrichment.success ? aiEnrichment.enrichedData?.qualityScore || 50 : 50,
+          researchData: {
+            apolloData: lead,
+            aiInsights: aiEnrichment.success ? (aiEnrichment.enrichedData as any) : null,
+            enrichedAt: new Date().toISOString(),
+          },
+          personalizationTokens: {
+            personalizedOpening: aiEnrichment.enrichedData?.personalizedOpening,
+            painPoints: aiEnrichment.enrichedData?.painPoints,
+            valueProposition: aiEnrichment.enrichedData?.valueProposition,
+          },
+        },
+      })
+
+      imported++
+    }
+
+    // Deduct credits for enrichment
+    await db.user.update({
+      where: { id: user.id },
+      data: { researchCredits: { decrement: enrichmentCost } },
+    })
+
+    // Update campaign total prospects
+    await db.campaign.update({
+      where: { id: campaignId },
+      data: { totalProspects: { increment: imported } },
+    })
+
+    revalidatePath(`/dashboard/campaigns/${campaignId}`)
+    revalidatePath(`/dashboard/prospects`)
+
+    return { success: true, imported, creditsUsed: enrichmentCost }
+  } catch (error: any) {
+    console.error("[Enrich & Import Leads] Error:", error)
+    return { success: false, error: error.message || "Failed to enrich and import leads" }
+  }
+}
+
 export async function syncCRMLeads(
   crmType: string,
   folderId?: string,
