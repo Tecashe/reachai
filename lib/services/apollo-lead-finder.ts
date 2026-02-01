@@ -60,9 +60,8 @@ export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise
     // Add company size filter if present (parsing "1-10", "11-50" etc)
     // if (params.companySize) { ... } - Apollo uses organization_num_employees_ranges
 
-    // Call Apollo API - Using api_search as requested
-    // Note: This endpoint accepts JSON body, not just query params, which is cleaner
-    const response = await fetch("https://api.apollo.io/api/v1/mixed_people/api_search", {
+    // Call Apollo API - Using contacts/search as per available scopes
+    const response = await fetch("https://api.apollo.io/api/v1/contacts/search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
