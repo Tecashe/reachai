@@ -395,6 +395,7 @@ export function getProviderIcon(provider: string) {
         'LEMLIST': 'lemlist',
     }
 
+
     const iconFileName = iconMap[provider] || 'default'
 
     return (
