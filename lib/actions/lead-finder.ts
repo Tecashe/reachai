@@ -46,7 +46,7 @@ export async function findLeadsFromDescription(
   }
 
   try {
-    // Step 1: Use AI to generate target audience from description
+    // Step 1:Use AI to generate target audience from description
     const audienceResult = await generateTargetAudienceFromKeywords(description)
     if (!audienceResult.success || !audienceResult.audience) {
       return { success: false, error: "Failed to generate target audience" }
