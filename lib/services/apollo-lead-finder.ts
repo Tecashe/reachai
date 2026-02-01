@@ -30,6 +30,10 @@ interface ApolloLead {
 /**
  * Search for leads using Apollo.io API
  */
+/**
+ * Search for leads using Apollo.io API
+ * Docs: https://api.apollo.io/api/v1/mixed_people/api_search
+ */
 export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise<{
   success: boolean
   leads?: ApolloLead[]
@@ -43,36 +47,27 @@ export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise
     }
 
     // Build query parameters
-    const queryParams = new URLSearchParams()
-
-    if (params.jobTitles) {
-      params.jobTitles.forEach((title) => {
-        queryParams.append("person_titles[]", title)
-      })
+    const requestBody: any = {
+      page: 1, // Default to page 1
+      per_page: params.perPage || 25,
+      person_titles: params.jobTitles,
+      person_locations: params.locations,
+      q_keywords: params.keywords?.join(" "),
     }
 
-    if (params.locations) {
-      params.locations.forEach((loc) => {
-        queryParams.append("person_locations[]", loc)
-      })
-    }
+    // Add company size filter if present (parsing "1-10", "11-50" etc)
+    // if (params.companySize) { ... } - Apollo uses organization_num_employees_ranges
 
-    if (params.keywords) {
-      params.keywords.forEach((kw) => {
-        queryParams.append("q_keywords", kw)
-      })
-    }
-
-    queryParams.append("per_page", (params.perPage || 25).toString())
-
-    // Call Apollo API
-    const response = await fetch(`https://api.apollo.io/api/v1/mixed_people/search?${queryParams.toString()}`, {
+    // Call Apollo API - Using api_search as requested
+    // Note: This endpoint accepts JSON body, not just query params, which is cleaner
+    const response = await fetch("https://api.apollo.io/api/v1/mixed_people/api_search", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
         "x-api-key": apolloApiKey,
       },
+      body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
@@ -90,70 +85,49 @@ export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise
 
     const leads: ApolloLead[] = peopleArray.map((person: any) => {
       // Handle nested company object or direct properties
-      const companyData = person.organization || person.company || person.organization_name || {}
-      const companyName =
-        typeof companyData === "string"
-          ? companyData
-          : companyData.name || companyData.organization_name || person.company_name || "Unknown"
-
-      // Handle different email formats
-      const email = person.email || person.primary_email || person.work_email || person.email_address || ""
+      const companyData = person.organization || person.company || {}
+      const companyName = companyData.name || person.company_name || "Unknown"
 
       // Handle different name formats
-      const firstName = person.first_name || person.firstName || person.given_name || ""
-      const lastName = person.last_name || person.lastName || person.family_name || person.surname || ""
+      const firstName = person.first_name || person.firstName || ""
+      const lastName = person.last_name || person.lastName || ""
 
       // Handle different title formats
-      const title = person.title || person.job_title || person.position || person.headline || ""
+      const title = person.title || person.job_title || ""
 
       // Handle different location formats
       let location = ""
-      if (person.location) {
-        location = typeof person.location === "string" ? person.location : person.location.name
-      } else if (person.city || person.state) {
-        location = [person.city, person.state].filter(Boolean).join(", ")
-      } else if (person.country) {
-        location = person.country
+      if (person.city || person.state || person.country) {
+        location = [person.city, person.state, person.country].filter(Boolean).join(", ")
+      } else if (typeof person.location === "string") {
+        location = person.location
       }
 
-      // Handle different phone formats
-      const phoneNumber =
-        person.phone_number ||
-        person.phoneNumber ||
-        person.phone ||
-        person.mobile_phone ||
-        (person.phone_numbers && person.phone_numbers.length > 0
-          ? person.phone_numbers[0].raw_number || person.phone_numbers[0].sanitized_number || person.phone_numbers[0]
-          : undefined)
-
       return {
-        id: person.id || person.apollo_id || `${firstName}-${lastName}-${Date.now()}`,
+        id: person.id, // CRITICAL: This ID is needed for enrichment
         firstName,
         lastName,
-        email,
+        email: person.email || "", // Likely empty in api_search
         title,
         company: {
           name: companyName,
-          website: companyData.website_url || companyData.website || companyData.domain || person.company_website,
-          industry: companyData.industry || companyData.primary_industry || person.industry,
-          size:
-            companyData.estimated_num_employees ||
-            companyData.employee_count ||
-            companyData.size ||
-            person.company_size,
+          website: companyData.website_url || companyData.website,
+          industry: companyData.industry,
+          size: companyData.employee_count?.toString() || companyData.estimated_num_employees?.toString(),
         },
-        linkedinUrl: person.linkedin_url || person.linkedinUrl || person.linkedin || person.linkedin_profile_url,
+        linkedinUrl: person.linkedin_url,
         location,
-        phoneNumber,
       }
     })
 
-    const validLeads = leads.filter((lead) => lead.email && lead.email.trim() !== "")
+    // CRITICAL CHANGE: Do NOT filter by email existence.
+    // The api_search endpoint deliberately DOES NOT return emails for new prospects.
+    // We must return them so the user can select them -> then we "Reveal" (Expect cost).
 
     return {
       success: true,
-      leads: validLeads,
-      totalResults: data.pagination?.total_entries || data.total || data.count || validLeads.length,
+      leads: leads,
+      totalResults: data.pagination?.total_entries || data.total_entries || data.total || leads.length,
     }
   } catch (error: any) {
     console.error("[Apollo Lead Finder] Error:", error)
@@ -166,8 +140,9 @@ export async function searchLeadsWithApollo(params: ApolloSearchParams): Promise
 
 /**
  * Enrich a single lead using Apollo.io
+ * Now supports enriching by ID (preferred) or Email.
  */
-export async function enrichLeadWithApollo(email: string): Promise<{
+export async function enrichLeadWithApollo(identifier: { email?: string; id?: string }): Promise<{
   success: boolean
   lead?: ApolloLead
   error?: string
@@ -178,19 +153,36 @@ export async function enrichLeadWithApollo(email: string): Promise<{
       return { success: false, error: "Apollo.io API key not configured" }
     }
 
-    const response = await fetch(`https://api.apollo.io/api/v1/people/match?email=${encodeURIComponent(email)}`, {
+    // Docs: https://api.apollo.io/api/v1/people/match
+    const requestBody: any = {
+      reveal_personal_emails: true,
+      reveal_phone_number: false, // Optional, costs extra
+    }
+
+    if (identifier.id) {
+      requestBody.id = identifier.id
+    } else if (identifier.email) {
+      requestBody.email = identifier.email
+    } else {
+      return { success: false, error: "Must provide either ID or Email for enrichment" }
+    }
+
+    const response = await fetch("https://api.apollo.io/api/v1/people/match", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
         "x-api-key": apolloApiKey,
       },
+      body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
+      // ... (error handling)
+      const errorData = await response.json().catch(() => null)
       return {
         success: false,
-        error: `Enrichment failed: ${response.statusText}`,
+        error: errorData?.message || `Enrichment failed: ${response.statusText}`,
       }
     }
 
@@ -198,48 +190,25 @@ export async function enrichLeadWithApollo(email: string): Promise<{
     const person = data.person
 
     if (!person) {
-      return { success: false, error: "No data found for this email" }
+      return { success: false, error: "No data found for this person" }
     }
 
+    // Normalize enriched data
     const lead: ApolloLead = {
-      id: person.id || person.apollo_id || `${person.first_name}-${person.last_name}-${Date.now()}`,
-      firstName: person.first_name || person.firstName || person.given_name || "",
-      lastName: person.last_name || person.lastName || person.family_name || person.surname || "",
-      email: person.email || person.primary_email || person.work_email || person.email_address || "",
-      title: person.title || person.job_title || person.position || person.headline || "",
+      id: person.id,
+      firstName: person.first_name || identifier.email?.split('@')[0] || "Unknown", // Fallback
+      lastName: person.last_name || "",
+      email: person.email || identifier.email || "", // The revealed email!
+      title: person.title || "",
       company: {
-        name:
-          person.organization?.name ||
-          person.company?.name ||
-          person.organization_name ||
-          person.company_name ||
-          "Unknown",
-        website:
-          person.organization?.website_url ||
-          person.company?.website ||
-          person.organization?.domain ||
-          person.company_website,
-        industry:
-          person.organization?.industry ||
-          person.company?.industry ||
-          person.organization?.primary_industry ||
-          person.industry,
-        size:
-          person.organization?.estimated_num_employees ||
-          person.company?.employee_count ||
-          person.organization?.size ||
-          person.company_size,
+        name: person.organization?.name || person.organization_name || "Unknown",
+        website: person.organization?.website_url || person.organization?.domain,
+        industry: person.organization?.industry,
+        size: person.organization?.estimated_num_employees,
       },
-      linkedinUrl: person.linkedin_url || person.linkedinUrl || person.linkedin || person.linkedin_profile_url,
-      location: person.location?.name || [person.city, person.state].filter(Boolean).join(", ") || person.country || "",
-      phoneNumber:
-        person.phone_number ||
-        person.phoneNumber ||
-        person.phone ||
-        person.mobile_phone ||
-        (person.phone_numbers && person.phone_numbers.length > 0
-          ? person.phone_numbers[0].raw_number || person.phone_numbers[0].sanitized_number || person.phone_numbers[0]
-          : undefined),
+      linkedinUrl: person.linkedin_url,
+      location: person.city ? `${person.city}, ${person.state || person.country}` : person.country,
+      phoneNumber: person.phone_numbers?.[0]?.sanitized_number,
     }
 
     return { success: true, lead }

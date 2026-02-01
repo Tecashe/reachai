@@ -3,7 +3,7 @@
 
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
-import { searchLeadsWithApollo } from "@/lib/services/apollo-lead-finder"
+import { searchLeadsWithApollo, enrichLeadWithApollo } from "@/lib/services/apollo-lead-finder"
 import { enrichLeadWithAI, generateTargetAudienceFromKeywords } from "@/lib/services/ai-lead-enrichement"
 import { revalidatePath } from "next/cache"
 import { syncLeadsFromCRM, type CrmCredentials } from "@/lib/services/crm-integrations"
@@ -380,11 +380,29 @@ export async function enrichAndImportSelectedLeads(
     let imported = 0
 
     for (const lead of selectedLeads) {
+      // Step 0: Ensure we have an email (Apollo Enrichment)
+      let leadWithContactInfo = lead
+
+      // If no email, we must enrich with Apollo first to reveal it
+      if (!lead.email || lead.email.trim() === "") {
+        console.log(`[Enrich & Import] Revealing email for lead ${lead.id}...`)
+        const apolloEnrichment = await enrichLeadWithApollo({ id: lead.id })
+
+        if (!apolloEnrichment.success || !apolloEnrichment.lead || !apolloEnrichment.lead.email) {
+          console.warn(`[Enrich & Import] Failed to reveal email for lead ${lead.id}. Skipping.`, apolloEnrichment.error)
+          continue
+        }
+
+        leadWithContactInfo = apolloEnrichment.lead
+      }
+
+      const finalLead = leadWithContactInfo
+
       // Check if prospect already exists
       const existing = await db.prospect.findUnique({
         where: {
           email_campaignId: {
-            email: lead.email,
+            email: finalLead.email,
             campaignId,
           },
         },
@@ -394,12 +412,12 @@ export async function enrichAndImportSelectedLeads(
 
       // Enrich this lead with AI
       const aiEnrichment = await enrichLeadWithAI({
-        firstName: lead.firstName,
-        lastName: lead.lastName,
-        company: lead.company?.name || lead.company,
-        title: lead.title,
-        linkedinUrl: lead.linkedinUrl,
-        websiteUrl: lead.company?.website,
+        firstName: finalLead.firstName,
+        lastName: finalLead.lastName,
+        company: finalLead.company?.name || finalLead.company,
+        title: finalLead.title,
+        linkedinUrl: finalLead.linkedinUrl,
+        websiteUrl: finalLead.company?.website,
       })
 
       // Create prospect with enriched data
@@ -407,20 +425,20 @@ export async function enrichAndImportSelectedLeads(
         data: {
           userId: user.id,
           campaignId,
-          email: lead.email,
-          firstName: lead.firstName,
-          lastName: lead.lastName,
-          company: lead.company?.name || lead.company,
-          jobTitle: lead.title || lead.jobTitle,
-          linkedinUrl: lead.linkedinUrl,
-          websiteUrl: lead.company?.website,
-          industry: lead.company?.industry,
-          location: lead.location,
-          phoneNumber: lead.phoneNumber,
-          companySize: lead.company?.size,
+          email: finalLead.email,
+          firstName: finalLead.firstName,
+          lastName: finalLead.lastName,
+          company: finalLead.company?.name || finalLead.company,
+          jobTitle: finalLead.title || finalLead.jobTitle,
+          linkedinUrl: finalLead.linkedinUrl,
+          websiteUrl: finalLead.company?.website,
+          industry: finalLead.company?.industry,
+          location: finalLead.location,
+          phoneNumber: finalLead.phoneNumber,
+          companySize: finalLead.company?.size,
           qualityScore: aiEnrichment.success ? aiEnrichment.enrichedData?.qualityScore || 50 : 50,
           researchData: {
-            apolloData: lead,
+            apolloData: finalLead,
             aiInsights: aiEnrichment.success ? (aiEnrichment.enrichedData as any) : null,
             enrichedAt: new Date().toISOString(),
           },
