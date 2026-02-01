@@ -43,8 +43,8 @@ interface ProspectsPageClientProps {
   researchCredits: number
 }
 
-export function ProspectsPageClient({ 
-  initialFolders, 
+export function ProspectsPageClient({
+  initialFolders,
   initialTrashedCount,
   subscriptionTier,
   researchCredits: initialResearchCredits
@@ -230,18 +230,19 @@ export function ProspectsPageClient({
             </Button>
             {/* <CRMImportDialog /> */}
 
-            <CRMImportDialog 
-              folderId={selectedFolderId||""} 
-              onImportComplete={handleRefreshData} 
+            <CRMImportDialog
+              folderId={selectedFolderId || ""}
+              onImportComplete={handleRefreshData}
             />
 
-            <ApolloLeadFinderDialog 
-              subscriptionTier={subscriptionTier} 
+            <ApolloLeadFinderDialog
+              subscriptionTier={subscriptionTier}
               researchCredits={researchCredits}
               onCreditsChange={handleCreditsChange}
+              folderId={selectedFolderId || undefined}
             />
             <SmartImportDialog
-              folderId={selectedFolderId||""}
+              folderId={selectedFolderId || ""}
               folderName={selectedFolder?.name}
               onImportComplete={handleRefreshData}
               trigger={

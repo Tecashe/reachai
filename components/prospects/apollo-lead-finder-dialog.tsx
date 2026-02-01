@@ -77,6 +77,7 @@ interface ApolloLeadFinderDialogProps {
   subscriptionTier: string
   researchCredits: number
   campaignId?: string
+  folderId?: string
   onCreditsChange?: () => void
   onLeadsImported?: () => void
 }
@@ -95,6 +96,7 @@ export function ApolloLeadFinderDialog({
   subscriptionTier,
   researchCredits,
   campaignId,
+  folderId,
   onCreditsChange,
   onLeadsImported,
 }: ApolloLeadFinderDialogProps) {
@@ -232,9 +234,10 @@ export function ApolloLeadFinderDialog({
       return
     }
 
-    if (!campaignId) {
-      toast.error("No campaign selected. Please select a campaign first.")
-      return
+    if (!campaignId && !folderId) {
+      toast.error("No campaign or folder selected. leads will be imported to 'All Prospects'.")
+      // It is allowed now, just warning is fine or we can skip check.
+      // But actually, we enforced campaignId before.
     }
 
     if (!hasEnoughCreditsForEnrichment) {
@@ -253,7 +256,8 @@ export function ApolloLeadFinderDialog({
       setProgress(30)
       toast.info(`Enriching ${selectedCount} leads with AI insights...`)
 
-      const result = await enrichAndImportSelectedLeads(selectedLeads, campaignId)
+      // Updated to pass folderId as 3rd arg
+      const result = await enrichAndImportSelectedLeads(selectedLeads, campaignId, folderId)
 
       setProgress(100)
 
@@ -688,7 +692,7 @@ export function ApolloLeadFinderDialog({
               </Button>
               <Button
                 onClick={handleImportSelected}
-                disabled={selectedCount === 0 || !hasEnoughCreditsForEnrichment || !campaignId}
+                disabled={selectedCount === 0 || !hasEnoughCreditsForEnrichment || (!campaignId && !folderId && false)}
               >
                 <Rocket className="mr-2 h-4 w-4" />
                 Import {selectedCount} Lead{selectedCount !== 1 ? "s" : ""} ({enrichmentCost} credits)

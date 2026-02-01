@@ -352,7 +352,8 @@ export async function enrichLeadsWithAI(leads: any[]): Promise<{
  */
 export async function enrichAndImportSelectedLeads(
   selectedLeads: any[],
-  campaignId: string,
+  campaignId?: string,
+  folderId?: string
 ): Promise<{
   success: boolean
   imported?: number
@@ -402,32 +403,62 @@ export async function enrichAndImportSelectedLeads(
       const finalLead = leadWithContactInfo
 
       // Check if prospect already exists
-      const existing = await db.prospect.findUnique({
-        where: {
-          email_campaignId: {
-            email: finalLead.email,
-            campaignId,
+      // Logic: 
+      // 1. If importing to Campaign: check uniqueness by email+campaignId
+      // 2. If importing to Folder/General: check uniqueness by email+userId (to avoid duplicate prospects for user generally, though maybe we allow repeats in diff folders?)
+      // For now, let's keep it simple: If in campaign, check campaign uniqueness.
+
+      let existing = null;
+      if (campaignId) {
+        existing = await db.prospect.findUnique({
+          where: {
+            email_campaignId: {
+              email: finalLead.email,
+              campaignId,
+            },
           },
-        },
-      })
+        })
+      } else {
+        // If just importing to folder or general list, check if this email exists for this user in ANY campaign or general pool?
+        // This is tricky. For now, let's just create it. 
+        // If we want to prevent global duplicates, we'd need a different query.
+        // Let's assume user can have same email in different campaigns, but maybe not multiple "floating" prospects.
+        // For safety, let's check if there is a prospect with no campaignId for this user/email.
+        const existingGeneric = await db.prospect.findFirst({
+          where: {
+            userId: user.id,
+            email: finalLead.email,
+            campaignId: null
+          }
+        });
+        existing = existingGeneric;
+      }
 
       if (existing) continue
 
       // Enrich this lead with AI
-      const aiEnrichment = await enrichLeadWithAI({
-        firstName: finalLead.firstName,
-        lastName: finalLead.lastName,
-        company: finalLead.company?.name || finalLead.company,
-        title: finalLead.title,
-        linkedinUrl: finalLead.linkedinUrl,
-        websiteUrl: finalLead.company?.website,
-      })
+      // NOTE: Skip AI enrichment if specifically requested or if cost is an issue, 
+      // but function assumes we enrich.
+      // We kept the AI code here but user said "not use AI for now". 
+      // I will wrap this in a try/catch or skip if previous steps failed?
+      // Actually, let's just do it, or return basic data if AI fails.
+
+      let aiInsights = null
+      try {
+        // Temporarily skip AI call to speed up and avoid gateway errors? 
+        // User asked to avoid AI. I will skip the actual AI call and use placeholders.
+        // const aiEnrichment = await enrichLeadWithAI(...) 
+        // aiInsights = aiEnrichment.success ? ...
+      } catch (e) {
+        console.warn("AI Enrichment skipped/failed", e)
+      }
 
       // Create prospect with enriched data
       await db.prospect.create({
         data: {
           userId: user.id,
-          campaignId,
+          campaignId: campaignId || null,
+          folderId: folderId || null,
           email: finalLead.email,
           firstName: finalLead.firstName,
           lastName: finalLead.lastName,
@@ -439,16 +470,16 @@ export async function enrichAndImportSelectedLeads(
           location: finalLead.location,
           phoneNumber: finalLead.phoneNumber,
           companySize: finalLead.company?.size,
-          qualityScore: aiEnrichment.success ? aiEnrichment.enrichedData?.qualityScore || 50 : 50,
+          qualityScore: 50, // Default since we skipped AI
           researchData: {
             apolloData: finalLead,
-            aiInsights: aiEnrichment.success ? (aiEnrichment.enrichedData as any) : null,
+            aiInsights: null, // Skipped
             enrichedAt: new Date().toISOString(),
           },
           personalizationTokens: {
-            personalizedOpening: aiEnrichment.enrichedData?.personalizedOpening,
-            painPoints: aiEnrichment.enrichedData?.painPoints,
-            valueProposition: aiEnrichment.enrichedData?.valueProposition,
+            personalizedOpening: null,
+            painPoints: null,
+            valueProposition: null,
           },
         },
       })
@@ -462,13 +493,15 @@ export async function enrichAndImportSelectedLeads(
       data: { researchCredits: { decrement: enrichmentCost } },
     })
 
-    // Update campaign total prospects
-    await db.campaign.update({
-      where: { id: campaignId },
-      data: { totalProspects: { increment: imported } },
-    })
+    // Update campaign total prospects if applicable
+    if (campaignId) {
+      await db.campaign.update({
+        where: { id: campaignId },
+        data: { totalProspects: { increment: imported } },
+      })
+      revalidatePath(`/dashboard/campaigns/${campaignId}`)
+    }
 
-    revalidatePath(`/dashboard/campaigns/${campaignId}`)
     revalidatePath(`/dashboard/prospects`)
 
     return { success: true, imported, creditsUsed: enrichmentCost }
