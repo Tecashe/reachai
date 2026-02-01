@@ -58,9 +58,9 @@ model User {
 
   preferences Json? // { scrapingMode: "FAST" | "DEEP", ... }
 
-  subscription         Subscription?
-  sendingAccounts      SendingAccount[]
-  prospectFolders      ProspectFolder[]
+  subscription    Subscription?
+  sendingAccounts SendingAccount[]
+  prospectFolders ProspectFolder[]
   workspaceDelegations WorkspaceDelegation[]
 
   // Relationships
@@ -395,29 +395,6 @@ model EmailLog {
   @@index([variantGroup])
 }
 
-model OAuthToken {
-  id            String      @id @default(cuid())
-  integrationId String      @unique
-  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-
-  provider     String
-  accessToken  String    @db.Text
-  refreshToken String?   @db.Text
-  expiresAt    DateTime?
-  scope        String?
-  tokenType    String?
-  raw          Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  User      User?    @relation(fields: [userId], references: [id])
-  userId    String?
-
-  @@index([integrationId])
-  @@index([provider])
-  @@index([expiresAt])
-}
-
 model Integration {
   id     String @id @default(cuid())
   userId String
@@ -426,36 +403,21 @@ model Integration {
   type IntegrationType
   name String
 
-  // OAuth info
-  provider     String?
-  accountName  String?
-  accountEmail String?
-  oauthState   String?
-
   // Credentials (encrypted)
-  credentials Json
+  credentials Json // Encrypted API keys, tokens, etc.
 
-  // Status & sync
-  isActive         Boolean   @default(true)
-  lastSyncedAt     DateTime?
-  lastError        String?
-  disconnectReason String?
+  // Status
+  isActive     Boolean   @default(true)
+  lastSyncedAt DateTime?
 
   // Settings
-  settings   Json? //Provider-specific settings
-  syncConfig Json? //Sync configuration
-  metadata   Json? //Additional metadata
-
-  // OAuth Token relationship
-  oauthToken OAuthToken?
+  settings Json? // Provider-specific settings
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, type])
   @@index([userId])
-  @@index([provider])
-  @@index([isActive])
 }
 
 model Analytics {
@@ -647,12 +609,12 @@ model SendingAccount {
   credentials Json // API keys, OAuth tokens, etc.
 
   // Rate limiting
-  dailyLimit         Int       @default(50)
-  hourlyLimit        Int       @default(10)
-  emailsSentToday    Int       @default(0)
-  emailsSentThisHour Int       @default(0)
-  lastResetDate      DateTime  @default(now())
-  lastResetHour      DateTime  @default(now())
+  dailyLimit         Int      @default(50)
+  hourlyLimit        Int      @default(10)
+  emailsSentToday    Int      @default(0)
+  emailsSentThisHour Int      @default(0)
+  lastResetDate      DateTime @default(now())
+  lastResetHour      DateTime @default(now())
   lastSentAt         DateTime?
 
   warmupEnabled    Boolean     @default(true)
@@ -680,6 +642,7 @@ model SendingAccount {
   connectionType   String? // "oauth", "smtp", "workspace-delegation"
   workspaceDomain  String? // For workspace delegation (e.g., "company.com")
   delegationStatus String? // "pending", "verified", "failed"
+ 
 
   rotatedAt     DateTime? // Last time account was rotated due to health issues
   rotationCount Int       @default(0) // Number of times account has been rotated
@@ -708,7 +671,7 @@ model SendingAccount {
   poolMemberships        PoolMembership[]
 
   // Peer replies this account needs to send
-  pendingPeerReplies WarmupInteraction[] @relation("PeerReplies")
+  pendingPeerReplies     WarmupInteraction[]  @relation("PeerReplies")
 
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
@@ -742,7 +705,7 @@ model WorkspaceDelegation {
   // Verification tracking
   lastVerifiedAt     DateTime?
   lastVerifiedBy     String? // Email of person who verified
-  verificationResult String?   @db.Text
+  verificationResult String? @db.Text
 
   // Health monitoring
   healthStatus      String    @default("unknown") // "unknown", "healthy", "degraded", "unhealthy"
@@ -750,10 +713,11 @@ model WorkspaceDelegation {
   healthCheckResult Json?
 
   // Error tracking
-  errorCount Int      @default(0)
-  lastError  String?  @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  errorCount Int     @default(0)
+  lastError  String? @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
 
   @@index([userId])
   @@index([domain])
@@ -1255,11 +1219,11 @@ model WarmupInteraction {
   isPending Boolean @default(false)
 
   // Peer reply tracking - for true peer-to-peer warmup
-  isPendingPeerReply  Boolean         @default(false) // Waiting for peer to reply
-  replyFromAccountId  String? // The peer account that should send the reply
-  replyFromAccount    SendingAccount? @relation("PeerReplies", fields: [replyFromAccountId], references: [id])
-  scheduledAt         DateTime? // When the peer reply should be sent
-  originalSenderEmail String? // Email of the original sender (for reply addressing)
+  isPendingPeerReply   Boolean         @default(false)  // Waiting for peer to reply
+  replyFromAccountId   String?                           // The peer account that should send the reply
+  replyFromAccount     SendingAccount? @relation("PeerReplies", fields: [replyFromAccountId], references: [id])
+  scheduledAt          DateTime?                         // When the peer reply should be sent
+  originalSenderEmail  String?                           // Email of the original sender (for reply addressing)
 
   createdAt DateTime @default(now())
 
@@ -1271,7 +1235,7 @@ model WarmupInteraction {
   @@index([warmupId])
   @@index([threadId])
   @@index([inReplyTo])
-  @@index([isPendingPeerReply, scheduledAt]) // Compound index for peer reply processing
+  @@index([isPendingPeerReply, scheduledAt])  // Compound index for peer reply processing
   @@index([replyFromAccountId])
 }
 
@@ -1287,35 +1251,35 @@ model WarmupThread {
   recipientAccount   SendingAccount @relation("ThreadRecipient", fields: [recipientAccountId], references: [id], onDelete: Cascade)
 
   // Thread metadata
-  subject String // Original subject line
-  topic   String? // Conversation topic (networking, follow-up, etc.)
-  status  WarmupThreadStatus @default(ACTIVE)
+  subject       String            // Original subject line
+  topic         String?           // Conversation topic (networking, follow-up, etc.)
+  status        WarmupThreadStatus @default(ACTIVE)
 
   // Conversation tracking
-  messageCount    Int       @default(0) // Total messages in thread
-  maxMessages     Int       @default(6) // Max messages before completing
-  lastSenderId    String? // Who sent the last message
-  nextScheduledAt DateTime? // When next message should be sent
+  messageCount      Int       @default(0)   // Total messages in thread
+  maxMessages       Int       @default(6)   // Max messages before completing
+  lastSenderId      String?                 // Who sent the last message
+  nextScheduledAt   DateTime?               // When next message should be sent
 
   // Thread timing
-  responseTimeMin Int @default(30) // Minimum minutes between replies
-  responseTimeMax Int @default(1440) // Maximum minutes between replies (24 hours)
+  responseTimeMin   Int       @default(30)  // Minimum minutes between replies
+  responseTimeMax   Int       @default(1440) // Maximum minutes between replies (24 hours)
 
   // Engagement
-  includeLinks       Boolean @default(false)
-  includeAttachments Boolean @default(false)
+  includeLinks      Boolean   @default(false)
+  includeAttachments Boolean  @default(false)
 
   // Stats
-  totalOpens   Int @default(0)
-  totalReplies Int @default(0)
+  totalOpens        Int       @default(0)
+  totalReplies      Int       @default(0)
 
   // Relationships
-  interactions WarmupInteraction[]
+  interactions      WarmupInteraction[]
 
-  startedAt   DateTime  @default(now())
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@index([initiatorAccountId])
   @@index([recipientAccountId])
@@ -1324,10 +1288,10 @@ model WarmupThread {
 }
 
 enum WarmupThreadStatus {
-  ACTIVE // Thread is ongoing
-  PAUSED // Temporarily paused
-  COMPLETED // Reached max messages
-  FAILED // Error during thread
+  ACTIVE      // Thread is ongoing
+  PAUSED      // Temporarily paused
+  COMPLETED   // Reached max messages
+  FAILED      // Error during thread
 }
 
 model WebhookEvent {
@@ -1696,30 +1660,9 @@ enum IntegrationType {
   RESEND
   OPENAI
   STRIPE
-  AIRTABLE
-  AMPLITUDE
-  ASANA
-  CLICKUP
-  CODA
-  GOOGLE_DOCS
-  GOOGLE_SHEETS
   HUBSPOT
-  INTERCOM
-  KLAVIYO
-  MAILCHIMP
-  MIXPANEL
-  NOTION
-  PIPEDRIVE
   SALESFORCE
-  SEGMENT
-  SERVICENOW
-  TRELLO
-  ZENDESK
-  ZOHO_CRM
-  SLACK
-  APOLLO
-  LEMLIST
-  HIGHLEVEL
+  PIPEDRIVE
 }
 
 enum TeamRole {
