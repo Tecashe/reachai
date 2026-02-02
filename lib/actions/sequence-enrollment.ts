@@ -101,12 +101,19 @@ export async function enrollCampaignInSequence(campaignId: string, sequenceId: s
     // Trigger automation for each enrolled prospect
     for (const prospect of campaign.prospects) {
       try {
-        await triggerSequenceAutomation('SEQUENCE_ENROLLED', {
-          sequenceId: sequence.id,
-          prospectId: prospect.id,
-          userId: user.id,
-          campaignId,
+        // Get the enrollment ID for this prospect
+        const enrollment = await db.sequenceEnrollment.findFirst({
+          where: {
+            sequenceId: sequence.id,
+            prospectId: prospect.id,
+          },
         })
+        if (enrollment) {
+          await triggerSequenceAutomation('SEQUENCE_ENROLLED', user.id, enrollment.id, {
+            sequenceId: sequence.id,
+            prospectId: prospect.id,
+          })
+        }
       } catch (automationError) {
         console.warn('Failed to trigger automation for sequence enrollment', automationError)
       }
@@ -151,10 +158,9 @@ export async function unenrollProspect(enrollmentId: string, reason?: string) {
 
     // Trigger automation for sequence exit
     try {
-      await triggerSequenceAutomation('SEQUENCE_EXITED', {
+      await triggerSequenceAutomation('SEQUENCE_EXITED', user.id, enrollment.id, {
         sequenceId: enrollment.sequenceId,
         prospectId: enrollment.prospectId,
-        userId: user.id,
         exitReason: 'MANUAL',
       })
     } catch (automationError) {

@@ -221,10 +221,11 @@ model Prospect {
   dealScore   Float? // AI deal score 0-100
 
   // Relationships
-  emailLogs        EmailLog[]
-  sendingSchedules SendingSchedule[]
-  replies          EmailReply[]
-  folders          ProspectInFolder[]
+  emailLogs           EmailLog[]
+  sendingSchedules    SendingSchedule[]
+  replies             EmailReply[]
+  folders             ProspectInFolder[]
+  sequenceEnrollments SequenceEnrollment[]
 
   timezone           String?
   timezoneDetectedAt DateTime?
@@ -2216,6 +2217,7 @@ model SequenceEnrollment {
   sequence   Sequence @relation(fields: [sequenceId], references: [id], onDelete: Cascade)
 
   prospectId String
+  prospect   Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
 
   status      EnrollmentStatus @default(ACTIVE)
   currentStep Int              @default(0)

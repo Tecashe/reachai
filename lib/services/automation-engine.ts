@@ -14,6 +14,7 @@ import type {
     AutomationAction
 } from '@/lib/types/automation-types'
 import type { AutomationTriggerType, Automation, AutomationExecutionStatus } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 // ============================================================
 // AUTOMATION ENGINE
@@ -304,9 +305,9 @@ class AutomationEngine {
                 return fieldValue !== null && fieldValue !== undefined && fieldValue !== '' &&
                     !(Array.isArray(fieldValue) && fieldValue.length === 0)
             case 'in':
-                return Array.isArray(targetValue) && targetValue.includes(fieldValue)
+                return Array.isArray(targetValue) && (targetValue as unknown[]).includes(fieldValue)
             case 'notIn':
-                return Array.isArray(targetValue) && !targetValue.includes(fieldValue)
+                return Array.isArray(targetValue) && !(targetValue as unknown[]).includes(fieldValue)
             default:
                 return false
         }
@@ -360,13 +361,13 @@ class AutomationEngine {
      */
     private async queueExecution(automation: Automation, event: TriggerEvent): Promise<void> {
         // Create execution record
-        const actions = automation.actions as AutomationAction[]
+        const actions = automation.actions as unknown as AutomationAction[]
         const execution = await db.automationExecution.create({
             data: {
                 automationId: automation.id,
                 triggerEntityType: event.entityType,
                 triggerEntityId: event.entityId,
-                triggerData: event.data as Record<string, unknown>,
+                triggerData: event.data as Prisma.InputJsonValue,
                 status: 'PENDING',
                 totalActions: actions.length
             }

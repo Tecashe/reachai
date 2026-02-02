@@ -88,26 +88,26 @@ const TRIGGER_ICONS: Record<string, React.ElementType> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    DRAFT: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-    ACTIVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    PAUSED: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    ARCHIVED: 'bg-red-500/10 text-red-400 border-red-500/20'
+    DRAFT: 'bg-muted text-muted-foreground border-border',
+    ACTIVE: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+    PAUSED: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    ARCHIVED: 'bg-destructive/10 text-destructive border-destructive/20'
 }
 
 const EXECUTION_STATUS_COLORS: Record<string, string> = {
-    PENDING: 'text-slate-400',
-    RUNNING: 'text-blue-400',
-    WAITING: 'text-amber-400',
-    COMPLETED: 'text-emerald-400',
-    FAILED: 'text-red-400',
-    CANCELLED: 'text-gray-400'
+    PENDING: 'text-muted-foreground',
+    RUNNING: 'text-blue-600 dark:text-blue-400',
+    WAITING: 'text-amber-600 dark:text-amber-400',
+    COMPLETED: 'text-green-600 dark:text-green-400',
+    FAILED: 'text-destructive',
+    CANCELLED: 'text-muted-foreground'
 }
 
 const LOG_LEVEL_COLORS: Record<string, string> = {
-    DEBUG: 'text-slate-400 bg-slate-500/10',
-    INFO: 'text-blue-400 bg-blue-500/10',
-    WARNING: 'text-amber-400 bg-amber-500/10',
-    ERROR: 'text-red-400 bg-red-500/10'
+    DEBUG: 'text-muted-foreground bg-muted',
+    INFO: 'text-blue-600 dark:text-blue-400 bg-blue-500/10',
+    WARNING: 'text-amber-600 dark:text-amber-400 bg-amber-500/10',
+    ERROR: 'text-destructive bg-destructive/10'
 }
 
 export default function AutomationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -189,10 +189,10 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8">
+            <div className="min-h-screen bg-background p-8">
                 <div className="max-w-5xl mx-auto">
-                    <div className="h-12 bg-slate-800 rounded animate-pulse mb-8" />
-                    <div className="h-96 bg-slate-800 rounded animate-pulse" />
+                    <div className="h-12 bg-muted rounded animate-pulse mb-8" />
+                    <div className="h-96 bg-muted rounded animate-pulse" />
                 </div>
             </div>
         )
@@ -200,11 +200,11 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
 
     if (!automation) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8 flex items-center justify-center">
-                <Card className="bg-slate-800/50 border-slate-700">
+            <div className="min-h-screen bg-background p-8 flex items-center justify-center">
+                <Card className="bg-card border-border">
                     <CardContent className="p-8 text-center">
-                        <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-                        <h2 className="text-xl font-semibold text-white mb-2">Automation not found</h2>
+                        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+                        <h2 className="text-xl font-semibold text-foreground mb-2">Automation not found</h2>
                         <Button onClick={() => router.push('/dashboard/automations')} className="mt-4">
                             Back to Automations
                         </Button>
@@ -220,7 +220,7 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
         : '0.0'
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="min-h-screen bg-background">
             <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -229,25 +229,25 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                             variant="ghost"
                             size="sm"
                             onClick={() => router.push('/dashboard/automations')}
-                            className="text-slate-400 hover:text-white"
+                            className="text-muted-foreground hover:text-foreground"
                         >
                             <ArrowLeft className="h-4 w-4 mr-2" />
                             Back
                         </Button>
                         <div className="flex items-center gap-3">
                             <div className={`p-3 rounded-xl ${automation.status === 'ACTIVE'
-                                    ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-400'
-                                    : 'bg-slate-700/50 text-slate-400'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-muted text-muted-foreground'
                                 }`}>
                                 <TriggerIcon className="h-6 w-6" />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-white">{automation.name}</h1>
+                                <h1 className="text-2xl font-bold text-foreground">{automation.name}</h1>
                                 <div className="flex items-center gap-2 mt-1">
                                     <Badge className={STATUS_COLORS[automation.status]}>
                                         {automation.status}
                                     </Badge>
-                                    <span className="text-sm text-slate-500">
+                                    <span className="text-sm text-muted-foreground">
                                         {automation.triggerType.replace(/_/g, ' ')}
                                     </span>
                                 </div>
@@ -259,7 +259,7 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                             <Button
                                 variant="outline"
                                 onClick={handlePause}
-                                className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10"
+                                className="border-amber-500/50 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
                             >
                                 <Pause className="h-4 w-4 mr-2" />
                                 Pause
@@ -267,7 +267,7 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                         ) : (
                             <Button
                                 onClick={handleActivate}
-                                className="bg-emerald-600 hover:bg-emerald-500"
+                                className="bg-green-600 hover:bg-green-500 text-white"
                             >
                                 <Play className="h-4 w-4 mr-2" />
                                 Activate
@@ -276,7 +276,7 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                         <Button
                             variant="outline"
                             onClick={handleDelete}
-                            className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                            className="border-destructive/50 text-destructive hover:bg-destructive/10"
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
@@ -285,41 +285,41 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <Card className="bg-slate-800/50 border-slate-700/50">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Total Runs</div>
-                            <div className="text-2xl font-bold text-white">{automation.totalRuns}</div>
+                            <div className="text-sm text-muted-foreground">Total Runs</div>
+                            <div className="text-2xl font-bold text-foreground">{automation.totalRuns}</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Successful</div>
-                            <div className="text-2xl font-bold text-emerald-400">{automation.successfulRuns}</div>
+                            <div className="text-sm text-muted-foreground">Successful</div>
+                            <div className="text-2xl font-bold text-green-600 dark:text-green-400">{automation.successfulRuns}</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Failed</div>
-                            <div className="text-2xl font-bold text-red-400">{automation.failedRuns}</div>
+                            <div className="text-sm text-muted-foreground">Failed</div>
+                            <div className="text-2xl font-bold text-destructive">{automation.failedRuns}</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Success Rate</div>
-                            <div className="text-2xl font-bold text-white">{successRate}%</div>
+                            <div className="text-sm text-muted-foreground">Success Rate</div>
+                            <div className="text-2xl font-bold text-foreground">{successRate}%</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Today</div>
-                            <div className="text-2xl font-bold text-white">{automation.runsToday}/{automation.runsPerDay}</div>
+                            <div className="text-sm text-muted-foreground">Today</div>
+                            <div className="text-2xl font-bold text-foreground">{automation.runsToday}/{automation.runsPerDay}</div>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="bg-slate-800/50 border border-slate-700">
+                    <TabsList className="bg-muted border border-border">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="executions">Executions</TabsTrigger>
                         <TabsTrigger value="logs">Logs</TabsTrigger>
@@ -328,29 +328,29 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                     <TabsContent value="overview" className="mt-6 space-y-6">
                         {/* Description */}
                         {automation.description && (
-                            <Card className="bg-slate-800/50 border-slate-700/50">
+                            <Card className="bg-card border-border">
                                 <CardContent className="p-4">
-                                    <p className="text-slate-300">{automation.description}</p>
+                                    <p className="text-foreground">{automation.description}</p>
                                 </CardContent>
                             </Card>
                         )}
 
                         {/* Trigger & Actions */}
                         <div className="grid md:grid-cols-2 gap-6">
-                            <Card className="bg-slate-800/50 border-slate-700/50">
+                            <Card className="bg-card border-border">
                                 <CardHeader>
-                                    <CardTitle className="text-white text-lg flex items-center gap-2">
-                                        <Zap className="h-4 w-4 text-amber-400" />
+                                    <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                        <Zap className="h-4 w-4 text-primary" />
                                         Trigger
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                                        <div className="font-medium text-white">
+                                    <div className="p-4 rounded-lg bg-primary/5 border border-primary/30">
+                                        <div className="font-medium text-foreground">
                                             {automation.triggerType.replace(/_/g, ' ')}
                                         </div>
                                         {Object.keys(automation.triggerConfig || {}).length > 0 && (
-                                            <pre className="mt-2 text-sm text-slate-400 overflow-auto">
+                                            <pre className="mt-2 text-sm text-muted-foreground overflow-auto">
                                                 {JSON.stringify(automation.triggerConfig, null, 2)}
                                             </pre>
                                         )}
@@ -358,10 +358,10 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-slate-800/50 border-slate-700/50">
+                            <Card className="bg-card border-border">
                                 <CardHeader>
-                                    <CardTitle className="text-white text-lg flex items-center gap-2">
-                                        <Activity className="h-4 w-4 text-violet-400" />
+                                    <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                                        <Activity className="h-4 w-4 text-primary" />
                                         Actions ({(automation.actions as unknown[]).length})
                                     </CardTitle>
                                 </CardHeader>
@@ -370,15 +370,15 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                                         {(automation.actions as any[]).map((action, i) => (
                                             <div
                                                 key={action.id || i}
-                                                className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/30 flex items-center gap-3"
+                                                className="p-3 rounded-lg bg-primary/5 border border-primary/30 flex items-center gap-3"
                                             >
-                                                <Badge variant="outline" className="bg-slate-800 text-slate-400 border-slate-600">
+                                                <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
                                                     {i + 1}
                                                 </Badge>
                                                 <div>
-                                                    <div className="font-medium text-white text-sm">{action.name || action.type}</div>
+                                                    <div className="font-medium text-foreground text-sm">{action.name || action.type}</div>
                                                     {action.delayMinutes > 0 && (
-                                                        <div className="text-xs text-slate-400">
+                                                        <div className="text-xs text-muted-foreground">
                                                             <Clock className="inline h-3 w-3 mr-1" />
                                                             Wait {action.delayMinutes}m
                                                         </div>
@@ -392,9 +392,9 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                         </div>
 
                         {/* Settings */}
-                        <Card className="bg-slate-800/50 border-slate-700/50">
+                        <Card className="bg-card border-border">
                             <CardHeader>
-                                <CardTitle className="text-white text-lg flex items-center gap-2">
+                                <CardTitle className="text-foreground text-lg flex items-center gap-2">
                                     <Settings className="h-4 w-4" />
                                     Settings
                                 </CardTitle>
@@ -402,24 +402,24 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                             <CardContent>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                     <div>
-                                        <div className="text-slate-400">Rate Limit (hourly)</div>
-                                        <div className="text-white font-medium">{automation.runsPerHour}/hour</div>
+                                        <div className="text-muted-foreground">Rate Limit (hourly)</div>
+                                        <div className="text-foreground font-medium">{automation.runsPerHour}/hour</div>
                                     </div>
                                     <div>
-                                        <div className="text-slate-400">Rate Limit (daily)</div>
-                                        <div className="text-white font-medium">{automation.runsPerDay}/day</div>
+                                        <div className="text-muted-foreground">Rate Limit (daily)</div>
+                                        <div className="text-foreground font-medium">{automation.runsPerDay}/day</div>
                                     </div>
                                     <div>
-                                        <div className="text-slate-400">Last Triggered</div>
-                                        <div className="text-white font-medium">
+                                        <div className="text-muted-foreground">Last Triggered</div>
+                                        <div className="text-foreground font-medium">
                                             {automation.lastTriggeredAt
                                                 ? new Date(automation.lastTriggeredAt).toLocaleString()
                                                 : 'Never'}
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-slate-400">Created</div>
-                                        <div className="text-white font-medium">
+                                        <div className="text-muted-foreground">Created</div>
+                                        <div className="text-foreground font-medium">
                                             {new Date(automation.createdAt).toLocaleDateString()}
                                         </div>
                                     </div>
@@ -429,37 +429,37 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                     </TabsContent>
 
                     <TabsContent value="executions" className="mt-6">
-                        <Card className="bg-slate-800/50 border-slate-700/50">
+                        <Card className="bg-card border-border">
                             <CardContent className="p-0">
                                 {automation.executions.length === 0 ? (
                                     <div className="p-12 text-center">
-                                        <Activity className="h-8 w-8 text-slate-500 mx-auto mb-3" />
-                                        <p className="text-slate-400">No executions yet</p>
+                                        <Activity className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-muted-foreground">No executions yet</p>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-slate-700">
+                                    <div className="divide-y divide-border">
                                         {automation.executions.map((execution) => (
                                             <div key={execution.id} className="p-4 flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`font-medium ${EXECUTION_STATUS_COLORS[execution.status]}`}>
                                                         {execution.status}
                                                     </div>
-                                                    <div className="text-sm text-slate-400">
+                                                    <div className="text-sm text-muted-foreground">
                                                         {execution.triggerEntityType}: {execution.triggerEntityId.slice(0, 8)}...
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4 text-sm">
                                                     <div className="flex items-center gap-2">
-                                                        <CheckCircle className="h-4 w-4 text-emerald-400" />
-                                                        <span className="text-white">{execution.actionsExecuted}</span>
+                                                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                        <span className="text-foreground">{execution.actionsExecuted}</span>
                                                         {execution.actionsFailed > 0 && (
                                                             <>
-                                                                <XCircle className="h-4 w-4 text-red-400 ml-2" />
-                                                                <span className="text-white">{execution.actionsFailed}</span>
+                                                                <XCircle className="h-4 w-4 text-destructive ml-2" />
+                                                                <span className="text-foreground">{execution.actionsFailed}</span>
                                                             </>
                                                         )}
                                                     </div>
-                                                    <div className="text-slate-500">
+                                                    <div className="text-muted-foreground">
                                                         {new Date(execution.createdAt).toLocaleString()}
                                                     </div>
                                                 </div>
@@ -472,29 +472,29 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                     </TabsContent>
 
                     <TabsContent value="logs" className="mt-6">
-                        <Card className="bg-slate-800/50 border-slate-700/50">
+                        <Card className="bg-card border-border">
                             <CardContent className="p-0">
                                 {logs.length === 0 ? (
                                     <div className="p-12 text-center">
-                                        <AlertCircle className="h-8 w-8 text-slate-500 mx-auto mb-3" />
-                                        <p className="text-slate-400">No logs yet</p>
+                                        <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                                        <p className="text-muted-foreground">No logs yet</p>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-slate-700 max-h-96 overflow-auto">
+                                    <div className="divide-y divide-border max-h-96 overflow-auto">
                                         {logs.map((log) => (
                                             <div key={log.id} className="p-3 flex items-start gap-3">
                                                 <Badge className={`${LOG_LEVEL_COLORS[log.level]} text-xs`}>
                                                     {log.level}
                                                 </Badge>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm text-white">{log.message}</p>
-                                                    {log.details && (
-                                                        <pre className="mt-1 text-xs text-slate-400 overflow-auto">
+                                                    <p className="text-sm text-foreground">{log.message}</p>
+                                                    {log.details ? (
+                                                        <pre className="mt-1 text-xs text-muted-foreground overflow-auto">
                                                             {JSON.stringify(log.details, null, 2)}
                                                         </pre>
-                                                    )}
+                                                    ) : null}
                                                 </div>
-                                                <div className="text-xs text-slate-500 whitespace-nowrap">
+                                                <div className="text-xs text-muted-foreground whitespace-nowrap">
                                                     {new Date(log.createdAt).toLocaleTimeString()}
                                                 </div>
                                             </div>

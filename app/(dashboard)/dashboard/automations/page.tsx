@@ -71,10 +71,10 @@ const TRIGGER_ICONS: Record<string, React.ElementType> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    DRAFT: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-    ACTIVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    PAUSED: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    ARCHIVED: 'bg-red-500/10 text-red-400 border-red-500/20'
+    DRAFT: 'bg-muted text-muted-foreground border-border',
+    ACTIVE: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
+    PAUSED: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    ARCHIVED: 'bg-destructive/10 text-destructive border-destructive/20'
 }
 
 export default function AutomationsPage() {
@@ -184,24 +184,24 @@ export default function AutomationsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="min-h-screen bg-background">
             <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
-                                <Zap className="h-6 w-6 text-white" />
+                        <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-primary/10 shadow-lg shadow-primary/10">
+                                <Zap className="h-6 w-6 text-primary" />
                             </div>
                             Automations
                         </h1>
-                        <p className="text-slate-400 mt-2">
+                        <p className="text-muted-foreground mt-2">
                             Create powerful workflows to automate your outreach
                         </p>
                     </div>
                     <Button
                         onClick={() => router.push('/dashboard/automations/new')}
-                        className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/25"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/25"
                     >
                         <Plus className="h-4 w-4 mr-2" />
                         New Automation
@@ -210,28 +210,28 @@ export default function AutomationsPage() {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Total Automations</div>
-                            <div className="text-2xl font-bold text-white mt-1">{stats.total}</div>
+                            <div className="text-sm text-muted-foreground">Total Automations</div>
+                            <div className="text-2xl font-bold text-foreground mt-1">{stats.total}</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Active</div>
-                            <div className="text-2xl font-bold text-emerald-400 mt-1">{stats.active}</div>
+                            <div className="text-sm text-muted-foreground">Active</div>
+                            <div className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{stats.active}</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Total Runs</div>
-                            <div className="text-2xl font-bold text-white mt-1">{stats.totalRuns.toLocaleString()}</div>
+                            <div className="text-sm text-muted-foreground">Total Runs</div>
+                            <div className="text-2xl font-bold text-foreground mt-1">{stats.totalRuns.toLocaleString()}</div>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur">
+                    <Card className="bg-card border-border">
                         <CardContent className="p-4">
-                            <div className="text-sm text-slate-400">Success Rate</div>
-                            <div className="text-2xl font-bold text-white mt-1">{stats.successRate.toFixed(1)}%</div>
+                            <div className="text-sm text-muted-foreground">Success Rate</div>
+                            <div className="text-2xl font-bold text-foreground mt-1">{stats.successRate.toFixed(1)}%</div>
                         </CardContent>
                     </Card>
                 </div>
@@ -239,16 +239,16 @@ export default function AutomationsPage() {
                 {/* Filters */}
                 <div className="flex flex-col sm:flex-row gap-4">
                     <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search automations..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500"
+                            className="pl-10 bg-background border-input text-foreground placeholder:text-muted-foreground"
                         />
                     </div>
                     <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
-                        <TabsList className="bg-slate-800/50 border border-slate-700">
+                        <TabsList className="bg-muted border border-border">
                             <TabsTrigger value="all">All</TabsTrigger>
                             <TabsTrigger value="ACTIVE">Active</TabsTrigger>
                             <TabsTrigger value="PAUSED">Paused</TabsTrigger>
@@ -261,27 +261,27 @@ export default function AutomationsPage() {
                 {isLoading ? (
                     <div className="grid gap-4">
                         {[...Array(3)].map((_, i) => (
-                            <Card key={i} className="bg-slate-800/50 border-slate-700/50 animate-pulse">
+                            <Card key={i} className="bg-card border-border animate-pulse">
                                 <CardContent className="p-6">
-                                    <div className="h-6 bg-slate-700 rounded w-1/3 mb-4" />
-                                    <div className="h-4 bg-slate-700 rounded w-2/3" />
+                                    <div className="h-6 bg-muted rounded w-1/3 mb-4" />
+                                    <div className="h-4 bg-muted rounded w-2/3" />
                                 </CardContent>
                             </Card>
                         ))}
                     </div>
                 ) : filteredAutomations.length === 0 ? (
-                    <Card className="bg-slate-800/50 border-slate-700/50 border-dashed">
+                    <Card className="bg-card border-border border-dashed">
                         <CardContent className="p-12 text-center">
-                            <div className="mx-auto w-16 h-16 rounded-full bg-slate-700/50 flex items-center justify-center mb-4">
-                                <Zap className="h-8 w-8 text-slate-500" />
+                            <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                                <Zap className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">No automations yet</h3>
-                            <p className="text-slate-400 mb-6">
+                            <h3 className="text-xl font-semibold text-foreground mb-2">No automations yet</h3>
+                            <p className="text-muted-foreground mb-6">
                                 Create your first automation to start automating your outreach
                             </p>
                             <Button
                                 onClick={() => router.push('/dashboard/automations/new')}
-                                className="bg-violet-600 hover:bg-violet-500"
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                             >
                                 <Plus className="h-4 w-4 mr-2" />
                                 Create Automation
@@ -295,30 +295,30 @@ export default function AutomationsPage() {
                             return (
                                 <Card
                                     key={automation.id}
-                                    className="bg-slate-800/50 border-slate-700/50 hover:border-violet-500/50 transition-all cursor-pointer group"
+                                    className="bg-card border-border hover:border-primary/50 transition-all cursor-pointer group"
                                     onClick={() => router.push(`/dashboard/automations/${automation.id}`)}
                                 >
                                     <CardContent className="p-6">
                                         <div className="flex items-start justify-between">
                                             <div className="flex items-start gap-4">
                                                 <div className={`p-3 rounded-xl ${automation.status === 'ACTIVE'
-                                                        ? 'bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-400'
-                                                        : 'bg-slate-700/50 text-slate-400'
+                                                    ? 'bg-primary/10 text-primary'
+                                                    : 'bg-muted text-muted-foreground'
                                                     }`}>
                                                     <TriggerIcon className="h-5 w-5" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-semibold text-white group-hover:text-violet-300 transition-colors">
+                                                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                                                         {automation.name}
                                                     </h3>
                                                     {automation.description && (
-                                                        <p className="text-sm text-slate-400 mt-1">{automation.description}</p>
+                                                        <p className="text-sm text-muted-foreground mt-1">{automation.description}</p>
                                                     )}
                                                     <div className="flex items-center gap-3 mt-3">
                                                         <Badge className={STATUS_COLORS[automation.status]}>
                                                             {automation.status}
                                                         </Badge>
-                                                        <span className="text-xs text-slate-500">
+                                                        <span className="text-xs text-muted-foreground">
                                                             {automation.triggerType.replace(/_/g, ' ')}
                                                         </span>
                                                     </div>
@@ -327,28 +327,28 @@ export default function AutomationsPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="text-right hidden sm:block">
                                                     <div className="flex items-center gap-2 text-sm">
-                                                        <CheckCircle className="h-4 w-4 text-emerald-400" />
-                                                        <span className="text-white">{automation.successfulRuns}</span>
-                                                        <XCircle className="h-4 w-4 text-red-400 ml-2" />
-                                                        <span className="text-white">{automation.failedRuns}</span>
+                                                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                        <span className="text-foreground">{automation.successfulRuns}</span>
+                                                        <XCircle className="h-4 w-4 text-destructive ml-2" />
+                                                        <span className="text-foreground">{automation.failedRuns}</span>
                                                     </div>
                                                     {automation.lastTriggeredAt && (
-                                                        <div className="text-xs text-slate-500 mt-1">
+                                                        <div className="text-xs text-muted-foreground mt-1">
                                                             Last run: {new Date(automation.lastTriggeredAt).toLocaleDateString()}
                                                         </div>
                                                     )}
                                                 </div>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                                                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                                                             <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
+                                                    <DropdownMenuContent align="end" className="bg-popover border-border">
                                                         {automation.status === 'ACTIVE' ? (
                                                             <DropdownMenuItem
                                                                 onClick={(e) => { e.stopPropagation(); handlePause(automation.id) }}
-                                                                className="text-amber-400"
+                                                                className="text-amber-600 dark:text-amber-400"
                                                             >
                                                                 <Pause className="h-4 w-4 mr-2" />
                                                                 Pause
@@ -356,7 +356,7 @@ export default function AutomationsPage() {
                                                         ) : (
                                                             <DropdownMenuItem
                                                                 onClick={(e) => { e.stopPropagation(); handleActivate(automation.id) }}
-                                                                className="text-emerald-400"
+                                                                className="text-green-600 dark:text-green-400"
                                                             >
                                                                 <Play className="h-4 w-4 mr-2" />
                                                                 Activate
@@ -368,10 +368,10 @@ export default function AutomationsPage() {
                                                             <Copy className="h-4 w-4 mr-2" />
                                                             Duplicate
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuSeparator className="bg-slate-700" />
+                                                        <DropdownMenuSeparator className="bg-border" />
                                                         <DropdownMenuItem
                                                             onClick={(e) => { e.stopPropagation(); handleDelete(automation.id) }}
-                                                            className="text-red-400"
+                                                            className="text-destructive"
                                                         >
                                                             <Trash2 className="h-4 w-4 mr-2" />
                                                             Delete
