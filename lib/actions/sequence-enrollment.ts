@@ -3,6 +3,7 @@
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
+import { triggerSequenceAutomation } from "@/lib/services/automation-engine"
 
 import type { ProspectStatus, EnrollmentStatus, ExitReason } from "@prisma/client"
 
@@ -97,6 +98,20 @@ export async function enrollCampaignInSequence(campaignId: string, sequenceId: s
     revalidatePath(`/dashboard/campaigns/${campaignId}`)
     revalidatePath(`/dashboard/sequences/${sequenceId}`)
 
+    // Trigger automation for each enrolled prospect
+    for (const prospect of campaign.prospects) {
+      try {
+        await triggerSequenceAutomation('SEQUENCE_ENROLLED', {
+          sequenceId: sequence.id,
+          prospectId: prospect.id,
+          userId: user.id,
+          campaignId,
+        })
+      } catch (automationError) {
+        console.warn('Failed to trigger automation for sequence enrollment', automationError)
+      }
+    }
+
     return {
       success: true,
       enrolledCount: enrollments.length,
@@ -121,14 +136,30 @@ export async function unenrollProspect(enrollmentId: string, reason?: string) {
 
     if (!user) throw new Error("User not found")
 
-    await db.sequenceEnrollment.update({
+    const enrollment = await db.sequenceEnrollment.update({
       where: { id: enrollmentId },
       data: {
         status: "MANUALLY_REMOVED" as EnrollmentStatus,
         exitReason: "MANUAL" as ExitReason,
         exitedAt: new Date(),
       },
+      include: {
+        prospect: true,
+        sequence: true,
+      },
     })
+
+    // Trigger automation for sequence exit
+    try {
+      await triggerSequenceAutomation('SEQUENCE_EXITED', {
+        sequenceId: enrollment.sequenceId,
+        prospectId: enrollment.prospectId,
+        userId: user.id,
+        exitReason: 'MANUAL',
+      })
+    } catch (automationError) {
+      console.warn('Failed to trigger automation for sequence exit', automationError)
+    }
 
     revalidatePath("/dashboard/sequences")
 

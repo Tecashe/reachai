@@ -79,6 +79,8 @@ model User {
   creditTransactions CreditTransaction[]
   creditPurchases    CreditPurchase[]
   domains            Domain[]
+  automations        Automation[]
+  automationWebhooks AutomationWebhook[]
 
   // Last time we sent low credit warning
   lastCreditWarning DateTime?
@@ -1847,6 +1849,7 @@ enum SubsequenceAction {
 }
 
 enum AutomationTriggerType {
+  // Original values
   EMAIL_OPENED
   EMAIL_CLICKED
   LINK_CLICKED
@@ -1855,6 +1858,28 @@ enum AutomationTriggerType {
   NOT_REPLIED
   TIME_ELAPSED
   ENGAGEMENT_SCORE
+  // New automation trigger types
+  EMAIL_SENT
+  EMAIL_BOUNCED
+  SEQUENCE_ENROLLED
+  SEQUENCE_COMPLETED
+  SEQUENCE_EXITED
+  SEQUENCE_STEP_COMPLETED
+  PROSPECT_CREATED
+  PROSPECT_UPDATED
+  PROSPECT_TAG_ADDED
+  PROSPECT_STATUS_CHANGED
+  CAMPAIGN_LAUNCHED
+  CAMPAIGN_COMPLETED
+  CRM_DEAL_CREATED
+  CRM_DEAL_UPDATED
+  CRM_CONTACT_CREATED
+  HUBSPOT_EVENT
+  WEBHOOK_RECEIVED
+  SCHEDULE_TRIGGERED
+  POSITIVE_REPLY_RECEIVED
+  NEGATIVE_REPLY_RECEIVED
+  MEETING_BOOKED
 }
 
 enum RealtimeNotificationType {
@@ -2933,4 +2958,202 @@ model ProcessedWarmupEmail {
   @@index([warmupId])
   @@index([threadId])
   @@index([processedAt])
+}
+
+// ============================================================
+// AUTOMATION SYSTEM
+// Production-ready workflow automation with triggers and actions
+// ============================================================
+
+model Automation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  status      AutomationStatus @default(DRAFT)
+
+  // Trigger configuration
+  triggerType   AutomationTriggerType
+  triggerConfig Json // Trigger-specific configuration (campaigns, sequences, filters, etc.)
+
+  // Conditions (optional filters before executing)
+  conditions Json? // Array of condition objects: [{ field, operator, value }]
+
+  // Actions to execute (ordered)
+  actions Json // Array of action objects: [{ id, type, order, config, delayMinutes }]
+
+  // Execution settings
+  runOnce     Boolean @default(false) // Only trigger once per entity
+  cooldownMin Int?    // Minutes before can trigger again for same entity
+  maxRuns     Int?    // Maximum total executions (null = unlimited)
+
+  // Rate limiting
+  runsPerHour  Int @default(100) // Max runs per hour
+  runsPerDay   Int @default(1000) // Max runs per day
+  runsThisHour Int @default(0)
+  runsToday    Int @default(0)
+  lastResetHour DateTime @default(now())
+  lastResetDay  DateTime @default(now())
+
+  // Stats
+  totalRuns       Int       @default(0)
+  successfulRuns  Int       @default(0)
+  failedRuns      Int       @default(0)
+  lastTriggeredAt DateTime?
+
+  // Organization
+  folderId String?
+  tags     String[] @default([])
+
+  // Relationships
+  executions AutomationExecution[]
+  logs       AutomationLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([triggerType])
+}
+
+model AutomationExecution {
+  id           String     @id @default(cuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  // Trigger context
+  triggerEntityType String // "prospect", "email", "sequence", "webhook", etc.
+  triggerEntityId   String
+  triggerData       Json?  // Snapshot of trigger data at execution time
+
+  // Execution details
+  status      AutomationExecutionStatus @default(PENDING)
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  // Progress tracking
+  currentActionIndex Int     @default(0)
+  actionsExecuted    Int     @default(0)
+  actionsFailed      Int     @default(0)
+  totalActions       Int     @default(0)
+
+  // Results
+  errorMessage String?  @db.Text
+  resultData   Json?    // Results from each action: { actionId: result }
+
+  // For delayed actions
+  nextActionAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([automationId])
+  @@index([status])
+  @@index([triggerEntityType, triggerEntityId])
+  @@index([nextActionAt])
+}
+
+model AutomationLog {
+  id           String     @id @default(cuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  executionId String?
+  actionIndex Int?     // Which action in the sequence
+  level       AutomationLogLevel @default(INFO)
+  message     String
+  details     Json?    // Additional context
+
+  createdAt DateTime @default(now())
+
+  @@index([automationId])
+  @@index([executionId])
+  @@index([level])
+  @@index([createdAt])
+}
+
+model AutomationWebhook {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Webhook identification
+  webhookKey String @unique // Unique key for the webhook URL: /api/automations/webhooks/[key]
+  name       String
+  description String?
+
+  // Source platform (for pre-built templates)
+  platform AutomationWebhookPlatform @default(GENERIC)
+
+  // Associated automation (optional - can be linked later)
+  automationId String?
+
+  // Security
+  secret     String?   // For HMAC signature verification
+  allowedIps String[]  @default([])
+
+  // Stats
+  lastReceivedAt DateTime?
+  totalReceived  Int       @default(0)
+  lastPayload    Json?     // Last received payload for debugging
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([webhookKey])
+  @@index([platform])
+  @@index([automationId])
+}
+
+// Cooldown tracking for runOnce and cooldown settings
+model AutomationCooldown {
+  id           String @id @default(cuid())
+  automationId String
+  entityType   String // "prospect", "email", etc.
+  entityId     String
+  
+  lastTriggeredAt DateTime @default(now())
+  runCount        Int      @default(1)
+
+  @@unique([automationId, entityType, entityId])
+  @@index([automationId])
+  @@index([lastTriggeredAt])
+}
+
+enum AutomationStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum AutomationExecutionStatus {
+  PENDING
+  RUNNING
+  WAITING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AutomationLogLevel {
+  DEBUG
+  INFO
+  WARNING
+  ERROR
+}
+
+
+
+enum AutomationWebhookPlatform {
+  GENERIC
+  TRIGIFFY
+  MAKE
+  ZAPIER
+  HUBSPOT
 }

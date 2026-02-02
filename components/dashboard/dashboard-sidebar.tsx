@@ -100,13 +100,21 @@ const navGroups: NavGroup[] = [
       { name: "AI Predictor", href: "/dashboard/predict", icon: Target, tourId: "ai-predictor" },
     ],
   },
+  {
+    name: "Automations",
+    icon: Zap,
+    items: [
+      { name: "All Automations", href: "/dashboard/automations", icon: List, tourId: "automations" },
+      { name: "Create New", href: "/dashboard/automations/new", icon: Plus },
+    ],
+  },
 ]
 
 // Bottom items
 const bottomItems: NavItem[] = [
   { name: "Integrations", href: "/dashboard/integrations", icon: Zap, tourId: "integrations" },
   { name: "Settings", href: "/dashboard/settings", icon: Settings, tourId: "settings" },
-   { name: "API Docs", href: "/dashboard/settings/api", icon: Server, tourId: "api-docs" },
+  { name: "API Docs", href: "/dashboard/settings/api", icon: Server, tourId: "api-docs" },
   { name: "Billing", href: "/dashboard/billing", icon: CreditCard, tourId: "billing" },
 ]
 
@@ -243,7 +251,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
   }
 
   // Determine which logo to show
-  const logoSrc = mounted && resolvedTheme === 'dark' 
+  const logoSrc = mounted && resolvedTheme === 'dark'
     ? '/mailfra-logo-dark.png'  // Your dark mode logo
     : '/mailfra-logo-light.png'  // Your light mode logo
 
@@ -251,24 +259,24 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     <>
       {/* Logo */}
       <div className={cn("p-6 border-b border-border/50 transition-all duration-300", collapsed && "p-4")}>
-         <Link href="/dashboard" className="flex items-center gap-2 group">
-           <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
-             <Image
-               src={logoSrc}
-               alt="Mailfra Logo"
-               width={40}
-               height={40}
-               className="object-contain"
-               priority
-             />
-           </div>
-           {!collapsed && (
-             <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-               Mailfra
-             </span>
-           )}
-         </Link>
-       </div>
+        <Link href="/dashboard" className="flex items-center gap-2 group">
+          <div className="relative h-10 w-10 flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+            <Image
+              src={logoSrc}
+              alt="Mailfra Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+              priority
+            />
+          </div>
+          {!collapsed && (
+            <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+              Mailfra
+            </span>
+          )}
+        </Link>
+      </div>
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">

@@ -1,6 +1,7 @@
 
 import { db } from "@/lib/db"
 import { logger } from "@/lib/logger"
+import { triggerEmailAutomation } from "@/lib/services/automation-engine"
 
 /**
  * REMOVED: generateTrackingPixelUrl - Tracking pixels get marked as spam
@@ -80,6 +81,19 @@ export async function trackEmailOpen(emailLogId: string, userAgent?: string, ipA
 
     logger.info("Email open tracked", { emailLogId, userAgent, ipAddress })
 
+    // Trigger automation for email opened
+    try {
+      await triggerEmailAutomation('EMAIL_OPENED', emailLog.prospect.userId, emailLogId, {
+        prospectId: emailLog.prospectId || '',
+        subject: emailLog.subject || '',
+        campaignId: emailLog.prospect.campaignId ?? undefined,
+        sequenceId: undefined,
+        openCount: emailLog.opens ?? 1,
+      })
+    } catch (automationError) {
+      logger.warn('Failed to trigger automation for email open', { error: automationError })
+    }
+
     return { success: true }
   } catch (error) {
     logger.error("Failed to track email open", error as Error)
@@ -138,6 +152,19 @@ export async function trackLinkClick(emailLogId: string, linkUrl: string, userAg
     }
 
     logger.info("Link click tracked", { emailLogId, linkUrl, userAgent, ipAddress })
+
+    // Trigger automation for email clicked
+    try {
+      await triggerEmailAutomation('EMAIL_CLICKED', emailLog.prospect.userId, emailLogId, {
+        prospectId: emailLog.prospectId || '',
+        subject: emailLog.subject || '',
+        campaignId: emailLog.prospect.campaignId ?? undefined,
+        sequenceId: undefined,
+        clickedUrl: linkUrl,
+      })
+    } catch (automationError) {
+      logger.warn('Failed to trigger automation for email click', { error: automationError })
+    }
 
     return { success: true, redirectUrl: linkUrl }
   } catch (error) {

@@ -92,6 +92,23 @@ export type WarmupEvents = {
       warmupType: 'POOL' | 'PEER'
     }
   }
+  // Automation events
+  'automation/execute': {
+    data: {
+      executionId: string
+      automationId: string
+      userId: string
+      triggerType: string
+      entityType: string
+      entityId: string
+    }
+  }
+  'automation/continue': {
+    data: {
+      executionId: string
+      currentActionIndex: number
+    }
+  }
 }
 
 logger.info('Inngest client initialized')
