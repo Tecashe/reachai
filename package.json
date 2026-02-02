@@ -64,6 +64,7 @@
     "@upstash/redis": "^1.35.8",
     "@vercel/analytics": "latest",
     "@vercel/blob": "^2.0.0",
+    "@xyflow/react": "^12.10.0",
     "ai": "latest",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",

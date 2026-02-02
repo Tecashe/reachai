@@ -345,7 +345,7 @@
 //     html: string,
 //   ): Promise<string> {
 //     try {
-   
+
 //       const credentials = decrypt(account.credentials)
 
 //       const transporter = nodemailer.createTransport({
@@ -1126,6 +1126,7 @@
 
 import { db } from "@/lib/db"
 import nodemailer from "nodemailer"
+import { triggerEmailAutomation } from "@/lib/services/automation-engine"
 
 interface SendEmailParams {
   to: string
@@ -1277,6 +1278,15 @@ export class EmailSenderService {
       })
 
       console.log("[EmailSender] Email sent successfully via SMTP, messageId:", messageId)
+
+      // Trigger EMAIL_SENT automation if we have campaign context
+      if (logId && prospectId && actualUserId) {
+        triggerEmailAutomation('EMAIL_SENT', actualUserId, logId, {
+          prospectId,
+          campaignId: campaignId || undefined,
+          subject,
+        }).catch((err) => console.error('[Automation] Failed to trigger EMAIL_SENT:', err))
+      }
 
       return { success: true, messageId, logId }
     } catch (error) {

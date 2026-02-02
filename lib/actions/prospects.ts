@@ -6,6 +6,7 @@ import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { Prisma } from "@prisma/client"
 import { updateOnboardingStep } from "./onboarding"
+import { triggerProspectAutomation } from "@/lib/services/automation-engine"
 
 export async function getProspects(
   status?: string,
@@ -102,6 +103,18 @@ export async function createProspect(formData: FormData) {
         qualityScore: 0,
       },
     })
+
+    // Trigger PROSPECT_CREATED automation
+    triggerProspectAutomation('PROSPECT_CREATED', user.id, prospect.id, {
+      newValues: {
+        email,
+        firstName,
+        lastName,
+        company,
+        jobTitle,
+        campaignId,
+      }
+    }).catch((err) => console.error('[Automation] Failed to trigger PROSPECT_CREATED:', err))
 
     await updateOnboardingStep("hasAddedProspects")
 
