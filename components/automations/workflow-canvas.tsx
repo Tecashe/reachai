@@ -98,20 +98,20 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
 
     return (
         <div className={cn(
-            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
+            "w-44 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : "border-amber-500/50",
             "hover:shadow-lg hover:scale-[1.02]"
         )}>
-            {/* Source Handle (Bottom) - Connection point for outgoing edges */}
+            {/* Source Handle (Right) - Connection point for outgoing edges */}
             <Handle
                 type="source"
-                position={Position.Bottom}
+                position={Position.Right}
                 id="source"
                 className={cn(
-                    "!w-4 !h-4 !bg-primary !border-2 !border-background",
-                    "!-bottom-2 !left-1/2 !-translate-x-1/2",
+                    "!w-3 !h-3 !bg-primary !border-2 !border-background",
+                    "!-right-1.5 !top-1/2 !-translate-y-1/2",
                     "transition-all duration-200",
-                    "hover:!w-5 hover:!h-5 hover:!shadow-lg hover:!shadow-primary/50",
+                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50",
                     "after:content-[''] after:absolute after:inset-0 after:rounded-full",
                     "after:animate-ping after:bg-primary/30"
                 )}
@@ -253,34 +253,34 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
 
     return (
         <div className={cn(
-            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
+            "w-44 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : borderColor,
             "hover:shadow-lg hover:scale-[1.02]"
         )}>
-            {/* Target Handle (Top) - Connection point for incoming edges */}
+            {/* Target Handle (Left) - Connection point for incoming edges */}
             <Handle
                 type="target"
-                position={Position.Top}
+                position={Position.Left}
                 id="target"
                 className={cn(
-                    "!w-4 !h-4 !bg-primary !border-2 !border-background",
-                    "!-top-2 !left-1/2 !-translate-x-1/2",
+                    "!w-3 !h-3 !bg-primary !border-2 !border-background",
+                    "!-left-1.5 !top-1/2 !-translate-y-1/2",
                     "transition-all duration-200",
-                    "hover:!w-5 hover:!h-5 hover:!shadow-lg hover:!shadow-primary/50"
+                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50"
                 )}
                 style={{ zIndex: 10 }}
             />
 
-            {/* Source Handle (Bottom) - Connection point for outgoing edges */}
+            {/* Source Handle (Right) - Connection point for outgoing edges */}
             <Handle
                 type="source"
-                position={Position.Bottom}
+                position={Position.Right}
                 id="source"
                 className={cn(
-                    "!w-4 !h-4 !bg-primary !border-2 !border-background",
-                    "!-bottom-2 !left-1/2 !-translate-x-1/2",
+                    "!w-3 !h-3 !bg-primary !border-2 !border-background",
+                    "!-right-1.5 !top-1/2 !-translate-y-1/2",
                     "transition-all duration-200",
-                    "hover:!w-5 hover:!h-5 hover:!shadow-lg hover:!shadow-primary/50",
+                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50",
                     "after:content-[''] after:absolute after:inset-0 after:rounded-full",
                     "after:animate-ping after:bg-primary/30"
                 )}
@@ -381,7 +381,7 @@ const generateNodeId = () => `node_${Date.now()}_${nodeIdCounter++}`
 const createDefaultTriggerNode = (): WorkflowNode => ({
     id: 'trigger_main',
     type: 'trigger',
-    position: { x: 250, y: 50 },
+    position: { x: 50, y: 150 },
     data: {
         label: 'Select a trigger',
         type: '',
@@ -458,14 +458,14 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
 
         // Calculate position for new node
         const newNodeId = generateNodeId()
-        const yOffset = 180 // Vertical spacing between nodes
+        const xOffset = 220 // Horizontal spacing between nodes
 
-        // Find the lowest y position of existing children
-        let maxChildY = parentNode.position.y
+        // Find the rightmost x position of existing children
+        let maxChildX = parentNode.position.x
         childEdges.forEach(edge => {
             const childNode = nodes.find(n => n.id === edge.target)
-            if (childNode && childNode.position.y > maxChildY) {
-                maxChildY = childNode.position.y
+            if (childNode && childNode.position.x > maxChildX) {
+                maxChildX = childNode.position.x
             }
         })
 
@@ -473,8 +473,8 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             id: newNodeId,
             type: 'action',
             position: {
-                x: parentNode.position.x,
-                y: maxChildY + yOffset,
+                x: maxChildX + xOffset,
+                y: parentNode.position.y,
             },
             data: {
                 label,
@@ -484,14 +484,14 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             },
         }
 
-        // Create edge from parent to new node with custom styling
+        // Create edge from parent to new node with smooth step styling
         const newEdge: Edge = {
             id: `edge_${parentNodeId}_${newNodeId}`,
             source: parentNodeId,
             sourceHandle: 'source',
             target: newNodeId,
             targetHandle: 'target',
-            type: 'custom',
+            type: 'smoothstep',
             data: {
                 deletable: true,
             },
@@ -574,7 +574,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     fitViewOptions={{ padding: 0.4 }}
                     className="bg-background"
                     defaultEdgeOptions={{
-                        type: 'custom',
+                        type: 'smoothstep',
                         data: { deletable: true },
                     }}
                     proOptions={{ hideAttribution: true }}
@@ -588,7 +588,11 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     deleteKeyCode={['Backspace', 'Delete']}
                     selectNodesOnDrag={false}
                 >
-                    <Controls className="bg-card/90 backdrop-blur-sm border-border shadow-md !bottom-4 !left-4" />
+                    <Controls
+                        className="bg-card/90 backdrop-blur-sm border-border shadow-md"
+                        position="bottom-left"
+                        style={{ position: 'absolute', bottom: 16, left: 16, zIndex: 50 }}
+                    />
                     <Background
                         variant={BackgroundVariant.Dots}
                         gap={20}
@@ -687,7 +691,7 @@ export function actionsToNodes(
     const triggerNode: WorkflowNode = {
         id: 'trigger_main',
         type: 'trigger',
-        position: { x: 250, y: 50 },
+        position: { x: 50, y: 150 },
         data: {
             label: triggerLabel,
             type: triggerType,
@@ -697,14 +701,14 @@ export function actionsToNodes(
     }
     nodes.push(triggerNode)
 
-    // Create action nodes
+    // Create action nodes - positioned horizontally
     let prevNodeId = triggerNode.id
     actions.forEach((action, index) => {
         const actionLabel = ACTIONS.find(a => a.type === action.type)?.label || action.name || action.type.replace(/_/g, ' ')
         const actionNode: WorkflowNode = {
             id: action.id || `action_${index}`,
             type: 'action',
-            position: { x: 250, y: 230 + index * 180 },
+            position: { x: 270 + index * 220, y: 150 },
             data: {
                 label: actionLabel,
                 type: action.type,
@@ -722,7 +726,7 @@ export function actionsToNodes(
             sourceHandle: 'source',
             target: actionNode.id,
             targetHandle: 'target',
-            type: 'custom',
+            type: 'smoothstep',
             data: {
                 deletable: true,
                 delay: action.delayMinutes,

@@ -17,7 +17,9 @@ import {
     Users,
     Webhook,
     Activity,
-    Settings
+    Settings,
+    Edit3,
+    Layers
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -255,6 +257,14 @@ export default function AutomationDetailPage({ params }: { params: Promise<{ id:
                         </div>
                     </div>
                     <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => router.push(`/dashboard/automations/${resolvedParams.id}/edit`)}
+                            className="border-primary/50 text-primary hover:bg-primary/10"
+                        >
+                            <Layers className="h-4 w-4 mr-2" />
+                            Edit in Canvas
+                        </Button>
                         {automation.status === 'ACTIVE' ? (
                             <Button
                                 variant="outline"
