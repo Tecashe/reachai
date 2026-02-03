@@ -315,180 +315,424 @@ export default function NewAutomationPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.push('/dashboard/automations')}
-                            className="text-muted-foreground hover:text-foreground"
-                        >
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Back
-                        </Button>
-                        <div>
-                            <h1 className="text-2xl font-bold text-foreground">New Automation</h1>
-                            <p className="text-muted-foreground text-sm">Build your automation workflow</p>
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        {/* Mode Toggle */}
-                        <div className="flex items-center bg-muted rounded-lg p-0.5 mr-2">
-                            <button
-                                onClick={() => setBuilderMode('form')}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${builderMode === 'form'
-                                    ? 'bg-background text-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground'
-                                    }`}
+            {/* Canvas Mode - Full width layout */}
+            {builderMode === 'canvas' ? (
+                <div className="p-3 space-y-2 h-screen flex flex-col">
+                    {/* Compact Header for Canvas */}
+                    <div className="flex items-center justify-between flex-shrink-0">
+                        <div className="flex items-center gap-3">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => router.push('/dashboard/automations')}
+                                className="text-muted-foreground hover:text-foreground h-8 px-2"
                             >
-                                <List className="h-4 w-4" />
-                                Form
-                            </button>
-                            <button
-                                onClick={() => setBuilderMode('canvas')}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${builderMode === 'canvas'
-                                    ? 'bg-background text-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                            >
-                                <Layers className="h-4 w-4" />
-                                Canvas
-                            </button>
-                        </div>
-                        <Button
-                            variant="outline"
-                            onClick={() => handleSave(false)}
-                            disabled={isSaving}
-                            className="border-border text-foreground hover:bg-accent"
-                        >
-                            <Save className="h-4 w-4 mr-2" />
-                            Save Draft
-                        </Button>
-                        <Button
-                            onClick={() => handleSave(true)}
-                            disabled={isSaving}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                        >
-                            <Play className="h-4 w-4 mr-2" />
-                            Save & Activate
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Canvas Mode */}
-                {builderMode === 'canvas' && (
-                    <div className="space-y-4">
-                        {/* Name input for canvas mode */}
-                        <div className="flex gap-4 items-center">
-                            <div className="flex-1">
-                                <Input
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    placeholder="Enter automation name..."
-                                    className="bg-background border-input text-foreground text-lg font-medium h-12"
-                                />
-                            </div>
+                                <ArrowLeft className="h-4 w-4 mr-1" />
+                                Back
+                            </Button>
+                            <div className="h-6 w-px bg-border" />
+                            <Input
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Automation name..."
+                                className="bg-background border-input text-foreground font-medium h-8 w-64 text-sm"
+                            />
                             <Input
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Description (optional)"
-                                className="bg-background border-input text-foreground flex-1"
+                                className="bg-background border-input text-foreground h-8 w-48 text-sm hidden md:block"
                             />
                         </div>
+                        <div className="flex items-center gap-2">
+                            {/* Mode Toggle */}
+                            <div className="flex items-center bg-muted rounded-md p-0.5">
+                                <button
+                                    onClick={() => setBuilderMode('form')}
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all ${(builderMode as BuilderMode) === 'form'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                >
+                                    <List className="h-3.5 w-3.5" />
+                                    Form
+                                </button>
+                                <button
+                                    onClick={() => setBuilderMode('canvas')}
+                                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all ${(builderMode as BuilderMode) === 'canvas'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                >
+                                    <Layers className="h-3.5 w-3.5" />
+                                    Canvas
+                                </button>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSave(false)}
+                                disabled={isSaving}
+                                className="border-border text-foreground hover:bg-accent h-8 text-xs"
+                            >
+                                <Save className="h-3.5 w-3.5 mr-1" />
+                                Save Draft
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={() => handleSave(true)}
+                                disabled={isSaving}
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs"
+                            >
+                                <Play className="h-3.5 w-3.5 mr-1" />
+                                Save & Activate
+                            </Button>
+                        </div>
+                    </div>
 
-                        {/* Workflow Canvas - Full Width */}
+                    {/* Workflow Canvas - Takes remaining space */}
+                    <div className="flex-1 min-h-0">
                         <WorkflowCanvasWithProvider ref={canvasRef} />
                     </div>
-                )}
+                </div>
+            ) : (
+                <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => router.push('/dashboard/automations')}
+                                className="text-muted-foreground hover:text-foreground"
+                            >
+                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                Back
+                            </Button>
+                            <div>
+                                <h1 className="text-2xl font-bold text-foreground">New Automation</h1>
+                                <p className="text-muted-foreground text-sm">Build your automation workflow</p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            {/* Mode Toggle */}
+                            <div className="flex items-center bg-muted rounded-lg p-0.5 mr-2">
+                                <button
+                                    onClick={() => setBuilderMode('form')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${(builderMode as BuilderMode) === 'form'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                >
+                                    <List className="h-4 w-4" />
+                                    Form
+                                </button>
+                                <button
+                                    onClick={() => setBuilderMode('canvas')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${(builderMode as BuilderMode) === 'canvas'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                >
+                                    <Layers className="h-4 w-4" />
+                                    Canvas
+                                </button>
+                            </div>
+                            <Button
+                                variant="outline"
+                                onClick={() => handleSave(false)}
+                                disabled={isSaving}
+                                className="border-border text-foreground hover:bg-accent"
+                            >
+                                <Save className="h-4 w-4 mr-2" />
+                                Save Draft
+                            </Button>
+                            <Button
+                                onClick={() => handleSave(true)}
+                                disabled={isSaving}
+                                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                            >
+                                <Play className="h-4 w-4 mr-2" />
+                                Save & Activate
+                            </Button>
+                        </div>
+                    </div>
 
-                {/* Form Mode */}
-                {builderMode === 'form' && (
-                    <>
-                        {/* Basic Info */}
-                        <Card className="bg-card border-border">
-                            <CardHeader>
-                                <CardTitle className="text-foreground">Basic Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <Label htmlFor="name" className="text-foreground">Name</Label>
-                                    <Input
-                                        id="name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="e.g., Follow up on positive replies"
-                                        className="mt-1.5 bg-background border-input text-foreground"
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="description" className="text-foreground">Description (optional)</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder="What does this automation do?"
-                                        className="mt-1.5 bg-background border-input text-foreground resize-none"
-                                        rows={2}
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Trigger Selection */}
-                        <Card className="bg-card border-border">
-                            <CardHeader>
-                                <CardTitle className="text-foreground flex items-center gap-2">
-                                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                                        <Zap className="h-4 w-4" />
+                    {/* Form Mode */}
+                    {builderMode === 'form' && (
+                        <>
+                            {/* Basic Info */}
+                            <Card className="bg-card border-border">
+                                <CardHeader>
+                                    <CardTitle className="text-foreground">Basic Information</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="name" className="text-foreground">Name</Label>
+                                        <Input
+                                            id="name"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            placeholder="e.g., Follow up on positive replies"
+                                            className="mt-1.5 bg-background border-input text-foreground"
+                                        />
                                     </div>
-                                    Trigger
-                                </CardTitle>
-                                <CardDescription>What event should start this automation?</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                {selectedTrigger ? (
-                                    <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/30">
-                                        <div className="flex items-center gap-3">
-                                            {(() => {
-                                                const Icon = getTriggerIcon(selectedTrigger)
-                                                return <Icon className="h-5 w-5 text-primary" />
-                                            })()}
-                                            <div>
-                                                <div className="font-medium text-foreground">
-                                                    {TRIGGERS.flatMap(c => c.items).find(t => t.type === selectedTrigger)?.label}
-                                                </div>
-                                                <div className="text-sm text-muted-foreground">
-                                                    {TRIGGERS.flatMap(c => c.items).find(t => t.type === selectedTrigger)?.description}
+                                    <div>
+                                        <Label htmlFor="description" className="text-foreground">Description (optional)</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            placeholder="What does this automation do?"
+                                            className="mt-1.5 bg-background border-input text-foreground resize-none"
+                                            rows={2}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Trigger Selection */}
+                            <Card className="bg-card border-border">
+                                <CardHeader>
+                                    <CardTitle className="text-foreground flex items-center gap-2">
+                                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                                            <Zap className="h-4 w-4" />
+                                        </div>
+                                        Trigger
+                                    </CardTitle>
+                                    <CardDescription>What event should start this automation?</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {selectedTrigger ? (
+                                        <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/30">
+                                            <div className="flex items-center gap-3">
+                                                {(() => {
+                                                    const Icon = getTriggerIcon(selectedTrigger)
+                                                    return <Icon className="h-5 w-5 text-primary" />
+                                                })()}
+                                                <div>
+                                                    <div className="font-medium text-foreground">
+                                                        {TRIGGERS.flatMap(c => c.items).find(t => t.type === selectedTrigger)?.label}
+                                                    </div>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        {TRIGGERS.flatMap(c => c.items).find(t => t.type === selectedTrigger)?.description}
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setSelectedTrigger(null)}
+                                                className="text-muted-foreground hover:text-foreground"
+                                            >
+                                                Change
+                                            </Button>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => setSelectedTrigger(null)}
-                                            className="text-muted-foreground hover:text-foreground"
-                                        >
-                                            Change
-                                        </Button>
+                                    ) : (
+                                        <div className="space-y-6">
+                                            {TRIGGERS.map((category) => (
+                                                <div key={category.category}>
+                                                    <h4 className="text-sm font-medium text-muted-foreground mb-3">{category.category}</h4>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                        {category.items.map((trigger) => (
+                                                            <button
+                                                                key={trigger.type}
+                                                                onClick={() => setSelectedTrigger(trigger.type)}
+                                                                className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-accent border border-transparent hover:border-primary/50 text-left transition-all"
+                                                            >
+                                                                <trigger.icon className="h-5 w-5 text-muted-foreground" />
+                                                                <div>
+                                                                    <div className="font-medium text-foreground text-sm">{trigger.label}</div>
+                                                                    <div className="text-xs text-muted-foreground">{trigger.description}</div>
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Actions */}
+                            <Card className="bg-card border-border">
+                                <CardHeader className="flex flex-row items-center justify-between">
+                                    <div>
+                                        <CardTitle className="text-foreground flex items-center gap-2">
+                                            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                                                <ArrowRight className="h-4 w-4" />
+                                            </div>
+                                            Actions
+                                        </CardTitle>
+                                        <CardDescription>What should happen when triggered?</CardDescription>
                                     </div>
-                                ) : (
-                                    <div className="space-y-6">
-                                        {TRIGGERS.map((category) => (
+                                    <Button
+                                        onClick={() => setShowActionSheet(true)}
+                                        size="sm"
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add Action
+                                    </Button>
+                                </CardHeader>
+                                <CardContent>
+                                    {actions.length === 0 ? (
+                                        <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
+                                            <Plus className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+                                            <p className="text-muted-foreground mb-4">No actions yet</p>
+                                            <Button
+                                                variant="outline"
+                                                onClick={() => setShowActionSheet(true)}
+                                                className="border-border text-foreground"
+                                            >
+                                                Add your first action
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {actions.map((action, index) => {
+                                                const ActionIcon = getActionIcon(action.type)
+                                                const isExpanded = expandedAction === action.id
+
+                                                return (
+                                                    <div
+                                                        key={action.id}
+                                                        className={`rounded-xl border transition-all ${isExpanded
+                                                            ? 'bg-accent/50 border-primary/50'
+                                                            : 'bg-muted/30 border-border hover:border-muted-foreground/50'
+                                                            }`}
+                                                    >
+                                                        <div
+                                                            className="flex items-center gap-3 p-4 cursor-pointer"
+                                                            onClick={() => setExpandedAction(isExpanded ? null : action.id)}
+                                                        >
+                                                            <div className="p-1 text-muted-foreground cursor-grab">
+                                                                <GripVertical className="h-4 w-4" />
+                                                            </div>
+                                                            <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
+                                                                {index + 1}
+                                                            </Badge>
+                                                            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                                                <ActionIcon className="h-4 w-4" />
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className="font-medium text-foreground">{action.name}</div>
+                                                                {action.delayMinutes && action.delayMinutes > 0 && (
+                                                                    <div className="text-xs text-muted-foreground">
+                                                                        Wait {action.delayMinutes} minutes before executing
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => { e.stopPropagation(); moveAction(action.id, 'up') }}
+                                                                    disabled={index === 0}
+                                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                                                >
+                                                                    <ChevronUp className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => { e.stopPropagation(); moveAction(action.id, 'down') }}
+                                                                    disabled={index === actions.length - 1}
+                                                                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                                                >
+                                                                    <ChevronDown className="h-4 w-4" />
+                                                                </Button>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => { e.stopPropagation(); removeAction(action.id) }}
+                                                                    className="h-8 w-8 p-0 text-destructive hover:text-destructive/80"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+
+                                                        {isExpanded && (
+                                                            <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
+                                                                <ActionConfigPanel
+                                                                    action={action}
+                                                                    onUpdate={(updates) => updateAction(action.id, updates)}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Settings */}
+                            <Card className="bg-card border-border">
+                                <CardHeader>
+                                    <CardTitle className="text-foreground flex items-center gap-2">
+                                        <Settings className="h-4 w-4" />
+                                        Advanced Settings
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <Label className="text-foreground">Run Once Per Prospect</Label>
+                                            <p className="text-sm text-muted-foreground">Only trigger once for each prospect</p>
+                                        </div>
+                                        <Switch checked={runOnce} onCheckedChange={setRunOnce} />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label className="text-foreground">Cooldown (minutes)</Label>
+                                            <Input
+                                                type="number"
+                                                value={cooldownMin || ''}
+                                                onChange={(e) => setCooldownMin(e.target.value ? parseInt(e.target.value) : undefined)}
+                                                placeholder="No cooldown"
+                                                className="mt-1.5 bg-background border-input text-foreground"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label className="text-foreground">Max Runs (total)</Label>
+                                            <Input
+                                                type="number"
+                                                value={maxRuns || ''}
+                                                onChange={(e) => setMaxRuns(e.target.value ? parseInt(e.target.value) : undefined)}
+                                                placeholder="Unlimited"
+                                                className="mt-1.5 bg-background border-input text-foreground"
+                                            />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Action Selection Sheet */}
+                            <Sheet open={showActionSheet} onOpenChange={setShowActionSheet}>
+                                <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto">
+                                    <SheetHeader>
+                                        <SheetTitle className="text-foreground">Add Action</SheetTitle>
+                                        <SheetDescription>Choose an action to add to your workflow</SheetDescription>
+                                    </SheetHeader>
+                                    <div className="mt-6 space-y-6">
+                                        {ACTIONS.map((category) => (
                                             <div key={category.category}>
                                                 <h4 className="text-sm font-medium text-muted-foreground mb-3">{category.category}</h4>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    {category.items.map((trigger) => (
+                                                <div className="space-y-2">
+                                                    {category.items.map((action) => (
                                                         <button
-                                                            key={trigger.type}
-                                                            onClick={() => setSelectedTrigger(trigger.type)}
-                                                            className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-accent border border-transparent hover:border-primary/50 text-left transition-all"
+                                                            key={action.type}
+                                                            onClick={() => addAction(action.type as AutomationActionType)}
+                                                            className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-accent border border-transparent hover:border-primary/50 text-left transition-all"
                                                         >
-                                                            <trigger.icon className="h-5 w-5 text-muted-foreground" />
+                                                            <action.icon className="h-5 w-5 text-primary" />
                                                             <div>
-                                                                <div className="font-medium text-foreground text-sm">{trigger.label}</div>
-                                                                <div className="text-xs text-muted-foreground">{trigger.description}</div>
+                                                                <div className="font-medium text-foreground text-sm">{action.label}</div>
+                                                                <div className="text-xs text-muted-foreground">{action.description}</div>
                                                             </div>
                                                         </button>
                                                     ))}
@@ -496,200 +740,12 @@ export default function NewAutomationPage() {
                                             </div>
                                         ))}
                                     </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Actions */}
-                        <Card className="bg-card border-border">
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-foreground flex items-center gap-2">
-                                        <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                                            <ArrowRight className="h-4 w-4" />
-                                        </div>
-                                        Actions
-                                    </CardTitle>
-                                    <CardDescription>What should happen when triggered?</CardDescription>
-                                </div>
-                                <Button
-                                    onClick={() => setShowActionSheet(true)}
-                                    size="sm"
-                                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                                >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Add Action
-                                </Button>
-                            </CardHeader>
-                            <CardContent>
-                                {actions.length === 0 ? (
-                                    <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-                                        <Plus className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-                                        <p className="text-muted-foreground mb-4">No actions yet</p>
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => setShowActionSheet(true)}
-                                            className="border-border text-foreground"
-                                        >
-                                            Add your first action
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {actions.map((action, index) => {
-                                            const ActionIcon = getActionIcon(action.type)
-                                            const isExpanded = expandedAction === action.id
-
-                                            return (
-                                                <div
-                                                    key={action.id}
-                                                    className={`rounded-xl border transition-all ${isExpanded
-                                                        ? 'bg-accent/50 border-primary/50'
-                                                        : 'bg-muted/30 border-border hover:border-muted-foreground/50'
-                                                        }`}
-                                                >
-                                                    <div
-                                                        className="flex items-center gap-3 p-4 cursor-pointer"
-                                                        onClick={() => setExpandedAction(isExpanded ? null : action.id)}
-                                                    >
-                                                        <div className="p-1 text-muted-foreground cursor-grab">
-                                                            <GripVertical className="h-4 w-4" />
-                                                        </div>
-                                                        <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
-                                                            {index + 1}
-                                                        </Badge>
-                                                        <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                                            <ActionIcon className="h-4 w-4" />
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="font-medium text-foreground">{action.name}</div>
-                                                            {action.delayMinutes && action.delayMinutes > 0 && (
-                                                                <div className="text-xs text-muted-foreground">
-                                                                    Wait {action.delayMinutes} minutes before executing
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => { e.stopPropagation(); moveAction(action.id, 'up') }}
-                                                                disabled={index === 0}
-                                                                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                                                            >
-                                                                <ChevronUp className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => { e.stopPropagation(); moveAction(action.id, 'down') }}
-                                                                disabled={index === actions.length - 1}
-                                                                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                                                            >
-                                                                <ChevronDown className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={(e) => { e.stopPropagation(); removeAction(action.id) }}
-                                                                className="h-8 w-8 p-0 text-destructive hover:text-destructive/80"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-
-                                                    {isExpanded && (
-                                                        <div className="px-4 pb-4 pt-2 border-t border-border space-y-4">
-                                                            <ActionConfigPanel
-                                                                action={action}
-                                                                onUpdate={(updates) => updateAction(action.id, updates)}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Settings */}
-                        <Card className="bg-card border-border">
-                            <CardHeader>
-                                <CardTitle className="text-foreground flex items-center gap-2">
-                                    <Settings className="h-4 w-4" />
-                                    Advanced Settings
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <Label className="text-foreground">Run Once Per Prospect</Label>
-                                        <p className="text-sm text-muted-foreground">Only trigger once for each prospect</p>
-                                    </div>
-                                    <Switch checked={runOnce} onCheckedChange={setRunOnce} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-foreground">Cooldown (minutes)</Label>
-                                        <Input
-                                            type="number"
-                                            value={cooldownMin || ''}
-                                            onChange={(e) => setCooldownMin(e.target.value ? parseInt(e.target.value) : undefined)}
-                                            placeholder="No cooldown"
-                                            className="mt-1.5 bg-background border-input text-foreground"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-foreground">Max Runs (total)</Label>
-                                        <Input
-                                            type="number"
-                                            value={maxRuns || ''}
-                                            onChange={(e) => setMaxRuns(e.target.value ? parseInt(e.target.value) : undefined)}
-                                            placeholder="Unlimited"
-                                            className="mt-1.5 bg-background border-input text-foreground"
-                                        />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Action Selection Sheet */}
-                        <Sheet open={showActionSheet} onOpenChange={setShowActionSheet}>
-                            <SheetContent className="bg-card border-border w-full sm:max-w-md overflow-y-auto">
-                                <SheetHeader>
-                                    <SheetTitle className="text-foreground">Add Action</SheetTitle>
-                                    <SheetDescription>Choose an action to add to your workflow</SheetDescription>
-                                </SheetHeader>
-                                <div className="mt-6 space-y-6">
-                                    {ACTIONS.map((category) => (
-                                        <div key={category.category}>
-                                            <h4 className="text-sm font-medium text-muted-foreground mb-3">{category.category}</h4>
-                                            <div className="space-y-2">
-                                                {category.items.map((action) => (
-                                                    <button
-                                                        key={action.type}
-                                                        onClick={() => addAction(action.type as AutomationActionType)}
-                                                        className="w-full flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-accent border border-transparent hover:border-primary/50 text-left transition-all"
-                                                    >
-                                                        <action.icon className="h-5 w-5 text-primary" />
-                                                        <div>
-                                                            <div className="font-medium text-foreground text-sm">{action.label}</div>
-                                                            <div className="text-xs text-muted-foreground">{action.description}</div>
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </SheetContent>
-                        </Sheet>
-                    </>
-                )}
-            </div>
+                                </SheetContent>
+                            </Sheet>
+                        </>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

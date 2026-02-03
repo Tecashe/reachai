@@ -12,6 +12,7 @@ import {
     ReactFlowProvider,
     BackgroundVariant,
     Panel,
+    MarkerType,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Plus, Zap, Settings, Trash2, ChevronDown } from 'lucide-react'
@@ -94,36 +95,36 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
 
     return (
         <div className={cn(
-            "w-72 rounded-xl border-2 bg-card shadow-lg transition-all",
-            selected ? "border-primary ring-2 ring-primary/20" : "border-amber-500/50",
-            "hover:shadow-xl"
+            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200",
+            selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : "border-amber-500/50",
+            "hover:shadow-lg hover:scale-[1.02]"
         )}>
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-t-lg border-b border-border">
-                <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-amber-500/20">
-                        <Zap className="h-4 w-4 text-amber-600" />
+            <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-t-md border-b border-border">
+                <div className="flex items-center gap-1.5">
+                    <div className="p-1 rounded bg-amber-500/20">
+                        <Zap className="h-3.5 w-3.5 text-amber-600" />
                     </div>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-amber-600">Trigger</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">Trigger</span>
                 </div>
                 {isConfigured && (
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-6 w-6 hover:bg-amber-500/20"
                         onClick={(e) => { e.stopPropagation(); onConfigure?.(id) }}
                     >
-                        <Settings className="h-3.5 w-3.5" />
+                        <Settings className="h-3 w-3" />
                     </Button>
                 )}
             </div>
 
             {/* Content */}
-            <div className="p-4">
+            <div className="p-2.5">
                 {!isConfigured ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-full justify-between">
+                            <Button variant="outline" size="sm" className="w-full justify-between text-xs h-8">
                                 Select a trigger...
                                 <ChevronDown className="h-4 w-4 ml-2" />
                             </Button>
@@ -146,20 +147,21 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="font-medium text-foreground">{label}</span>
+                    <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-1">
+                            <span className="font-medium text-foreground text-sm truncate">{label}</span>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                    <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[10px]">
                                         Change
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-64" align="end">
+                                <DropdownMenuContent className="w-48" align="end">
                                     {TRIGGERS.map((trigger) => (
                                         <DropdownMenuItem
                                             key={trigger.type}
                                             onClick={() => onSelectTrigger?.(id, trigger.type, trigger.label)}
+                                            className="text-xs"
                                         >
                                             {trigger.label}
                                         </DropdownMenuItem>
@@ -167,50 +169,46 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                            When this event occurs, run the actions below
-                        </p>
                     </div>
                 )}
             </div>
 
             {/* Add Action Button */}
             {isConfigured && (
-                <div className="px-4 pb-4">
-                    <div className="border-t border-dashed border-border pt-4">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="w-full border-dashed hover:border-primary hover:bg-primary/5"
-                                >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Add Action
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-64" align="center">
-                                {['Email', 'Prospect', 'Sequence', 'Integration', 'Notification', 'Task', 'Logic'].map((category) => {
-                                    const categoryActions = ACTIONS.filter(a => a.category === category)
-                                    if (categoryActions.length === 0) return null
-                                    return (
-                                        <div key={category}>
-                                            <DropdownMenuLabel>{category}</DropdownMenuLabel>
-                                            {categoryActions.map((action) => (
-                                                <DropdownMenuItem
-                                                    key={action.type}
-                                                    onClick={() => onAddAction?.(id, action.type, action.label)}
-                                                >
-                                                    {action.label}
-                                                </DropdownMenuItem>
-                                            ))}
-                                            <DropdownMenuSeparator />
-                                        </div>
-                                    )
-                                })}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                <div className="px-2.5 pb-2.5">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full h-7 text-xs border-dashed hover:border-primary hover:bg-primary/5 transition-colors"
+                            >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Add Action
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48" align="center">
+                            {['Email', 'Prospect', 'Sequence', 'Integration', 'Notification', 'Task', 'Logic'].map((category) => {
+                                const categoryActions = ACTIONS.filter(a => a.category === category)
+                                if (categoryActions.length === 0) return null
+                                return (
+                                    <div key={category}>
+                                        <DropdownMenuLabel className="text-[10px]">{category}</DropdownMenuLabel>
+                                        {categoryActions.map((action) => (
+                                            <DropdownMenuItem
+                                                key={action.type}
+                                                onClick={() => onAddAction?.(id, action.type, action.label)}
+                                                className="text-xs"
+                                            >
+                                                {action.label}
+                                            </DropdownMenuItem>
+                                        ))}
+                                        <DropdownMenuSeparator />
+                                    </div>
+                                )
+                            })}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             )}
         </div>
@@ -223,85 +221,82 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
     // Color based on category
     const actionDef = ACTIONS.find(a => a.type === type)
     const colors = {
-        Email: 'from-blue-500/10 to-cyan-500/10 border-blue-500/50',
-        Prospect: 'from-green-500/10 to-emerald-500/10 border-green-500/50',
-        Sequence: 'from-purple-500/10 to-violet-500/10 border-purple-500/50',
-        Integration: 'from-pink-500/10 to-rose-500/10 border-pink-500/50',
-        Notification: 'from-yellow-500/10 to-amber-500/10 border-yellow-500/50',
-        Task: 'from-indigo-500/10 to-blue-500/10 border-indigo-500/50',
-        Logic: 'from-slate-500/10 to-gray-500/10 border-slate-500/50',
+        Email: 'from-blue-500/10 to-cyan-500/10 border-blue-500/50 text-blue-600',
+        Prospect: 'from-green-500/10 to-emerald-500/10 border-green-500/50 text-green-600',
+        Sequence: 'from-purple-500/10 to-violet-500/10 border-purple-500/50 text-purple-600',
+        Integration: 'from-pink-500/10 to-rose-500/10 border-pink-500/50 text-pink-600',
+        Notification: 'from-yellow-500/10 to-amber-500/10 border-yellow-500/50 text-yellow-600',
+        Task: 'from-indigo-500/10 to-blue-500/10 border-indigo-500/50 text-indigo-600',
+        Logic: 'from-slate-500/10 to-gray-500/10 border-slate-500/50 text-slate-600',
     }
     const colorClass = colors[actionDef?.category as keyof typeof colors] || colors.Logic
+    const borderColor = colorClass.split(' ')[2]
+    const textColor = colorClass.split(' ')[3]
 
     return (
         <div className={cn(
-            "w-72 rounded-xl border-2 bg-card shadow-lg transition-all",
-            selected ? "border-primary ring-2 ring-primary/20" : colorClass.split(' ')[2],
-            "hover:shadow-xl"
+            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200",
+            selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : borderColor,
+            "hover:shadow-lg hover:scale-[1.02]"
         )}>
-            {/* Connector line to parent */}
-            <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-primary/50 to-primary" />
-
             {/* Header */}
             <div className={cn(
-                "flex items-center justify-between px-4 py-3 rounded-t-lg border-b border-border bg-gradient-to-r",
+                "flex items-center justify-between px-3 py-2 rounded-t-md border-b border-border bg-gradient-to-r",
                 colorClass.split(' ').slice(0, 2).join(' ')
             )}>
-                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className={cn("text-[10px] font-bold uppercase tracking-wider", textColor)}>
                     {actionDef?.category || 'Action'}
                 </span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-5 w-5 hover:bg-white/20"
                         onClick={(e) => { e.stopPropagation(); onConfigure?.(id) }}
                     >
-                        <Settings className="h-3.5 w-3.5" />
+                        <Settings className="h-3 w-3" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 hover:text-destructive"
+                        className="h-5 w-5 hover:bg-destructive/20 hover:text-destructive"
                         onClick={(e) => { e.stopPropagation(); onDelete?.(id) }}
                     >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3 w-3" />
                     </Button>
                 </div>
             </div>
 
             {/* Content */}
-            <div className="p-4">
-                <span className="font-medium text-foreground">{label}</span>
-                <p className="text-xs text-muted-foreground mt-1">
-                    Click settings to configure this action
-                </p>
+            <div className="p-2.5">
+                <span className="font-medium text-foreground text-sm truncate block">{label}</span>
             </div>
 
             {/* Add Next Action Button */}
-            <div className="px-4 pb-4">
+            <div className="px-2.5 pb-2.5">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="outline"
                             size="sm"
-                            className="w-full border-dashed hover:border-primary hover:bg-primary/5"
+                            className="w-full h-7 text-xs border-dashed hover:border-primary hover:bg-primary/5 transition-colors"
                         >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Next Action
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Next
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64" align="center">
+                    <DropdownMenuContent className="w-48" align="center">
                         {['Email', 'Prospect', 'Sequence', 'Integration', 'Notification', 'Task', 'Logic'].map((category) => {
                             const categoryActions = ACTIONS.filter(a => a.category === category)
                             if (categoryActions.length === 0) return null
                             return (
                                 <div key={category}>
-                                    <DropdownMenuLabel>{category}</DropdownMenuLabel>
+                                    <DropdownMenuLabel className="text-[10px]">{category}</DropdownMenuLabel>
                                     {categoryActions.map((action) => (
                                         <DropdownMenuItem
                                             key={action.type}
                                             onClick={() => onAddAction?.(id, action.type, action.label)}
+                                            className="text-xs"
                                         >
                                             {action.label}
                                         </DropdownMenuItem>
@@ -437,14 +432,23 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             },
         }
 
-        // Create edge from parent to new node
+        // Create edge from parent to new node with styled appearance
         const newEdge: Edge = {
             id: `edge_${parentNodeId}_${newNodeId}`,
             source: parentNodeId,
             target: newNodeId,
             type: 'smoothstep',
             animated: true,
-            style: { stroke: 'hsl(var(--primary))' },
+            style: {
+                stroke: 'hsl(var(--primary))',
+                strokeWidth: 2,
+            },
+            markerEnd: {
+                type: MarkerType.ArrowClosed,
+                color: 'hsl(var(--primary))',
+                width: 20,
+                height: 20,
+            },
         }
 
         setNodes((nds) => [...nds, newNode])
@@ -507,9 +511,9 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     const selectedNode = nodes.find(n => n.id === selectedNodeId) as WorkflowNode | undefined
 
     return (
-        <div className="flex h-[calc(100vh-180px)] min-h-[600px] bg-muted/30 rounded-xl border border-border overflow-hidden">
+        <div className="flex h-full bg-muted/20 rounded-lg border border-border overflow-hidden">
             {/* Main Canvas */}
-            <div className="flex-1">
+            <div className="flex-1 relative">
                 <ReactFlow
                     nodes={nodesWithHandlers}
                     edges={edges}
@@ -517,11 +521,18 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     onEdgesChange={onEdgesChange}
                     nodeTypes={nodeTypes}
                     fitView
-                    fitViewOptions={{ padding: 0.3 }}
+                    fitViewOptions={{ padding: 0.4 }}
                     className="bg-background"
                     defaultEdgeOptions={{
                         type: 'smoothstep',
                         animated: true,
+                        style: { strokeWidth: 2, stroke: 'hsl(var(--primary))' },
+                        markerEnd: {
+                            type: MarkerType.ArrowClosed,
+                            color: 'hsl(var(--primary))',
+                            width: 20,
+                            height: 20,
+                        },
                     }}
                     proOptions={{ hideAttribution: true }}
                     nodesDraggable={true}
@@ -529,19 +540,19 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     elementsSelectable={true}
                     panOnScroll={true}
                     zoomOnScroll={true}
+                    minZoom={0.3}
+                    maxZoom={2}
                 >
-                    <Controls className="bg-card border-border shadow-lg" />
+                    <Controls className="bg-card/90 backdrop-blur-sm border-border shadow-md !bottom-4 !left-4" />
                     <Background
                         variant={BackgroundVariant.Dots}
-                        gap={24}
-                        size={1.5}
-                        color="hsl(var(--muted-foreground) / 0.15)"
+                        gap={20}
+                        size={1}
+                        color="hsl(var(--muted-foreground) / 0.1)"
                     />
-                    <Panel position="top-right" className="bg-card/80 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-border">
-                        <div className="text-xs text-muted-foreground space-y-1">
-                            <p>• Click trigger to select event type</p>
-                            <p>• Use + buttons to add actions</p>
-                            <p>• Click ⚙️ to configure nodes</p>
+                    <Panel position="top-right" className="!m-2">
+                        <div className="bg-card/70 backdrop-blur-md rounded-md px-2 py-1.5 shadow-sm border border-border/50 text-[10px] text-muted-foreground">
+                            <span className="opacity-80">Click nodes to configure • Drag to reposition</span>
                         </div>
                     </Panel>
                 </ReactFlow>
