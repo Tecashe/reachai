@@ -386,18 +386,20 @@ export default function NewAutomationPage() {
                                 <Input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="Automation name..."
-                                    className="bg-background border-input text-foreground text-lg font-medium"
+                                    placeholder="Enter automation name..."
+                                    className="bg-background border-input text-foreground text-lg font-medium h-12"
                                 />
                             </div>
+                            <Input
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Description (optional)"
+                                className="bg-background border-input text-foreground flex-1"
+                            />
                         </div>
 
-                        {/* Workflow Canvas */}
+                        {/* Workflow Canvas - Full Width */}
                         <WorkflowCanvasWithProvider ref={canvasRef} />
-
-                        <p className="text-sm text-muted-foreground text-center">
-                            Drag triggers and actions from the sidebar onto the canvas. Connect them to build your workflow.
-                        </p>
                     </div>
                 )}
 
