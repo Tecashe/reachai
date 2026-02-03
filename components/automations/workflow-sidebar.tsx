@@ -43,6 +43,7 @@ const ACTIONS: DraggableItem[] = [
     { nodeType: 'action', type: 'MOVE_TO_SEQUENCE', label: 'Add to Sequence', icon: Users, category: 'Sequence' },
     { nodeType: 'action', type: 'REMOVE_FROM_SEQUENCE', label: 'Remove from Sequence', icon: Users, category: 'Sequence' },
     { nodeType: 'action', type: 'PAUSE_SEQUENCE', label: 'Pause Sequence', icon: Clock, category: 'Sequence' },
+    { nodeType: 'action', type: 'RESUME_SEQUENCE', label: 'Resume Sequence', icon: Zap, category: 'Sequence' },
     // Prospect
     { nodeType: 'action', type: 'ADD_TAG', label: 'Add Tag', icon: Tag, category: 'Prospect' },
     { nodeType: 'action', type: 'REMOVE_TAG', label: 'Remove Tag', icon: Tag, category: 'Prospect' },

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import {
@@ -63,6 +63,11 @@ const WorkflowCanvasWithProvider = dynamic(
     () => import('@/components/automations/workflow-canvas').then((mod) => mod.WorkflowCanvasWithProvider),
     { ssr: false, loading: () => <div className="h-[500px] flex items-center justify-center bg-muted/30 rounded-lg">Loading canvas...</div> }
 )
+
+// Import types for canvas ref  
+import type { WorkflowCanvasRef, WorkflowNode } from '@/components/automations/workflow-canvas'
+import type { Edge } from '@xyflow/react'
+import { nodesToActions } from '@/components/automations/workflow-canvas'
 
 type BuilderMode = 'form' | 'canvas'
 
@@ -161,6 +166,9 @@ export default function NewAutomationPage() {
     const [showActionSheet, setShowActionSheet] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
 
+    // Canvas ref for extracting workflow data
+    const canvasRef = useRef<WorkflowCanvasRef>(null)
+
     // Settings
     const [runOnce, setRunOnce] = useState(false)
     const [cooldownMin, setCooldownMin] = useState<number | undefined>()
@@ -213,15 +221,45 @@ export default function NewAutomationPage() {
     }, [actions])
 
     const handleSave = async (activate: boolean = false) => {
+        // Variables to hold the final data for saving
+        let saveTriggerType = selectedTrigger
+        let saveTriggerConfig = triggerConfig
+        let saveActions = actions
+
+        // If in canvas mode, extract data from the canvas
+        if (builderMode === 'canvas' && canvasRef.current) {
+            const canvasData = canvasRef.current.getWorkflowData()
+
+            if (!canvasData.triggerType) {
+                toast.error('Please add a trigger to your workflow')
+                return
+            }
+
+            const extractedActions = nodesToActions(canvasData.nodes, canvasData.edges)
+            if (extractedActions.length === 0) {
+                toast.error('Please add at least one action to your workflow')
+                return
+            }
+
+            saveTriggerType = canvasData.triggerType
+            saveTriggerConfig = canvasData.triggerConfig
+            saveActions = extractedActions.map((a, idx) => ({
+                ...a,
+                id: a.id || `action_${idx}`,
+                order: idx,
+                continueOnError: false,
+            }))
+        }
+
         if (!name.trim()) {
             toast.error('Please enter a name for the automation')
             return
         }
-        if (!selectedTrigger) {
+        if (!saveTriggerType) {
             toast.error('Please select a trigger')
             return
         }
-        if (actions.length === 0) {
+        if (saveActions.length === 0) {
             toast.error('Please add at least one action')
             return
         }
@@ -234,9 +272,9 @@ export default function NewAutomationPage() {
                 body: JSON.stringify({
                     name: name.trim(),
                     description: description.trim() || undefined,
-                    triggerType: selectedTrigger,
-                    triggerConfig,
-                    actions,
+                    triggerType: saveTriggerType,
+                    triggerConfig: saveTriggerConfig,
+                    actions: saveActions,
                     runOnce,
                     cooldownMin,
                     maxRuns
@@ -355,7 +393,7 @@ export default function NewAutomationPage() {
                         </div>
 
                         {/* Workflow Canvas */}
-                        <WorkflowCanvasWithProvider />
+                        <WorkflowCanvasWithProvider ref={canvasRef} />
 
                         <p className="text-sm text-muted-foreground text-center">
                             Drag triggers and actions from the sidebar onto the canvas. Connect them to build your workflow.

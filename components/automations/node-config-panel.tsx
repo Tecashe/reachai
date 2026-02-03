@@ -92,6 +92,7 @@ function renderTypeConfig(
     updateConfig: (updates: Record<string, unknown>) => void
 ) {
     switch (type) {
+        // ====== EMAIL ACTIONS ======
         case 'SEND_EMAIL':
         case 'SCHEDULE_EMAIL':
             return (
@@ -116,19 +117,24 @@ function renderTypeConfig(
                 </div>
             )
 
+        // ====== TAG ACTIONS ======
         case 'ADD_TAG':
         case 'REMOVE_TAG':
             return (
                 <div className="space-y-1.5">
-                    <Label>Tag Name</Label>
+                    <Label>Tags (comma-separated)</Label>
                     <Input
-                        value={(config.tag as string) || ''}
-                        onChange={(e) => updateConfig({ tag: e.target.value })}
+                        value={(config.tags as string[])?.join(', ') || (config.tag as string) || ''}
+                        onChange={(e) => {
+                            const tags = e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                            updateConfig({ tags, tag: tags[0] || '' })
+                        }}
                         placeholder="e.g., interested, contacted"
                     />
                 </div>
             )
 
+        // ====== STATUS ACTION ======
         case 'CHANGE_STATUS':
             return (
                 <div className="space-y-1.5">
@@ -149,6 +155,94 @@ function renderTypeConfig(
                             <SelectItem value="UNSUBSCRIBED">Unsubscribed</SelectItem>
                         </SelectContent>
                     </Select>
+                </div>
+            )
+
+        // ====== SEQUENCE ACTIONS ======
+        case 'MOVE_TO_SEQUENCE':
+            return (
+                <div className="space-y-1.5">
+                    <Label>Target Sequence ID</Label>
+                    <Input
+                        value={(config.sequenceId as string) || ''}
+                        onChange={(e) => updateConfig({ sequenceId: e.target.value })}
+                        placeholder="Enter sequence ID"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        The sequence to add the prospect to
+                    </p>
+                </div>
+            )
+
+        case 'REMOVE_FROM_SEQUENCE':
+            return (
+                <div className="space-y-1.5">
+                    <Label>Sequence ID (optional)</Label>
+                    <Input
+                        value={(config.sequenceId as string) || ''}
+                        onChange={(e) => updateConfig({ sequenceId: e.target.value })}
+                        placeholder="Leave empty to remove from current sequence"
+                    />
+                </div>
+            )
+
+        case 'PAUSE_SEQUENCE':
+        case 'RESUME_SEQUENCE':
+            return (
+                <p className="text-sm text-muted-foreground">
+                    This action will {type === 'PAUSE_SEQUENCE' ? 'pause' : 'resume'} the current sequence for this prospect.
+                </p>
+            )
+
+        // ====== PROSPECT ACTIONS ======
+        case 'MOVE_TO_FOLDER':
+            return (
+                <div className="space-y-1.5">
+                    <Label>Folder Name</Label>
+                    <Input
+                        value={(config.folder as string) || ''}
+                        onChange={(e) => updateConfig({ folder: e.target.value })}
+                        placeholder="e.g., Hot Leads, Qualified"
+                    />
+                </div>
+            )
+
+        // ====== INTEGRATION ACTIONS ======
+        case 'SYNC_TO_CRM':
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>CRM Platform</Label>
+                        <Select
+                            value={(config.platform as string) || ''}
+                            onValueChange={(value) => updateConfig({ platform: value })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select CRM" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="HUBSPOT">HubSpot</SelectItem>
+                                <SelectItem value="SALESFORCE">Salesforce</SelectItem>
+                                <SelectItem value="PIPEDRIVE">Pipedrive</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Sync Mode</Label>
+                        <Select
+                            value={(config.mode as string) || 'upsert'}
+                            onValueChange={(value) => updateConfig({ mode: value })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="upsert">Create or Update</SelectItem>
+                                <SelectItem value="create">Create Only</SelectItem>
+                                <SelectItem value="update">Update Only</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             )
 
@@ -202,37 +296,248 @@ function renderTypeConfig(
                             </SelectContent>
                         </Select>
                     </div>
+                    <div className="space-y-1.5">
+                        <Label>Headers (JSON, optional)</Label>
+                        <Textarea
+                            value={(config.headers as string) || ''}
+                            onChange={(e) => updateConfig({ headers: e.target.value })}
+                            placeholder='{"Authorization": "Bearer ..."}'
+                            rows={2}
+                        />
+                    </div>
                 </div>
             )
 
+        // ====== NOTIFICATION ACTIONS ======
+        case 'SEND_NOTIFICATION':
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>Title</Label>
+                        <Input
+                            value={(config.title as string) || ''}
+                            onChange={(e) => updateConfig({ title: e.target.value })}
+                            placeholder="Notification title"
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Message</Label>
+                        <Textarea
+                            value={(config.message as string) || ''}
+                            onChange={(e) => updateConfig({ message: e.target.value })}
+                            placeholder="Notification message (supports {{variables}})"
+                            rows={3}
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Type</Label>
+                        <Select
+                            value={(config.type as string) || 'info'}
+                            onValueChange={(value) => updateConfig({ type: value })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="info">Info</SelectItem>
+                                <SelectItem value="success">Success</SelectItem>
+                                <SelectItem value="warning">Warning</SelectItem>
+                                <SelectItem value="error">Error</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            )
+
+        case 'CREATE_TASK':
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>Task Title</Label>
+                        <Input
+                            value={(config.title as string) || ''}
+                            onChange={(e) => updateConfig({ title: e.target.value })}
+                            placeholder="Follow up with {{firstName}}"
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Description</Label>
+                        <Textarea
+                            value={(config.description as string) || ''}
+                            onChange={(e) => updateConfig({ description: e.target.value })}
+                            placeholder="Task details..."
+                            rows={2}
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Due In (days)</Label>
+                        <Input
+                            type="number"
+                            min={0}
+                            value={(config.dueDays as number) || 1}
+                            onChange={(e) => updateConfig({ dueDays: parseInt(e.target.value) || 1 })}
+                        />
+                    </div>
+                </div>
+            )
+
+        // ====== LOGIC ACTIONS ======
         case 'DELAY':
             return (
-                <div className="space-y-1.5">
-                    <Label>Duration (minutes)</Label>
-                    <Input
-                        type="number"
-                        min={1}
-                        value={(config.durationMinutes as number) || 60}
-                        onChange={(e) => updateConfig({ durationMinutes: parseInt(e.target.value) || 60 })}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                        Pause workflow for this duration
-                    </p>
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>Duration</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <div>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={(config.days as number) || 0}
+                                    onChange={(e) => updateConfig({ days: parseInt(e.target.value) || 0 })}
+                                    placeholder="Days"
+                                />
+                                <span className="text-xs text-muted-foreground">Days</span>
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={(config.hours as number) || 0}
+                                    onChange={(e) => updateConfig({ hours: parseInt(e.target.value) || 0 })}
+                                    placeholder="Hours"
+                                />
+                                <span className="text-xs text-muted-foreground">Hours</span>
+                            </div>
+                            <div>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={(config.minutes as number) || 0}
+                                    onChange={(e) => updateConfig({ minutes: parseInt(e.target.value) || 0 })}
+                                    placeholder="Mins"
+                                />
+                                <span className="text-xs text-muted-foreground">Minutes</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )
 
-        case 'MOVE_TO_SEQUENCE':
+        // ====== TRIGGER CONFIGURATIONS ======
+        case 'EMAIL_SENT':
+        case 'EMAIL_OPENED':
+        case 'EMAIL_CLICKED':
+        case 'EMAIL_REPLIED':
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>Campaign Filter (optional)</Label>
+                        <Input
+                            value={(config.campaignId as string) || ''}
+                            onChange={(e) => updateConfig({ campaignId: e.target.value })}
+                            placeholder="Leave empty for all campaigns"
+                        />
+                    </div>
+                    {type === 'EMAIL_CLICKED' && (
+                        <div className="space-y-1.5">
+                            <Label>Link URL Contains (optional)</Label>
+                            <Input
+                                value={(config.urlContains as string) || ''}
+                                onChange={(e) => updateConfig({ urlContains: e.target.value })}
+                                placeholder="e.g., pricing, demo"
+                            />
+                        </div>
+                    )}
+                </div>
+            )
+
+        case 'PROSPECT_CREATED':
+        case 'PROSPECT_UPDATED':
             return (
                 <div className="space-y-1.5">
-                    <Label>Sequence ID</Label>
+                    <Label>Source Filter (optional)</Label>
+                    <Input
+                        value={(config.source as string) || ''}
+                        onChange={(e) => updateConfig({ source: e.target.value })}
+                        placeholder="e.g., csv_import, manual"
+                    />
+                </div>
+            )
+
+        case 'WEBHOOK_RECEIVED':
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>Platform Filter</Label>
+                        <Select
+                            value={(config.platform as string) || ''}
+                            onValueChange={(value) => updateConfig({ platform: value })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Any platform" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">Any Platform</SelectItem>
+                                <SelectItem value="STRIPE">Stripe</SelectItem>
+                                <SelectItem value="CALENDLY">Calendly</SelectItem>
+                                <SelectItem value="TYPEFORM">Typeform</SelectItem>
+                                <SelectItem value="CUSTOM">Custom</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Event Type Filter (optional)</Label>
+                        <Input
+                            value={(config.eventType as string) || ''}
+                            onChange={(e) => updateConfig({ eventType: e.target.value })}
+                            placeholder="e.g., payment.success"
+                        />
+                    </div>
+                </div>
+            )
+
+        case 'SCHEDULE_TRIGGERED':
+            return (
+                <div className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>Schedule Type</Label>
+                        <Select
+                            value={(config.scheduleType as string) || 'daily'}
+                            onValueChange={(value) => updateConfig({ scheduleType: value })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="hourly">Every Hour</SelectItem>
+                                <SelectItem value="daily">Daily</SelectItem>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <Label>Time (for daily/weekly/monthly)</Label>
+                        <Input
+                            type="time"
+                            value={(config.time as string) || '09:00'}
+                            onChange={(e) => updateConfig({ time: e.target.value })}
+                        />
+                    </div>
+                </div>
+            )
+
+        case 'SEQUENCE_ENROLLED':
+        case 'SEQUENCE_COMPLETED':
+        case 'SEQUENCE_EXITED':
+            return (
+                <div className="space-y-1.5">
+                    <Label>Sequence Filter (optional)</Label>
                     <Input
                         value={(config.sequenceId as string) || ''}
                         onChange={(e) => updateConfig({ sequenceId: e.target.value })}
-                        placeholder="Enter sequence ID"
+                        placeholder="Leave empty for all sequences"
                     />
-                    <p className="text-xs text-muted-foreground">
-                        The sequence to add the prospect to
-                    </p>
                 </div>
             )
 

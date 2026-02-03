@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, forwardRef, useImperativeHandle } from 'react'
 import {
     ReactFlow,
     Controls,
@@ -43,16 +43,21 @@ interface WorkflowCanvasProps {
     initialEdges?: Edge[]
     onSave?: (nodes: WorkflowNode[], edges: Edge[]) => void
     automationName?: string
+    onDataChange?: (data: { nodes: WorkflowNode[]; edges: Edge[]; triggerType: string | null; triggerConfig: Record<string, unknown> }) => void
+}
+
+export interface WorkflowCanvasRef {
+    getWorkflowData: () => { nodes: WorkflowNode[]; edges: Edge[]; triggerType: string | null; triggerConfig: Record<string, unknown> }
 }
 
 let nodeId = 0
 const getNodeId = () => `node_${nodeId++}`
 
-export function WorkflowCanvas({
+export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>(function WorkflowCanvas({
     initialNodes = [],
     initialEdges = [],
-    onSave,
-}: WorkflowCanvasProps) {
+    onDataChange,
+}, ref) {
     const reactFlowWrapper = useRef<HTMLDivElement>(null)
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -157,15 +162,40 @@ export function WorkflowCanvas({
         setSelectedNode(null)
     }, [setNodes, setEdges])
 
-    // Get nodes and edges for saving
-    const getWorkflowData = useCallback(() => {
-        return { nodes, edges }
-    }, [nodes, edges])
+    // Get trigger info from nodes
+    const getTriggerInfo = useCallback(() => {
+        const triggerNode = nodes.find((n) => n.type === 'trigger')
+        return {
+            type: triggerNode?.data.type || null,
+            config: triggerNode?.data.config || {},
+        }
+    }, [nodes])
 
-    // Export function to parent
-    if (onSave) {
-        // Parent can call onSave with current data
-    }
+    // Expose methods to parent via ref
+    useImperativeHandle(ref, () => ({
+        getWorkflowData: () => {
+            const trigger = getTriggerInfo()
+            return {
+                nodes: nodes as WorkflowNode[],
+                edges,
+                triggerType: trigger.type,
+                triggerConfig: trigger.config,
+            }
+        },
+    }), [nodes, edges, getTriggerInfo])
+
+    // Notify parent of changes
+    const notifyDataChange = useCallback(() => {
+        if (onDataChange) {
+            const trigger = getTriggerInfo()
+            onDataChange({
+                nodes: nodes as WorkflowNode[],
+                edges,
+                triggerType: trigger.type,
+                triggerConfig: trigger.config,
+            })
+        }
+    }, [onDataChange, nodes, edges, getTriggerInfo])
 
     return (
         <div className="flex h-[calc(100vh-200px)] min-h-[500px]">
@@ -214,16 +244,18 @@ export function WorkflowCanvas({
             )}
         </div>
     )
-}
+})
 
-// Wrapper with provider
-export function WorkflowCanvasWithProvider(props: WorkflowCanvasProps) {
-    return (
-        <ReactFlowProvider>
-            <WorkflowCanvas {...props} />
-        </ReactFlowProvider>
-    )
-}
+// Wrapper with provider that forwards ref
+export const WorkflowCanvasWithProvider = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>(
+    function WorkflowCanvasWithProvider(props, ref) {
+        return (
+            <ReactFlowProvider>
+                <WorkflowCanvas ref={ref} {...props} />
+            </ReactFlowProvider>
+        )
+    }
+)
 
 /**
  * Convert workflow nodes/edges to automation actions array
