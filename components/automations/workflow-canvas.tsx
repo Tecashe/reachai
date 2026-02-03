@@ -13,6 +13,8 @@ import {
     BackgroundVariant,
     Panel,
     MarkerType,
+    Handle,
+    Position,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Plus, Zap, Settings, Trash2, ChevronDown } from 'lucide-react'
@@ -27,6 +29,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { NodeConfigPanel } from './node-config-panel'
+import CustomEdge, { edgeStyles } from './edges/custom-edge'
 import type { AutomationAction, AutomationActionType } from '@/lib/types/automation-types'
 
 // ============================================================
@@ -95,10 +98,25 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
 
     return (
         <div className={cn(
-            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200",
+            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : "border-amber-500/50",
             "hover:shadow-lg hover:scale-[1.02]"
         )}>
+            {/* Source Handle (Bottom) - Connection point for outgoing edges */}
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                id="source"
+                className={cn(
+                    "!w-4 !h-4 !bg-primary !border-2 !border-background",
+                    "!-bottom-2 !left-1/2 !-translate-x-1/2",
+                    "transition-all duration-200",
+                    "hover:!w-5 hover:!h-5 hover:!shadow-lg hover:!shadow-primary/50",
+                    "after:content-[''] after:absolute after:inset-0 after:rounded-full",
+                    "after:animate-ping after:bg-primary/30"
+                )}
+                style={{ zIndex: 10 }}
+            />
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-t-md border-b border-border">
                 <div className="flex items-center gap-1.5">
@@ -235,10 +253,39 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
 
     return (
         <div className={cn(
-            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200",
+            "w-52 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : borderColor,
             "hover:shadow-lg hover:scale-[1.02]"
         )}>
+            {/* Target Handle (Top) - Connection point for incoming edges */}
+            <Handle
+                type="target"
+                position={Position.Top}
+                id="target"
+                className={cn(
+                    "!w-4 !h-4 !bg-primary !border-2 !border-background",
+                    "!-top-2 !left-1/2 !-translate-x-1/2",
+                    "transition-all duration-200",
+                    "hover:!w-5 hover:!h-5 hover:!shadow-lg hover:!shadow-primary/50"
+                )}
+                style={{ zIndex: 10 }}
+            />
+
+            {/* Source Handle (Bottom) - Connection point for outgoing edges */}
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                id="source"
+                className={cn(
+                    "!w-4 !h-4 !bg-primary !border-2 !border-background",
+                    "!-bottom-2 !left-1/2 !-translate-x-1/2",
+                    "transition-all duration-200",
+                    "hover:!w-5 hover:!h-5 hover:!shadow-lg hover:!shadow-primary/50",
+                    "after:content-[''] after:absolute after:inset-0 after:rounded-full",
+                    "after:animate-ping after:bg-primary/30"
+                )}
+                style={{ zIndex: 10 }}
+            />
             {/* Header */}
             <div className={cn(
                 "flex items-center justify-between px-3 py-2 rounded-t-md border-b border-border bg-gradient-to-r",
@@ -316,6 +363,11 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
 const nodeTypes = {
     trigger: TriggerNodeComponent,
     action: ActionNodeComponent,
+}
+
+// Edge types for ReactFlow
+const edgeTypes = {
+    custom: CustomEdge,
 }
 
 // ============================================================
@@ -432,22 +484,16 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             },
         }
 
-        // Create edge from parent to new node with styled appearance
+        // Create edge from parent to new node with custom styling
         const newEdge: Edge = {
             id: `edge_${parentNodeId}_${newNodeId}`,
             source: parentNodeId,
+            sourceHandle: 'source',
             target: newNodeId,
-            type: 'smoothstep',
-            animated: true,
-            style: {
-                stroke: 'hsl(var(--primary))',
-                strokeWidth: 2,
-            },
-            markerEnd: {
-                type: MarkerType.ArrowClosed,
-                color: 'hsl(var(--primary))',
-                width: 20,
-                height: 20,
+            targetHandle: 'target',
+            type: 'custom',
+            data: {
+                deletable: true,
             },
         }
 
@@ -512,6 +558,9 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
 
     return (
         <div className="flex h-full bg-muted/20 rounded-lg border border-border overflow-hidden">
+            {/* Inject edge animation styles */}
+            <style dangerouslySetInnerHTML={{ __html: edgeStyles }} />
+
             {/* Main Canvas */}
             <div className="flex-1 relative">
                 <ReactFlow
@@ -520,28 +569,24 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
                     fitView
                     fitViewOptions={{ padding: 0.4 }}
                     className="bg-background"
                     defaultEdgeOptions={{
-                        type: 'smoothstep',
-                        animated: true,
-                        style: { strokeWidth: 2, stroke: 'hsl(var(--primary))' },
-                        markerEnd: {
-                            type: MarkerType.ArrowClosed,
-                            color: 'hsl(var(--primary))',
-                            width: 20,
-                            height: 20,
-                        },
+                        type: 'custom',
+                        data: { deletable: true },
                     }}
                     proOptions={{ hideAttribution: true }}
                     nodesDraggable={true}
-                    nodesConnectable={false}
+                    nodesConnectable={true}
                     elementsSelectable={true}
                     panOnScroll={true}
                     zoomOnScroll={true}
                     minZoom={0.3}
                     maxZoom={2}
+                    deleteKeyCode={['Backspace', 'Delete']}
+                    selectNodesOnDrag={false}
                 >
                     <Controls className="bg-card/90 backdrop-blur-sm border-border shadow-md !bottom-4 !left-4" />
                     <Background
@@ -552,7 +597,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     />
                     <Panel position="top-right" className="!m-2">
                         <div className="bg-card/70 backdrop-blur-md rounded-md px-2 py-1.5 shadow-sm border border-border/50 text-[10px] text-muted-foreground">
-                            <span className="opacity-80">Click nodes to configure • Drag to reposition</span>
+                            <span className="opacity-80">Click nodes to configure • Hover connections to delete</span>
                         </div>
                     </Panel>
                 </ReactFlow>
@@ -674,9 +719,14 @@ export function actionsToNodes(
         edges.push({
             id: `edge_${prevNodeId}_${actionNode.id}`,
             source: prevNodeId,
+            sourceHandle: 'source',
             target: actionNode.id,
-            type: 'smoothstep',
-            animated: true,
+            targetHandle: 'target',
+            type: 'custom',
+            data: {
+                deletable: true,
+                delay: action.delayMinutes,
+            },
         })
 
         prevNodeId = actionNode.id
