@@ -1750,6 +1750,7 @@ enum NotificationType {
   TEAM_INVITE
   SYSTEM_UPDATE
   ACCOUNT_PAUSED
+  TASK_ASSIGNED
 }
 
 enum ScheduleStatus {

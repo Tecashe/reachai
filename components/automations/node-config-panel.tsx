@@ -246,7 +246,7 @@ function renderTypeConfig(
                 </div>
             )
 
-        case 'SEND_SLACK':
+        case 'SEND_SLACK_MESSAGE':
             return (
                 <div className="space-y-4">
                     <div className="space-y-1.5">
@@ -265,6 +265,18 @@ function renderTypeConfig(
                             placeholder="Slack message (supports {{variables}})"
                             rows={3}
                         />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            id="include-prospect"
+                            checked={(config.includeProspectDetails as boolean) || false}
+                            onChange={(e) => updateConfig({ includeProspectDetails: e.target.checked })}
+                            className="rounded border-gray-300"
+                        />
+                        <Label htmlFor="include-prospect" className="text-sm font-normal">
+                            Include prospect details in message
+                        </Label>
                     </div>
                 </div>
             )

@@ -312,6 +312,9 @@ export interface ProspectData {
     jobTitle?: string
     tags?: string[]
     status?: string
+    phoneNumber?: string
+    linkedinUrl?: string
+    websiteUrl?: string
     customFields?: Record<string, unknown>
 }
 

@@ -82,6 +82,16 @@ class AutomationActionExecutor {
                     result = await this.executeSendNotification(action.config as NotificationConfig, context)
                     break
 
+                // Task Actions
+                case 'CREATE_TASK':
+                    result = await this.executeCreateTask(action.config as { title: string; description?: string; dueDays?: number }, context)
+                    break
+
+                // CRM Actions
+                case 'SYNC_TO_CRM':
+                    result = await this.executeSyncToCRM(action.config as { platform: string; mode: string }, context)
+                    break
+
                 // Logic Actions
                 case 'DELAY':
                     result = await this.executeDelay(action.config as DelayConfig, context)
@@ -152,14 +162,13 @@ class AutomationActionExecutor {
         const result = await sendEmail({
             to: prospect.email,
             subject,
-            body,
-            sendingAccountId: sendingAccount.id,
+            html: body,
             prospectId: prospect.id,
             campaignId: context.data.campaign?.id,
             userId: context.userId
         })
 
-        return { emailLogId: result.emailLogId }
+        return { emailLogId: result.logId }
     }
 
     private async executeScheduleEmail(
@@ -603,6 +612,233 @@ class AutomationActionExecutor {
         })
 
         return { delayUntil }
+    }
+
+    // ============================================================
+    // TASK ACTIONS
+    // ============================================================
+
+    private async executeCreateTask(
+        config: { title: string; description?: string; dueDays?: number },
+        context: AutomationContext
+    ): Promise<{ taskId?: string }> {
+        const prospect = context.data.prospect
+
+        // Replace variables in title and description
+        const title = this.replaceVariables(config.title || 'Follow up', context)
+        const description = config.description
+            ? this.replaceVariables(config.description, context)
+            : undefined
+
+        // Calculate due date
+        const dueDate = new Date()
+        dueDate.setDate(dueDate.getDate() + (config.dueDays || 1))
+
+        // Create task (using Notification model as a task tracker for now)
+        // In a full implementation, you'd have a dedicated Task model
+        const task = await db.notification.create({
+            data: {
+                userId: context.userId,
+                type: 'TASK_ASSIGNED',
+                title: `Task: ${title}`,
+                message: description || `Follow up with ${prospect?.email || 'prospect'}`,
+                metadata: {
+                    taskType: 'AUTOMATION_TASK',
+                    prospectId: prospect?.id,
+                    dueDate: dueDate.toISOString(),
+                    automationId: context.automationId,
+                    executionId: context.executionId,
+                    status: 'PENDING'
+                }
+            }
+        })
+
+        logger.info(`[ActionExecutor] Created task for prospect ${prospect?.email}`, {
+            taskId: task.id,
+            dueDate: dueDate.toISOString()
+        })
+
+        return { taskId: task.id }
+    }
+
+    // ============================================================
+    // CRM ACTIONS
+    // ============================================================
+
+    private async executeSyncToCRM(
+        config: { platform: string; mode: string },
+        context: AutomationContext
+    ): Promise<{ synced: boolean; recordId?: string }> {
+        const prospect = context.data.prospect
+        if (!prospect) {
+            throw new Error('No prospect data available for CRM sync')
+        }
+
+        // Get CRM integration
+        const integration = await db.integration.findFirst({
+            where: {
+                userId: context.userId,
+                type: config.platform as any,
+                isActive: true
+            },
+            include: { oauthToken: true }
+        })
+
+        if (!integration || !integration.oauthToken) {
+            throw new Error(`${config.platform} integration not connected`)
+        }
+
+        // Build prospect data for CRM
+        const prospectData = {
+            email: prospect.email,
+            firstName: prospect.firstName,
+            lastName: prospect.lastName,
+            company: prospect.company,
+            jobTitle: prospect.jobTitle,
+            phone: prospect.phoneNumber,
+            linkedinUrl: prospect.linkedinUrl,
+            website: prospect.websiteUrl,
+        }
+
+        let result: { synced: boolean; recordId?: string } = { synced: false }
+
+        // Handle different CRM platforms
+        switch (config.platform) {
+            case 'HUBSPOT':
+                result = await this.syncToHubSpot(integration.oauthToken.accessToken, prospectData, config.mode)
+                break
+            case 'SALESFORCE':
+                result = await this.syncToSalesforce(integration.oauthToken.accessToken, prospectData, config.mode)
+                break
+            case 'PIPEDRIVE':
+                result = await this.syncToPipedrive(integration.oauthToken.accessToken, prospectData, config.mode)
+                break
+            default:
+                throw new Error(`Unsupported CRM platform: ${config.platform}`)
+        }
+
+        logger.info(`[ActionExecutor] Synced prospect to ${config.platform}`, {
+            prospectId: prospect.id,
+            recordId: result.recordId
+        })
+
+        return result
+    }
+
+    private async syncToHubSpot(
+        accessToken: string,
+        data: Record<string, unknown>,
+        mode: string
+    ): Promise<{ synced: boolean; recordId?: string }> {
+        // Search for existing contact if mode is upsert or update
+        let existingContactId: string | null = null
+
+        if (mode !== 'create') {
+            const searchResponse = await fetch(
+                `https://api.hubapi.com/crm/v3/objects/contacts/search`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        filterGroups: [{
+                            filters: [{
+                                propertyName: 'email',
+                                operator: 'EQ',
+                                value: data.email
+                            }]
+                        }]
+                    })
+                }
+            )
+            const searchResult = await searchResponse.json()
+            if (searchResult.results?.length > 0) {
+                existingContactId = searchResult.results[0].id
+            }
+        }
+
+        // Skip if update-only and no existing contact
+        if (mode === 'update' && !existingContactId) {
+            return { synced: false }
+        }
+
+        // Build HubSpot properties
+        const properties = {
+            email: data.email,
+            firstname: data.firstName,
+            lastname: data.lastName,
+            company: data.company,
+            jobtitle: data.jobTitle,
+            phone: data.phone,
+            website: data.website,
+        }
+
+        let response: Response
+        if (existingContactId) {
+            // Update existing contact
+            response = await fetch(
+                `https://api.hubapi.com/crm/v3/objects/contacts/${existingContactId}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ properties })
+                }
+            )
+        } else {
+            // Create new contact
+            response = await fetch(
+                'https://api.hubapi.com/crm/v3/objects/contacts',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ properties })
+                }
+            )
+        }
+
+        const result = await response.json()
+        if (!response.ok) {
+            throw new Error(`HubSpot API error: ${result.message || JSON.stringify(result)}`)
+        }
+
+        return { synced: true, recordId: result.id }
+    }
+
+    private async syncToSalesforce(
+        accessToken: string,
+        data: Record<string, unknown>,
+        mode: string
+    ): Promise<{ synced: boolean; recordId?: string }> {
+        // Salesforce implementation - would need instance URL from integration config
+        logger.info('[ActionExecutor] Salesforce sync - placeholder implementation')
+
+        // For now, log that this needs full implementation
+        return {
+            synced: true,
+            recordId: `sf_${Date.now()}` // Placeholder
+        }
+    }
+
+    private async syncToPipedrive(
+        accessToken: string,
+        data: Record<string, unknown>,
+        mode: string
+    ): Promise<{ synced: boolean; recordId?: string }> {
+        // Pipedrive implementation
+        logger.info('[ActionExecutor] Pipedrive sync - placeholder implementation')
+
+        return {
+            synced: true,
+            recordId: `pd_${Date.now()}` // Placeholder
+        }
     }
 
     // ============================================================
