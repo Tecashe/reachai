@@ -211,7 +211,7 @@ export default function IntegrationsPage() {
         {/* Master Header */}
         <div className='space-y-8'>
           <div className='space-y-4'>
-            <div className='flex items-end justify-between'>
+            {/* <div className='flex items-end justify-between'>
               <div className='flex-1'>
                 <h1 className='text-5xl tracking-tight font-light leading-tight text-foreground'>
                   Connect your tools.
@@ -219,14 +219,14 @@ export default function IntegrationsPage() {
                   <span className='font-semibold'>Power your workflow.</span>
                 </h1>
               </div>
-            </div>
+            </div> */}
             <p className='text-base text-muted-foreground leading-relaxed max-w-2xl font-light'>
               Integrate with over 20 platforms to sync data, automate campaigns, and keep your team aligned across every tool you use.
             </p>
           </div>
 
           {/* Stats Strip */}
-          <div className='flex items-center gap-12 pt-4 border-t border-border'>
+          {/* <div className='flex items-center gap-12 pt-4 border-t border-border'>
             <div>
               <div className='text-2xl font-semibold text-foreground'>{connected}</div>
               <p className='text-xs text-muted-foreground uppercase tracking-wide mt-2'>Connected</p>
@@ -241,7 +241,7 @@ export default function IntegrationsPage() {
               <div className='text-2xl font-semibold text-foreground'>{Math.round((connected / total) * 100)}%</div>
               <p className='text-xs text-muted-foreground uppercase tracking-wide mt-2'>Coverage</p>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* All Integrations Grid */}
