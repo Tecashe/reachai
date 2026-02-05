@@ -1081,7 +1081,7 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("INTEGRATION_CRM_SYNC")} className="py-2.5 px-3 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-orange-500" />
+                <img src="/icons/hubspot.svg" alt="CRM" className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">CRM Sync</p>
@@ -1092,7 +1092,7 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("INTEGRATION_SLACK")} className="py-2.5 px-3 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-pink-500" />
+                <img src="/icons/slack.svg" alt="Slack" className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">Slack Notification</p>
@@ -1103,7 +1103,7 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("INTEGRATION_NOTION")} className="py-2.5 px-3 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-stone-500/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-stone-500" />
+                <img src="/icons/notion.svg" alt="Notion" className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">Notion Page</p>
@@ -1114,7 +1114,7 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("INTEGRATION_AIRTABLE")} className="py-2.5 px-3 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-lime-500/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-lime-500" />
+                <img src="/icons/airtable.svg" alt="Airtable" className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">Airtable Record</p>
@@ -1125,7 +1125,7 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("INTEGRATION_TRELLO")} className="py-2.5 px-3 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-blue-500" />
+                <img src="/icons/trello.svg" alt="Trello" className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">Trello Card</p>
@@ -1136,7 +1136,7 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("INTEGRATION_ASANA")} className="py-2.5 px-3 rounded-lg">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-red-500" />
+                <img src="/icons/asana.svg" alt="Asana" className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium text-sm">Asana Task</p>
