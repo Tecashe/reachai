@@ -758,7 +758,21 @@ export function SequenceCanvas({
                     <div
                       className={cn("p-2.5 rounded-xl border-2 shadow-sm shrink-0", config.bgColor, config.borderColor)}
                     >
-                      <Icon className={cn("h-5 w-5", config.color)} />
+                      {step.stepType === "INTEGRATION_CRM_SYNC" ? (
+                        <img src="/icons/hubspot.svg" alt="CRM" className="h-5 w-5" />
+                      ) : step.stepType === "INTEGRATION_SLACK" ? (
+                        <img src="/icons/slack.svg" alt="Slack" className="h-5 w-5" />
+                      ) : step.stepType === "INTEGRATION_NOTION" ? (
+                        <img src="/icons/notion.svg" alt="Notion" className="h-5 w-5" />
+                      ) : step.stepType === "INTEGRATION_AIRTABLE" ? (
+                        <img src="/icons/airtable.svg" alt="Airtable" className="h-5 w-5" />
+                      ) : step.stepType === "INTEGRATION_TRELLO" ? (
+                        <img src="/icons/trello.svg" alt="Trello" className="h-5 w-5" />
+                      ) : step.stepType === "INTEGRATION_ASANA" ? (
+                        <img src="/icons/asana.svg" alt="Asana" className="h-5 w-5" />
+                      ) : (
+                        <Icon className={cn("h-5 w-5", config.color)} />
+                      )}
                     </div>
 
                     {/* Content */}
