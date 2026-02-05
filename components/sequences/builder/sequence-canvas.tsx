@@ -413,6 +413,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import type { SequenceStep, StepType } from "@/lib/types/sequence"
@@ -1026,16 +1030,10 @@ function AddStepButton({
                   <span className="text-sm">Manual Task</span>
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => onAdd("MULTI_CHANNEL_TOUCH")} className="py-2 px-3 rounded-lg">
-                <Layers className="mr-3 h-4 w-4 text-cyan-500" />
-                <span className="text-sm">Multi-Channel Touch</span>
+              <DropdownMenuItem onClick={() => onAdd("VOICEMAIL_DROP")} className="py-2 px-3 rounded-lg">
+                <Voicemail className="mr-3 h-4 w-4 text-rose-500" />
+                <span className="text-sm">Voicemail Drop</span>
               </DropdownMenuItem>
-              {enableCalls && (
-                <DropdownMenuItem onClick={() => onAdd("VOICEMAIL_DROP")} className="py-2 px-3 rounded-lg">
-                  <Voicemail className="mr-3 h-4 w-4 text-rose-500" />
-                  <span className="text-sm">Voicemail Drop</span>
-                </DropdownMenuItem>
-              )}
               <DropdownMenuItem onClick={() => onAdd("DIRECT_MAIL")} className="py-2 px-3 rounded-lg">
                 <Send className="mr-3 h-4 w-4 text-violet-500" />
                 <span className="text-sm">Direct Mail</span>
@@ -1044,121 +1042,171 @@ function AddStepButton({
           </>
         )}
 
-        {/* Automation */}
         <DropdownMenuSeparator className="my-2" />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs text-muted-foreground font-medium px-2">Automation</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onAdd("CONDITION")} className="py-2 px-3 rounded-lg">
-            <GitBranch className="mr-3 h-4 w-4 text-yellow-500" />
-            <span className="text-sm">Condition Branch</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("WAIT_UNTIL")} className="py-2 px-3 rounded-lg">
-            <Timer className="mr-3 h-4 w-4 text-orange-500" />
-            <span className="text-sm">Wait Until</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("EXIT_TRIGGER")} className="py-2 px-3 rounded-lg">
-            <LogOut className="mr-3 h-4 w-4 text-red-500" />
-            <span className="text-sm">Exit Trigger</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("BEHAVIOR_BRANCH")} className="py-2 px-3 rounded-lg">
-            <GitBranch className="mr-3 h-4 w-4 text-emerald-500" />
-            <span className="text-sm">Behavior Branch</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("MANUAL_REVIEW")} className="py-2 px-3 rounded-lg">
-            <UserCheck className="mr-3 h-4 w-4 text-amber-500" />
-            <span className="text-sm">Manual Review</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
 
-        {/* Advanced */}
-        <DropdownMenuSeparator className="my-2" />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs text-muted-foreground font-medium px-2">Advanced</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onAdd("AB_SPLIT")} className="py-2 px-3 rounded-lg">
-            <Split className="mr-3 h-4 w-4 text-indigo-500" />
-            <span className="text-sm">A/B Split Test</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("RANDOM_VARIANT")} className="py-2 px-3 rounded-lg">
-            <Shuffle className="mr-3 h-4 w-4 text-fuchsia-500" />
-            <span className="text-sm">Random Variant</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("CONTENT_REFERENCE")} className="py-2 px-3 rounded-lg">
-            <FileText className="mr-3 h-4 w-4 text-teal-500" />
-            <span className="text-sm">Content Reference</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        {/* Automation Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="py-2 px-3 rounded-lg">
+            <Zap className="mr-3 h-4 w-4 text-amber-500" />
+            <span className="text-sm">Automation</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className="w-56">
+              <DropdownMenuItem onClick={() => onAdd("CONDITION")} className="py-2 px-3 rounded-lg">
+                <GitBranch className="mr-3 h-4 w-4 text-yellow-500" />
+                <span className="text-sm">Condition Branch</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("WAIT_UNTIL")} className="py-2 px-3 rounded-lg">
+                <Timer className="mr-3 h-4 w-4 text-orange-500" />
+                <span className="text-sm">Wait Until</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("EXIT_TRIGGER")} className="py-2 px-3 rounded-lg">
+                <LogOut className="mr-3 h-4 w-4 text-red-500" />
+                <span className="text-sm">Exit Trigger</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("BEHAVIOR_BRANCH")} className="py-2 px-3 rounded-lg">
+                <GitBranch className="mr-3 h-4 w-4 text-emerald-500" />
+                <span className="text-sm">Behavior Branch</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("MANUAL_REVIEW")} className="py-2 px-3 rounded-lg">
+                <UserCheck className="mr-3 h-4 w-4 text-amber-500" />
+                <span className="text-sm">Manual Review</span>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
 
-        {/* Integrations */}
-        <DropdownMenuSeparator className="my-2" />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel className="text-xs text-muted-foreground font-medium px-2">Integrations</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_CRM_SYNC")} className="py-2.5 px-3 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                <img src="/icons/hubspot.svg" alt="CRM" className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">CRM Sync</p>
-                <p className="text-xs text-muted-foreground">HubSpot, Salesforce, Pipedrive</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_SLACK")} className="py-2.5 px-3 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
-                <img src="/icons/slack.svg" alt="Slack" className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Slack Notification</p>
-                <p className="text-xs text-muted-foreground">Send to channel</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_NOTION")} className="py-2.5 px-3 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-stone-500/10 flex items-center justify-center">
-                <img src="/icons/notion.svg" alt="Notion" className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Notion Page</p>
-                <p className="text-xs text-muted-foreground">Create database entry</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_AIRTABLE")} className="py-2.5 px-3 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-lime-500/10 flex items-center justify-center">
-                <img src="/icons/airtable.svg" alt="Airtable" className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Airtable Record</p>
-                <p className="text-xs text-muted-foreground">Add to base</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_TRELLO")} className="py-2.5 px-3 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                <img src="/icons/trello.svg" alt="Trello" className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Trello Card</p>
-                <p className="text-xs text-muted-foreground">Create card in list</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_ASANA")} className="py-2.5 px-3 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                <img src="/icons/asana.svg" alt="Asana" className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">Asana Task</p>
-                <p className="text-xs text-muted-foreground">Create in project</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        {/* LinkedIn Submenu */}
+        {enableLinkedIn && (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="py-2 px-3 rounded-lg">
+              <Linkedin className="mr-3 h-4 w-4 text-sky-500" />
+              <span className="text-sm">LinkedIn</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent className="w-56">
+                <DropdownMenuItem onClick={() => onAdd("LINKEDIN_VIEW")} className="py-2 px-3 rounded-lg">
+                  <Linkedin className="mr-3 h-4 w-4 text-sky-500" />
+                  <span className="text-sm">View Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onAdd("LINKEDIN_CONNECT")} className="py-2 px-3 rounded-lg">
+                  <Linkedin className="mr-3 h-4 w-4 text-sky-500" />
+                  <span className="text-sm">Connection Request</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onAdd("LINKEDIN_MESSAGE")} className="py-2 px-3 rounded-lg">
+                  <Linkedin className="mr-3 h-4 w-4 text-sky-500" />
+                  <span className="text-sm">Message</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        )}
+
+        {/* Advanced Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="py-2 px-3 rounded-lg">
+            <Sparkles className="mr-3 h-4 w-4 text-indigo-500" />
+            <span className="text-sm">Advanced</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className="w-56">
+              <DropdownMenuItem onClick={() => onAdd("AB_SPLIT")} className="py-2 px-3 rounded-lg">
+                <Split className="mr-3 h-4 w-4 text-indigo-500" />
+                <span className="text-sm">A/B Split Test</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("RANDOM_VARIANT")} className="py-2 px-3 rounded-lg">
+                <Shuffle className="mr-3 h-4 w-4 text-fuchsia-500" />
+                <span className="text-sm">Random Variant</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("CONTENT_REFERENCE")} className="py-2 px-3 rounded-lg">
+                <FileText className="mr-3 h-4 w-4 text-teal-500" />
+                <span className="text-sm">Content Reference</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("MULTI_CHANNEL_TOUCH")} className="py-2 px-3 rounded-lg">
+                <Layers className="mr-3 h-4 w-4 text-cyan-500" />
+                <span className="text-sm">Multi-Channel Touch</span>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+
+        {/* Integrations Submenu */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="py-2 px-3 rounded-lg">
+            <Zap className="mr-3 h-4 w-4 text-orange-500" />
+            <span className="text-sm">Integrations</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className="w-64">
+              <DropdownMenuItem onClick={() => onAdd("INTEGRATION_CRM_SYNC")} className="py-2.5 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                    <img src="/icons/hubspot.svg" alt="CRM" className="h-5 w-5 hover:scale-110 transition-transform" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-xs">CRM Sync</p>
+                    <p className="text-[10px] text-muted-foreground">HubSpot, Salesforce</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("INTEGRATION_SLACK")} className="py-2.5 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                    <img src="/icons/slack.svg" alt="Slack" className="h-5 w-5 hover:scale-110 transition-transform" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-xs">Slack Notification</p>
+                    <p className="text-[10px] text-muted-foreground">Send to channel</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("INTEGRATION_NOTION")} className="py-2.5 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-stone-500/10 flex items-center justify-center">
+                    <img src="/icons/notion.svg" alt="Notion" className="h-5 w-5 hover:scale-110 transition-transform" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-xs">Notion Page</p>
+                    <p className="text-[10px] text-muted-foreground">Create database entry</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("INTEGRATION_AIRTABLE")} className="py-2.5 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-lime-500/10 flex items-center justify-center">
+                    <img src="/icons/airtable.svg" alt="Airtable" className="h-5 w-5 hover:scale-110 transition-transform" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-xs">Airtable Record</p>
+                    <p className="text-[10px] text-muted-foreground">Add to base</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("INTEGRATION_TRELLO")} className="py-2.5 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <img src="/icons/trello.svg" alt="Trello" className="h-5 w-5 hover:scale-110 transition-transform" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-xs">Trello Card</p>
+                    <p className="text-[10px] text-muted-foreground">Create card in list</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAdd("INTEGRATION_ASANA")} className="py-2.5 px-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                    <img src="/icons/asana.svg" alt="Asana" className="h-5 w-5 hover:scale-110 transition-transform" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-xs">Asana Task</p>
+                    <p className="text-[10px] text-muted-foreground">Add task to project</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
       </DropdownMenuContent>
     </DropdownMenu>
   )

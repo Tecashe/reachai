@@ -69,7 +69,7 @@ const TRIGGERS = [
     { type: 'PROSPECT_UPDATED', label: 'Prospect Updated', category: 'Prospect' },
     { type: 'SEQUENCE_ENROLLED', label: 'Sequence Started', category: 'Sequence' },
     { type: 'SEQUENCE_COMPLETED', label: 'Sequence Completed', category: 'Sequence' },
-    { type: 'WEBHOOK_RECEIVED', label: 'Webhook Received', category: 'Integration' },
+    { type: 'WEBHOOK_RECEIVED', label: 'Webhook Received', category: 'Communication' },
 ]
 
 const ACTIONS = [
@@ -78,24 +78,65 @@ const ACTIONS = [
     { type: 'ADD_TAG', label: 'Add Tag', category: 'Prospect' },
     { type: 'REMOVE_TAG', label: 'Remove Tag', category: 'Prospect' },
     { type: 'CHANGE_STATUS', label: 'Change Status', category: 'Prospect' },
+    { type: 'MOVE_TO_FOLDER', label: 'Move to Folder', category: 'Prospect' },
     { type: 'MOVE_TO_SEQUENCE', label: 'Add to Sequence', category: 'Sequence' },
     { type: 'REMOVE_FROM_SEQUENCE', label: 'Remove from Sequence', category: 'Sequence' },
     { type: 'PAUSE_SEQUENCE', label: 'Pause Sequence', category: 'Sequence' },
     { type: 'RESUME_SEQUENCE', label: 'Resume Sequence', category: 'Sequence' },
-    { type: 'SEND_SLACK_MESSAGE', label: 'Send Slack Message', category: 'Integration' },
-    { type: 'SEND_WEBHOOK', label: 'Send Webhook', category: 'Integration' },
-    { type: 'SYNC_TO_CRM', label: 'Sync to CRM', category: 'Integration' },
+
+    // CRM
+    { type: 'SYNC_TO_HUBSPOT', label: 'Sync to HubSpot', category: 'CRM', provider: 'HUBSPOT' },
+    { type: 'SYNC_TO_SALESFORCE', label: 'Sync to Salesforce', category: 'CRM', provider: 'SALESFORCE' },
+    { type: 'SYNC_TO_PIPEDRIVE', label: 'Sync to Pipedrive', category: 'CRM', provider: 'PIPEDRIVE' },
+
+    // Communication
+    { type: 'SEND_SLACK_MESSAGE', label: 'Send Slack Message', category: 'Communication', provider: 'SLACK' },
+    { type: 'SEND_WEBHOOK', label: 'Send Webhook', category: 'Communication' },
+
+    // Productivity
+    { type: 'ADD_TO_NOTION', label: 'Add to Notion', category: 'Productivity', provider: 'NOTION' },
+    { type: 'ADD_TO_AIRTABLE', label: 'Add to Airtable', category: 'Productivity', provider: 'AIRTABLE' },
+    { type: 'CREATE_TRELLO_CARD', label: 'Create Trello Card', category: 'Productivity', provider: 'TRELLO' },
+    { type: 'CREATE_ASANA_TASK', label: 'Create Asana Task', category: 'Productivity', provider: 'ASANA' },
+
+    // Other
     { type: 'SEND_NOTIFICATION', label: 'Send Notification', category: 'Notification' },
     { type: 'CREATE_TASK', label: 'Create Task', category: 'Task' },
     { type: 'DELAY', label: 'Wait / Delay', category: 'Logic' },
 ]
+
+// Add these imports at the top if missing
+import Image from 'next/image'
+import {
+    DropdownMenuSub,
+    DropdownMenuSubTrigger,
+    DropdownMenuSubContent,
+    DropdownMenuPortal,
+} from '@/components/ui/dropdown-menu'
+
+// Provider icon file mapping
+const PROVIDER_ICON_MAP: Record<string, string> = {
+    'HUBSPOT': 'hubspot',
+    'SALESFORCE': 'salesforce',
+    'PIPEDRIVE': 'pipedrive',
+    'SLACK': 'slack',
+    'NOTION': 'notion',
+    'AIRTABLE': 'airtable',
+    'TRELLO': 'trello',
+    'ASANA': 'asana',
+    'ZOHO_CRM': 'zoho_crm',
+    'CLICKUP': 'clickup',
+    'GOOGLE_SHEETS': 'google_sheets',
+}
 
 // ============================================================
 // CUSTOM NODE COMPONENTS
 // ============================================================
 
 function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data']; id: string; selected?: boolean }) {
-    const { onSelectTrigger, onConfigure, onAddAction, isConfigured, type, label } = data as any
+    const { onSelectTrigger, onConfigure, onAddAction, isConfigured, type, label, provider } = data as any
+
+    const categories = ['Email', 'Prospect', 'Sequence', 'Communication', 'CRM', 'Productivity', 'Other']
 
     return (
         <div className={cn(
@@ -149,45 +190,68 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-64" align="start">
-                            {['Email', 'Prospect', 'Sequence', 'Integration'].map((category) => (
-                                <div key={category}>
-                                    <DropdownMenuLabel>{category}</DropdownMenuLabel>
-                                    {TRIGGERS.filter(t => t.category === category).map((trigger) => (
-                                        <DropdownMenuItem
-                                            key={trigger.type}
-                                            onClick={() => onSelectTrigger?.(id, trigger.type, trigger.label)}
-                                        >
-                                            {trigger.label}
-                                        </DropdownMenuItem>
-                                    ))}
-                                    <DropdownMenuSeparator />
-                                </div>
-                            ))}
+                            {categories.map((category) => {
+                                const categoryTriggers = TRIGGERS.filter(t => t.category === category)
+                                if (categoryTriggers.length === 0) return null
+                                return (
+                                    <DropdownMenuSub key={category}>
+                                        <DropdownMenuSubTrigger className="text-xs">
+                                            {category}
+                                        </DropdownMenuSubTrigger>
+                                        <DropdownMenuPortal>
+                                            <DropdownMenuSubContent className="w-48">
+                                                {categoryTriggers.map((trigger) => (
+                                                    <DropdownMenuItem
+                                                        key={trigger.type}
+                                                        onClick={() => onSelectTrigger?.(id, trigger.type, trigger.label)}
+                                                        className="text-xs"
+                                                    >
+                                                        {trigger.label}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuSubContent>
+                                        </DropdownMenuPortal>
+                                    </DropdownMenuSub>
+                                )
+                            })}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
-                    <div className="space-y-1.5">
-                        <div className="flex items-center justify-between gap-1">
-                            <span className="font-medium text-foreground text-sm truncate">{label}</span>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[10px]">
-                                        Change
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-48" align="end">
-                                    {TRIGGERS.map((trigger) => (
-                                        <DropdownMenuItem
-                                            key={trigger.type}
-                                            onClick={() => onSelectTrigger?.(id, trigger.type, trigger.label)}
-                                            className="text-xs"
-                                        >
-                                            {trigger.label}
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                    <div className="space-y-1.5 text-center">
+                        <span className="font-medium text-foreground text-sm truncate block px-1">{label}</span>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-5 px-1.5 text-[10px] opacity-50 hover:opacity-100">
+                                    Change Trigger
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-64" align="center">
+                                {categories.map((category) => {
+                                    const categoryTriggers = TRIGGERS.filter(t => t.category === category)
+                                    if (categoryTriggers.length === 0) return null
+                                    return (
+                                        <DropdownMenuSub key={category}>
+                                            <DropdownMenuSubTrigger className="text-xs">
+                                                {category}
+                                            </DropdownMenuSubTrigger>
+                                            <DropdownMenuPortal>
+                                                <DropdownMenuSubContent className="w-48">
+                                                    {categoryTriggers.map((trigger) => (
+                                                        <DropdownMenuItem
+                                                            key={trigger.type}
+                                                            onClick={() => onSelectTrigger?.(id, trigger.type, trigger.label)}
+                                                            className="text-xs"
+                                                        >
+                                                            {trigger.label}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuSubContent>
+                                            </DropdownMenuPortal>
+                                        </DropdownMenuSub>
+                                    )
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 )}
             </div>
@@ -206,24 +270,42 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                                 Add Action
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-48" align="center">
-                            {['Email', 'Prospect', 'Sequence', 'Integration', 'Notification', 'Task', 'Logic'].map((category) => {
+                        <DropdownMenuContent className="w-64" align="center">
+                            {['Email', 'Prospect', 'Sequence', 'Communication', 'CRM', 'Productivity', 'Notification', 'Task', 'Logic'].map((category) => {
                                 const categoryActions = ACTIONS.filter(a => a.category === category)
                                 if (categoryActions.length === 0) return null
                                 return (
-                                    <div key={category}>
-                                        <DropdownMenuLabel className="text-[10px]">{category}</DropdownMenuLabel>
-                                        {categoryActions.map((action) => (
-                                            <DropdownMenuItem
-                                                key={action.type}
-                                                onClick={() => onAddAction?.(id, action.type, action.label)}
-                                                className="text-xs"
-                                            >
-                                                {action.label}
-                                            </DropdownMenuItem>
-                                        ))}
-                                        <DropdownMenuSeparator />
-                                    </div>
+                                    <DropdownMenuSub key={category}>
+                                        <DropdownMenuSubTrigger className="text-xs">
+                                            {category}
+                                        </DropdownMenuSubTrigger>
+                                        <DropdownMenuPortal>
+                                            <DropdownMenuSubContent className="w-56">
+                                                {categoryActions.map((action) => (
+                                                    <DropdownMenuItem
+                                                        key={action.type}
+                                                        onClick={() => onAddAction?.(id, action.type, action.label)}
+                                                        className="py-2 px-3"
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
+                                                                <Image
+                                                                    src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
+                                                                    alt={action.provider}
+                                                                    width={14}
+                                                                    height={14}
+                                                                    className="object-contain"
+                                                                />
+                                                            ) : (
+                                                                <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
+                                                            )}
+                                                            <span className="text-xs">{action.label}</span>
+                                                        </div>
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuSubContent>
+                                        </DropdownMenuPortal>
+                                    </DropdownMenuSub>
                                 )
                             })}
                         </DropdownMenuContent>
@@ -235,20 +317,25 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
 }
 
 function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data']; id: string; selected?: boolean }) {
-    const { onConfigure, onDelete, onAddAction, type, label } = data as any
+    const { onConfigure, onDelete, onAddAction, type, label, provider } = data as any
 
     // Color based on category
     const actionDef = ACTIONS.find(a => a.type === type)
+    const category = actionDef?.category || 'Action'
+    const currentProvider = provider || actionDef?.provider
+
     const colors = {
         Email: 'from-blue-500/10 to-cyan-500/10 border-blue-500/50 text-blue-600',
         Prospect: 'from-green-500/10 to-emerald-500/10 border-green-500/50 text-green-600',
         Sequence: 'from-purple-500/10 to-violet-500/10 border-purple-500/50 text-purple-600',
-        Integration: 'from-pink-500/10 to-rose-500/10 border-pink-500/50 text-pink-600',
+        Communication: 'from-pink-500/10 to-rose-500/10 border-pink-500/50 text-pink-600',
+        CRM: 'from-orange-500/10 to-amber-500/10 border-orange-500/50 text-orange-600',
+        Productivity: 'from-stone-500/10 to-neutral-500/10 border-stone-500/50 text-stone-600',
         Notification: 'from-yellow-500/10 to-amber-500/10 border-yellow-500/50 text-yellow-600',
         Task: 'from-indigo-500/10 to-blue-500/10 border-indigo-500/50 text-indigo-600',
         Logic: 'from-slate-500/10 to-gray-500/10 border-slate-500/50 text-slate-600',
     }
-    const colorClass = colors[actionDef?.category as keyof typeof colors] || colors.Logic
+    const colorClass = colors[category as keyof typeof colors] || colors.Logic
     const borderColor = colorClass.split(' ')[2]
     const textColor = colorClass.split(' ')[3]
 
@@ -292,9 +379,24 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                 "flex items-center justify-between px-3 py-2 rounded-t-md border-b border-border bg-gradient-to-r",
                 colorClass.split(' ').slice(0, 2).join(' ')
             )}>
-                <span className={cn("text-[10px] font-bold uppercase tracking-wider", textColor)}>
-                    {actionDef?.category || 'Action'}
-                </span>
+                <div className="flex items-center gap-1.5">
+                    {currentProvider && PROVIDER_ICON_MAP[currentProvider] ? (
+                        <div className="w-3.5 h-3.5 flex items-center justify-center">
+                            <Image
+                                src={`/icons/${PROVIDER_ICON_MAP[currentProvider]}.svg`}
+                                alt={currentProvider}
+                                width={14}
+                                height={14}
+                                className="object-contain"
+                            />
+                        </div>
+                    ) : (
+                        <Zap className={cn("h-3.5 w-3.5", textColor)} />
+                    )}
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", textColor)}>
+                        {category}
+                    </span>
+                </div>
                 <div className="flex items-center gap-0.5">
                     <Button
                         variant="ghost"
@@ -333,24 +435,42 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                             Add Next
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-48" align="center">
-                        {['Email', 'Prospect', 'Sequence', 'Integration', 'Notification', 'Task', 'Logic'].map((category) => {
+                    <DropdownMenuContent className="w-64" align="center">
+                        {['Email', 'Prospect', 'Sequence', 'Communication', 'CRM', 'Productivity', 'Notification', 'Task', 'Logic'].map((category) => {
                             const categoryActions = ACTIONS.filter(a => a.category === category)
                             if (categoryActions.length === 0) return null
                             return (
-                                <div key={category}>
-                                    <DropdownMenuLabel className="text-[10px]">{category}</DropdownMenuLabel>
-                                    {categoryActions.map((action) => (
-                                        <DropdownMenuItem
-                                            key={action.type}
-                                            onClick={() => onAddAction?.(id, action.type, action.label)}
-                                            className="text-xs"
-                                        >
-                                            {action.label}
-                                        </DropdownMenuItem>
-                                    ))}
-                                    <DropdownMenuSeparator />
-                                </div>
+                                <DropdownMenuSub key={category}>
+                                    <DropdownMenuSubTrigger className="text-xs">
+                                        {category}
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuPortal>
+                                        <DropdownMenuSubContent className="w-56">
+                                            {categoryActions.map((action) => (
+                                                <DropdownMenuItem
+                                                    key={action.type}
+                                                    onClick={() => onAddAction?.(id, action.type, action.label)}
+                                                    className="py-2 px-3"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
+                                                            <Image
+                                                                src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
+                                                                alt={action.provider}
+                                                                width={14}
+                                                                height={14}
+                                                                className="object-contain"
+                                                            />
+                                                        ) : (
+                                                            <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
+                                                        )}
+                                                        <span className="text-xs">{action.label}</span>
+                                                    </div>
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuPortal>
+                                </DropdownMenuSub>
                             )
                         })}
                     </DropdownMenuContent>
