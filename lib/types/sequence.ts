@@ -350,12 +350,19 @@ export type StepType =
   | "EXIT_TRIGGER"
   | "MANUAL_REVIEW"
   | "MULTI_CHANNEL_TOUCH"
-  | "MULTI_CHANNEL_TOUCH"
   | "BEHAVIOR_BRANCH"
   | "RANDOM_VARIANT"
   | "CONTENT_REFERENCE"
   | "VOICEMAIL_DROP"
   | "DIRECT_MAIL"
+  // Integration step types
+  | "INTEGRATION_CRM_SYNC"
+  | "INTEGRATION_SLACK"
+  | "INTEGRATION_NOTION"
+  | "INTEGRATION_AIRTABLE"
+  | "INTEGRATION_TRELLO"
+  | "INTEGRATION_ASANA"
+
 
 export type DelayUnit = "MINUTES" | "HOURS" | "DAYS" | "WEEKS"
 
@@ -569,7 +576,11 @@ export interface SequenceStep {
 
   voicemailDropConfig?: VoicemailDropConfig | null
 
+
   directMailConfig?: DirectMailConfig | null
+
+  // Integration step config
+  integrationConfig?: IntegrationStepConfig | null
 
   // Stats
   sent: number
@@ -718,6 +729,33 @@ export interface DirectMailConfig {
   useProspectAddress: boolean
   followUpEmailEnabled: boolean
   followUpDelay?: number
+}
+
+export interface IntegrationStepConfig {
+  provider: string  // e.g., "HUBSPOT", "SALESFORCE", "SLACK", "NOTION"
+  action: string    // e.g., "sync_contact", "send_notification", "add_page"
+  config: {
+    // CRM-specific
+    mode?: "create" | "update" | "upsert"
+    dealStage?: string
+    // Slack-specific
+    channel?: string
+    messageTemplate?: string
+    // Notion-specific
+    databaseId?: string
+    pageTitle?: string
+    // Airtable-specific
+    baseId?: string
+    tableId?: string
+    // Trello-specific
+    boardId?: string
+    listId?: string
+    // Asana-specific
+    projectId?: string
+    sectionId?: string
+    // General
+    customFields?: Record<string, unknown>
+  }
 }
 
 export interface StepVersionHistory {
@@ -961,7 +999,7 @@ export const STEP_TYPE_CONFIG: Record<
     color: string
     bgColor: string
     borderColor: string
-    category: "core" | "linkedin" | "multichannel" | "automation" | "advanced"
+    category: "core" | "linkedin" | "multichannel" | "automation" | "advanced" | "integration"
   }
 > = {
   EMAIL: {
@@ -1107,6 +1145,55 @@ export const STEP_TYPE_CONFIG: Record<
     bgColor: "bg-violet-500/10",
     borderColor: "border-violet-500/30",
     category: "multichannel",
+  },
+  // Integration step types
+  INTEGRATION_CRM_SYNC: {
+    label: "CRM Sync",
+    description: "Sync prospect to CRM",
+    color: "text-orange-600",
+    bgColor: "bg-orange-500/10",
+    borderColor: "border-orange-500/30",
+    category: "integration",
+  },
+  INTEGRATION_SLACK: {
+    label: "Slack Notification",
+    description: "Send Slack message",
+    color: "text-pink-600",
+    bgColor: "bg-pink-500/10",
+    borderColor: "border-pink-500/30",
+    category: "integration",
+  },
+  INTEGRATION_NOTION: {
+    label: "Notion Page",
+    description: "Create Notion page",
+    color: "text-stone-600",
+    bgColor: "bg-stone-500/10",
+    borderColor: "border-stone-500/30",
+    category: "integration",
+  },
+  INTEGRATION_AIRTABLE: {
+    label: "Airtable Record",
+    description: "Add Airtable record",
+    color: "text-lime-600",
+    bgColor: "bg-lime-500/10",
+    borderColor: "border-lime-500/30",
+    category: "integration",
+  },
+  INTEGRATION_TRELLO: {
+    label: "Trello Card",
+    description: "Create Trello card",
+    color: "text-blue-600",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/30",
+    category: "integration",
+  },
+  INTEGRATION_ASANA: {
+    label: "Asana Task",
+    description: "Create Asana task",
+    color: "text-red-600",
+    bgColor: "bg-red-500/10",
+    borderColor: "border-red-500/30",
+    category: "integration",
   },
 }
 

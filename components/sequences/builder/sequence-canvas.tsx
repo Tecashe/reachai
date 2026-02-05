@@ -453,6 +453,13 @@ const STEP_ICONS: Record<StepType, React.ElementType> = {
   CONTENT_REFERENCE: FileText,
   VOICEMAIL_DROP: Voicemail,
   DIRECT_MAIL: Send,
+  // Integration step types - uses Zap as fallback, actual icons from getProviderIcon
+  INTEGRATION_CRM_SYNC: Zap,
+  INTEGRATION_SLACK: Zap,
+  INTEGRATION_NOTION: Zap,
+  INTEGRATION_AIRTABLE: Zap,
+  INTEGRATION_TRELLO: Zap,
+  INTEGRATION_ASANA: Zap,
 }
 
 export function SequenceCanvas({
@@ -573,6 +580,21 @@ export function SequenceCanvas({
         return step.voicemailDropConfig?.useTts ? "TTS voicemail" : "Pre-recorded VM"
       case "DIRECT_MAIL":
         return step.directMailConfig?.mailType?.replace(/_/g, " ") || "Physical mail"
+      // Integration step descriptions
+      case "INTEGRATION_CRM_SYNC":
+        return step.integrationConfig?.provider
+          ? `Sync to ${step.integrationConfig.provider}`
+          : "Select CRM"
+      case "INTEGRATION_SLACK":
+        return step.integrationConfig?.config?.channel || "Send Slack message"
+      case "INTEGRATION_NOTION":
+        return step.integrationConfig?.config?.pageTitle || "Create Notion page"
+      case "INTEGRATION_AIRTABLE":
+        return step.integrationConfig?.provider ? "Add Airtable record" : "Configure Airtable"
+      case "INTEGRATION_TRELLO":
+        return step.integrationConfig?.config?.listId ? "Create Trello card" : "Configure Trello"
+      case "INTEGRATION_ASANA":
+        return step.integrationConfig?.config?.projectId ? "Create Asana task" : "Configure Asana"
       default:
         return ""
     }
@@ -1049,6 +1071,78 @@ function AddStepButton({
           <DropdownMenuItem onClick={() => onAdd("CONTENT_REFERENCE")} className="py-2 px-3 rounded-lg">
             <FileText className="mr-3 h-4 w-4 text-teal-500" />
             <span className="text-sm">Content Reference</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        {/* Integrations */}
+        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-xs text-muted-foreground font-medium px-2">Integrations</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_CRM_SYNC")} className="py-2.5 px-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-orange-500" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">CRM Sync</p>
+                <p className="text-xs text-muted-foreground">HubSpot, Salesforce, Pipedrive</p>
+              </div>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_SLACK")} className="py-2.5 px-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-pink-500" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Slack Notification</p>
+                <p className="text-xs text-muted-foreground">Send to channel</p>
+              </div>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_NOTION")} className="py-2.5 px-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-stone-500/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-stone-500" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Notion Page</p>
+                <p className="text-xs text-muted-foreground">Create database entry</p>
+              </div>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_AIRTABLE")} className="py-2.5 px-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-lime-500/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-lime-500" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Airtable Record</p>
+                <p className="text-xs text-muted-foreground">Add to base</p>
+              </div>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_TRELLO")} className="py-2.5 px-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-blue-500" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Trello Card</p>
+                <p className="text-xs text-muted-foreground">Create card in list</p>
+              </div>
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onAdd("INTEGRATION_ASANA")} className="py-2.5 px-3 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-red-500" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Asana Task</p>
+                <p className="text-xs text-muted-foreground">Create in project</p>
+              </div>
+            </div>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

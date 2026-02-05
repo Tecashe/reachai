@@ -2238,6 +2238,268 @@ Best regards,
 
   // CONTINUATION FROM PART 2 - Add these after renderConditionContent()
 
+  // Integration step content renderer
+  const renderIntegrationContent = () => {
+    const config = step.integrationConfig || { provider: '', action: '', config: {} }
+    
+    const updateIntegrationConfig = (updates: Partial<typeof config>) => {
+      onUpdate({ 
+        integrationConfig: { ...config, ...updates } as any
+      })
+    }
+
+    const updateIntegrationConfigField = (field: string, value: unknown) => {
+      onUpdate({ 
+        integrationConfig: { 
+          ...config, 
+          config: { ...config.config, [field]: value } 
+        } as any
+      })
+    }
+
+    // CRM Sync config
+    if (step.stepType === "INTEGRATION_CRM_SYNC") {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-orange-500/5 border border-orange-500/20">
+            <Zap className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">CRM Sync</p>
+              <p className="text-xs">Automatically sync prospect data to your CRM.</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Select CRM</Label>
+            <Select
+              value={config.provider}
+              onValueChange={(v) => updateIntegrationConfig({ provider: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Choose CRM..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="HUBSPOT">HubSpot</SelectItem>
+                <SelectItem value="SALESFORCE">Salesforce</SelectItem>
+                <SelectItem value="PIPEDRIVE">Pipedrive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Sync Mode</Label>
+            <Select
+              value={config.config?.mode || 'upsert'}
+              onValueChange={(v) => updateIntegrationConfigField('mode', v)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="create">Create only</SelectItem>
+                <SelectItem value="update">Update only</SelectItem>
+                <SelectItem value="upsert">Create or update</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {config.config?.mode === 'create' && "Only creates new records, skips existing ones"}
+              {config.config?.mode === 'update' && "Only updates existing records, skips new ones"}
+              {(!config.config?.mode || config.config?.mode === 'upsert') && "Creates new or updates existing records"}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Deal Stage (optional)</Label>
+            <Input
+              value={config.config?.dealStage || ''}
+              onChange={(e) => updateIntegrationConfigField('dealStage', e.target.value)}
+              placeholder="e.g., Qualified Lead"
+              className="h-8 text-sm"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Slack notification config
+    if (step.stepType === "INTEGRATION_SLACK") {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-pink-500/5 border border-pink-500/20">
+            <Zap className="h-4 w-4 text-pink-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">Slack Notification</p>
+              <p className="text-xs">Send a notification to a Slack channel.</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Channel Name</Label>
+            <Input
+              value={config.config?.channel || ''}
+              onChange={(e) => updateIntegrationConfigField('channel', e.target.value)}
+              placeholder="#sales-notifications"
+              className="h-8 text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Message Template</Label>
+            <Textarea
+              value={config.config?.messageTemplate || ''}
+              onChange={(e) => updateIntegrationConfigField('messageTemplate', e.target.value)}
+              placeholder="New prospect {{firstName}} from {{company}} entered sequence!"
+              className="min-h-[80px] text-sm"
+            />
+            <p className="text-xs text-muted-foreground">Use {"{{variables}}"} for personalization</p>
+          </div>
+        </div>
+      )
+    }
+
+    // Notion page config
+    if (step.stepType === "INTEGRATION_NOTION") {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-stone-500/5 border border-stone-500/20">
+            <Zap className="h-4 w-4 text-stone-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">Notion Page</p>
+              <p className="text-xs">Create a page in your Notion database.</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Database ID</Label>
+            <Input
+              value={config.config?.databaseId || ''}
+              onChange={(e) => updateIntegrationConfigField('databaseId', e.target.value)}
+              placeholder="Enter Notion database ID"
+              className="h-8 text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Page Title Template</Label>
+            <Input
+              value={config.config?.pageTitle || ''}
+              onChange={(e) => updateIntegrationConfigField('pageTitle', e.target.value)}
+              placeholder="{{firstName}} {{lastName}} - {{company}}"
+              className="h-8 text-sm"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Airtable record config
+    if (step.stepType === "INTEGRATION_AIRTABLE") {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-lime-500/5 border border-lime-500/20">
+            <Zap className="h-4 w-4 text-lime-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">Airtable Record</p>
+              <p className="text-xs">Add a record to your Airtable base.</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Base ID</Label>
+            <Input
+              value={config.config?.baseId || ''}
+              onChange={(e) => updateIntegrationConfigField('baseId', e.target.value)}
+              placeholder="appXXXXXXXXXXXXXX"
+              className="h-8 text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Table ID</Label>
+            <Input
+              value={config.config?.tableId || ''}
+              onChange={(e) => updateIntegrationConfigField('tableId', e.target.value)}
+              placeholder="tblXXXXXXXXXXXXXX"
+              className="h-8 text-sm"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Trello card config
+    if (step.stepType === "INTEGRATION_TRELLO") {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
+            <Zap className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">Trello Card</p>
+              <p className="text-xs">Create a card in your Trello board.</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Board ID</Label>
+            <Input
+              value={config.config?.boardId || ''}
+              onChange={(e) => updateIntegrationConfigField('boardId', e.target.value)}
+              placeholder="Enter Trello board ID"
+              className="h-8 text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">List ID</Label>
+            <Input
+              value={config.config?.listId || ''}
+              onChange={(e) => updateIntegrationConfigField('listId', e.target.value)}
+              placeholder="Enter Trello list ID"
+              className="h-8 text-sm"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    // Asana task config
+    if (step.stepType === "INTEGRATION_ASANA") {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
+            <Zap className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">Asana Task</p>
+              <p className="text-xs">Create a task in your Asana project.</p>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Project ID</Label>
+            <Input
+              value={config.config?.projectId || ''}
+              onChange={(e) => updateIntegrationConfigField('projectId', e.target.value)}
+              placeholder="Enter Asana project ID"
+              className="h-8 text-sm"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Section ID (optional)</Label>
+            <Input
+              value={config.config?.sectionId || ''}
+              onChange={(e) => updateIntegrationConfigField('sectionId', e.target.value)}
+              placeholder="Enter section ID"
+              className="h-8 text-sm"
+            />
+          </div>
+        </div>
+      )
+    }
+
+    return <p className="text-sm text-muted-foreground">Unknown integration type.</p>
+  }
+
   const getStepIcon = (stepType: StepType) => {
     switch (stepType) {
       case "EMAIL":
@@ -2274,6 +2536,14 @@ Best regards,
         return <Zap className={cn("h-4 w-4", config.color)} />
       case "CONDITION":
         return <Target className={cn("h-4 w-4", config.color)} />
+      // Integration step types
+      case "INTEGRATION_CRM_SYNC":
+      case "INTEGRATION_SLACK":
+      case "INTEGRATION_NOTION":
+      case "INTEGRATION_AIRTABLE":
+      case "INTEGRATION_TRELLO":
+      case "INTEGRATION_ASANA":
+        return <Zap className={cn("h-4 w-4", config.color)} />
       default:
         return <Settings2 className={cn("h-4 w-4", config.color)} />
     }
@@ -2315,6 +2585,14 @@ Best regards,
         return renderMultiChannelContent()
       case "CONDITION":
         return renderConditionContent()
+      // Integration step types
+      case "INTEGRATION_CRM_SYNC":
+      case "INTEGRATION_SLACK":
+      case "INTEGRATION_NOTION":
+      case "INTEGRATION_AIRTABLE":
+      case "INTEGRATION_TRELLO":
+      case "INTEGRATION_ASANA":
+        return renderIntegrationContent()
       default:
         return <p className="text-sm text-muted-foreground">Configuration for {step.stepType} coming soon.</p>
     }
