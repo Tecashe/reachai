@@ -87,9 +87,32 @@ class AutomationActionExecutor {
                     result = await this.executeCreateTask(action.config as { title: string; description?: string; dueDays?: number }, context)
                     break
 
-                // CRM Actions
+                // CRM Actions (generic and provider-specific)
                 case 'SYNC_TO_CRM':
                     result = await this.executeSyncToCRM(action.config as { platform: string; mode: string }, context)
+                    break
+                case 'SYNC_TO_HUBSPOT':
+                    result = await this.executeSyncToCRM({ platform: 'hubspot', mode: 'upsert' }, context)
+                    break
+                case 'SYNC_TO_SALESFORCE':
+                    result = await this.executeSyncToCRM({ platform: 'salesforce', mode: 'upsert' }, context)
+                    break
+                case 'SYNC_TO_PIPEDRIVE':
+                    result = await this.executeSyncToCRM({ platform: 'pipedrive', mode: 'upsert' }, context)
+                    break
+
+                // Productivity Integrations
+                case 'ADD_TO_NOTION':
+                    result = await this.executeAddToNotion(action.config as { databaseId: string }, context)
+                    break
+                case 'ADD_TO_AIRTABLE':
+                    result = await this.executeAddToAirtable(action.config as { baseId: string; tableId: string }, context)
+                    break
+                case 'CREATE_TRELLO_CARD':
+                    result = await this.executeCreateTrelloCard(action.config as { boardId: string; listId: string; title: string }, context)
+                    break
+                case 'CREATE_ASANA_TASK':
+                    result = await this.executeCreateAsanaTask(action.config as { projectId: string; title: string }, context)
                     break
 
                 // Logic Actions
@@ -707,9 +730,12 @@ class AutomationActionExecutor {
             case 'HUBSPOT':
                 result = await this.syncToHubSpot(integration.oauthToken.accessToken, prospectData, config.mode)
                 break
-            case 'SALESFORCE':
-                result = await this.syncToSalesforce(integration.oauthToken.accessToken, prospectData, config.mode)
+            case 'SALESFORCE': {
+                const credentials = integration.credentials as Record<string, unknown> || {}
+                const instanceUrl = credentials.instanceUrl as string
+                result = await this.syncToSalesforce(integration.oauthToken.accessToken, prospectData, config.mode, instanceUrl)
                 break
+            }
             case 'PIPEDRIVE':
                 result = await this.syncToPipedrive(integration.oauthToken.accessToken, prospectData, config.mode)
                 break
@@ -815,30 +841,439 @@ class AutomationActionExecutor {
     private async syncToSalesforce(
         accessToken: string,
         data: Record<string, unknown>,
-        mode: string
+        mode: string,
+        instanceUrl?: string
     ): Promise<{ synced: boolean; recordId?: string }> {
-        // Salesforce implementation - would need instance URL from integration config
-        logger.info('[ActionExecutor] Salesforce sync - placeholder implementation')
+        if (!instanceUrl) {
+            throw new Error('Salesforce instanceUrl is required')
+        }
 
-        // For now, log that this needs full implementation
-        return {
-            synced: true,
-            recordId: `sf_${Date.now()}` // Placeholder
+        // Search for existing contact by email if mode is upsert or update
+        let existingContactId: string | null = null
+
+        if (mode !== 'create' && data.email) {
+            const searchUrl = `${instanceUrl}/services/data/v57.0/query?q=SELECT+Id+FROM+Contact+WHERE+Email='${encodeURIComponent(String(data.email))}'`
+            const searchResponse = await fetch(searchUrl, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+
+            if (searchResponse.ok) {
+                const searchResult = await searchResponse.json()
+                if (searchResult.records?.length > 0) {
+                    existingContactId = searchResult.records[0].Id
+                }
+            }
+        }
+
+        // Skip if update-only and no existing contact
+        if (mode === 'update' && !existingContactId) {
+            return { synced: false }
+        }
+
+        // Build Salesforce Contact fields
+        const contactData = {
+            Email: data.email,
+            FirstName: data.firstName,
+            LastName: data.lastName || 'Unknown',
+            Title: data.jobTitle,
+            Phone: data.phone,
+            ...(data.linkedinUrl ? { LinkedIn_Profile__c: data.linkedinUrl } : {})
+        }
+
+        let response: Response
+        if (existingContactId) {
+            // Update existing contact
+            response = await fetch(
+                `${instanceUrl}/services/data/v57.0/sobjects/Contact/${existingContactId}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                }
+            )
+
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(`Salesforce API error: ${JSON.stringify(error)}`)
+            }
+
+            logger.info('[ActionExecutor] Updated Salesforce contact', { contactId: existingContactId })
+            return { synced: true, recordId: existingContactId }
+        } else {
+            // Create new contact
+            response = await fetch(
+                `${instanceUrl}/services/data/v57.0/sobjects/Contact`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                }
+            )
+
+            const result = await response.json()
+            if (!response.ok) {
+                throw new Error(`Salesforce API error: ${JSON.stringify(result)}`)
+            }
+
+            logger.info('[ActionExecutor] Created Salesforce contact', { contactId: result.id })
+            return { synced: true, recordId: result.id }
         }
     }
+
 
     private async syncToPipedrive(
         accessToken: string,
         data: Record<string, unknown>,
         mode: string
     ): Promise<{ synced: boolean; recordId?: string }> {
-        // Pipedrive implementation
-        logger.info('[ActionExecutor] Pipedrive sync - placeholder implementation')
+        // Search for existing person by email if mode is upsert or update
+        let existingPersonId: number | null = null
 
-        return {
-            synced: true,
-            recordId: `pd_${Date.now()}` // Placeholder
+        if (mode !== 'create' && data.email) {
+            const searchResponse = await fetch(
+                `https://api.pipedrive.com/v1/persons/search?term=${encodeURIComponent(String(data.email))}&fields=email&api_token=${accessToken}`,
+                { method: 'GET' }
+            )
+
+            if (searchResponse.ok) {
+                const searchResult = await searchResponse.json()
+                if (searchResult.data?.items?.length > 0) {
+                    existingPersonId = searchResult.data.items[0].item.id
+                }
+            }
         }
+
+        // Skip if update-only and no existing person
+        if (mode === 'update' && !existingPersonId) {
+            return { synced: false }
+        }
+
+        // Build Pipedrive Person fields
+        const personData = {
+            name: `${data.firstName || ''} ${data.lastName || ''}`.trim() || String(data.email),
+            email: [{ value: data.email, primary: true }],
+            phone: data.phone ? [{ value: data.phone, primary: true }] : undefined,
+            ...(data.company ? { org_id: null } : {}) // Note: would need org lookup for company
+        }
+
+        let response: Response
+        if (existingPersonId) {
+            // Update existing person
+            response = await fetch(
+                `https://api.pipedrive.com/v1/persons/${existingPersonId}?api_token=${accessToken}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(personData)
+                }
+            )
+        } else {
+            // Create new person
+            response = await fetch(
+                `https://api.pipedrive.com/v1/persons?api_token=${accessToken}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(personData)
+                }
+            )
+        }
+
+        const result = await response.json()
+        if (!result.success) {
+            throw new Error(`Pipedrive API error: ${result.error || JSON.stringify(result)}`)
+        }
+
+        logger.info('[ActionExecutor] Synced to Pipedrive', { personId: result.data?.id })
+        return { synced: true, recordId: String(result.data?.id) }
+    }
+
+    // ============================================================
+    // PRODUCTIVITY INTEGRATIONS
+    // ============================================================
+
+    private async executeAddToNotion(
+        config: { databaseId: string; titleField?: string; properties?: Record<string, unknown> },
+        context: AutomationContext
+    ): Promise<{ added: boolean; pageId?: string }> {
+        const prospect = context.data.prospect
+
+        logger.info('[ActionExecutor] Adding to Notion', {
+            databaseId: config.databaseId,
+            prospectId: prospect?.id
+        })
+
+        // Check for Notion integration with OAuth token
+        const integration = await db.integration.findFirst({
+            where: {
+                userId: context.userId,
+                type: 'NOTION',
+                isActive: true
+            },
+            include: { oauthToken: true }
+        })
+
+        if (!integration || !integration.oauthToken) {
+            throw new Error('Notion integration not connected')
+        }
+
+        // Build page properties - Notion requires specific property format
+        const titleField = config.titleField || 'Name'
+        const pageProperties: Record<string, unknown> = {
+            [titleField]: {
+                title: [{
+                    text: { content: `${prospect?.firstName || ''} ${prospect?.lastName || ''}`.trim() || prospect?.email || 'Unknown' }
+                }]
+            }
+        }
+
+        // Add common properties if they exist in the database
+        if (prospect?.email) {
+            pageProperties['Email'] = { email: prospect.email }
+        }
+        if (prospect?.company) {
+            pageProperties['Company'] = { rich_text: [{ text: { content: prospect.company } }] }
+        }
+        if (prospect?.jobTitle) {
+            pageProperties['Title'] = { rich_text: [{ text: { content: prospect.jobTitle } }] }
+        }
+
+        // Merge custom properties
+        if (config.properties) {
+            Object.assign(pageProperties, config.properties)
+        }
+
+        const response = await fetch('https://api.notion.com/v1/pages', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${integration.oauthToken.accessToken}`,
+                'Content-Type': 'application/json',
+                'Notion-Version': '2022-06-28'
+            },
+            body: JSON.stringify({
+                parent: { database_id: config.databaseId },
+                properties: pageProperties
+            })
+        })
+
+        const result = await response.json()
+        if (!response.ok) {
+            throw new Error(`Notion API error: ${result.message || JSON.stringify(result)}`)
+        }
+
+        logger.info('[ActionExecutor] Added page to Notion', { pageId: result.id })
+        return { added: true, pageId: result.id }
+    }
+
+    private async executeAddToAirtable(
+        config: { baseId: string; tableId: string; fields?: Record<string, unknown> },
+        context: AutomationContext
+    ): Promise<{ added: boolean; recordId?: string }> {
+        const prospect = context.data.prospect
+
+        logger.info('[ActionExecutor] Adding to Airtable', {
+            baseId: config.baseId,
+            tableId: config.tableId,
+            prospectId: prospect?.id
+        })
+
+        // Check for Airtable integration with OAuth token
+        const integration = await db.integration.findFirst({
+            where: {
+                userId: context.userId,
+                type: 'AIRTABLE',
+                isActive: true
+            },
+            include: { oauthToken: true }
+        })
+
+        if (!integration || !integration.oauthToken) {
+            throw new Error('Airtable integration not connected')
+        }
+
+        // Build record fields - using common field names
+        const fields: Record<string, unknown> = {
+            'Name': `${prospect?.firstName || ''} ${prospect?.lastName || ''}`.trim() || prospect?.email,
+            'Email': prospect?.email,
+            'Company': prospect?.company,
+            'Title': prospect?.jobTitle,
+            'Phone': prospect?.phoneNumber,
+            ...config.fields
+        }
+
+        // Remove undefined values
+        Object.keys(fields).forEach(key => {
+            if (fields[key] === undefined || fields[key] === null) {
+                delete fields[key]
+            }
+        })
+
+        const response = await fetch(
+            `https://api.airtable.com/v0/${config.baseId}/${encodeURIComponent(config.tableId)}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${integration.oauthToken.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fields })
+            }
+        )
+
+        const result = await response.json()
+        if (!response.ok) {
+            throw new Error(`Airtable API error: ${result.error?.message || JSON.stringify(result)}`)
+        }
+
+        logger.info('[ActionExecutor] Added record to Airtable', { recordId: result.id })
+        return { added: true, recordId: result.id }
+    }
+
+    private async executeCreateTrelloCard(
+        config: { boardId: string; listId: string; title: string; description?: string },
+        context: AutomationContext
+    ): Promise<{ created: boolean; cardId?: string }> {
+        const prospect = context.data.prospect
+        const title = this.replaceVariables(config.title, context)
+        const description = config.description ? this.replaceVariables(config.description, context) : undefined
+
+        logger.info('[ActionExecutor] Creating Trello card', {
+            boardId: config.boardId,
+            listId: config.listId,
+            title,
+            prospectId: prospect?.id
+        })
+
+        // Check for Trello integration with credentials
+        const integration = await db.integration.findFirst({
+            where: {
+                userId: context.userId,
+                type: 'TRELLO',
+                isActive: true
+            },
+            include: { oauthToken: true }
+        })
+
+        if (!integration || !integration.oauthToken) {
+            throw new Error('Trello integration not connected')
+        }
+
+        // Get API key from credentials (Trello uses API key + token)
+        const credentials = integration.credentials as Record<string, unknown> || {}
+        const apiKey = credentials.apiKey as string
+        const token = integration.oauthToken.accessToken
+
+        if (!apiKey) {
+            throw new Error('Trello API key not configured')
+        }
+
+        // Build card description with prospect info if not provided
+        const cardDescription = description || [
+            prospect?.email ? `Email: ${prospect.email}` : null,
+            prospect?.company ? `Company: ${prospect.company}` : null,
+            prospect?.jobTitle ? `Title: ${prospect.jobTitle}` : null,
+            prospect?.phoneNumber ? `Phone: ${prospect.phoneNumber}` : null
+        ].filter(Boolean).join('\n')
+
+        const response = await fetch(
+            `https://api.trello.com/1/cards?key=${apiKey}&token=${token}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    idList: config.listId,
+                    name: title,
+                    desc: cardDescription
+                })
+            }
+        )
+
+        const result = await response.json()
+        if (!response.ok) {
+            throw new Error(`Trello API error: ${result.message || JSON.stringify(result)}`)
+        }
+
+        logger.info('[ActionExecutor] Created Trello card', { cardId: result.id })
+        return { created: true, cardId: result.id }
+    }
+
+    private async executeCreateAsanaTask(
+        config: { projectId: string; title: string; notes?: string; dueInDays?: number },
+        context: AutomationContext
+    ): Promise<{ created: boolean; taskId?: string }> {
+        const prospect = context.data.prospect
+        const title = this.replaceVariables(config.title, context)
+        const notes = config.notes ? this.replaceVariables(config.notes, context) : undefined
+
+        logger.info('[ActionExecutor] Creating Asana task', {
+            projectId: config.projectId,
+            title,
+            prospectId: prospect?.id
+        })
+
+        // Check for Asana integration with OAuth token
+        const integration = await db.integration.findFirst({
+            where: {
+                userId: context.userId,
+                type: 'ASANA',
+                isActive: true
+            },
+            include: { oauthToken: true }
+        })
+
+        if (!integration || !integration.oauthToken) {
+            throw new Error('Asana integration not connected')
+        }
+
+        // Build task notes with prospect info if not provided
+        const taskNotes = notes || [
+            prospect?.email ? `Email: ${prospect.email}` : null,
+            prospect?.company ? `Company: ${prospect.company}` : null,
+            prospect?.jobTitle ? `Title: ${prospect.jobTitle}` : null,
+            prospect?.phoneNumber ? `Phone: ${prospect.phoneNumber}` : null,
+            prospect?.linkedinUrl ? `LinkedIn: ${prospect.linkedinUrl}` : null
+        ].filter(Boolean).join('\n')
+
+        // Calculate due date if specified
+        let dueOn: string | undefined
+        if (config.dueInDays) {
+            const dueDate = new Date()
+            dueDate.setDate(dueDate.getDate() + config.dueInDays)
+            dueOn = dueDate.toISOString().split('T')[0]
+        }
+
+        const response = await fetch('https://app.asana.com/api/1.0/tasks', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${integration.oauthToken.accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data: {
+                    name: title,
+                    notes: taskNotes,
+                    projects: [config.projectId],
+                    ...(dueOn && { due_on: dueOn })
+                }
+            })
+        })
+
+        const result = await response.json()
+        if (!response.ok || result.errors) {
+            throw new Error(`Asana API error: ${result.errors?.[0]?.message || JSON.stringify(result)}`)
+        }
+
+        logger.info('[ActionExecutor] Created Asana task', { taskId: result.data?.gid })
+        return { created: true, taskId: result.data?.gid }
     }
 
     // ============================================================

@@ -8,19 +8,35 @@ import {
     Users,
     Webhook,
     Bell,
-    MessageSquare,
     Zap,
     Briefcase,
     CheckCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 interface DraggableItem {
     nodeType: 'trigger' | 'action'
     type: string
     label: string
-    icon: React.ElementType
+    icon?: React.ElementType
     category: string
+    provider?: string // For integration actions
+}
+
+// Provider icon file mapping
+const PROVIDER_ICON_MAP: Record<string, string> = {
+    'HUBSPOT': 'hubspot',
+    'SALESFORCE': 'salesforce',
+    'PIPEDRIVE': 'pipedrive',
+    'SLACK': 'slack',
+    'NOTION': 'notion',
+    'AIRTABLE': 'airtable',
+    'TRELLO': 'trello',
+    'ASANA': 'asana',
+    'ZOHO_CRM': 'zoho_crm',
+    'CLICKUP': 'clickup',
+    'GOOGLE_SHEETS': 'google_sheets',
 }
 
 const TRIGGERS: DraggableItem[] = [
@@ -49,10 +65,24 @@ const ACTIONS: DraggableItem[] = [
     { nodeType: 'action', type: 'REMOVE_TAG', label: 'Remove Tag', icon: Tag, category: 'Prospect' },
     { nodeType: 'action', type: 'CHANGE_STATUS', label: 'Change Status', icon: Users, category: 'Prospect' },
     { nodeType: 'action', type: 'MOVE_TO_FOLDER', label: 'Move to Folder', icon: Briefcase, category: 'Prospect' },
-    // Integrations
-    { nodeType: 'action', type: 'SEND_SLACK', label: 'Send Slack', icon: MessageSquare, category: 'Integration' },
-    { nodeType: 'action', type: 'SEND_WEBHOOK', label: 'Send Webhook', icon: Webhook, category: 'Integration' },
-    { nodeType: 'action', type: 'SYNC_TO_CRM', label: 'Sync to CRM', icon: Briefcase, category: 'Integration' },
+
+    // CRM Integrations (with provider icons)
+    { nodeType: 'action', type: 'SYNC_TO_HUBSPOT', label: 'Sync to HubSpot', category: 'CRM', provider: 'HUBSPOT' },
+    { nodeType: 'action', type: 'SYNC_TO_SALESFORCE', label: 'Sync to Salesforce', category: 'CRM', provider: 'SALESFORCE' },
+    { nodeType: 'action', type: 'SYNC_TO_PIPEDRIVE', label: 'Sync to Pipedrive', category: 'CRM', provider: 'PIPEDRIVE' },
+
+    // Communication Integrations
+    { nodeType: 'action', type: 'SEND_SLACK_MESSAGE', label: 'Send Slack Message', category: 'Communication', provider: 'SLACK' },
+
+    // Productivity Integrations
+    { nodeType: 'action', type: 'ADD_TO_NOTION', label: 'Add to Notion', category: 'Productivity', provider: 'NOTION' },
+    { nodeType: 'action', type: 'ADD_TO_AIRTABLE', label: 'Add to Airtable', category: 'Productivity', provider: 'AIRTABLE' },
+    { nodeType: 'action', type: 'CREATE_TRELLO_CARD', label: 'Create Trello Card', category: 'Productivity', provider: 'TRELLO' },
+    { nodeType: 'action', type: 'CREATE_ASANA_TASK', label: 'Create Asana Task', category: 'Productivity', provider: 'ASANA' },
+
+    // Other Integrations
+    { nodeType: 'action', type: 'SEND_WEBHOOK', label: 'Send Webhook', icon: Webhook, category: 'Other' },
+
     // Notifications
     { nodeType: 'action', type: 'SEND_NOTIFICATION', label: 'Send Notification', icon: Bell, category: 'Notification' },
     { nodeType: 'action', type: 'CREATE_TASK', label: 'Create Task', icon: Briefcase, category: 'Task' },
@@ -68,9 +98,36 @@ function DraggableNodeItem({ item }: { item: DraggableItem }) {
                 nodeType: item.nodeType,
                 type: item.type,
                 label: item.label,
+                provider: item.provider,
             })
         )
         event.dataTransfer.effectAllowed = 'move'
+    }
+
+    // Render provider icon for integration actions
+    const renderIcon = () => {
+        if (item.provider && PROVIDER_ICON_MAP[item.provider]) {
+            const iconFileName = PROVIDER_ICON_MAP[item.provider]
+            return (
+                <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                    <Image
+                        src={`/icons/${iconFileName}.svg`}
+                        alt={`${item.provider} icon`}
+                        width={16}
+                        height={16}
+                        className="object-contain"
+                    />
+                </div>
+            )
+        }
+
+        // Fallback to Lucide icon
+        if (item.icon) {
+            const IconComponent = item.icon
+            return <IconComponent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        }
+
+        return <Briefcase className="h-4 w-4 text-muted-foreground flex-shrink-0" />
     }
 
     return (
@@ -84,7 +141,7 @@ function DraggableNodeItem({ item }: { item: DraggableItem }) {
             draggable
             onDragStart={onDragStart}
         >
-            <item.icon className="h-4 w-4 text-muted-foreground" />
+            {renderIcon()}
             <span className="text-sm">{item.label}</span>
         </div>
     )

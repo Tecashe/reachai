@@ -84,8 +84,11 @@ export type AutomationActionType =
     | 'REMOVE_TAG'
     | 'MOVE_TO_FOLDER'
     | 'CHANGE_STATUS'
-    // CRM Actions
+    // CRM Actions (generic and provider-specific)
     | 'SYNC_TO_CRM'
+    | 'SYNC_TO_HUBSPOT'
+    | 'SYNC_TO_SALESFORCE'
+    | 'SYNC_TO_PIPEDRIVE'
     | 'CREATE_CRM_DEAL'
     | 'UPDATE_CRM_DEAL'
     | 'CREATE_CRM_CONTACT'
@@ -93,12 +96,18 @@ export type AutomationActionType =
     | 'SEND_SLACK_MESSAGE'
     | 'SEND_WEBHOOK'
     | 'SEND_NOTIFICATION'
+    // Productivity Actions
+    | 'ADD_TO_NOTION'
+    | 'ADD_TO_AIRTABLE'
+    | 'CREATE_TRELLO_CARD'
+    | 'CREATE_ASANA_TASK'
     // Task Actions
     | 'CREATE_TASK'
     // Logic Actions
     | 'DELAY'
     | 'CONDITION_BRANCH'
     | 'SPLIT_TEST'
+
 
 // ============================================================
 // ACTION CONFIGURATIONS
@@ -276,6 +285,43 @@ export type ActionConfig =
     | DelayConfig
     | ConditionBranchConfig
     | SplitTestConfig
+    | NotionActionConfig
+    | AirtableActionConfig
+    | TrelloActionConfig
+    | AsanaActionConfig
+
+// ============================================================
+// PRODUCTIVITY INTEGRATION CONFIGS
+// ============================================================
+
+export interface NotionActionConfig {
+    databaseId: string           // Notion database to add to
+    titleField?: string          // Field to use for page title (default: prospect name)
+    properties?: Record<string, unknown>  // Additional properties to set
+}
+
+export interface AirtableActionConfig {
+    baseId: string               // Airtable base ID
+    tableId: string              // Airtable table ID/name
+    fields?: Record<string, unknown>  // Field mapping for the record
+}
+
+export interface TrelloActionConfig {
+    boardId: string              // Trello board ID
+    listId: string               // List to create card in
+    title: string                // Card title (supports variables like {{prospect.name}})
+    description?: string         // Card description (supports variables)
+    labelIds?: string[]          // Labels to apply
+    dueInDays?: number           // Due date as days from now
+}
+
+export interface AsanaActionConfig {
+    projectId: string            // Asana project ID
+    title: string                // Task title (supports variables)
+    notes?: string               // Task notes/description
+    assignee?: string            // User ID or 'owner' for automation owner
+    dueInDays?: number           // Due date as days from now
+}
 
 // ============================================================
 // EXECUTION CONTEXT
