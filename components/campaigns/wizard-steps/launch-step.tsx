@@ -105,7 +105,7 @@ export function LaunchStepWithSequence({ campaign, onBack }: LaunchStepWithSeque
         )
         router.push(`/dashboard/sequences/${campaign.sequenceId}`)
       } else {
-        throw new Error(result.error || "Failed to launch campaign")
+        throw new Error("Failed to launch campaign")
       }
     } catch (error) {
       console.error("[Launch] Error:", error)

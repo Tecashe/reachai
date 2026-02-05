@@ -939,7 +939,7 @@
 //                 <ul className="space-y-2">
 //                   {sections.map((section) => (
 //                     <li key={section.id}>
-                      
+
 //                         href={`#${section.id}`}
 //                         className={`block py-2 text-sm transition-colors ${
 //                           activeSection === section.id ? "text-white font-medium" : "text-white/50 hover:text-white"
@@ -1071,7 +1071,7 @@
 //                   <p className="text-white/70 leading-relaxed mb-3">
 //                     By connecting your Gmail account, you authorize Mailfra to access your Gmail data as described in
 //                     this section. Your use of Gmail through Mailfra is also subject to{" "}
-                    
+
 //                       href="https://policies.google.com/privacy"
 //                       target="_blank"
 //                       rel="noopener noreferrer"
@@ -1080,7 +1080,7 @@
 //                       Google&apos;s Privacy Policy
 //                     </a>{" "}
 //                     and{" "}
-                    
+
 //                       href="https://policies.google.com/terms"
 //                       target="_blank"
 //                       rel="noopener noreferrer"
@@ -1242,7 +1242,7 @@
 //                     <strong className="text-white">Revoke Access Anytime:</strong> You can disconnect Gmail from
 //                     Mailfra at any time through your account settings. Additionally, you can revoke access directly
 //                     through your{" "}
-                    
+
 //                       href="https://myaccount.google.com/permissions"
 //                       target="_blank"
 //                       rel="noopener noreferrer"
@@ -1293,7 +1293,7 @@
 //                 <h3 className="text-xl font-semibold mb-3 mt-6">Compliance with Google API Services User Data Policy</h3>
 //                 <p className="text-white/70 leading-relaxed mb-4">
 //                   Mailfra&apos;s use and transfer of information received from Google APIs adheres to the{" "}
-                  
+
 //                     href="https://developers.google.com/terms/api-services-user-data-policy"
 //                     target="_blank"
 //                     rel="noopener noreferrer"
@@ -4271,11 +4271,10 @@ export default function PrivacyPage() {
                     <li key={section.id}>
                       <a
                         href={`#${section.id}`}
-                        className={`block py-2 px-3 text-sm rounded transition-colors ${
-                          activeSection === section.id 
-                            ? "text-foreground bg-accent/10 font-semibold border-l-2 border-primary" 
+                        className={`block py-2 px-3 text-sm rounded transition-colors ${activeSection === section.id
+                            ? "text-foreground bg-accent/10 font-semibold border-l-2 border-primary"
                             : "text-muted-foreground hover:text-foreground"
-                        }`}
+                          }`}
                       >
                         {section.title}
                       </a>
@@ -4560,7 +4559,7 @@ export default function PrivacyPage() {
                   <div>
                     <h3 className="text-lg md:text-xl font-semibold text-foreground mb-3">How We Use SMTP Data</h3>
                     <p className="text-muted-foreground leading-relaxed mb-3">
-                      We use your SMTP data solely and exclusively to provide our email outreach automation services. 
+                      We use your SMTP data solely and exclusively to provide our email outreach automation services.
                       Specifically:
                     </p>
                     <ul className="space-y-3 text-muted-foreground ml-4">
@@ -5000,7 +4999,7 @@ export default function PrivacyPage() {
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">Mailing Address</p>
-                      <p>Mailfra, Inc.<br />Privacy Department<br />Your Address Here</p>
+                      <p>Mailfra, Inc.<br />Privacy Department</p>
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">Data Protection Officer</p>
