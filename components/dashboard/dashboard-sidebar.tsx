@@ -80,7 +80,6 @@ const navGroups: NavGroup[] = [
     items: [
       { name: "All Campaigns", href: "/dashboard/campaigns", icon: List, tourId: "campaigns" },
       { name: "Create New", href: "/dashboard/campaigns/new", icon: Plus },
-      { name: "Analytics", href: "/dashboard/analytics", icon: PieChart, tourId: "analytics" },
     ],
   },
   {
@@ -140,6 +139,16 @@ const settingsNavItems: NavItem[] = [
   { name: "Notifications", href: "/dashboard/settings/notifications", icon: Bell },
   { name: "API Keys", href: "/dashboard/settings/api-keys", icon: Key, badge: "NEW" },
   { name: "Team", href: "/dashboard/settings/team", icon: UsersRound },
+]
+
+// Analytics sub-navigation items
+const analyticsNavItems: NavItem[] = [
+  { name: "Overview", href: "/dashboard/analytics/overview", icon: BarChart3 },
+  { name: "Campaigns", href: "/dashboard/analytics/campaigns", icon: Mail },
+  { name: "Email Metrics", href: "/dashboard/analytics/emails", icon: MailCheck },
+  { name: "Engagement", href: "/dashboard/analytics/engagement", icon: Users },
+  { name: "Revenue", href: "/dashboard/analytics/revenue", icon: CreditCard },
+  { name: "Advanced", href: "/dashboard/analytics/advanced", icon: Cpu },
 ]
 
 interface SidebarContentProps {
@@ -329,13 +338,97 @@ function SettingsSidebarContent({
   )
 }
 
+// Analytics sidebar view component
+function AnalyticsSidebarContent({
+  collapsed,
+  pathname,
+  onNavigate,
+  onBack,
+}: {
+  collapsed: boolean
+  pathname: string
+  onNavigate?: () => void
+  onBack: () => void
+}) {
+  if (collapsed) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-2">
+        <button
+          onClick={onBack}
+          className="flex items-center justify-center p-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+          title="Back to main menu"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <div className="h-px w-8 bg-border/50 my-1" />
+        {analyticsNavItems.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/")
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onNavigate}
+              className={cn(
+                "flex items-center justify-center p-3 rounded-lg transition-all duration-200",
+                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+              title={item.name}
+            >
+              <item.icon className="h-5 w-5" />
+            </Link>
+          )
+        })}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Analytics Header with back button */}
+      <div className="p-4 border-b border-border/50">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors group w-full"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-base font-semibold text-foreground">Analytics</span>
+        </button>
+      </div>
+
+      {/* Analytics Navigation Items */}
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {analyticsNavItems.map((item) => {
+          const isActive = pathname === item.href || pathname?.startsWith(item.href + "/")
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              onClick={onNavigate}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              <span className="flex-1">{item.name}</span>
+              {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary" />}
+            </Link>
+          )
+        })}
+      </nav>
+    </div>
+  )
+}
+
 function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: SidebarContentProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [showUpgrade, setShowUpgrade] = useState(false)
-  const [sidebarView, setSidebarView] = useState<'main' | 'settings'>('main')
+  const [sidebarView, setSidebarView] = useState<'main' | 'settings' | 'analytics'>('main')
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
@@ -351,10 +444,12 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     setMounted(true)
   }, [])
 
-  // Auto-switch to settings view when on settings pages
+  // Auto-switch to settings/analytics view when on those pages
   useEffect(() => {
     if (pathname?.startsWith('/dashboard/settings')) {
       setSidebarView('settings')
+    } else if (pathname?.startsWith('/dashboard/analytics')) {
+      setSidebarView('analytics')
     } else {
       setSidebarView('main')
     }
@@ -384,32 +479,47 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     router.push('/dashboard')
   }
 
+  const handleAnalyticsClick = () => {
+    setSidebarView('analytics')
+    router.push('/dashboard/analytics/overview')
+  }
+
   // Determine which logo to show
   const logoSrc = mounted && resolvedTheme === 'dark'
     ? '/mailfra-logo-dark.png'
     : '/mailfra-logo-light.png'
 
-  // Animation variants for sidebar transitions
+  // Animation variants for sidebar transitions with blur effect
   const slideVariants = {
     enterFromRight: {
-      x: 20,
+      x: 30,
       opacity: 0,
+      scale: 0.95,
+      filter: "blur(8px)",
     },
     enterFromLeft: {
-      x: -20,
+      x: -30,
       opacity: 0,
+      scale: 0.95,
+      filter: "blur(8px)",
     },
     center: {
       x: 0,
       opacity: 1,
+      scale: 1,
+      filter: "blur(0px)",
     },
     exitToLeft: {
-      x: -20,
+      x: -30,
       opacity: 0,
+      scale: 0.95,
+      filter: "blur(8px)",
     },
     exitToRight: {
-      x: 20,
+      x: 30,
       opacity: 0,
+      scale: 0.95,
+      filter: "blur(8px)",
     },
   }
 
@@ -445,10 +555,27 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
             animate="center"
             exit="exitToRight"
             variants={slideVariants}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="flex-1 flex flex-col overflow-hidden"
           >
             <SettingsSidebarContent
+              collapsed={collapsed}
+              pathname={pathname}
+              onNavigate={onNavigate}
+              onBack={handleBackToMain}
+            />
+          </motion.div>
+        ) : sidebarView === 'analytics' ? (
+          <motion.div
+            key="analytics"
+            initial="enterFromRight"
+            animate="center"
+            exit="exitToRight"
+            variants={slideVariants}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            <AnalyticsSidebarContent
               collapsed={collapsed}
               pathname={pathname}
               onNavigate={onNavigate}
@@ -462,7 +589,7 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
             animate="center"
             exit="exitToLeft"
             variants={slideVariants}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="flex-1 flex flex-col overflow-hidden"
           >
             {/* Main Navigation */}
@@ -542,6 +669,27 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
                   </Link>
                 )
               })}
+
+              {/* Analytics button - special handling for nested sidebar */}
+              <button
+                onClick={handleAnalyticsClick}
+                data-tour="analytics"
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                  pathname?.startsWith('/dashboard/analytics')
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                  collapsed && "justify-center px-2",
+                )}
+              >
+                <PieChart className="h-5 w-5" />
+                {!collapsed && (
+                  <>
+                    <span>Analytics</span>
+                    <ChevronRight className="ml-auto h-4 w-4" />
+                  </>
+                )}
+              </button>
 
               {/* Settings button - special handling */}
               <button
