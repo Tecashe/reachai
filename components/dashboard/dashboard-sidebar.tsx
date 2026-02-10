@@ -489,37 +489,27 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     ? '/mailfra-logo-dark.png'
     : '/mailfra-logo-light.png'
 
-  // Animation variants for sidebar transitions with blur effect
+  // Animation variants for sidebar transitions - very subtle, almost invisible
   const slideVariants = {
     enterFromRight: {
-      x: 30,
       opacity: 0,
-      scale: 0.95,
-      filter: "blur(8px)",
+      filter: "blur(1px)",
     },
     enterFromLeft: {
-      x: -30,
       opacity: 0,
-      scale: 0.95,
-      filter: "blur(8px)",
+      filter: "blur(1px)",
     },
     center: {
-      x: 0,
       opacity: 1,
-      scale: 1,
       filter: "blur(0px)",
     },
     exitToLeft: {
-      x: -30,
       opacity: 0,
-      scale: 0.95,
-      filter: "blur(8px)",
+      filter: "blur(1px)",
     },
     exitToRight: {
-      x: 30,
       opacity: 0,
-      scale: 0.95,
-      filter: "blur(8px)",
+      filter: "blur(1px)",
     },
   }
 
@@ -712,25 +702,25 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
                 )}
               </button>
             </nav>
-
-            {/* Upgrade card */}
-            {!collapsed && (
-              <div className="p-3 border-t border-border/50">
-                <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Wand2 className="h-4 w-4 text-primary" />
-                    <p className="text-sm font-semibold">Upgrade to Pro</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-3">Unlock unlimited campaigns and AI credits</p>
-                  <Button onClick={() => setShowUpgrade(true)} className="w-full" size="sm">
-                    Upgrade Now
-                  </Button>
-                </div>
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Upgrade card - shown in all sidebar views */}
+      {!collapsed && (
+        <div className="p-3 border-t border-border/50">
+          <div className="rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Wand2 className="h-4 w-4 text-primary" />
+              <p className="text-sm font-semibold">Upgrade to Pro</p>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">Unlock unlimited campaigns and AI credits</p>
+            <Button onClick={() => setShowUpgrade(true)} className="w-full" size="sm">
+              Upgrade Now
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Collapse toggle */}
       {onToggleCollapse && (
