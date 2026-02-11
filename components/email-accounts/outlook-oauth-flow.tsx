@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
@@ -86,12 +86,95 @@ export function OutlookOAuthFlow({ onAccountAdded }: Props) {
     const [smtpEnabled, setSmtpEnabled] = useState(false)
     const [expandedStep, setExpandedStep] = useState<number | null>(null)
     const { toast } = useToast()
+    const popupRef = useRef<Window | null>(null)
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-    const handleOAuthConnect = async () => {
+    // Clean up polling on unmount
+    useEffect(() => {
+        return () => {
+            if (pollRef.current) clearInterval(pollRef.current)
+        }
+    }, [])
+
+    const handleOAuthConnect = useCallback(async () => {
         try {
             setIsLoading(true)
-            // Redirect to OAuth initiation endpoint
-            window.location.href = "/api/oauth/outlook"
+
+            // Open popup window for OAuth
+            const width = 500
+            const height = 700
+            const left = window.screenX + (window.outerWidth - width) / 2
+            const top = window.screenY + (window.outerHeight - height) / 2
+
+            const popup = window.open(
+                "/api/oauth/outlook",
+                "outlook-oauth",
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+            )
+            popupRef.current = popup
+
+            if (!popup) {
+                toast({
+                    title: "Popup blocked",
+                    description: "Please allow popups for this site and try again.",
+                    variant: "destructive",
+                })
+                setIsLoading(false)
+                return
+            }
+
+            // Poll the popup to detect when it closes or lands on our success URL
+            pollRef.current = setInterval(() => {
+                try {
+                    if (!popup || popup.closed) {
+                        if (pollRef.current) clearInterval(pollRef.current)
+                        setIsLoading(false)
+
+                        // Check if the OAuth was successful by looking for success URL params
+                        // The popup will have redirected to our email-accounts page with ?success=outlook_connected
+                        // We refresh the parent to pick up the new account
+                        toast({
+                            title: "Checking connection...",
+                            description: "Verifying your Microsoft account was connected.",
+                        })
+
+                        // Give a moment for the DB write to complete, then trigger refresh
+                        setTimeout(() => {
+                            onAccountAdded()
+                        }, 1000)
+                        return
+                    }
+
+                    // Try to read the popup URL to detect success/error
+                    const popupUrl = popup.location?.href
+                    if (popupUrl && popupUrl.includes("/dashboard/settings/email-accounts")) {
+                        const url = new URL(popupUrl)
+                        const success = url.searchParams.get("success")
+                        const error = url.searchParams.get("error")
+
+                        popup.close()
+                        if (pollRef.current) clearInterval(pollRef.current)
+                        setIsLoading(false)
+
+                        if (success === "outlook_connected") {
+                            toast({
+                                title: "Microsoft account connected!",
+                                description: "Your account has been successfully linked.",
+                            })
+                            onAccountAdded()
+                        } else if (error) {
+                            toast({
+                                title: "Connection failed",
+                                description: "Failed to connect your Microsoft account. Please try again.",
+                                variant: "destructive",
+                            })
+                        }
+                    }
+                } catch {
+                    // Cross-origin errors are expected while popup is on Microsoft's domain
+                    // Just keep polling
+                }
+            }, 500)
         } catch (error) {
             console.error("[mailfra] Outlook OAuth initiation error:", error)
             toast({
@@ -101,7 +184,7 @@ export function OutlookOAuthFlow({ onAccountAdded }: Props) {
             })
             setIsLoading(false)
         }
-    }
+    }, [onAccountAdded, toast])
 
     // Account type selection
     if (accountType === "select") {

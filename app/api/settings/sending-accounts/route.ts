@@ -25,6 +25,9 @@ export async function GET() {
         email: true,
         name: true,
         provider: true,
+        connectionMethod: true,
+        connectionType: true,
+        oauthProvider: true,
         healthScore: true,
         warmupStage: true,
         bounceRate: true,
@@ -34,6 +37,7 @@ export async function GET() {
         dailyLimit: true,
         emailsSentToday: true,
         warmupEnabled: true,
+        createdAt: true,
       },
     })
 
