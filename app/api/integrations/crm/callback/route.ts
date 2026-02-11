@@ -57,7 +57,7 @@ export async function GET(request: Request) {
         break
 
       case "salesforce":
-        const salesforceResponse = await fetch("https://sign-in.salesforce.com/services/oauth2/token", {
+        const salesforceResponse = await fetch("https://login.salesforce.com/services/oauth2/token", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
