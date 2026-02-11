@@ -27,12 +27,12 @@ export async function GET(request: NextRequest) {
     // Exchange code for tokens
     const tokens = await outlookOAuth.getTokensFromCode(code)
 
-    if (!tokens.access_token || !tokens.refresh_token) {
+    if (!tokens.access_token || !tokens.refresh_token || !tokens.id_token) {
       throw new Error("Failed to get tokens from Outlook")
     }
 
-    // Get user's Outlook profile
-    const profile = await outlookOAuth.getUserProfile(tokens.access_token)
+    // Get user's Outlook profile from ID token
+    const profile = await outlookOAuth.getUserProfile(tokens.id_token)
 
     // Find user in database
     const user = await db.user.findUnique({

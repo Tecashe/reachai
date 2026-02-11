@@ -41,6 +41,7 @@ export class OutlookOAuthService {
   }
 
   /**
+  /**
    * Exchange authorization code for tokens
    */
   async getTokensFromCode(code: string) {
@@ -70,6 +71,7 @@ export class OutlookOAuthService {
     return {
       access_token: data.access_token,
       refresh_token: data.refresh_token,
+      id_token: data.id_token, // Return ID token
       expires_in: data.expires_in,
     }
   }
@@ -103,12 +105,15 @@ export class OutlookOAuthService {
     return {
       access_token: data.access_token,
       refresh_token: data.refresh_token || refreshToken, // Outlook may not return new refresh token
+      id_token: data.id_token,
       expires_in: data.expires_in,
     }
   }
 
   /**
    * Send email via Microsoft Graph API
+   * Note: This may fail if the access token is scoped for Outlook REST API instead of Graph.
+   * Recommendation: Use SMTP via nodemailer with the access token instead.
    */
   async sendEmail(
     accessToken: string,
@@ -145,26 +150,33 @@ export class OutlookOAuthService {
       saveToSentItems: true,
     })
 
-    // Microsoft Graph doesn't return message ID for sendMail
-    // We'll generate a unique ID for tracking
     return `outlook-${Date.now()}-${Math.random().toString(36).substring(7)}`
   }
 
   /**
-   * Get user's Outlook profile
+   * Get user's Outlook profile from ID Token
+   * We use ID Token because the Access Token is scoped for Outlook (IMAP/SMTP)
+   * and cannot be used with Microsoft Graph User.Read endpoint.
    */
-  async getUserProfile(accessToken: string) {
-    const client = Client.init({
-      authProvider: (done) => {
-        done(null, accessToken)
-      },
-    })
+  async getUserProfile(idToken: string) {
+    if (!idToken) {
+      throw new Error("ID token is missing")
+    }
 
-    const user = await client.api("/me").get()
+    // Decode JWT payload (middle part)
+    const base64Url = idToken.split(".")[1]
+    if (!base64Url) {
+      throw new Error("Invalid ID token format")
+    }
+
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+    const jsonPayload = Buffer.from(base64, "base64").toString("utf8")
+
+    const payload = JSON.parse(jsonPayload)
 
     return {
-      email: user.mail || user.userPrincipalName || "",
-      displayName: user.displayName || "",
+      email: payload.email || payload.preferred_username || payload.upn || "",
+      displayName: payload.name || "",
     }
   }
 }
