@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Exchange code for tokens
-    const tokenResponse = await fetch("https://sign-in.microsoftonline.com/common/oauth2/v2.0/token", {
+    const tokenResponse = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({

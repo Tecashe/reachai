@@ -1,6 +1,14 @@
 import { Client } from "@microsoft/microsoft-graph-client"
 
-const SCOPES = ["https://graph.microsoft.com/Mail.Send", "https://graph.microsoft.com/User.Read"]
+const SCOPES = [
+  "openid",
+  "email",
+  "profile",
+  "offline_access",
+  "https://outlook.office.com/IMAP.AccessAsUser.All",
+  "https://outlook.office.com/SMTP.Send",
+  "https://outlook.office.com/Mail.Send",
+]
 
 export class OutlookOAuthService {
   private clientId: string
@@ -25,10 +33,11 @@ export class OutlookOAuthService {
       response_mode: "query",
       scope: SCOPES.join(" "),
       state: userId,
-      prompt: "consent",
+      prompt: "select_account",
+      sso_reload: "true",
     })
 
-    return `https://sign-in.microsoftonline.com/${this.tenantId}/oauth2/v2.0/authorize?${params.toString()}`
+    return `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/authorize?${params.toString()}`
   }
 
   /**
@@ -41,9 +50,10 @@ export class OutlookOAuthService {
       code,
       redirect_uri: this.redirectUri,
       grant_type: "authorization_code",
+      scope: SCOPES.join(" "),
     })
 
-    const response = await fetch(`https://sign-in.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
+    const response = await fetch(`https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -73,9 +83,10 @@ export class OutlookOAuthService {
       client_secret: this.clientSecret,
       refresh_token: refreshToken,
       grant_type: "refresh_token",
+      scope: SCOPES.join(" "),
     })
 
-    const response = await fetch(`https://sign-in.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
+    const response = await fetch(`https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
