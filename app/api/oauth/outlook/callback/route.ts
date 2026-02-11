@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    console.log("[mailfra] Outlook OAuth account connected:", account.id, profile.email)
+    console.log("[mailfra]Outlook OAuth account connected:", account.id, profile.email)
 
     return NextResponse.redirect(`${settingsUrl}?success=outlook_connected`)
   } catch (error) {
