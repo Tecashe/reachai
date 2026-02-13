@@ -1261,42 +1261,32 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     ? '/mailfra-logo-dark.png'
     : '/mailfra-logo-light.png'
 
-  // Animation variants for sidebar transitions - crossfade blur effect
+  // Animation variants for sidebar transitions - sophisticated crossfade blur
   const slideVariants = {
     enterFromRight: {
-      position: "absolute" as const,
-      x: 4,
       opacity: 0,
-      filter: "blur(12px)",
-      scale: 0.96,
+      filter: "blur(15px)",
+      scale: 0.95,
     },
     enterFromLeft: {
-      position: "absolute" as const,
-      x: -4,
       opacity: 0,
-      filter: "blur(12px)",
-      scale: 0.96,
+      filter: "blur(15px)",
+      scale: 0.95,
     },
     center: {
-      position: "relative" as const,
-      x: 0,
       opacity: 1,
       filter: "blur(0px)",
       scale: 1,
     },
     exitToLeft: {
-      position: "absolute" as const,
-      x: 0,
       opacity: 0,
-      filter: "blur(12px)",
-      scale: 0.96,
+      filter: "blur(15px)",
+      scale: 0.95,
     },
     exitToRight: {
-      position: "absolute" as const,
-      x: 0,
       opacity: 0,
-      filter: "blur(12px)",
-      scale: 0.96,
+      filter: "blur(15px)",
+      scale: 0.95,
     },
   }
 
@@ -1324,8 +1314,8 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
       </div>
 
       {/* Animated sidebar content */}
-      <div className="flex-1 relative overflow-hidden">
-        <AnimatePresence mode="popLayout" initial={false}>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
           {sidebarView === 'settings' ? (
             <motion.div
               key="settings"
@@ -1334,12 +1324,11 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
               exit="exitToRight"
               variants={slideVariants}
               transition={{
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
-                opacity: { duration: 0.4 },
-                filter: { duration: 0.65 }
+                duration: 0.55,
+                ease: [0.19, 1, 0.22, 1],
+                filter: { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
               }}
-              className="inset-0 flex flex-col overflow-hidden"
+              className="flex-1 flex flex-col overflow-hidden"
             >
               <SettingsSidebarContent
                 collapsed={collapsed}
@@ -1356,12 +1345,11 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
               exit="exitToRight"
               variants={slideVariants}
               transition={{
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
-                opacity: { duration: 0.4 },
-                filter: { duration: 0.65 }
+                duration: 0.55,
+                ease: [0.19, 1, 0.22, 1],
+                filter: { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
               }}
-              className="inset-0 flex flex-col overflow-hidden"
+              className="flex-1 flex flex-col overflow-hidden"
             >
               <AnalyticsSidebarContent
                 collapsed={collapsed}
@@ -1378,12 +1366,11 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
               exit="exitToLeft"
               variants={slideVariants}
               transition={{
-                duration: 0.6,
-                ease: [0.22, 1, 0.36, 1],
-                opacity: { duration: 0.4 },
-                filter: { duration: 0.65 }
+                duration: 0.55,
+                ease: [0.19, 1, 0.22, 1],
+                filter: { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
               }}
-              className="inset-0 flex flex-col overflow-hidden"
+              className="flex-1 flex flex-col overflow-hidden"
             >
               {/* Main Navigation */}
               <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
