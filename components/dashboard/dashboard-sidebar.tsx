@@ -1261,37 +1261,42 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     ? '/mailfra-logo-dark.png'
     : '/mailfra-logo-light.png'
 
-  // Animation variants for sidebar transitions - sophisticated blur effect
+  // Animation variants for sidebar transitions - crossfade blur effect
   const slideVariants = {
     enterFromRight: {
-      x: 8,
+      position: "absolute" as const,
+      x: 4,
       opacity: 0,
-      filter: "blur(10px)",
-      scale: 0.98,
+      filter: "blur(12px)",
+      scale: 0.96,
     },
     enterFromLeft: {
-      x: -8,
+      position: "absolute" as const,
+      x: -4,
       opacity: 0,
-      filter: "blur(10px)",
-      scale: 0.98,
+      filter: "blur(12px)",
+      scale: 0.96,
     },
     center: {
+      position: "relative" as const,
       x: 0,
       opacity: 1,
       filter: "blur(0px)",
       scale: 1,
     },
     exitToLeft: {
-      x: -8,
+      position: "absolute" as const,
+      x: 0,
       opacity: 0,
-      filter: "blur(10px)",
-      scale: 0.98,
+      filter: "blur(12px)",
+      scale: 0.96,
     },
     exitToRight: {
-      x: 8,
+      position: "absolute" as const,
+      x: 0,
       opacity: 0,
-      filter: "blur(10px)",
-      scale: 0.98,
+      filter: "blur(12px)",
+      scale: 0.96,
     },
   }
 
@@ -1319,186 +1324,191 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
       </div>
 
       {/* Animated sidebar content */}
-      <AnimatePresence mode="wait">
-        {sidebarView === 'settings' ? (
-          <motion.div
-            key="settings"
-            initial="enterFromRight"
-            animate="center"
-            exit="exitToRight"
-            variants={slideVariants}
-            transition={{
-              duration: 0.5,
-              ease: [0.25, 0.1, 0.25, 1],
-              filter: { duration: 0.55 }
-            }}
-            className="flex-1 flex flex-col overflow-hidden"
-          >
-            <SettingsSidebarContent
-              collapsed={collapsed}
-              pathname={pathname}
-              onNavigate={onNavigate}
-              onBack={handleBackToMain}
-            />
-          </motion.div>
-        ) : sidebarView === 'analytics' ? (
-          <motion.div
-            key="analytics"
-            initial="enterFromRight"
-            animate="center"
-            exit="exitToRight"
-            variants={slideVariants}
-            transition={{
-              duration: 0.5,
-              ease: [0.25, 0.1, 0.25, 1],
-              filter: { duration: 0.55 }
-            }}
-            className="flex-1 flex flex-col overflow-hidden"
-          >
-            <AnalyticsSidebarContent
-              collapsed={collapsed}
-              pathname={pathname}
-              onNavigate={onNavigate}
-              onBack={handleBackToMain}
-            />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="main"
-            initial="enterFromLeft"
-            animate="center"
-            exit="exitToLeft"
-            variants={slideVariants}
-            transition={{
-              duration: 0.5,
-              ease: [0.25, 0.1, 0.25, 1],
-              filter: { duration: 0.55 }
-            }}
-            className="flex-1 flex flex-col overflow-hidden"
-          >
-            {/* Main Navigation */}
-            <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-              {/* Single items at top */}
-              {singleItems.map((item) => {
-                const isActive = pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    data-tour={item.tourId}
-                    onClick={onNavigate}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                      collapsed && "justify-center px-2",
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {!collapsed && <span>{item.name}</span>}
-                    {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-                  </Link>
-                )
-              })}
+      <div className="flex-1 relative overflow-hidden">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {sidebarView === 'settings' ? (
+            <motion.div
+              key="settings"
+              initial="enterFromRight"
+              animate="center"
+              exit="exitToRight"
+              variants={slideVariants}
+              transition={{
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1],
+                opacity: { duration: 0.4 },
+                filter: { duration: 0.65 }
+              }}
+              className="inset-0 flex flex-col overflow-hidden"
+            >
+              <SettingsSidebarContent
+                collapsed={collapsed}
+                pathname={pathname}
+                onNavigate={onNavigate}
+                onBack={handleBackToMain}
+              />
+            </motion.div>
+          ) : sidebarView === 'analytics' ? (
+            <motion.div
+              key="analytics"
+              initial="enterFromRight"
+              animate="center"
+              exit="exitToRight"
+              variants={slideVariants}
+              transition={{
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1],
+                opacity: { duration: 0.4 },
+                filter: { duration: 0.65 }
+              }}
+              className="inset-0 flex flex-col overflow-hidden"
+            >
+              <AnalyticsSidebarContent
+                collapsed={collapsed}
+                pathname={pathname}
+                onNavigate={onNavigate}
+                onBack={handleBackToMain}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="main"
+              initial="enterFromLeft"
+              animate="center"
+              exit="exitToLeft"
+              variants={slideVariants}
+              transition={{
+                duration: 0.6,
+                ease: [0.22, 1, 0.36, 1],
+                opacity: { duration: 0.4 },
+                filter: { duration: 0.65 }
+              }}
+              className="inset-0 flex flex-col overflow-hidden"
+            >
+              {/* Main Navigation */}
+              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                {/* Single items at top */}
+                {singleItems.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      data-tour={item.tourId}
+                      onClick={onNavigate}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                        collapsed && "justify-center px-2",
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {!collapsed && <span>{item.name}</span>}
+                      {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                    </Link>
+                  )
+                })}
 
-              {/* Separator */}
-              {!collapsed && (
-                <div className="py-2">
-                  <div className="h-px bg-border/50" />
-                </div>
-              )}
-
-              {/* Grouped navigation */}
-              {navGroups.map((group) => (
-                <NavGroupComponent
-                  key={group.name}
-                  group={group}
-                  collapsed={collapsed}
-                  pathname={pathname}
-                  onNavigate={onNavigate}
-                  expandedGroups={expandedGroups}
-                  toggleGroup={toggleGroup}
-                />
-              ))}
-
-              {/* Separator */}
-              {!collapsed && (
-                <div className="py-2">
-                  <div className="h-px bg-border/50" />
-                </div>
-              )}
-
-              {/* Bottom items */}
-              {bottomItems.map((item) => {
-                const isActive =
-                  pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href + "/"))
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    data-tour={item.tourId}
-                    onClick={onNavigate}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                      collapsed && "justify-center px-2",
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {!collapsed && <span>{item.name}</span>}
-                    {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
-                  </Link>
-                )
-              })}
-
-              {/* Analytics button - special handling for nested sidebar */}
-              <button
-                onClick={handleAnalyticsClick}
-                data-tour="analytics"
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                  pathname?.startsWith('/dashboard/analytics')
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                  collapsed && "justify-center px-2",
-                )}
-              >
-                <PieChart className="h-5 w-5" />
+                {/* Separator */}
                 {!collapsed && (
-                  <>
-                    <span>Analytics</span>
-                    <ChevronRight className="ml-auto h-4 w-4" />
-                  </>
+                  <div className="py-2">
+                    <div className="h-px bg-border/50" />
+                  </div>
                 )}
-              </button>
 
-              {/* Settings button - special handling */}
-              <button
-                onClick={handleSettingsClick}
-                data-tour="settings"
-                className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                  pathname?.startsWith('/dashboard/settings')
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                  collapsed && "justify-center px-2",
-                )}
-              >
-                <Settings className="h-5 w-5" />
+                {/* Grouped navigation */}
+                {navGroups.map((group) => (
+                  <NavGroupComponent
+                    key={group.name}
+                    group={group}
+                    collapsed={collapsed}
+                    pathname={pathname}
+                    onNavigate={onNavigate}
+                    expandedGroups={expandedGroups}
+                    toggleGroup={toggleGroup}
+                  />
+                ))}
+
+                {/* Separator */}
                 {!collapsed && (
-                  <>
-                    <span>Settings</span>
-                    <ChevronRight className="ml-auto h-4 w-4" />
-                  </>
+                  <div className="py-2">
+                    <div className="h-px bg-border/50" />
+                  </div>
                 )}
-              </button>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+                {/* Bottom items */}
+                {bottomItems.map((item) => {
+                  const isActive =
+                    pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href + "/"))
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      data-tour={item.tourId}
+                      onClick={onNavigate}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                        collapsed && "justify-center px-2",
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {!collapsed && <span>{item.name}</span>}
+                      {isActive && !collapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                    </Link>
+                  )
+                })}
+
+                {/* Analytics button - special handling for nested sidebar */}
+                <button
+                  onClick={handleAnalyticsClick}
+                  data-tour="analytics"
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                    pathname?.startsWith('/dashboard/analytics')
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                    collapsed && "justify-center px-2",
+                  )}
+                >
+                  <PieChart className="h-5 w-5" />
+                  {!collapsed && (
+                    <>
+                      <span>Analytics</span>
+                      <ChevronRight className="ml-auto h-4 w-4" />
+                    </>
+                  )}
+                </button>
+
+                {/* Settings button - special handling */}
+                <button
+                  onClick={handleSettingsClick}
+                  data-tour="settings"
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                    pathname?.startsWith('/dashboard/settings')
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                    collapsed && "justify-center px-2",
+                  )}
+                >
+                  <Settings className="h-5 w-5" />
+                  {!collapsed && (
+                    <>
+                      <span>Settings</span>
+                      <ChevronRight className="ml-auto h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Upgrade card - shown in all sidebar views */}
       {!collapsed && (
