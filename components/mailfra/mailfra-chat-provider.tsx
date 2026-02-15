@@ -115,7 +115,8 @@ export function MailfraChatProvider({ children, isPaidUser = false }: { children
     // Reset conversation when mode changes
     useEffect(() => {
         clearConversation()
-    }, [mode]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [mode])
+    // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <MailfraChatContext.Provider
