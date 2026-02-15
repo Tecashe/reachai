@@ -84,7 +84,7 @@ function MessageBubble({ role, content, isLatest }: { role: string; content: str
                         : "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
                 )}
             >
-                {isUser ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+                {isUser ? <User className="h-3.5 w-3.5" /> : <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-full" /></div>}
             </div>
 
             {/* Message */}
@@ -114,8 +114,8 @@ function TypingIndicator() {
             exit={{ opacity: 0, y: -4 }}
             className="flex gap-2.5"
         >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                <Bot className="h-3.5 w-3.5 text-white" />
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 p-0.5">
+                <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-full" /></div>
             </div>
             <div className="bg-muted/80 rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
                 <div className="flex items-center gap-1">
@@ -227,7 +227,9 @@ export function MailfraChatWidget() {
                         aria-label="Open Mailfra Chat"
                     >
                         <MessageCircle className="h-6 w-6 group-hover:hidden" />
-                        <Sparkles className="h-6 w-6 hidden group-hover:block" />
+                        <div className="h-8 w-8 hidden group-hover:block relative">
+                            <Image src="/mailfra-avatar.png" alt="Mailfra" fill className="object-cover rounded-full" />
+                        </div>
 
                         {/* Pulse ring animation */}
                         <span className="absolute inset-0 rounded-full animate-ping bg-violet-400/30" />
@@ -258,8 +260,8 @@ export function MailfraChatWidget() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                                            <Bot className="h-5 w-5 text-white" />
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 p-0.5">
+                                            <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="Mailfra" fill className="object-cover rounded-full" /></div>
                                         </div>
                                         {/* Active indicator */}
                                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-background" />

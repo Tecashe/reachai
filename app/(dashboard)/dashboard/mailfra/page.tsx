@@ -32,6 +32,8 @@ import {
     Lock,
 } from "lucide-react"
 
+import Image from "next/image"
+
 // ─── Markdown renderer (shared) ───
 function renderMarkdown(text: string) {
     let html = text
@@ -141,7 +143,7 @@ function AgentMessage({ role, content }: { role: string; content: string }) {
                         : "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
                 )}
             >
-                {isUser ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                {isUser ? <User className="h-4 w-4" /> : <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-xl" /></div>}
             </div>
             <div
                 className={cn(
@@ -169,8 +171,8 @@ function AgentTyping() {
             exit={{ opacity: 0 }}
             className="flex gap-3 max-w-3xl"
         >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                <Sparkles className="h-4 w-4 text-white" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 px-1 py-1">
+                <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-lg" /></div>
             </div>
             <div className="bg-card border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                 <div className="flex items-center gap-1.5">
@@ -345,8 +347,8 @@ export default function MailfraDashboardPage() {
             <div className="flex items-center justify-between pb-4 border-b border-border/50">
                 <div className="flex items-center gap-3">
                     <div className="relative">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                            <Sparkles className="h-5 w-5 text-white" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 p-1">
+                            <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="Mailfra" fill className="object-cover rounded-lg" /></div>
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-background" />
                     </div>

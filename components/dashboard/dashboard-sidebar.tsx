@@ -822,6 +822,17 @@ import {
 import { UpgradeModal } from "@/components/subscription/upgrade-modal"
 import { motion, AnimatePresence } from "framer-motion"
 
+const MailfraAvatarIcon = ({ className }: { className?: string }) => (
+  <div className={cn("relative", className)}>
+    <Image
+      src="/mailfra-avatar.png"
+      alt="Mailfra"
+      fill
+      className="object-cover rounded-full"
+    />
+  </div>
+)
+
 interface NavItem {
   name: string
   href: string
@@ -878,7 +889,7 @@ const navGroups: NavGroup[] = [
     icon: Brain,
     defaultOpen: true,
     items: [
-      { name: "Mailfra AI", href: "/dashboard/mailfra", icon: Wand2, tourId: "mailfra-ai", badge: "NEW" },
+      { name: "Mailfra AI", href: "/dashboard/mailfra", icon: MailfraAvatarIcon, tourId: "mailfra-ai", badge: "NEW" },
       { name: "AI Generator", href: "/dashboard/generate", icon: Sparkles, tourId: "ai-generator" },
       { name: "AI Predictor", href: "/dashboard/predict", icon: Target, tourId: "ai-predictor" },
     ],
