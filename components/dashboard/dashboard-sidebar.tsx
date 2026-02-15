@@ -825,7 +825,7 @@ import { motion, AnimatePresence } from "framer-motion"
 const MailfraAvatarIcon = ({ className }: { className?: string }) => (
   <div className={cn("relative", className)}>
     <Image
-      src="/mailfra-avatar.png"
+      src="/mailfra-avatars.png"
       alt="Mailfra"
       fill
       className="object-cover rounded-full"
