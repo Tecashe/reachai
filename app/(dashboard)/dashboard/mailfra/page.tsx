@@ -4,13 +4,13 @@ import React, { useRef, useEffect, useState, useCallback } from "react"
 import { useChat, type UIMessage } from "@ai-sdk/react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { WaveLoader } from "@/components/loader/wave-loader"
 import {
     Bot,
     User,
     Send,
     Sparkles,
     ArrowUp,
-    Loader2,
     Zap,
     Search,
     BarChart3,
@@ -175,11 +175,9 @@ function AgentTyping() {
                 <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-lg" /></div>
             </div>
             <div className="bg-card border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground mr-1">Thinking</span>
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0 }} />
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0.2 }} />
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0.4 }} />
+                    <WaveLoader size="sm" bars={3} color="bg-primary" />
                 </div>
             </div>
         </motion.div>
@@ -336,7 +334,7 @@ export default function MailfraDashboardPage() {
     if (isPaidUser === null) {
         return (
             <div className="flex items-center justify-center min-h-[80vh]">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <WaveLoader color="bg-primary" />
             </div>
         )
     }
@@ -356,7 +354,7 @@ export default function MailfraDashboardPage() {
                         <h1 className="text-lg font-bold text-foreground">Mailfra AI Agent</h1>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                             <Zap className="h-3 w-3 text-primary" />
-                            Powered by GPT-4o • Full platform access
+                            Powered by GPT-4o
                         </p>
                     </div>
                 </div>

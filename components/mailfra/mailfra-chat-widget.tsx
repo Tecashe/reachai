@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from "react"
 import { useMailfraChat } from "./mailfra-chat-provider"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { WaveLoader } from "@/components/loader/wave-loader"
 import {
     MessageCircle,
     X,
@@ -12,7 +13,6 @@ import {
     User,
     Sparkles,
     ArrowUp,
-    Loader2,
     Trash2,
     Zap,
     HelpCircle,
@@ -118,23 +118,7 @@ function TypingIndicator() {
                 <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-full" /></div>
             </div>
             <div className="bg-muted/80 rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
-                <div className="flex items-center gap-1">
-                    <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-primary"
-                        animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
-                    />
-                    <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-primary"
-                        animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
-                    />
-                    <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-primary"
-                        animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
-                    />
-                </div>
+                <WaveLoader size="sm" bars={3} color="bg-primary" />
             </div>
         </motion.div>
     )
