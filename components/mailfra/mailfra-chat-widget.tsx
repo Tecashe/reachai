@@ -49,19 +49,19 @@ function renderMarkdown(text: string) {
 
 // ─── Quick Action Pills ───
 const supportQuickActions = [
-    { label: "How does email warmup work?", icon: "🔥" },
-    { label: "Tips for better open rates", icon: "📈" },
-    { label: "What is deliverability?", icon: "📬" },
-    { label: "How to write cold emails", icon: "✍️" },
+    { label: "How does email warmup work?", icon: "" },
+    { label: "Tips for better open rates", icon: "" },
+    { label: "What is deliverability?", icon: "" },
+    { label: "How to write cold emails", icon: "" },
 ]
 
 const agentQuickActions = [
-    { label: "Show my top leads by score", icon: "🎯" },
-    { label: "Analyze my best campaign", icon: "📊" },
-    { label: "Check my deliverability health", icon: "🏥" },
-    { label: "Give me an account overview", icon: "📋" },
-    { label: "Draft an email for a prospect", icon: "📧" },
-    { label: "Show recent replies", icon: "💬" },
+    { label: "Show my top leads by score", icon: "" },
+    { label: "Analyze my best campaign", icon: "" },
+    { label: "Check my deliverability health", icon: "" },
+    { label: "Give me an account overview", icon: "" },
+    { label: "Draft an email for a prospect", icon: "" },
+    { label: "Show recent replies", icon: "" },
 ]
 
 // ─── Message Bubble ───
@@ -296,7 +296,7 @@ export function MailfraChatWidget() {
                                                     : "bg-muted text-muted-foreground border-border hover:border-border/80"
                                             )}
                                         >
-                                            {mode === "agent" ? "⚡ Agent" : "💬 Support"}
+                                            {mode === "agent" ? "Agent" : "Support"}
                                         </button>
                                     )}
 
