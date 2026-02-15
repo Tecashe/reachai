@@ -61,6 +61,17 @@ export function MailfraChatProvider({ children, isPaidUser = false }: { children
             if (newConvId && !conversationId) {
                 setConversationId(newConvId)
             }
+
+            if (!response.ok) {
+                // Try to parse the error message from the response
+                response.clone().json().then((data) => {
+                    // We can't easily force the error state in useChat, but we can potentially log it or handle it via a side effect if needed.
+                    // However, useChat usually handles non-200 responses by setting the error state.
+                    console.error("Chat API Error:", data.error)
+                }).catch(() => {
+                    console.error("Chat API Error: Failed to parse error response")
+                })
+            }
         },
         initialMessages: [
             {

@@ -81,7 +81,7 @@ function MessageBubble({ role, content, isLatest }: { role: string; content: str
                     "flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs",
                     isUser
                         ? "bg-primary text-primary-foreground"
-                        : "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
+                        : "bg-muted text-foreground border border-border"
                 )}
             >
                 {isUser ? <User className="h-3.5 w-3.5" /> : <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-full" /></div>}
@@ -114,23 +114,23 @@ function TypingIndicator() {
             exit={{ opacity: 0, y: -4 }}
             className="flex gap-2.5"
         >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 p-0.5">
+            <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center border border-border p-0.5">
                 <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-full" /></div>
             </div>
             <div className="bg-muted/80 rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
                 <div className="flex items-center gap-1">
                     <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-violet-400"
+                        className="w-1.5 h-1.5 rounded-full bg-primary"
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }}
                         transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
                     />
                     <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-violet-400"
+                        className="w-1.5 h-1.5 rounded-full bg-primary"
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }}
                         transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
                     />
                     <motion.div
-                        className="w-1.5 h-1.5 rounded-full bg-violet-400"
+                        className="w-1.5 h-1.5 rounded-full bg-primary"
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 1, 0.4] }}
                         transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
                     />
@@ -223,7 +223,7 @@ export function MailfraChatWidget() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setIsOpen(true)}
-                        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-2xl shadow-violet-500/30 flex items-center justify-center group cursor-pointer hover:shadow-violet-500/50 transition-shadow duration-300"
+                        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-2xl shadow-primary/30 flex items-center justify-center group cursor-pointer hover:shadow-primary/50 transition-shadow duration-300"
                         aria-label="Open Mailfra Chat"
                     >
                         <MessageCircle className="h-6 w-6 group-hover:hidden" />
@@ -232,8 +232,8 @@ export function MailfraChatWidget() {
                         </div>
 
                         {/* Pulse ring animation */}
-                        <span className="absolute inset-0 rounded-full animate-ping bg-violet-400/30" />
-                        <span className="absolute -inset-1 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-400/20 blur-sm" />
+                        <span className="absolute inset-0 rounded-full animate-ping bg-primary/30" />
+                        <span className="absolute -inset-1 rounded-full bg-primary/20 blur-sm" />
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -253,30 +253,30 @@ export function MailfraChatWidget() {
                         }}
                     >
                         {/* ─── Header ─── */}
-                        <div className="relative px-4 py-3 border-b border-border/50 bg-gradient-to-r from-violet-600/10 via-indigo-600/10 to-purple-600/10">
+                        <div className="relative px-4 py-3 border-b border-border bg-muted/30">
                             {/* Decorative gradient bar */}
-                            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 via-indigo-500 to-purple-500" />
+                            <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary" />
 
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
-                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 p-0.5">
+                                        <div className="w-9 h-9 rounded-full bg-muted border border-border flex items-center justify-center p-0.5">
                                             <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="Mailfra" fill className="object-cover rounded-full" /></div>
                                         </div>
                                         {/* Active indicator */}
-                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-background" />
+                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-semibold text-foreground">Mailfra AI</h3>
                                         <p className="text-[10px] text-muted-foreground font-medium">
                                             {mode === "agent" ? (
                                                 <span className="flex items-center gap-1">
-                                                    <Zap className="h-2.5 w-2.5 text-amber-400" />
+                                                    <Zap className="h-2.5 w-2.5 text-primary" />
                                                     Agent Mode • Can take actions
                                                 </span>
                                             ) : (
                                                 <span className="flex items-center gap-1">
-                                                    <HelpCircle className="h-2.5 w-2.5 text-blue-400" />
+                                                    <HelpCircle className="h-2.5 w-2.5 text-muted-foreground" />
                                                     Support Mode • Always free
                                                 </span>
                                             )}
@@ -292,8 +292,8 @@ export function MailfraChatWidget() {
                                             className={cn(
                                                 "px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all duration-200 border",
                                                 mode === "agent"
-                                                    ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 border-amber-500/30 hover:border-amber-500/50"
-                                                    : "bg-muted/50 text-muted-foreground border-border/50 hover:border-border"
+                                                    ? "bg-primary/10 text-primary border-primary/20 hover:border-primary/50"
+                                                    : "bg-muted text-muted-foreground border-border hover:border-border/80"
                                             )}
                                         >
                                             {mode === "agent" ? "⚡ Agent" : "💬 Support"}
@@ -347,7 +347,7 @@ export function MailfraChatWidget() {
                                     animate={{ opacity: 1 }}
                                     className="text-xs text-destructive bg-destructive/10 rounded-lg px-3 py-2 border border-destructive/20"
                                 >
-                                    Something went wrong. Please try again.
+                                    {error?.message || "Something went wrong. Please try again."}
                                 </motion.div>
                             )}
 
@@ -382,10 +382,10 @@ export function MailfraChatWidget() {
                                 <motion.div
                                     initial={{ opacity: 0, y: 8 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="bg-gradient-to-r from-violet-500/10 via-indigo-500/10 to-purple-500/10 rounded-xl p-3 border border-violet-500/20"
+                                    className="bg-primary/5 rounded-xl p-3 border border-primary/10"
                                 >
                                     <div className="flex items-start gap-2">
-                                        <Sparkles className="h-4 w-4 text-violet-400 mt-0.5 flex-shrink-0" />
+                                        <Sparkles className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                                         <div>
                                             <p className="text-xs font-semibold text-foreground">Unlock Mailfra AI Agent</p>
                                             <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -393,7 +393,7 @@ export function MailfraChatWidget() {
                                             </p>
                                             <a
                                                 href="/dashboard/billing"
-                                                className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full text-[10px] font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 transition-colors"
+                                                className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full text-[10px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                                             >
                                                 <Zap className="h-3 w-3" />
                                                 Upgrade Now
@@ -436,7 +436,7 @@ export function MailfraChatWidget() {
                                         onKeyDown={handleKeyDown}
                                         placeholder={mode === "agent" ? "Ask Mailfra to do something..." : "Ask Mailfra anything..."}
                                         rows={1}
-                                        className="w-full resize-none rounded-xl border border-border/50 bg-muted/30 px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all max-h-[100px] scrollbar-thin"
+                                        className="w-full resize-none rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all max-h-[100px] scrollbar-thin"
                                         style={{
                                             height: "auto",
                                             minHeight: "40px",
@@ -466,8 +466,8 @@ export function MailfraChatWidget() {
                                         className={cn(
                                             "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200",
                                             input.trim()
-                                                ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 hover:scale-105"
-                                                : "bg-muted/50 text-muted-foreground cursor-not-allowed"
+                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105"
+                                                : "bg-muted text-muted-foreground cursor-not-allowed"
                                         )}
                                     >
                                         <ArrowUp className="h-4 w-4" />

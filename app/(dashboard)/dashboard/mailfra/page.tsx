@@ -56,72 +56,72 @@ const agentActions = [
         description: "Search and filter your best prospects",
         icon: Search,
         prompt: "Show me my top 10 leads by quality score",
-        color: "from-emerald-500/20 to-teal-500/20",
-        iconColor: "text-emerald-500",
-        borderColor: "border-emerald-500/20 hover:border-emerald-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "Campaign Analytics",
         description: "Analyze performance and get insights",
         icon: BarChart3,
         prompt: "Analyze my most recent campaign performance and give me insights",
-        color: "from-blue-500/20 to-cyan-500/20",
-        iconColor: "text-blue-500",
-        borderColor: "border-blue-500/20 hover:border-blue-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "Generate Email",
         description: "AI-crafted personalized cold emails",
         icon: Mail,
         prompt: "Generate a professional cold email to pitch a B2B SaaS product to a VP of Marketing",
-        color: "from-violet-500/20 to-purple-500/20",
-        iconColor: "text-violet-500",
-        borderColor: "border-violet-500/20 hover:border-violet-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "CRM Insights",
         description: "Pipeline analysis and engagement data",
         icon: Users,
         prompt: "Give me a full CRM pipeline summary with engagement trends",
-        color: "from-amber-500/20 to-orange-500/20",
-        iconColor: "text-amber-500",
-        borderColor: "border-amber-500/20 hover:border-amber-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "Deliverability Health",
         description: "Check sending account status",
         icon: Shield,
         prompt: "Check the deliverability health of all my sending accounts",
-        color: "from-rose-500/20 to-pink-500/20",
-        iconColor: "text-rose-500",
-        borderColor: "border-rose-500/20 hover:border-rose-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "Account Overview",
         description: "Full dashboard summary at a glance",
         icon: Layout,
         prompt: "Give me a comprehensive overview of my account — campaigns, leads, credits, and key metrics",
-        color: "from-indigo-500/20 to-blue-500/20",
-        iconColor: "text-indigo-500",
-        borderColor: "border-indigo-500/20 hover:border-indigo-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "Template Performance",
         description: "Optimize your email templates",
         icon: FileText,
         prompt: "Analyze my email templates and show which ones perform best",
-        color: "from-cyan-500/20 to-sky-500/20",
-        iconColor: "text-cyan-500",
-        borderColor: "border-cyan-500/20 hover:border-cyan-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
     {
         title: "Schedule Campaign",
         description: "Configure sending schedules via AI",
         icon: Calendar,
         prompt: "Show me the current schedule for my campaigns",
-        color: "from-fuchsia-500/20 to-pink-500/20",
-        iconColor: "text-fuchsia-500",
-        borderColor: "border-fuchsia-500/20 hover:border-fuchsia-500/40",
+        color: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        borderColor: "border-primary/20 hover:border-primary/40",
     },
 ]
 
@@ -140,7 +140,7 @@ function AgentMessage({ role, content }: { role: string; content: string }) {
                     "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center",
                     isUser
                         ? "bg-primary text-primary-foreground"
-                        : "bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
+                        : "bg-muted text-foreground border border-border"
                 )}
             >
                 {isUser ? <User className="h-4 w-4" /> : <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-xl" /></div>}
@@ -150,7 +150,7 @@ function AgentMessage({ role, content }: { role: string; content: string }) {
                     "rounded-2xl px-4 py-3 text-sm leading-relaxed max-w-[85%]",
                     isUser
                         ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-card border border-border/50 rounded-bl-md shadow-sm"
+                        : "bg-muted/50 border border-border/50 rounded-bl-md"
                 )}
             >
                 <div
@@ -171,15 +171,15 @@ function AgentTyping() {
             exit={{ opacity: 0 }}
             className="flex gap-3 max-w-3xl"
         >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 px-1 py-1">
+            <div className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center border border-border px-1 py-1">
                 <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="A" fill className="object-cover rounded-lg" /></div>
             </div>
             <div className="bg-card border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                 <div className="flex items-center gap-1.5">
                     <span className="text-xs text-muted-foreground mr-1">Thinking</span>
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-violet-400" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0 }} />
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-violet-400" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0.2 }} />
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-violet-400" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0.4 }} />
+                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0 }} />
+                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0.2 }} />
+                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.4, repeat: Infinity, delay: 0.4 }} />
                 </div>
             </div>
         </motion.div>
@@ -288,14 +288,14 @@ export default function MailfraDashboardPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="max-w-lg text-center space-y-6"
                 >
-                    <div className="relative mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-violet-500/30">
-                        <Lock className="h-8 w-8 text-white" />
-                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shadow-lg">
-                            <Crown className="h-4 w-4 text-amber-900" />
+                    <div className="relative mx-auto w-20 h-20 rounded-2xl bg-muted border border-border flex items-center justify-center">
+                        <Lock className="h-8 w-8 text-muted-foreground" />
+                        <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                            <Crown className="h-4 w-4 text-primary-foreground" />
                         </div>
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
+                        <h1 className="text-2xl font-bold text-foreground">
                             Mailfra AI Agent
                         </h1>
                         <p className="text-muted-foreground mt-2 text-sm leading-relaxed max-w-md mx-auto">
@@ -312,14 +312,14 @@ export default function MailfraDashboardPage() {
                             { icon: Zap, label: "Bulk Actions" },
                         ].map((item) => (
                             <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <item.icon className="h-3.5 w-3.5 text-violet-400" />
+                                <item.icon className="h-3.5 w-3.5 text-primary" />
                                 {item.label}
                             </div>
                         ))}
                     </div>
                     <a
                         href="/dashboard/billing"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all duration-200"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-200"
                     >
                         <Zap className="h-4 w-4" />
                         Upgrade to Starter — $29/mo
@@ -336,7 +336,7 @@ export default function MailfraDashboardPage() {
     if (isPaidUser === null) {
         return (
             <div className="flex items-center justify-center min-h-[80vh]">
-                <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
         )
     }
@@ -347,15 +347,15 @@ export default function MailfraDashboardPage() {
             <div className="flex items-center justify-between pb-4 border-b border-border/50">
                 <div className="flex items-center gap-3">
                     <div className="relative">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 p-1">
+                        <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center p-1">
                             <div className="relative w-full h-full"><Image src="/mailfra-avatar.png" alt="Mailfra" fill className="object-cover rounded-lg" /></div>
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-background" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-primary border-2 border-background" />
                     </div>
                     <div>
                         <h1 className="text-lg font-bold text-foreground">Mailfra AI Agent</h1>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Zap className="h-3 w-3 text-amber-400" />
+                            <Zap className="h-3 w-3 text-primary" />
                             Powered by GPT-4o • Full platform access
                         </p>
                     </div>
@@ -392,7 +392,7 @@ export default function MailfraDashboardPage() {
                         animate={{ opacity: 1 }}
                         className="max-w-3xl text-xs text-destructive bg-destructive/10 rounded-xl px-4 py-3 border border-destructive/20 flex items-center justify-between"
                     >
-                        <span>Something went wrong. Please try again.</span>
+                        <span>{error?.message || "Something went wrong. Please try again."}</span>
                         <button onClick={() => regenerate()} className="text-destructive underline font-medium">
                             Retry
                         </button>
@@ -419,7 +419,7 @@ export default function MailfraDashboardPage() {
                                     className={cn(
                                         "group flex items-start gap-3 p-3 rounded-xl border text-left transition-all duration-200 hover:shadow-md cursor-pointer",
                                         action.borderColor,
-                                        `bg-gradient-to-br ${action.color}`
+                                        `bg-card hover:bg-muted/50`
                                     )}
                                 >
                                     <div className={cn("p-2 rounded-lg bg-background/80 shadow-sm", action.iconColor)}>
@@ -468,7 +468,7 @@ export default function MailfraDashboardPage() {
                             onKeyDown={handleKeyDown}
                             placeholder='Ask Mailfra anything... Try "Find my top leads" or "Analyze my campaigns"'
                             rows={1}
-                            className="w-full resize-none rounded-xl border border-border/50 bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all max-h-[120px] scrollbar-thin shadow-sm"
+                            className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all max-h-[120px] scrollbar-thin shadow-sm"
                             style={{ height: "auto", minHeight: "48px", maxHeight: "120px" }}
                             onInput={(e) => {
                                 const target = e.target as HTMLTextAreaElement
@@ -494,7 +494,7 @@ export default function MailfraDashboardPage() {
                             className={cn(
                                 "flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm",
                                 input.trim()
-                                    ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-105"
+                                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-105"
                                     : "bg-muted/50 text-muted-foreground cursor-not-allowed"
                             )}
                         >
