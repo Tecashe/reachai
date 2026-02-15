@@ -1,7 +1,12 @@
-import { Hero } from "@/components/hero"
+import { Navbar } from "@/components/navbar"
+import { HeroSection } from "@/components/hero"
+
+
+
+// import { Hero } from "@/components/hero"
 import { LogoBar } from "@/components/sections/logo-bar"
 import { Problem } from "@/components/sections/problem"
-import  Features  from "@/components/sections/features"
+import Features from "@/components/sections/features"
 import { Stats } from "@/components/sections/stats"
 import { DashboardPreview } from "@/components/sections/dashboard-preview"
 import { HowItWorks } from "@/components/sections/how-it-works"
@@ -25,17 +30,18 @@ import { LiquidMorph } from "@/components/sections/transforms/liquid-morph"
 export default function Home() {
   return (
     <main>
-      <Hero />
+      <Navbar />
+      <HeroSection />
       <LogoBar />
       <Problem />
       <Features />
       <Stats />
       <EmailWarmup />
-             {/* <DashboardPreview /> 
+      {/* <DashboardPreview /> 
              <HowItWorks />  */}
       <GetStarted />
       <UseCases />
-           {/* <Integrations /> */}
+      {/* <Integrations /> */}
       <Comparison />
       <CaseStudies />
       <ROICalculator />
