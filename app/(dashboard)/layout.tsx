@@ -7,6 +7,7 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { syncUserToDatabase } from "@/lib/actions/auth"
 import { OnboardingTour } from "@/components/onboarding/onboarding-tour"
 import { db } from "@/lib/db"
+import { MailfraDashboardWrapper } from "@/components/mailfra/mailfra-dashboard-wrapper"
 
 export default async function DashboardLayout({
   children,
@@ -27,12 +28,14 @@ export default async function DashboardLayout({
 
   const user = await db.user.findUnique({
     where: { clerkId: userId },
-    select: { onboardingCompletedQuestionnaire: true },
+    select: { onboardingCompletedQuestionnaire: true, subscriptionTier: true },
   })
 
   if (user && !user.onboardingCompletedQuestionnaire) {
     redirect("/onboarding")
   }
+
+  const isPaidUser = user?.subscriptionTier !== "FREE"
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -44,6 +47,7 @@ export default async function DashboardLayout({
         </main>
       </div>
       <OnboardingTour />
+      <MailfraDashboardWrapper isPaidUser={isPaidUser} />
     </div>
   )
 }

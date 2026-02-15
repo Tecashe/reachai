@@ -876,7 +876,9 @@ const navGroups: NavGroup[] = [
   {
     name: "AI Tools",
     icon: Brain,
+    defaultOpen: true,
     items: [
+      { name: "Mailfra AI", href: "/dashboard/mailfra", icon: Wand2, tourId: "mailfra-ai", badge: "NEW" },
       { name: "AI Generator", href: "/dashboard/generate", icon: Sparkles, tourId: "ai-generator" },
       { name: "AI Predictor", href: "/dashboard/predict", icon: Target, tourId: "ai-predictor" },
     ],

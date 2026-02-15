@@ -79,8 +79,9 @@ model User {
   creditTransactions CreditTransaction[]
   creditPurchases    CreditPurchase[]
   domains            Domain[]
-  automations        Automation[]
-  automationWebhooks AutomationWebhook[]
+  automations             Automation[]
+  automationWebhooks      AutomationWebhook[]
+  mailfraConversations    MailfraConversation[]
 
   // Last time we sent low credit warning
   lastCreditWarning DateTime?
@@ -3167,4 +3168,45 @@ enum AutomationWebhookPlatform {
   MAKE
   ZAPIER
   HUBSPOT
+}
+
+// ==========================================
+// Mailfra AI Assistant
+// ==========================================
+
+model MailfraConversation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title    String  @default("New Conversation")
+  mode     String  @default("support") // "support" | "agent"
+  metadata Json?
+
+  messages MailfraMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model MailfraMessage {
+  id             String              @id @default(cuid())
+  conversationId String
+  conversation   MailfraConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role    String // "user" | "assistant" | "system" | "tool"
+  content String @db.Text
+
+  // Tool execution data
+  toolName   String?
+  toolArgs   Json?
+  toolResult Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
 }
