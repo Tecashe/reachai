@@ -75,7 +75,6 @@ export async function POST(request: NextRequest) {
             system: MAILFRA_AGENT_SYSTEM_PROMPT,
             messages,
             tools,
-            maxSteps: 5, // Allow multi-step tool calls
             onFinish: async ({ text }) => {
                 // Save assistant response
                 if (dbConversationId && text) {
@@ -104,7 +103,7 @@ export async function POST(request: NextRequest) {
             },
         })
 
-        return result.toDataStreamResponse({
+        return result.toTextStreamResponse({
             headers: {
                 "X-Conversation-Id": dbConversationId || "",
             },

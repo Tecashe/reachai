@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef, useEffect, useState, useCallback } from "react"
-import { useChat, type Message } from "ai/react"
+import { useChat, type UIMessage } from "@ai-sdk/react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import {
@@ -202,15 +202,15 @@ export default function MailfraDashboardPage() {
             .catch(() => setIsPaidUser(false))
     }, [])
 
+    const [input, setInput] = useState("")
+
     const {
         messages,
-        input,
-        setInput,
-        handleSubmit: rawHandleSubmit,
-        isLoading,
-        error,
-        reload,
+        status,
+        sendMessage,
         stop,
+        error,
+        regenerate,
         setMessages,
     } = useChat({
         api: "/api/mailfra/agent",
@@ -221,15 +221,18 @@ export default function MailfraDashboardPage() {
                 content: `Welcome to **Mailfra AI Command Center** 🚀\n\nI'm your AI-powered assistant with full access to your data. I can:\n\n- 🎯 **Search & filter** your leads and prospects\n- 📊 **Analyze** campaign performance with insights\n- ✍️ **Generate** personalized cold emails\n- 🏥 **Monitor** deliverability and account health\n- 📋 **Summarize** your pipeline and CRM data\n- ⚡ **Execute** bulk actions on your prospects\n\nWhat would you like me to do?`,
             },
         ],
-    })
+    } as any)
+
+    const isLoading = status === "streaming" || status === "submitted"
 
     const handleSubmit = useCallback(
         (e?: React.FormEvent) => {
             e?.preventDefault()
             if (!input.trim() || isLoading) return
-            rawHandleSubmit(e)
+            sendMessage({ role: "user", content: input } as any)
+            setInput("")
         },
-        [input, isLoading, rawHandleSubmit]
+        [input, isLoading, sendMessage]
     )
 
     const handleQuickAction = (prompt: string) => {
@@ -246,7 +249,7 @@ export default function MailfraDashboardPage() {
                 id: "welcome",
                 role: "assistant",
                 content: `Welcome to **Mailfra AI Command Center** 🚀\n\nI'm ready to help. What would you like me to do?`,
-            },
+            } as any,
         ])
     }
 
@@ -373,7 +376,7 @@ export default function MailfraDashboardPage() {
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto py-6 space-y-5 scrollbar-thin relative"
             >
-                {messages.map((msg) => (
+                {messages.map((msg: any) => (
                     <AgentMessage key={msg.id} role={msg.role} content={msg.content} />
                 ))}
 
@@ -388,7 +391,7 @@ export default function MailfraDashboardPage() {
                         className="max-w-3xl text-xs text-destructive bg-destructive/10 rounded-xl px-4 py-3 border border-destructive/20 flex items-center justify-between"
                     >
                         <span>Something went wrong. Please try again.</span>
-                        <button onClick={() => reload()} className="text-destructive underline font-medium">
+                        <button onClick={() => regenerate()} className="text-destructive underline font-medium">
                             Retry
                         </button>
                     </motion.div>

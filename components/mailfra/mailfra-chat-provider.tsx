@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react"
-import { useChat, type Message } from "ai/react"
+import { useChat, type UIMessage } from "@ai-sdk/react"
 import { useAuth } from "@clerk/nextjs"
 
 interface MailfraChatContextType {
@@ -12,7 +12,7 @@ interface MailfraChatContextType {
     setMode: (mode: "support" | "agent") => void
 
     // Chat hook data
-    messages: Message[]
+    messages: (UIMessage & { content: string })[]
     input: string
     setInput: (input: string) => void
     handleSubmit: (e?: React.FormEvent) => void
@@ -43,20 +43,20 @@ export function MailfraChatProvider({ children, isPaidUser = false }: { children
 
     const apiEndpoint = mode === "agent" ? "/api/mailfra/agent" : "/api/mailfra/chat"
 
+    const [input, setInput] = useState("")
+
     const {
         messages,
-        input,
-        setInput,
-        handleSubmit: rawHandleSubmit,
-        isLoading,
-        error,
-        reload,
+        status,
+        sendMessage,
         stop,
+        error,
+        regenerate,
         setMessages,
     } = useChat({
         api: apiEndpoint,
         body: { conversationId },
-        onResponse: (response) => {
+        onResponse: (response: Response) => {
             const newConvId = response.headers.get("X-Conversation-Id")
             if (newConvId && !conversationId) {
                 setConversationId(newConvId)
@@ -71,16 +71,23 @@ export function MailfraChatProvider({ children, isPaidUser = false }: { children
                     : "Hey! 👋 I'm **Mailfra**, your email outreach assistant. Ask me anything about cold email, deliverability, or how to use Mailfra!",
             },
         ],
-    })
+    } as any)
+
+    const isLoading = status === "streaming" || status === "submitted"
 
     const handleSubmit = useCallback(
         (e?: React.FormEvent) => {
             e?.preventDefault()
             if (!input.trim()) return
-            rawHandleSubmit(e)
+            sendMessage({ role: "user", content: input } as any)
+            setInput("")
         },
-        [input, rawHandleSubmit]
+        [input, sendMessage]
     )
+
+    const reload = useCallback(() => {
+        regenerate()
+    }, [regenerate])
 
     const clearConversation = useCallback(() => {
         setMessages([
@@ -90,8 +97,7 @@ export function MailfraChatProvider({ children, isPaidUser = false }: { children
                 content: mode === "agent"
                     ? "Hey! 👋 I'm **Mailfra AI Agent**. I can search your leads, analyze campaigns, generate emails, check deliverability, and much more. What would you like me to do?"
                     : "Hey! 👋 I'm **Mailfra**, your email outreach assistant. Ask me anything about cold email, deliverability, or how to use Mailfra!",
-            },
-        ])
+            } as any])
         setConversationId(null)
     }, [mode, setMessages])
 
@@ -107,7 +113,7 @@ export function MailfraChatProvider({ children, isPaidUser = false }: { children
                 setIsOpen,
                 mode,
                 setMode,
-                messages,
+                messages: messages as any,
                 input,
                 setInput,
                 handleSubmit,
