@@ -806,7 +806,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     }, [])
 
     // Validate connections: no self-loops, no duplicate edges
-    const isValidConnection = useCallback((connection: Connection) => {
+    const isValidConnection = useCallback((connection: Edge | Connection) => {
         if (connection.source === connection.target) return false
         return !edges.some(
             e => e.source === connection.source && e.target === connection.target
