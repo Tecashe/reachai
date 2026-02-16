@@ -75,7 +75,7 @@ export function Footer() {
           >
             <Link href="/" className="inline-flex items-center gap-2 mb-4">
               <Image
-                src="/mailfra-logo.png"
+                src="/mailfra-avatars.png"
                 alt="Mailfra"
                 width={36}
                 height={36}

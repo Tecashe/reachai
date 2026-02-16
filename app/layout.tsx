@@ -24,11 +24,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/mailfra-icon-light.png",
+        url: "/mailfra-avatars.png",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/mailfra-icon-dark.png",
+        url: "/mailfra-avatars.png",
         media: "(prefers-color-scheme: dark)",
       },
       {
@@ -50,8 +50,8 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Mailfra",
-    "url": "https://mailfra.com", // Replace with your actual domain
-    "logo": "https://mailfra.com/mailfra-logo-light.png", // Replace with your actual domain
+    "url": "https://mailfra.com", // 
+    "logo": "https://mailfra.com/mailfra-avatars.png",
     "description": "The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.",
     "sameAs": [
       // Add your social media profiles here (optional)

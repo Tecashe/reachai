@@ -26,7 +26,7 @@
 //     { label: "Press", href: "/press" },
 //     { label: "Partners", href: "/partners" },
 //     { label: "Contact", href: "/contact" },
-    
+
 //   ],
 //   Compare: [
 //     { label: "vs Instantly", href: "/compare/instantly" },
@@ -153,7 +153,7 @@ const footerLinks = {
     { label: "Press", href: "/press" },
     { label: "Partners", href: "/partners" },
     { label: "Contact", href: "/contact" },
-    
+
   ],
   Compare: [
     { label: "vs Instantly", href: "/compare/instantly" },
@@ -173,7 +173,7 @@ export function PageFooter() {
 
   // Determine which logo to show
   const currentTheme = mounted ? (theme === "system" ? resolvedTheme : theme) : "light"
-  const logoSrc = currentTheme === "dark" ? "/mailfra-logo-dark.png" : "/mailfra-logo-light.png"
+  const logoSrc = currentTheme === "dark" ? "/mailfra-avatars.png" : "/mailfra-avatars.png"
 
   return (
     <footer className="bg-background border-t border-border">
@@ -181,18 +181,18 @@ export function PageFooter() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
-             <Link href="/" className="inline-flex items-center gap-2 mb-4">
-                {mounted && (
-                  <Image
-                    src={logoSrc}
-                    alt="Mailfra"
-                    width={36}
-                    height={36}
-                    className="w-9 h-9 object-contain"
-                  />
-                )}
-                <span className="font-semibold text-lg text-foreground">mailfra</span>
-              </Link>
+            <Link href="/" className="inline-flex items-center gap-2 mb-4">
+              {mounted && (
+                <Image
+                  src={logoSrc}
+                  alt="Mailfra"
+                  width={36}
+                  height={36}
+                  className="w-9 h-9 object-contain"
+                />
+              )}
+              <span className="font-semibold text-lg text-foreground">mailfra</span>
+            </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-6">
               The modern cold email platform for revenue teams. Scale your outreach without sacrificing deliverability.
             </p>
