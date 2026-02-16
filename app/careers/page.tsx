@@ -169,7 +169,7 @@ export default function CareersPage() {
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/careers/mailfra-office.png" alt="Mailfra office" fill className="object-cover opacity-30" />
+          <Image src="/images/culture/mailfra-office.png" alt="Mailfra office" fill className="object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black" />
         </div>
 
