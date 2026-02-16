@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState, forwardRef, useImperativeHandle, useEffect } from 'react'
+import { useCallback, useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react'
 import {
     ReactFlow,
     Controls,
@@ -15,6 +15,11 @@ import {
     MarkerType,
     Handle,
     Position,
+    Connection,
+    ConnectionMode,
+    useReactFlow,
+    reconnectEdge,
+    type OnConnectStart,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Plus, Zap, Settings, Trash2, ChevronDown } from 'lucide-react'
@@ -30,6 +35,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { NodeConfigPanel } from './node-config-panel'
 import CustomEdge, { edgeStyles } from './edges/custom-edge'
+import ConditionNodeComponent from './nodes/condition-node'
 import type { AutomationAction, AutomationActionType } from '@/lib/types/automation-types'
 
 // ============================================================
@@ -72,7 +78,7 @@ const TRIGGERS = [
     { type: 'WEBHOOK_RECEIVED', label: 'Webhook Received', category: 'Communication' },
 ]
 
-const ACTIONS = [
+const ACTIONS: { type: string; label: string; category: string; provider?: string }[] = [
     { type: 'SEND_EMAIL', label: 'Send Email', category: 'Email' },
     { type: 'SCHEDULE_EMAIL', label: 'Schedule Email', category: 'Email' },
     { type: 'ADD_TAG', label: 'Add Tag', category: 'Prospect' },
@@ -103,9 +109,9 @@ const ACTIONS = [
     { type: 'SEND_NOTIFICATION', label: 'Send Notification', category: 'Notification' },
     { type: 'CREATE_TASK', label: 'Create Task', category: 'Task' },
     { type: 'DELAY', label: 'Wait / Delay', category: 'Logic' },
+    { type: 'CONDITION_BRANCH', label: 'If / Else Branch', category: 'Logic' },
 ]
 
-// Add these imports at the top if missing
 import Image from 'next/image'
 import {
     DropdownMenuSub,
@@ -144,7 +150,7 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : "border-amber-500/50",
             "hover:shadow-lg hover:scale-[1.02]"
         )}>
-            {/* Source Handle (Right) - Connection point for outgoing edges */}
+            {/* Source Handle (Right) */}
             <Handle
                 type="source"
                 position={Position.Right}
@@ -345,7 +351,7 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : borderColor,
             "hover:shadow-lg hover:scale-[1.02]"
         )}>
-            {/* Target Handle (Left) - Connection point for incoming edges */}
+            {/* Target Handle (Left) */}
             <Handle
                 type="target"
                 position={Position.Left}
@@ -359,7 +365,7 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                 style={{ zIndex: 10 }}
             />
 
-            {/* Source Handle (Right) - Connection point for outgoing edges */}
+            {/* Source Handle (Right) */}
             <Handle
                 type="source"
                 position={Position.Right}
@@ -484,6 +490,7 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
 const nodeTypes = {
     trigger: TriggerNodeComponent,
     action: ActionNodeComponent,
+    condition: ConditionNodeComponent,
 }
 
 // Edge types for ReactFlow
@@ -515,7 +522,6 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     initialNodes = [],
     initialEdges = [],
 }, ref) {
-    // Initialize with default trigger node if no initial nodes
     const defaultNodes = initialNodes.length > 0 ? initialNodes : [createDefaultTriggerNode()]
 
     const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes)
@@ -555,12 +561,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                 if (node.id === nodeId) {
                     return {
                         ...node,
-                        data: {
-                            ...node.data,
-                            type: triggerType,
-                            label,
-                            isConfigured: true,
-                        },
+                        data: { ...node.data, type: triggerType, label, isConfigured: true },
                     }
                 }
                 return node
@@ -573,15 +574,11 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
         const parentNode = nodes.find(n => n.id === parentNodeId)
         if (!parentNode) return
 
-        // Find all nodes connected below this parent
         const childEdges = edges.filter(e => e.source === parentNodeId)
         const childCount = childEdges.length
-
-        // Calculate position for new node
         const newNodeId = generateNodeId()
-        const xOffset = 220 // Horizontal spacing between nodes
+        const xOffset = 220
 
-        // Find the rightmost x position of existing children
         let maxChildX = parentNode.position.x
         childEdges.forEach(edge => {
             const childNode = nodes.find(n => n.id === edge.target)
@@ -590,22 +587,29 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             }
         })
 
+        const isCondition = actionType === 'CONDITION_BRANCH'
+
         const newNode: WorkflowNode = {
             id: newNodeId,
-            type: 'action',
+            type: isCondition ? 'condition' : 'action',
             position: {
                 x: maxChildX + xOffset,
-                y: parentNode.position.y,
+                y: parentNode.position.y + (childCount > 0 ? 120 * childCount : 0),
             },
             data: {
-                label,
+                label: isCondition ? 'If / Else' : label,
                 type: actionType,
                 config: {},
                 isConfigured: true,
+                ...(isCondition ? {
+                    branches: [
+                        { id: 'true', name: 'True' },
+                        { id: 'false', name: 'False' },
+                    ],
+                } : {}),
             },
         }
 
-        // Create edge from parent to new node with smooth step styling
         const newEdge: Edge = {
             id: `edge_${parentNodeId}_${newNodeId}`,
             source: parentNodeId,
@@ -613,9 +617,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             target: newNodeId,
             targetHandle: 'target',
             type: 'smoothstep',
-            data: {
-                deletable: true,
-            },
+            data: { deletable: true },
         }
 
         setNodes((nds) => [...nds, newNode])
@@ -628,21 +630,50 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
         setShowConfigPanel(true)
     }, [])
 
-    // Handle deleting an action node
+    // ============================================================
+    // INTELLIGENT NODE DELETION (auto-reconnection)
+    // ============================================================
+
     const handleDeleteNode = useCallback((nodeId: string) => {
-        // Don't allow deleting the trigger node
         const node = nodes.find(n => n.id === nodeId)
         if (!node || node.type === 'trigger') return
 
-        // Remove the node and its edges
+        // Find all incoming and outgoing edges
+        const incomingEdges = edges.filter(e => e.target === nodeId)
+        const outgoingEdges = edges.filter(e => e.source === nodeId)
+
+        // Bridge: connect each parent to each child
+        const bridgeEdges: Edge[] = []
+        for (const incoming of incomingEdges) {
+            for (const outgoing of outgoingEdges) {
+                const exists = edges.some(
+                    e => e.source === incoming.source && e.target === outgoing.target
+                )
+                if (!exists) {
+                    bridgeEdges.push({
+                        id: `edge_${incoming.source}_${outgoing.target}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                        source: incoming.source,
+                        sourceHandle: incoming.sourceHandle || 'source',
+                        target: outgoing.target,
+                        targetHandle: outgoing.targetHandle || 'target',
+                        type: 'smoothstep',
+                        data: { deletable: true },
+                    })
+                }
+            }
+        }
+
         setNodes((nds) => nds.filter((n) => n.id !== nodeId))
-        setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId))
+        setEdges((eds) => [
+            ...eds.filter((e) => e.source !== nodeId && e.target !== nodeId),
+            ...bridgeEdges,
+        ])
 
         if (selectedNodeId === nodeId) {
             setSelectedNodeId(null)
             setShowConfigPanel(false)
         }
-    }, [nodes, selectedNodeId, setNodes, setEdges])
+    }, [nodes, edges, selectedNodeId, setNodes, setEdges])
 
     // Update node config
     const updateNodeConfig = useCallback((updates: Partial<WorkflowNode['data']>) => {
@@ -650,18 +681,193 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
         setNodes((nds) =>
             nds.map((node) => {
                 if (node.id === selectedNodeId) {
+                    return { ...node, data: { ...node.data, ...updates } }
+                }
+                return node
+            })
+        )
+    }, [selectedNodeId, setNodes])
+
+    // ============================================================
+    // CONNECTION HANDLING (Voiceflow-style)
+    // ============================================================
+
+    const reactFlowWrapper = useRef<HTMLDivElement>(null)
+    const { screenToFlowPosition } = useReactFlow()
+
+    // Track pending connection source for action picker
+    const [pendingConnection, setPendingConnection] = useState<{
+        sourceNodeId: string
+        sourceHandleId: string | null
+    } | null>(null)
+
+    // Floating action picker state
+    const [actionPickerPos, setActionPickerPos] = useState<{ x: number; y: number } | null>(null)
+    const [actionPickerFlowPos, setActionPickerFlowPos] = useState<{ x: number; y: number } | null>(null)
+
+    // Handle manual connection (drag handle to target handle)
+    const onConnect = useCallback((connection: Connection) => {
+        if (!connection.source || !connection.target) return
+        const exists = edges.some(
+            e => e.source === connection.source && e.target === connection.target
+                && e.sourceHandle === (connection.sourceHandle || 'source')
+        )
+        if (exists) return
+
+        const newEdge: Edge = {
+            id: `edge_${connection.source}_${connection.target}_${Date.now()}`,
+            source: connection.source,
+            sourceHandle: connection.sourceHandle || 'source',
+            target: connection.target,
+            targetHandle: connection.targetHandle || 'target',
+            type: 'smoothstep',
+            data: { deletable: true },
+        }
+        setEdges((eds) => [...eds, newEdge])
+    }, [edges, setEdges])
+
+    // Track connection start
+    const onConnectStart: OnConnectStart = useCallback((_event, params) => {
+        setPendingConnection({
+            sourceNodeId: params.nodeId || '',
+            sourceHandleId: params.handleId || null,
+        })
+    }, [])
+
+    // Connection drop on empty canvas -> show floating action picker
+    const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
+        if (!pendingConnection) return
+
+        const targetElement = (event as MouseEvent).target as HTMLElement
+        const isPane = targetElement.classList.contains('react-flow__pane')
+            || !!targetElement.closest('.react-flow__pane')
+
+        if (isPane) {
+            const clientX = (event as MouseEvent).clientX
+            const clientY = (event as MouseEvent).clientY
+            const flowPosition = screenToFlowPosition({ x: clientX, y: clientY })
+            setActionPickerFlowPos(flowPosition)
+            setActionPickerPos({ x: clientX, y: clientY })
+        } else {
+            setPendingConnection(null)
+        }
+    }, [pendingConnection, screenToFlowPosition])
+
+    // Handle action selection from floating picker
+    const handlePickerActionSelect = useCallback((actionType: string, label: string) => {
+        if (!pendingConnection || !actionPickerFlowPos) return
+
+        const isCondition = actionType === 'CONDITION_BRANCH'
+        const newNodeId = generateNodeId()
+
+        const newNode: WorkflowNode = {
+            id: newNodeId,
+            type: isCondition ? 'condition' : 'action',
+            position: {
+                x: actionPickerFlowPos.x,
+                y: actionPickerFlowPos.y - 40,
+            },
+            data: {
+                label: isCondition ? 'If / Else' : label,
+                type: actionType,
+                config: {},
+                isConfigured: true,
+                ...(isCondition ? {
+                    branches: [
+                        { id: 'true', name: 'True' },
+                        { id: 'false', name: 'False' },
+                    ],
+                } : {}),
+            },
+        }
+
+        const newEdge: Edge = {
+            id: `edge_${pendingConnection.sourceNodeId}_${newNodeId}`,
+            source: pendingConnection.sourceNodeId,
+            sourceHandle: pendingConnection.sourceHandleId || 'source',
+            target: newNodeId,
+            targetHandle: 'target',
+            type: 'smoothstep',
+            data: { deletable: true },
+        }
+
+        setNodes((nds) => [...nds, newNode])
+        setEdges((eds) => [...eds, newEdge])
+
+        setActionPickerPos(null)
+        setActionPickerFlowPos(null)
+        setPendingConnection(null)
+    }, [pendingConnection, actionPickerFlowPos, setNodes, setEdges])
+
+    const closeActionPicker = useCallback(() => {
+        setActionPickerPos(null)
+        setActionPickerFlowPos(null)
+        setPendingConnection(null)
+    }, [])
+
+    // Validate connections: no self-loops, no duplicate edges
+    const isValidConnection = useCallback((connection: Connection) => {
+        if (connection.source === connection.target) return false
+        return !edges.some(
+            e => e.source === connection.source && e.target === connection.target
+        )
+    }, [edges])
+
+    // Edge reconnection (drag edge endpoints to new nodes)
+    const onReconnect = useCallback((oldEdge: Edge, newConnection: Connection) => {
+        setEdges((eds) => reconnectEdge(oldEdge, newConnection, eds))
+    }, [setEdges])
+
+    // ============================================================
+    // CONDITION NODE BRANCH MANAGEMENT
+    // ============================================================
+
+    const handleAddBranch = useCallback((nodeId: string) => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.id === nodeId && node.type === 'condition') {
+                    const currentBranches = (node.data as any).branches || [
+                        { id: 'true', name: 'True' },
+                        { id: 'false', name: 'False' },
+                    ]
+                    const newBranchId = `branch_${Date.now()}`
                     return {
                         ...node,
                         data: {
                             ...node.data,
-                            ...updates,
+                            branches: [
+                                ...currentBranches,
+                                { id: newBranchId, name: `Branch ${currentBranches.length + 1}` },
+                            ],
                         },
                     }
                 }
                 return node
             })
         )
-    }, [selectedNodeId, setNodes])
+    }, [setNodes])
+
+    const handleRemoveBranch = useCallback((nodeId: string, branchId: string) => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.id === nodeId && node.type === 'condition') {
+                    const currentBranches = (node.data as any).branches || []
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            branches: currentBranches.filter((b: any) => b.id !== branchId),
+                        },
+                    }
+                }
+                return node
+            })
+        )
+        const handleId = `branch-${branchId}`
+        setEdges((eds) =>
+            eds.filter((e) => !(e.source === nodeId && e.sourceHandle === handleId))
+        )
+    }, [setNodes, setEdges])
 
     // Inject handlers into node data
     const nodesWithHandlers = nodes.map(node => ({
@@ -672,6 +878,8 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             onAddAction: handleAddAction,
             onConfigure: handleConfigure,
             onDelete: handleDeleteNode,
+            onAddBranch: handleAddBranch,
+            onRemoveBranch: handleRemoveBranch,
         },
     }))
 
@@ -679,16 +887,20 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
 
     return (
         <div className="flex h-full bg-muted/20 rounded-lg border border-border overflow-hidden">
-            {/* Inject edge animation styles */}
             <style dangerouslySetInnerHTML={{ __html: edgeStyles }} />
 
-            {/* Main Canvas */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative" ref={reactFlowWrapper}>
                 <ReactFlow
                     nodes={nodesWithHandlers}
                     edges={edges}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onConnectStart={onConnectStart}
+                    onConnectEnd={onConnectEnd}
+                    onReconnect={onReconnect}
+                    isValidConnection={isValidConnection}
+                    connectionMode={ConnectionMode.Loose}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     fitView
@@ -708,6 +920,12 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     maxZoom={2}
                     deleteKeyCode={['Backspace', 'Delete']}
                     selectNodesOnDrag={false}
+                    onPaneClick={closeActionPicker}
+                    connectionLineStyle={{
+                        stroke: 'hsl(var(--primary))',
+                        strokeWidth: 2,
+                        strokeDasharray: '8 4',
+                    }}
                 >
                     <Controls
                         className="bg-card/90 backdrop-blur-sm border-border shadow-md"
@@ -722,13 +940,21 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     />
                     <Panel position="top-right" className="!m-2">
                         <div className="bg-card/70 backdrop-blur-md rounded-md px-2 py-1.5 shadow-sm border border-border/50 text-[10px] text-muted-foreground">
-                            <span className="opacity-80">Click nodes to configure • Hover connections to delete</span>
+                            <span className="opacity-80">Drag handles to connect &bull; Drop on empty to add &bull; Hover edges to delete</span>
                         </div>
                     </Panel>
                 </ReactFlow>
+
+                {/* Floating Action Picker */}
+                {actionPickerPos && (
+                    <FloatingActionPicker
+                        position={actionPickerPos}
+                        onSelect={handlePickerActionSelect}
+                        onClose={closeActionPicker}
+                    />
+                )}
             </div>
 
-            {/* Config Panel */}
             {showConfigPanel && selectedNode && (
                 <NodeConfigPanel
                     node={selectedNode}
@@ -744,6 +970,136 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     )
 })
 
+// ============================================================
+// FLOATING ACTION PICKER (appears on connection drop)
+// ============================================================
+
+function FloatingActionPicker({
+    position,
+    onSelect,
+    onClose,
+}: {
+    position: { x: number; y: number }
+    onSelect: (actionType: string, label: string) => void
+    onClose: () => void
+}) {
+    const [searchTerm, setSearchTerm] = useState('')
+    const categories = ['Email', 'Prospect', 'Sequence', 'Communication', 'CRM', 'Productivity', 'Notification', 'Task', 'Logic']
+
+    const filteredActions = searchTerm
+        ? ACTIONS.filter(a => a.label.toLowerCase().includes(searchTerm.toLowerCase()))
+        : ACTIONS
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose()
+        }
+        window.addEventListener('keydown', handleKeyDown)
+        return () => window.removeEventListener('keydown', handleKeyDown)
+    }, [onClose])
+
+    const adjustedX = Math.min(position.x, window.innerWidth - 280)
+    const adjustedY = Math.min(position.y, window.innerHeight - 400)
+
+    return (
+        <>
+            <div className="fixed inset-0 z-[100]" onClick={onClose} />
+            <div
+                className={cn(
+                    "fixed z-[101] w-64 max-h-80 overflow-hidden",
+                    "bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl shadow-black/20",
+                    "animate-in fade-in-0 zoom-in-95 duration-150"
+                )}
+                style={{ left: adjustedX, top: adjustedY }}
+            >
+                <div className="p-2 border-b border-border">
+                    <input
+                        type="text"
+                        placeholder="Search actions..."
+                        autoFocus
+                        className={cn(
+                            "w-full px-2.5 py-1.5 text-xs rounded-md",
+                            "bg-muted/50 border border-border/50",
+                            "placeholder:text-muted-foreground/50",
+                            "focus:outline-none focus:ring-1 focus:ring-primary/50"
+                        )}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                <div className="overflow-y-auto max-h-64 p-1">
+                    {searchTerm ? (
+                        filteredActions.length > 0 ? (
+                            filteredActions.map((action) => (
+                                <button
+                                    key={action.type}
+                                    className={cn(
+                                        "w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left",
+                                        "hover:bg-primary/10 transition-colors text-xs text-foreground"
+                                    )}
+                                    onClick={() => onSelect(action.type, action.label)}
+                                >
+                                    {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
+                                        <Image
+                                            src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
+                                            alt={action.provider}
+                                            width={14}
+                                            height={14}
+                                            className="object-contain"
+                                        />
+                                    ) : (
+                                        <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
+                                    )}
+                                    <span>{action.label}</span>
+                                    <span className="ml-auto text-[10px] text-muted-foreground">{action.category}</span>
+                                </button>
+                            ))
+                        ) : (
+                            <div className="p-3 text-center text-xs text-muted-foreground">No actions found</div>
+                        )
+                    ) : (
+                        categories.map((category) => {
+                            const categoryActions = filteredActions.filter(a => a.category === category)
+                            if (categoryActions.length === 0) return null
+                            return (
+                                <div key={category}>
+                                    <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                                        {category}
+                                    </div>
+                                    {categoryActions.map((action) => (
+                                        <button
+                                            key={action.type}
+                                            className={cn(
+                                                "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left",
+                                                "hover:bg-primary/10 transition-colors text-xs text-foreground"
+                                            )}
+                                            onClick={() => onSelect(action.type, action.label)}
+                                        >
+                                            {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
+                                                <Image
+                                                    src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
+                                                    alt={action.provider}
+                                                    width={14}
+                                                    height={14}
+                                                    className="object-contain"
+                                                />
+                                            ) : (
+                                                <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
+                                            )}
+                                            <span>{action.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )
+                        })
+                    )}
+                </div>
+            </div>
+        </>
+    )
+}
+
 // Wrapper with provider that forwards ref
 export const WorkflowCanvasWithProvider = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>(
     function WorkflowCanvasWithProvider(props, ref) {
@@ -756,41 +1112,42 @@ export const WorkflowCanvasWithProvider = forwardRef<WorkflowCanvasRef, Workflow
 )
 
 /**
- * Convert workflow nodes/edges to automation actions array
+ * Convert workflow nodes/edges to automation actions array (graph-aware BFS)
  */
 export function nodesToActions(nodes: WorkflowNode[], edges: Edge[]): AutomationAction[] {
-    // Find the trigger node
     const triggerNode = nodes.find((n) => n.type === 'trigger')
     if (!triggerNode) return []
 
-    // Build action order from edges
-    const actionNodes = nodes.filter((n) => n.type === 'action')
+    const actionNodes = nodes.filter((n) => n.type === 'action' || n.type === 'condition')
     const sortedActions: AutomationAction[] = []
-
-    // Simple linear chain for now
-    let currentNodeId = triggerNode.id
     const visited = new Set<string>()
 
-    while (true) {
-        // Find edge from current node
-        const nextEdge = edges.find((e) => e.source === currentNodeId)
-        if (!nextEdge || visited.has(nextEdge.target)) break
+    // BFS from trigger node
+    const queue: string[] = [triggerNode.id]
 
-        visited.add(nextEdge.target)
-        const nextNode = actionNodes.find((n) => n.id === nextEdge.target)
-        if (!nextNode) break
+    while (queue.length > 0) {
+        const currentId = queue.shift()!
+        if (visited.has(currentId)) continue
+        visited.add(currentId)
 
-        sortedActions.push({
-            id: nextNode.id,
-            type: nextNode.data.type as AutomationActionType,
-            name: nextNode.data.label,
-            order: sortedActions.length,
-            config: nextNode.data.config || {},
-            delayMinutes: nextNode.data.delayMinutes || 0,
-            continueOnError: false,
-        })
+        // Find all outgoing edges from current node
+        const outEdges = edges.filter(e => e.source === currentId)
+        for (const edge of outEdges) {
+            const targetNode = actionNodes.find(n => n.id === edge.target)
+            if (!targetNode || visited.has(targetNode.id)) continue
 
-        currentNodeId = nextNode.id
+            sortedActions.push({
+                id: targetNode.id,
+                type: targetNode.data.type as AutomationActionType,
+                name: targetNode.data.label,
+                order: sortedActions.length,
+                config: targetNode.data.config || {},
+                delayMinutes: targetNode.data.delayMinutes || 0,
+                continueOnError: false,
+            })
+
+            queue.push(targetNode.id)
+        }
     }
 
     return sortedActions
@@ -826,9 +1183,10 @@ export function actionsToNodes(
     let prevNodeId = triggerNode.id
     actions.forEach((action, index) => {
         const actionLabel = ACTIONS.find(a => a.type === action.type)?.label || action.name || action.type.replace(/_/g, ' ')
+        const isCondition = action.type === 'CONDITION_BRANCH'
         const actionNode: WorkflowNode = {
             id: action.id || `action_${index}`,
-            type: 'action',
+            type: isCondition ? 'condition' : 'action',
             position: { x: 270 + index * 220, y: 150 },
             data: {
                 label: actionLabel,
