@@ -103,32 +103,32 @@ const perks = [
   {
     title: "Competitive Equity",
     description: "Significant ownership stake. We win together.",
-    image: "/images/perks/equity.jpg",
+    image: "/images/perks/equity.png",
   },
   {
     title: "Unlimited PTO",
     description: "Take time when you need it. We trust you.",
-    image: "/images/perks/pto.jpg",
+    image: "/images/perks/pto.png",
   },
   {
     title: "Remote-First",
     description: "Work from anywhere. We have teammates in 12 countries.",
-    image: "/images/perks/remote.jpg",
+    image: "/images/perks/remote.png",
   },
   {
     title: "Health & Wellness",
     description: "Premium health, dental, vision. Plus $200/mo wellness stipend.",
-    image: "/images/perks/health.jpg",
+    image: "/images/perks/health.png",
   },
   {
     title: "Learning Budget",
     description: "$2,000/year for courses, conferences, and books.",
-    image: "/images/perks/learning.jpg",
+    image: "/images/perks/learning.png",
   },
   {
     title: "Home Office Setup",
     description: "$2,500 to set up your perfect workspace.",
-    image: "/images/perks/office.jpg",
+    image: "/images/perks/office.png",
   },
 ]
 
@@ -169,7 +169,7 @@ export default function CareersPage() {
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/careers-hero.jpg" alt="Mailfra office" fill className="object-cover opacity-30" />
+          <Image src="/images/careers/mailfra-office.png" alt="Mailfra office" fill className="object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/70 to-black" />
         </div>
 
