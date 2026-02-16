@@ -54,7 +54,7 @@ export function Navbar() {
                 className="flex items-center gap-2.5 transition-transform duration-300 hover:scale-[1.02] flex-shrink-0"
             >
                 <Image
-                    src="/mailfra-logo.png"
+                    src="/mailfra-avatars.png"
                     alt="Mailfra"
                     width={32}
                     height={32}
