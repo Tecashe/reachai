@@ -825,7 +825,7 @@ import { motion, AnimatePresence } from "framer-motion"
 const MailfraAvatarIcon = ({ className }: { className?: string }) => (
   <div className={cn("relative", className)}>
     <Image
-      src="/mailfra-avatars.png"
+      src="/mailfra-avatar.png"
       alt="Mailfra"
       fill
       className="object-cover rounded-full"
@@ -1269,10 +1269,14 @@ function SidebarContent({ collapsed = false, onToggleCollapse, onNavigate }: Sid
     router.push('/dashboard/analytics/overview')
   }
 
-  // Determine which logo to show
   const logoSrc = mounted && resolvedTheme === 'dark'
-    ? '/mailfra-logo-dark.png'
-    : '/mailfra-logo-light.png'
+    ? '/mailfra-avatars.png'
+    : '/mailfra-avatars.png'
+
+  // Determine which logo to show
+  // const logoSrc = mounted && resolvedTheme === 'dark'
+  //   ? '/mailfra-logo-dark.png'
+  //   : '/mailfra-logo-light.png'
 
   // Animation variants for sidebar transitions - overlapping crossfade blur
   const slideVariants = {
