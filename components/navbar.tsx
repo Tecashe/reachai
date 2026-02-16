@@ -58,7 +58,8 @@ export function Navbar() {
                     alt="Mailfra"
                     width={32}
                     height={32}
-                    className={`w-6 h-6 object-contain ${isDark ? "invert" : ""}`}
+                    // className={`w-6 h-6 object-contain ${isDark ? "invert" : ""}`}
+                    className="w-6 h-6 object-contain"
                     priority
                 />
                 <span className="font-semibold text-lg tracking-tight text-foreground">mailfra</span>
