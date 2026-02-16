@@ -353,7 +353,7 @@ export default function CareersPage() {
             Find your next role
           </p>
 
-          {/* Department Filter*/}
+          {/* Department Filter */}
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {departments.map((dept) => {
               const Icon = dept.icon
@@ -362,8 +362,8 @@ export default function CareersPage() {
                   key={dept.id}
                   onClick={() => setActiveDepartment(dept.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${activeDepartment === dept.id
-                      ? "bg-white text-black border-white"
-                      : "border-white/20 hover:border-white/40"
+                    ? "bg-white text-black border-white"
+                    : "border-white/20 hover:border-white/40"
                     }`}
                 >
                   <Icon className="w-4 h-4" />
