@@ -182,9 +182,8 @@ export default function CareersPage() {
           <h1
             id="hero-title"
             data-animate
-            className={`text-5xl md:text-7xl font-bold mb-6 transition-all duration-1000 ${
-              visibleSections.has("hero-title") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-5xl md:text-7xl font-bold mb-6 transition-all duration-1000 ${visibleSections.has("hero-title") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             Build the future of
             <br />
@@ -193,9 +192,8 @@ export default function CareersPage() {
           <p
             id="hero-subtitle"
             data-animate
-            className={`text-xl md:text-2xl text-white/60 max-w-2xl mx-auto mb-10 transition-all duration-1000 delay-200 ${
-              visibleSections.has("hero-subtitle") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-xl md:text-2xl text-white/60 max-w-2xl mx-auto mb-10 transition-all duration-1000 delay-200 ${visibleSections.has("hero-subtitle") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             Join a team of ambitious builders working to transform how businesses connect with customers.
           </p>
@@ -217,9 +215,8 @@ export default function CareersPage() {
                 key={stat.label}
                 id={`stat-${index}`}
                 data-animate
-                className={`text-center transition-all duration-700 ${
-                  visibleSections.has(`stat-${index}`) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
+                className={`text-center transition-all duration-700 ${visibleSections.has(`stat-${index}`) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <div className="text-4xl md:text-5xl font-bold mb-2">{stat.value}</div>
@@ -237,21 +234,20 @@ export default function CareersPage() {
             <div
               id="culture-grid"
               data-animate
-              className={`grid grid-cols-2 gap-4 transition-all duration-1000 ${
-                visibleSections.has("culture-grid") ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
-              }`}
+              className={`grid grid-cols-2 gap-4 transition-all duration-1000 ${visibleSections.has("culture-grid") ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
+                }`}
             >
               <div className="aspect-[3/4] relative rounded-2xl overflow-hidden">
-                <Image src="/images/culture/team-1.jpg" alt="Team collaboration" fill className="object-cover" />
+                <Image src="/images/culture/team1.png" alt="Team collaboration" fill className="object-cover" />
               </div>
               <div className="aspect-[3/4] relative rounded-2xl overflow-hidden mt-8">
-                <Image src="/images/culture/team-2.jpg" alt="Team event" fill className="object-cover" />
+                <Image src="/images/culture/team2.png" alt="Team event" fill className="object-cover" />
               </div>
               <div className="aspect-[3/4] relative rounded-2xl overflow-hidden -mt-8">
-                <Image src="/images/culture/team-3.jpg" alt="Office space" fill className="object-cover" />
+                <Image src="/images/culture/team3.png" alt="Office space" fill className="object-cover" />
               </div>
               <div className="aspect-[3/4] relative rounded-2xl overflow-hidden">
-                <Image src="/images/culture/team-4.jpg" alt="Team meeting" fill className="object-cover" />
+                <Image src="/images/culture/team4.png" alt="Team meeting" fill className="object-cover" />
               </div>
             </div>
 
@@ -259,18 +255,16 @@ export default function CareersPage() {
               <h2
                 id="culture-title"
                 data-animate
-                className={`text-4xl md:text-5xl font-bold mb-8 transition-all duration-700 ${
-                  visibleSections.has("culture-title") ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-                }`}
+                className={`text-4xl md:text-5xl font-bold mb-8 transition-all duration-700 ${visibleSections.has("culture-title") ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+                  }`}
               >
                 Why Mailfra?
               </h2>
               <div
                 id="culture-text"
                 data-animate
-                className={`space-y-6 text-lg text-white/70 transition-all duration-700 delay-200 ${
-                  visibleSections.has("culture-text") ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
-                }`}
+                className={`space-y-6 text-lg text-white/70 transition-all duration-700 delay-200 ${visibleSections.has("culture-text") ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+                  }`}
               >
                 <p>
                   We&apos;re not just building a product. We&apos;re defining how modern sales teams connect with
@@ -296,18 +290,16 @@ export default function CareersPage() {
           <h2
             id="perks-title"
             data-animate
-            className={`text-4xl md:text-5xl font-bold text-center mb-6 transition-all duration-700 ${
-              visibleSections.has("perks-title") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-4xl md:text-5xl font-bold text-center mb-6 transition-all duration-700 ${visibleSections.has("perks-title") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             Perks & Benefits
           </h2>
           <p
             id="perks-subtitle"
             data-animate
-            className={`text-xl text-white/60 text-center max-w-2xl mx-auto mb-16 transition-all duration-700 delay-100 ${
-              visibleSections.has("perks-subtitle") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-xl text-white/60 text-center max-w-2xl mx-auto mb-16 transition-all duration-700 delay-100 ${visibleSections.has("perks-subtitle") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             We take care of our team so they can focus on doing great work
           </p>
@@ -318,9 +310,8 @@ export default function CareersPage() {
                 key={perk.title}
                 id={`perk-${index}`}
                 data-animate
-                className={`group relative overflow-hidden rounded-2xl transition-all duration-500 ${
-                  visibleSections.has(`perk-${index}`) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
+                className={`group relative overflow-hidden rounded-2xl transition-all duration-500 ${visibleSections.has(`perk-${index}`) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  }`}
                 style={{ transitionDelay: `${index * 100}ms` }}
               >
                 <div className="aspect-video relative">
@@ -348,23 +339,21 @@ export default function CareersPage() {
           <h2
             id="jobs-title"
             data-animate
-            className={`text-4xl md:text-5xl font-bold text-center mb-6 transition-all duration-700 ${
-              visibleSections.has("jobs-title") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-4xl md:text-5xl font-bold text-center mb-6 transition-all duration-700 ${visibleSections.has("jobs-title") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             Open Positions
           </h2>
           <p
             id="jobs-subtitle"
             data-animate
-            className={`text-xl text-white/60 text-center max-w-2xl mx-auto mb-12 transition-all duration-700 delay-100 ${
-              visibleSections.has("jobs-subtitle") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+            className={`text-xl text-white/60 text-center max-w-2xl mx-auto mb-12 transition-all duration-700 delay-100 ${visibleSections.has("jobs-subtitle") ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              }`}
           >
             Find your next role
           </p>
 
-          {/* Department Filter */}
+          {/* Department Filter*/}
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {departments.map((dept) => {
               const Icon = dept.icon
@@ -372,11 +361,10 @@ export default function CareersPage() {
                 <button
                   key={dept.id}
                   onClick={() => setActiveDepartment(dept.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${
-                    activeDepartment === dept.id
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${activeDepartment === dept.id
                       ? "bg-white text-black border-white"
                       : "border-white/20 hover:border-white/40"
-                  }`}
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {dept.name}
@@ -392,9 +380,8 @@ export default function CareersPage() {
                 key={job.id}
                 id={`job-${index}`}
                 data-animate
-                className={`border border-white/10 rounded-xl overflow-hidden transition-all duration-500 hover:border-white/30 ${
-                  visibleSections.has(`job-${index}`) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-                }`}
+                className={`border border-white/10 rounded-xl overflow-hidden transition-all duration-500 hover:border-white/30 ${visibleSections.has(`job-${index}`) ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+                  }`}
                 style={{ transitionDelay: `${index * 50}ms` }}
               >
                 <button
@@ -419,9 +406,8 @@ export default function CareersPage() {
                 </button>
 
                 <div
-                  className={`overflow-hidden transition-all duration-300 ${
-                    expandedJob === job.id ? "max-h-96" : "max-h-0"
-                  }`}
+                  className={`overflow-hidden transition-all duration-300 ${expandedJob === job.id ? "max-h-96" : "max-h-0"
+                    }`}
                 >
                   <div className="px-6 pb-6 border-t border-white/10 pt-4">
                     <p className="text-white/70 mb-4">{job.description}</p>
