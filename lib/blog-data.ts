@@ -1291,7 +1291,7 @@ export const blogPosts: BlogPost[] = [
     slug: "ultimate-cold-email-deliverability-guide-2025",
     title: "The Ultimate Cold Email Deliverability Guide for 2025",
     excerpt: "Master email authentication, sender reputation, and inbox placement with our comprehensive guide covering SPF, DKIM, DMARC, and advanced deliverability strategies.",
-    image: "/images/blog-posts/deliverability-guide-hero.jpg",
+    image: "/images/blog-posts/deliverability-guide-hero.png",
     author: alexAuthor,
     publishedAt: "2025-01-15",
     updatedAt: "2025-01-15",
