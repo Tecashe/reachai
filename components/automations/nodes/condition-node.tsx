@@ -162,6 +162,7 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
                                     : "!bg-violet-500 hover:!shadow-violet-500/50",
                             "after:content-[''] after:absolute after:inset-0 after:rounded-full",
                             "after:animate-ping",
+                            "after:pointer-events-none",
                             branch.id === 'true'
                                 ? "after:bg-emerald-500/30"
                                 : branch.id === 'false'

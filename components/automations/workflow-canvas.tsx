@@ -161,7 +161,7 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                     "transition-all duration-200",
                     "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50",
                     "after:content-[''] after:absolute after:inset-0 after:rounded-full",
-                    "after:animate-ping after:bg-primary/30"
+                    "after:animate-ping after:bg-primary/30 after:pointer-events-none"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -376,7 +376,7 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                     "transition-all duration-200",
                     "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50",
                     "after:content-[''] after:absolute after:inset-0 after:rounded-full",
-                    "after:animate-ping after:bg-primary/30"
+                    "after:animate-ping after:bg-primary/30 after:pointer-events-none"
                 )}
                 style={{ zIndex: 10 }}
             />
