@@ -84,10 +84,10 @@
 //         content: `
 //           <h2>Introduction to Cold Email</h2>
 //           <p>Cold email is one of the most powerful, scalable, and cost-effective channels for B2B lead generation...</p>
-          
+
 //           <h3>Why Cold Email Works in 2025</h3>
 //           <p>Despite predictions of its demise, cold email continues to deliver exceptional ROI...</p>
-          
+
 //           <!-- Full chapter content from earlier artifacts -->
 //         `,
 //         keyTakeaways: [
@@ -116,7 +116,7 @@
 //       'b2b-sales-automation'
 //     ]
 //   },
-  
+
 //   // Add all other guides here...
 // }
 
@@ -135,7 +135,7 @@
 // export function getRelatedGuides(currentSlug: string, limit = 3): Guide[] {
 //   const current = getGuide(currentSlug)
 //   if (!current) return []
-  
+
 //   return current.relatedGuides
 //     .map(slug => getGuide(slug))
 //     .filter(Boolean)
@@ -226,24 +226,24 @@
 //         content: `
 //           <h2>Introduction to Cold Email</h2>
 //           <p>Cold email is one of the most powerful, scalable, and cost-effective channels for B2B lead generation. When done right, it can generate consistent pipeline, book qualified meetings, and drive revenue growth—all without paid advertising budgets.</p>
-          
+
 //           <h3>Why Cold Email Works in 2025</h3>
 //           <p>Despite predictions of its demise, cold email continues to deliver exceptional ROI. The average cold email campaign generates <strong>$42 for every $1 spent</strong>, with open rates ranging from 20-30% and reply rates of 3-8% for well-targeted campaigns.</p>
-          
+
 //           <p>Decision-makers check email an average of 15 times per day, making it the most reliable way to reach them. Unlike social media posts that get buried in feeds or paid ads that get blocked, email sits in their inbox waiting for attention.</p>
-          
+
 //           <h3>The Modern Cold Email Landscape</h3>
 //           <p>Today's buyers are more sophisticated than ever. They ignore generic pitches, delete obvious templates, and respond only to personalized, relevant outreach. Success requires understanding three pillars:</p>
-          
+
 //           <ul>
 //             <li><strong>Technical setup:</strong> SPF, DKIM, DMARC, domain warmup</li>
 //             <li><strong>Compelling copy:</strong> Personalization, value proposition, clear CTAs</li>
 //             <li><strong>Smart targeting:</strong> ICP definition, list building, segmentation</li>
 //           </ul>
-          
+
 //           <h3>What You'll Learn in This Guide</h3>
 //           <p>This masterclass covers everything from technical setup to crafting compelling copy, building prospect lists, creating follow-up sequences, and measuring results. By the end, you'll have a complete system for generating predictable pipeline through cold email.</p>
-          
+
 //           <p>Each chapter builds on the previous one, taking you from complete beginner to advanced practitioner. You'll learn both strategy and tactics, with real examples and templates you can use immediately.</p>
 //         `,
 //         keyTakeaways: [
@@ -267,10 +267,10 @@
 //         content: `
 //           <h2>Building Your Prospect List</h2>
 //           <p>Your success in cold email depends entirely on who you're emailing. The best copy in the world won't convert if you're reaching the wrong people. List building is where strategy meets execution.</p>
-          
+
 //           <h3>Define Your Ideal Customer Profile (ICP)</h3>
 //           <p>Start with crystal-clear targeting. What company size? Which industries? What technologies do they use? Who's the decision-maker? Create a detailed profile including:</p>
-          
+
 //           <ul>
 //             <li>Company revenue range ($2M-$20M, $20M-$100M, etc.)</li>
 //             <li>Employee count (20-200, 200-1000, etc.)</li>
@@ -279,25 +279,25 @@
 //             <li>Growth indicators (hiring, funding, expansion)</li>
 //             <li>Pain points your solution addresses</li>
 //           </ul>
-          
+
 //           <p>The more specific your ICP, the better your results. "Companies that need marketing help" is too broad. "B2B SaaS companies with 50-200 employees, $5M-$50M ARR, Series A-B funded, struggling with lead generation" is specific enough to craft compelling, targeted messages.</p>
-          
+
 //           <h3>Data Sources for Building Lists</h3>
 //           <p>Top-performing sources include:</p>
-          
+
 //           <p><strong>LinkedIn Sales Navigator</strong> - Best for finding decision-makers. Filter by job title, company size, industry, location, and more. Export to CSV or use Apollo/Hunter to find emails.</p>
-          
+
 //           <p><strong>Apollo.io</strong> - 200M+ contacts with advanced filters. Includes email addresses, phone numbers, and company data. Great for bulk list building.</p>
-          
+
 //           <p><strong>ZoomInfo</strong> - Enterprise-grade data with high accuracy. More expensive but worth it for high-ticket sales.</p>
-          
+
 //           <p><strong>Hunter.io</strong> - Email finding and verification. Great for finding specific people at target companies.</p>
-          
+
 //           <p><strong>Clearbit</strong> - Enrichment data to fill gaps in your existing lists.</p>
-          
+
 //           <h3>Email Verification is Non-Negotiable</h3>
 //           <p>Never send to unverified emails. Bounce rates above 3% destroy your sender reputation. Use services like NeverBounce, ZeroBounce, or Clearout to verify every email. This step alone can improve deliverability by 40%+ and protect your domain reputation.</p>
-          
+
 //           <h3>Segmentation Strategy</h3>
 //           <p>Divide your list into segments based on:</p>
 //           <ul>
@@ -307,7 +307,7 @@
 //             <li><strong>Geographic region:</strong> East Coast, West Coast, International</li>
 //             <li><strong>Engagement level:</strong> Cold, Warm (visited website), Hot (engaged with content)</li>
 //           </ul>
-          
+
 //           <p>This allows you to personalize messaging for each segment. A CFO at a 50-person startup has different needs than a CFO at a 5,000-person enterprise.</p>
 //         `,
 //         keyTakeaways: [
@@ -331,34 +331,34 @@
 //         content: `
 //           <h2>Email Authentication Setup</h2>
 //           <p>Before sending a single email, you must properly authenticate your domain. This technical setup is the foundation of deliverability. Skip it, and your emails land in spam. Master it, and you'll reach the inbox consistently.</p>
-          
+
 //           <h3>SPF (Sender Policy Framework)</h3>
 //           <p>SPF tells receiving servers which IP addresses are authorized to send email from your domain. Add an SPF record to your DNS with all legitimate sending sources.</p>
-          
+
 //           <p><strong>Example SPF record:</strong></p>
 //           <pre>v=spf1 include:_spf.google.com include:servers.mcsv.net ~all</pre>
-          
+
 //           <p>Breaking it down:</p>
 //           <ul>
 //             <li><code>v=spf1</code> - SPF version 1</li>
 //             <li><code>include:_spf.google.com</code> - Authorize Google's servers</li>
 //             <li><code>~all</code> - Soft fail for others (recommended for testing)</li>
 //           </ul>
-          
+
 //           <h3>DKIM (DomainKeys Identified Mail)</h3>
 //           <p>DKIM adds a digital signature to your emails, proving they came from you and haven't been tampered with. Your email service provider generates a public/private key pair. Add the public key to your DNS as a TXT record.</p>
-          
+
 //           <p><strong>Example DKIM record:</strong></p>
 //           <pre>default._domainkey.example.com TXT "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA..."</pre>
-          
+
 //           <h3>DMARC (Domain-based Message Authentication)</h3>
 //           <p>DMARC builds on SPF and DKIM, telling receivers what to do with emails that fail authentication. Start with monitoring, then progress to enforcement.</p>
-          
+
 //           <p><strong>Example DMARC record:</strong></p>
 //           <pre>_dmarc.example.com TXT "v=DMARC1; p=none; rua=mailto:dmarc@example.com"</pre>
-          
+
 //           <p>Start with <code>p=none</code> to monitor, then move to <code>p=quarantine</code> or <code>p=reject</code> once confident.</p>
-          
+
 //           <h3>Testing Your Setup</h3>
 //           <p>Use these tools to verify your configuration:</p>
 //           <ul>
@@ -366,7 +366,7 @@
 //             <li><strong>Mail-tester.com:</strong> Comprehensive email score</li>
 //             <li><strong>Google Postmaster Tools:</strong> Monitor domain reputation</li>
 //           </ul>
-          
+
 //           <p>Send test emails to Gmail, Outlook, and Yahoo accounts. Check that SPF and DKIM both pass, DMARC is aligned, and spam score is under 3/10.</p>
 //         `,
 //         keyTakeaways: [
@@ -390,7 +390,7 @@
 //         content: `
 //           <h2>Domain & Inbox Strategy</h2>
 //           <p>Your domain and inbox setup determines whether you can scale successfully. Using your primary business domain for cold outreach is risky. A smart infrastructure strategy protects your brand while enabling growth.</p>
-          
+
 //           <h3>The Multi-Domain Approach</h3>
 //           <p>Never send cold email from your primary domain (company.com). Buy similar variations for outreach:</p>
 //           <ul>
@@ -399,19 +399,19 @@
 //             <li>trycompanyname.com</li>
 //             <li>hellocompanyname.com</li>
 //           </ul>
-          
+
 //           <p>This protects your main domain's reputation if something goes wrong. Budget 3-5 domains for serious outreach operations. Cost: $10-15 per domain annually.</p>
-          
+
 //           <h3>Domain Warmup Process</h3>
 //           <p>New domains have zero reputation. Warm them up over 2-4 weeks before sending cold emails:</p>
-          
+
 //           <p><strong>Week 1:</strong> Send 5-10 emails daily to colleagues and personal contacts<br>
 //           <strong>Week 2:</strong> Gradually increase to 20-30 emails daily<br>
 //           <strong>Week 3:</strong> Reach 40-50 emails daily<br>
 //           <strong>Week 4:</strong> Full sending volume (up to 50 per inbox)</p>
-          
+
 //           <p>Use tools like Mailwarm, Warmup Inbox, or Instantly's built-in warmup to automate this process. These tools send emails between warmup accounts to build positive sender reputation.</p>
-          
+
 //           <h3>Inbox Rotation Strategy</h3>
 //           <p>Don't send all emails from one address. Create multiple sending inboxes:</p>
 //           <ul>
@@ -419,9 +419,9 @@
 //             <li>firstname.lastname@domain.com</li>
 //             <li>f.lastname@domain.com</li>
 //           </ul>
-          
+
 //           <p>Rotate between them to spread volume and risk. Each inbox should send maximum 40-50 emails per day. For 500 daily emails, use 10-12 inboxes.</p>
-          
+
 //           <h3>Infrastructure Scaling</h3>
 //           <p>As you scale, maintain proper ratios:</p>
 //           <ul>
@@ -429,9 +429,9 @@
 //             <li>1 inbox per 40-50 emails/day</li>
 //             <li>Budget: $100-200 monthly for domains and email accounts</li>
 //           </ul>
-          
+
 //           <p>Use Google Workspace or Microsoft 365—their IPs have built-in reputation. Avoid budget ESPs that share IPs with spammers.</p>
-          
+
 //           <h3>Example Setup for 500 Emails/Day</h3>
 //           <ul>
 //             <li><strong>Domains needed:</strong> 2-3 domains</li>
@@ -455,10 +455,10 @@
 //         content: `
 //           <h2>Writing Compelling Subject Lines</h2>
 //           <p>Your subject line determines whether your email gets opened or ignored. With professionals receiving 100+ emails daily, you have 2-3 seconds to grab attention. Master this, and you've won half the battle.</p>
-          
+
 //           <h3>The Psychology of Subject Lines</h3>
 //           <p>Great subject lines trigger curiosity, relevance, or urgency without being clickbait. They hint at value without revealing everything.</p>
-          
+
 //           <p><strong>Avoid generic subject lines:</strong></p>
 //           <ul>
 //             <li>❌ "Quick question"</li>
@@ -466,7 +466,7 @@
 //             <li>❌ "Touching base"</li>
 //             <li>❌ "Introduction"</li>
 //           </ul>
-          
+
 //           <p><strong>Try specific, relevant subject lines:</strong></p>
 //           <ul>
 //             <li>✅ "Worth a quick 15-minute conversation?"</li>
@@ -490,7 +490,7 @@
 //         content: `
 //           <h2>Follow-Up Sequences</h2>
 //           <p>80% of conversions happen in follow-up emails, yet most people give up after one or two attempts. A strategic follow-up sequence is where deals are won or lost.</p>
-          
+
 //           <h3>The Psychology of Follow-Ups</h3>
 //           <p>Decision-makers are busy. They see your first email but don't respond because:</p>
 //           <ul>
@@ -499,55 +499,55 @@
 //             <li>Wanted to think about it</li>
 //             <li>Needed to check with someone</li>
 //           </ul>
-          
+
 //           <p>Your follow-ups give them multiple opportunities to engage when timing is right.</p>
-          
+
 //           <h3>The 6-Touch Sequence</h3>
-          
+
 //           <p><strong>Email 1 (Day 0):</strong> Initial value-based outreach<br>
 //           Focus: Problem + Solution + Low-commitment ask</p>
-          
+
 //           <p><strong>Email 2 (Day 3-4):</strong> Different angle<br>
 //           "Wanted to add..." or "One more thought..."<br>
 //           Share additional insight, statistic, or case study</p>
-          
+
 //           <p><strong>Email 3 (Day 7):</strong> Social proof<br>
 //           "We just helped [Similar Company] achieve [Result]..."<br>
 //           Include specific numbers and outcomes</p>
-          
+
 //           <p><strong>Email 4 (Day 11):</strong> Question/Curiosity<br>
 //           "Quick question—is [problem] still a priority?"<br>
 //           Re-engage with direct question</p>
-          
+
 //           <p><strong>Email 5 (Day 15):</strong> Final value add<br>
 //           "Last thing before I close your file..."<br>
 //           Share resource, article, or tool recommendation</p>
-          
+
 //           <p><strong>Email 6 (Day 20):</strong> Breakup email<br>
 //           "Should I take you off my list?"<br>
 //           Permission-based close that often generates responses</p>
-          
+
 //           <h3>Follow-Up Best Practices</h3>
-          
+
 //           <p><strong>Each email should add new value.</strong> Don't just say "following up" or "bumping this up." Each touch should provide a new insight, angle, or piece of information.</p>
-          
+
 //           <p><strong>Space them appropriately.</strong> 3-4 days between early emails, 4-5 days between later ones. Don't bombard—give them breathing room.</p>
-          
+
 //           <p><strong>Change the angle.</strong> If first email focused on pain points, second might share success story. Third could ask a question. Keep it fresh.</p>
-          
+
 //           <p><strong>Use different subject lines.</strong> Don't re-use the same subject. Each email is a new opportunity to grab attention.</p>
-          
+
 //           <h3>The Breakup Email</h3>
 //           <p>Your final email should give them an easy out while reopening the door:</p>
-          
+
 //           <p><em>"Hey [Name],</em></p>
-          
+
 //           <p><em>I've reached out a few times about [topic] but haven't heard back—no worries if it's not a priority right now.</em></p>
-          
+
 //           <p><em>Should I take you off my list, or would you prefer I check back in a few months?</em></p>
-          
+
 //           <p><em>Either way, happy to share a [resource] that might be helpful."</em></p>
-          
+
 //           <p>Breakup emails often get 15-30% response rates because they're non-pushy and show respect for their time.</p>
 //         `,
 //         keyTakeaways: [
@@ -565,9 +565,9 @@
 //         content: `
 //           <h2>A/B Testing Methodology</h2>
 //           <p>Systematic testing is how good campaigns become great. Small improvements compound—a 2% increase in reply rate across 1,000 emails means 20 more conversations.</p>
-          
+
 //           <h3>What to Test</h3>
-          
+
 //           <p><strong>Subject Lines:</strong></p>
 //           <ul>
 //             <li>Length (short vs long)</li>
@@ -575,28 +575,28 @@
 //             <li>Format (question, statement, curiosity)</li>
 //             <li>Tone (professional, casual, urgent)</li>
 //           </ul>
-          
+
 //           <p><strong>Opening Lines:</strong></p>
 //           <ul>
 //             <li>Compliment vs observation vs question</li>
 //             <li>Company-specific vs role-specific</li>
 //             <li>Direct vs indirect approach</li>
 //           </ul>
-          
+
 //           <p><strong>Email Length:</strong></p>
 //           <ul>
 //             <li>Short (50-75 words)</li>
 //             <li>Medium (100-150 words)</li>
 //             <li>Long (200+ words)</li>
 //           </ul>
-          
+
 //           <p><strong>CTAs:</strong></p>
 //           <ul>
 //             <li>Question vs statement</li>
 //             <li>Single vs multiple options</li>
 //             <li>Direct ask vs soft inquiry</li>
 //           </ul>
-          
+
 //           <p><strong>Send Time:</strong></p>
 //           <ul>
 //             <li>Morning (6-9 AM)</li>
@@ -604,33 +604,33 @@
 //             <li>Afternoon (3-5 PM)</li>
 //             <li>Weekday vs weekend</li>
 //           </ul>
-          
+
 //           <h3>Testing Framework</h3>
-          
+
 //           <p><strong>Step 1:</strong> Choose ONE variable to test<br>
 //           Testing multiple things at once makes results meaningless</p>
-          
+
 //           <p><strong>Step 2:</strong> Create two variants (A and B)<br>
 //           Keep everything else identical</p>
-          
+
 //           <p><strong>Step 3:</strong> Split your list<br>
 //           Send A to 50%, B to 50% (minimum 50-100 recipients each)</p>
-          
+
 //           <p><strong>Step 4:</strong> Wait 48 hours<br>
 //           Give enough time for opens and replies</p>
-          
+
 //           <p><strong>Step 5:</strong> Analyze results<br>
 //           Look at open rate (for subject line tests) or reply rate (for body tests)</p>
-          
+
 //           <p><strong>Step 6:</strong> Implement winner<br>
 //           Use winning variant for remainder of campaign</p>
-          
+
 //           <p><strong>Step 7:</strong> Document learnings<br>
 //           Keep a testing log—patterns emerge over time</p>
-          
+
 //           <h3>Statistical Significance</h3>
 //           <p>Don't make decisions on tiny sample sizes. Minimum 50-100 recipients per variant. Look for differences of at least 2-3% before declaring a winner.</p>
-          
+
 //           <p>Example: If variant A gets 5% reply rate and variant B gets 7% reply rate with 100 recipients each, B is likely better. But 5% vs 5.5% with 20 recipients each could just be random chance.</p>
 //         `,
 //         keyTakeaways: [
@@ -648,7 +648,7 @@
 //         content: `
 //           <h2>Scaling Your Outreach</h2>
 //           <p>Once you've proven your campaign works at small scale, it's time to scale up. But scaling requires infrastructure, process, and discipline.</p>
-          
+
 //           <h3>Before You Scale: Validate First</h3>
 //           <p>Don't scale a mediocre campaign. First validate with 100-200 prospects:</p>
 //           <ul>
@@ -657,25 +657,25 @@
 //             <li>Positive replies: 3%+</li>
 //             <li>Meeting booking rate: 1-2%+</li>
 //           </ul>
-          
+
 //           <p>If you're not hitting these benchmarks, optimize before scaling.</p>
-          
+
 //           <h3>Infrastructure for Scale</h3>
-          
+
 //           <p><strong>Domain Strategy:</strong><br>
 //           Add 1 domain per 250-300 emails/day you want to send<br>
 //           For 1,000 emails/day: 3-4 domains</p>
-          
+
 //           <p><strong>Inbox Strategy:</strong><br>
 //           Add 1 inbox per 40-50 emails/day<br>
 //           For 1,000 emails/day: 20-25 inboxes</p>
-          
+
 //           <p><strong>Warmup Strategy:</strong><br>
 //           New domains/inboxes need 2-4 weeks warmup<br>
 //           Plan infrastructure growth 4-6 weeks ahead</p>
-          
+
 //           <h3>Automation Tools</h3>
-          
+
 //           <p><strong>Email Sending Platforms:</strong></p>
 //           <ul>
 //             <li>Instantly.ai - Best for large scale (10K+ emails/month)</li>
@@ -683,35 +683,35 @@
 //             <li>Lemlist - Best personalization features</li>
 //             <li>Reply.io - Good for sales teams</li>
 //           </ul>
-          
+
 //           <p><strong>List Building:</strong></p>
 //           <ul>
 //             <li>Apollo.io - Best all-in-one for prospecting</li>
 //             <li>LinkedIn Sales Navigator - Best for targeting</li>
 //             <li>Hunter.io - Email finding and verification</li>
 //           </ul>
-          
+
 //           <p><strong>CRM Integration:</strong></p>
 //           <ul>
 //             <li>HubSpot - Best for growing companies</li>
 //             <li>Pipedrive - Best for sales teams</li>
 //             <li>Salesforce - Best for enterprises</li>
 //           </ul>
-          
+
 //           <h3>Scaling Timeline</h3>
-          
+
 //           <p><strong>Month 1: Validate (100-200 emails/day)</strong><br>
 //           Test campaign, optimize, prove it works</p>
-          
+
 //           <p><strong>Month 2: Scale to 500/day</strong><br>
 //           Add domains and inboxes, maintain quality</p>
-          
+
 //           <p><strong>Month 3: Scale to 1,000/day</strong><br>
 //           Add more infrastructure, hire help for personalization</p>
-          
+
 //           <p><strong>Month 4+: Scale to 2,000+/day</strong><br>
 //           Full team, multiple campaigns, continuous optimization</p>
-          
+
 //           <h3>Quality vs Quantity</h3>
 //           <p>Don't sacrifice personalization for volume. Better to send 500 well-researched emails than 2,000 generic ones. Find the balance that maintains reply rate while increasing volume.</p>
 //         `,
@@ -730,30 +730,30 @@
 //         content: `
 //           <h2>Measuring & Optimizing</h2>
 //           <p>What gets measured gets improved. Track the right metrics, analyze systematically, and iterate continuously.</p>
-          
+
 //           <h3>Key Metrics to Track</h3>
-          
+
 //           <p><strong>Top-of-Funnel:</strong></p>
 //           <ul>
 //             <li><strong>Deliverability rate:</strong> Emails delivered / Emails sent (Target: 97%+)</li>
 //             <li><strong>Bounce rate:</strong> Bounces / Emails sent (Target: <3%)</li>
 //             <li><strong>Open rate:</strong> Opens / Emails delivered (Target: 25%+)</li>
 //           </ul>
-          
+
 //           <p><strong>Mid-Funnel:</strong></p>
 //           <ul>
 //             <li><strong>Reply rate:</strong> Replies / Emails delivered (Target: 5%+)</li>
 //             <li><strong>Positive reply rate:</strong> Positive replies / Replies (Target: 60%+)</li>
 //             <li><strong>Interested rate:</strong> Interested / Emails delivered (Target: 3%+)</li>
 //           </ul>
-          
+
 //           <p><strong>Bottom-Funnel:</strong></p>
 //           <ul>
 //             <li><strong>Meeting booking rate:</strong> Meetings / Emails delivered (Target: 1-2%)</li>
 //             <li><strong>Show rate:</strong> Attended / Booked (Target: 70%+)</li>
 //             <li><strong>Qualified rate:</strong> Qualified / Attended (Target: 50%+)</li>
 //           </ul>
-          
+
 //           <p><strong>Business Metrics:</strong></p>
 //           <ul>
 //             <li><strong>Cost per meeting:</strong> Total cost / Meetings booked</li>
@@ -761,26 +761,26 @@
 //             <li><strong>Pipeline generated:</strong> Sum of opportunity values</li>
 //             <li><strong>ROI:</strong> Revenue / Cost</li>
 //           </ul>
-          
+
 //           <h3>Weekly Review Process</h3>
-          
+
 //           <p><strong>Monday:</strong> Review last week's metrics<br>
 //           Compare to benchmarks, identify issues</p>
-          
+
 //           <p><strong>Tuesday:</strong> Analyze what worked<br>
 //           Which emails got best responses? Why?</p>
-          
+
 //           <p><strong>Wednesday:</strong> Plan optimizations<br>
 //           What to test this week?</p>
-          
+
 //           <p><strong>Thursday:</strong> Implement changes<br>
 //           Update templates, launch new tests</p>
-          
+
 //           <p><strong>Friday:</strong> Review early results<br>
 //           Quick check on new tests</p>
-          
+
 //           <h3>Common Issues & Fixes</h3>
-          
+
 //           <p><strong>Problem:</strong> Low open rate (<20%)<br>
 //           <strong>Solutions:</strong></p>
 //           <ul>
@@ -789,7 +789,7 @@
 //             <li>Reduce sending volume</li>
 //             <li>Improve domain reputation</li>
 //           </ul>
-          
+
 //           <p><strong>Problem:</strong> Low reply rate (<3%)<br>
 //           <strong>Solutions:</strong></p>
 //           <ul>
@@ -798,7 +798,7 @@
 //             <li>Test different value propositions</li>
 //             <li>Shorten email length</li>
 //           </ul>
-          
+
 //           <p><strong>Problem:</strong> High bounce rate (>5%)<br>
 //           <strong>Solutions:</strong></p>
 //           <ul>
@@ -806,7 +806,7 @@
 //             <li>Clean list of old addresses</li>
 //             <li>Check data source quality</li>
 //           </ul>
-          
+
 //           <p><strong>Problem:</strong> Negative replies<br>
 //           <strong>Solutions:</strong></p>
 //           <ul>
@@ -815,7 +815,7 @@
 //             <li>Add more value upfront</li>
 //             <li>Make unsubscribe easier</li>
 //           </ul>
-          
+
 //           <h3>Continuous Improvement Cycle</h3>
 //           <ol>
 //             <li>Measure baseline metrics</li>
@@ -825,7 +825,7 @@
 //             <li>Implement if successful</li>
 //             <li>Repeat</li>
 //           </ol>
-          
+
 //           <p>Small improvements compound. Improving reply rate from 4% to 5% means 25% more meetings. Do that monthly and you 5x results in a year.</p>
 //         `,
 //         keyTakeaways: [
@@ -895,7 +895,7 @@
 //         content: `
 //           <h2>Understanding Email Deliverability</h2>
 //           <p>Email deliverability is the ability to successfully deliver emails to recipients' inboxes. It's not just about whether emails are delivered—it's about WHERE they're delivered: inbox vs spam folder vs promotions tab.</p>
-          
+
 //           <h3>Key Metrics That Matter</h3>
 //           <ul>
 //             <li><strong>Inbox Placement Rate (IPR):</strong> Percentage of emails landing in primary inbox (Target: 90%+)</li>
@@ -903,7 +903,7 @@
 //             <li><strong>Bounce Rate:</strong> Percentage of emails that fail to deliver (Target: <3%)</li>
 //             <li><strong>Engagement Rate:</strong> Opens, clicks, replies from delivered emails (Target: 25%+ open rate)</li>
 //           </ul>
-          
+
 //           <h3>The Email Delivery Journey</h3>
 //           <p>When you send an email, it goes through multiple checkpoints:</p>
 //           <ol>
@@ -913,11 +913,11 @@
 //             <li><strong>Spam filters</strong> → Analyze content, sender behavior, engagement patterns</li>
 //             <li><strong>Recipient's inbox</strong> → Final destination (hopefully!)</li>
 //           </ol>
-          
+
 //           <p>Each checkpoint can reject or flag your email. Understanding this journey is critical.</p>
-          
+
 //           <h3>The Three Pillars of Deliverability</h3>
-          
+
 //           <p><strong>1. Sender Reputation</strong></p>
 //           <p>Your domain and IP reputation score (0-100). Built over time through:</p>
 //           <ul>
@@ -926,7 +926,7 @@
 //             <li>Low bounce rates (<3%)</li>
 //             <li>Strong engagement (opens, clicks, replies)</li>
 //           </ul>
-          
+
 //           <p><strong>2. Technical Authentication</strong></p>
 //           <p>Proving you're authorized to send from your domain:</p>
 //           <ul>
@@ -936,34 +936,34 @@
 //             <li>✅ "Question about [Company]'s [specific initiative]"</li>
 //             <li>✅ "Saw [Company] just [specific action]"</li>
 //           </ul>
-          
+
 //           <h3>Length and Format Guidelines</h3>
 //           <p>Keep subject lines under 50 characters (mobile displays 30-40 characters). Avoid ALL CAPS, excessive punctuation, or spam trigger words (free, guarantee, act now).</p>
-          
+
 //           <p>Use sentence case or lowercase—feels more personal. Test emojis sparingly in B2C; avoid in B2B. Include company name or specific reference for personalization.</p>
-          
+
 //           <h3>High-Performing Formulas</h3>
-          
+
 //           <p><strong>Question format:</strong><br>
 //           "Thoughts on [specific challenge]?"<br>
 //           "How are you handling [industry issue]?"</p>
-          
+
 //           <p><strong>Mutual connection:</strong><br>
 //           "[Name] recommended I contact you"<br>
 //           "[Name] suggested we connect"</p>
-          
+
 //           <p><strong>Specific observation:</strong><br>
 //           "Saw [Company] just [specific action]"<br>
 //           "Noticed [Company]'s [new initiative]"</p>
-          
+
 //           <p><strong>Value proposition:</strong><br>
 //           "Idea for [Company]'s [specific goal]"<br>
 //           "[Solution] for [Company]'s [challenge]"</p>
-          
+
 //           <p><strong>Curiosity gap:</strong><br>
 //           "[Company] + [Your Solution]?"<br>
 //           "Quick thought about [Company]"</p>
-          
+
 //           <h3>A/B Testing Framework</h3>
 //           <p>Test one variable at a time: length, personalization, format, or tone. Send each variant to 50-100 recipients. Measure open rates after 48 hours. Winner goes to remaining list. Track which formulas work best for different segments.</p>
 //         `,
@@ -996,7 +996,7 @@
 //         content: `
 //           <h2>Crafting the Perfect Opening</h2>
 //           <p>The first sentence determines whether your email gets read or deleted. In B2B cold email, you have one job: prove you've done your homework and deserve their attention.</p>
-          
+
 //           <h3>The Personalization Imperative</h3>
 //           <p>Generic openings kill response rates. Never start with:</p>
 //           <ul>
@@ -1005,7 +1005,7 @@
 //             <li>❌ "My name is..."</li>
 //             <li>❌ "I came across your profile"</li>
 //           </ul>
-          
+
 //           <p>Instead, reference something specific:</p>
 //           <ul>
 //             <li>✅ Their company news</li>
@@ -1014,34 +1014,34 @@
 //             <li>✅ Mutual connection</li>
 //             <li>✅ Industry challenge they've discussed publicly</li>
 //           </ul>
-          
+
 //           <p>Personalization takes 2-3 minutes per email but increases replies by 300%+.</p>
-          
+
 //           <h3>Proven Opening Formulas</h3>
-          
+
 //           <p><strong>Specific observation:</strong><br>
 //           "Noticed [Company] just raised Series B—congrats! Given your focus on expanding into enterprise, I thought..."</p>
-          
+
 //           <p><strong>Question hook:</strong><br>
 //           "How are you currently handling [specific challenge]? Most [job title]s I talk to struggle with..."</p>
-          
+
 //           <p><strong>Mutual connection:</strong><br>
 //           "[Name] mentioned you're exploring [topic]. I've helped companies like [similar company] with this and thought..."</p>
-          
+
 //           <p><strong>Compliment + question:</strong><br>
 //           "Loved your piece on [topic]. Quick question—how are you thinking about [related challenge]?"</p>
-          
+
 //           <h3>Establishing Credibility Fast</h3>
 //           <p>After your opening, immediately establish why you're relevant. Mention similar companies you've helped, specific results you've driven, or relevant expertise.</p>
-          
+
 //           <p>Be specific: "We helped [Similar Company] reduce [metric] by 34%" beats "We help companies improve performance".</p>
-          
+
 //           <h3>Before and After Examples</h3>
-          
+
 //           <p><strong>Before (Generic):</strong><br>
 //           "Hi John,<br><br>
 //           I hope this email finds you well. My name is Sarah and I work at XYZ Company. We help businesses improve their operations..."</p>
-          
+
 //           <p><strong>After (Personalized):</strong><br>
 //           "Hi John,<br><br>
 //           Saw that TechCorp just launched in the European market—congrats on the expansion!<br><br>
@@ -1062,10 +1062,10 @@
 //         content: `
 //           <h2>The Art of Personalization</h2>
 //           <p>Personalization is the difference between 1% and 8% reply rates. But there's smart personalization and there's wasted effort. This chapter shows you how to personalize at scale without burning hours on each email.</p>
-          
+
 //           <h3>The Personalization Hierarchy</h3>
 //           <p>Not all personalization is equal.</p>
-          
+
 //           <p><strong>Tier 1 (Highest Impact):</strong></p>
 //           <ul>
 //             <li>Recent company news (funding, launches, expansions)</li>
@@ -1073,51 +1073,51 @@
 //             <li>Mutual connections</li>
 //             <li>Recent content they've published</li>
 //           </ul>
-          
+
 //           <p><strong>Tier 2 (Medium Impact):</strong></p>
 //           <ul>
 //             <li>Industry trends affecting their business</li>
 //             <li>Company goals (from about page or press releases)</li>
 //             <li>Technologies they use</li>
 //           </ul>
-          
+
 //           <p><strong>Tier 3 (Low Impact):</strong></p>
 //           <ul>
 //             <li>City/location</li>
 //             <li>Job title</li>
 //             <li>Company name</li>
 //           </ul>
-          
+
 //           <p>Focus 80% of effort on Tier 1 personalization.</p>
-          
+
 //           <h3>Research Sources for Personalization</h3>
-          
+
 //           <p><strong>LinkedIn:</strong> Recent posts, comments, job changes, shared articles. Check their activity feed—shows what they care about.</p>
-          
+
 //           <p><strong>Company website:</strong> Press releases, blog posts, product launches, about page. Look for recent news or initiatives.</p>
-          
+
 //           <p><strong>Industry news:</strong> Funding rounds, acquisitions, expansion announcements. Set up Google Alerts for target accounts.</p>
-          
+
 //           <p><strong>Twitter:</strong> Check their tweets and replies. Often more casual and revealing than LinkedIn.</p>
-          
+
 //           <p><strong>Company tech stack:</strong> Use BuiltWith or similar to see what tools they use. Helps identify pain points.</p>
-          
+
 //           <p>Takes 2-3 minutes per prospect but 10x's your response rate.</p>
-          
+
 //           <h3>Personalization at Scale</h3>
 //           <p>Can't manually research 500 prospects? Use tiered approach:</p>
-          
+
 //           <p><strong>Top 20% prospects (highest value):</strong> Full manual research, 3+ personalization points, custom first paragraph.</p>
-          
+
 //           <p><strong>Middle 50%:</strong> One strong personalization point (company news or recent content), semi-custom opening.</p>
-          
+
 //           <p><strong>Bottom 30%:</strong> Industry-level personalization (segment-based), template with dynamic fields.</p>
-          
+
 //           <p>This balances time investment with results.</p>
-          
+
 //           <h3>AI-Assisted Personalization</h3>
 //           <p>Tools like Clay, Lemlist, and Apollo use AI to find personalization points at scale. They scan LinkedIn, company websites, and news for recent events.</p>
-          
+
 //           <p><strong>Best practice:</strong> Review and edit AI suggestions—never send verbatim. Use AI for research, but craft the actual message yourself. 70% time savings while maintaining quality.</p>
 //         `,
 //         keyTakeaways: [
@@ -1127,7 +1127,7 @@
 //           'AI can accelerate research but shouldn\'t write your emails'
 //         ]
 //       },
-    
+
 
 
 
@@ -1146,7 +1146,7 @@
 // export function getRelatedGuides(currentSlug: string, limit = 3): Guide[] {
 //   const current = getGuide(currentSlug)
 //   if (!current) return []
-  
+
 //   return current.relatedGuides
 //     .map(slug => getGuide(slug))
 //     .filter(Boolean)
@@ -1202,7 +1202,7 @@ export interface FAQ {
   question: string
   answer: string
 }
-
+//here
 export const guides: Record<string, Guide> = {
   'cold-email-masterclass': {
     slug: 'cold-email-masterclass',
@@ -1743,7 +1743,7 @@ export function getFeaturedGuide(): Guide | undefined {
 export function getRelatedGuides(currentSlug: string, limit = 3): Guide[] {
   const current = getGuide(currentSlug)
   if (!current) return []
-  
+
   return current.relatedGuides
     .map(slug => getGuide(slug))
     .filter(Boolean)
