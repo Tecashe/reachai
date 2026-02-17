@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server"
 import { streamText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { fastModel } from "@/lib/ai-provider"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
 import { MAILFRA_SUPPORT_SYSTEM_PROMPT } from "@/lib/services/mailfra-prompts"
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         }
 
         const result = streamText({
-            model: openai("gpt-4o-mini"),
+            model: fastModel,
             system: MAILFRA_SUPPORT_SYSTEM_PROMPT,
             messages,
             onFinish: async ({ text }) => {

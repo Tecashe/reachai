@@ -1,17 +1,10 @@
 "use server"
 
-import { generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
-
-// Initialize OpenAI client
-const openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-})
-
+import { generateObject } from "ai"
+import { z } from "zod"
+import { fastModel } from "@/lib/ai-provider"
 import { auth } from "@clerk/nextjs/server"
 import { db } from "@/lib/db"
-
-// ... imports
 
 export async function generateSpintax(
     content: string,
@@ -40,8 +33,19 @@ export async function generateSpintax(
             return { success: false, error: "Content too short to generate spintax" }
         }
 
-        const { text } = await generateText({
-            model: openai("gpt-4o"),
+        const prompt = `Rewrite the following text adding Spintax variations {option1|option2|option3} for greetings, openers, and common phrases to increase variability.
+Keep the original meaning.
+
+TEXT: "${content}"
+
+OUTPUT: Just the rewriting text with Spintax.`
+
+        const { object } = await generateObject({
+            model: fastModel,
+            prompt,
+            schema: z.object({
+                spintaxText: z.string(),
+            }),
             system: `You are an expert cold email copywriter specializing in Spintax (Spin Syntax). 
       Your goal is to rewrite the provided email content by injecting Spintax variations to ensure high deliverability and avoid spam filters.
       
@@ -51,9 +55,7 @@ export async function generateSpintax(
       3. Create variations for greetings, sign-offs, verbs, and adjectives
       4. Ensure all variations are grammatically correct when spun
       5. Do NOT change personalization variables like {{firstName}}
-      6. IMPORTANT: The input may be HTML. PRESERVE ALL HTML TAGS exactly as they are. Do not strip <br>, <p>, <span>, etc. Only spin the text content inside tags.
-      7. Return ONLY the spintaxed content, no explanations`,
-            prompt: `Rewrite this content with rich Spintax variations:\n\n${content}`,
+      6. IMPORTANT: The input may be HTML. PRESERVE ALL HTML TAGS exactly as they are. Do not strip <br>, <p>, <span>, etc. Only spin the text content inside tags.`,
             temperature: 0.7,
         })
 
@@ -65,7 +67,8 @@ export async function generateSpintax(
             }
         })
 
-        return { success: true, content: text }
+        return { success: true, content: object.spintaxText }
+
     } catch (error) {
         console.error("Spintax Generation Error:", error)
         return {

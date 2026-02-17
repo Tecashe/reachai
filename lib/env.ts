@@ -11,7 +11,10 @@ const envSchema = z.object({
   CLERK_WEBHOOK_SECRET: z.string().min(1),
 
   // OpenAI
-  OPENAI_API_KEY: z.string().min(1),
+  // OpenAI - Temporarily Optional
+  OPENAI_API_KEY: z.string().optional(),
+  // Google Gemini
+  GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
 
   // Resend
   RESEND_API_KEY: z.string().min(1),

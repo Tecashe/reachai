@@ -1,6 +1,7 @@
 import { db } from "../db"
 import { logger } from "../logger"
 import { generateObject } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { z } from "zod"
 
 const predictiveSchema = z.object({
@@ -186,7 +187,7 @@ class AdvancedAnalytics {
       })
 
       const { object: prediction } = await generateObject({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         schema: predictiveSchema,
         prompt: `You are a data scientist analyzing cold email campaign performance. Predict future performance based on current data.
 

@@ -1,4 +1,5 @@
 import { generateObject } from "ai"
+import { qualityModel } from "@/lib/ai-provider"
 import { z } from "zod"
 
 interface GenerateEmailParams {
@@ -49,7 +50,7 @@ export async function generateEmail(params: GenerateEmailParams): Promise<Genera
 
   try {
     const { object } = await generateObject({
-      model: "openai/gpt-4o",
+      model: qualityModel,
       prompt,
       schema: z.object({
         subject: z.string(),
@@ -183,7 +184,7 @@ Provide the improved version with quality scores and suggestions.
 
   try {
     const { object } = await generateObject({
-      model: "openai/gpt-4o",
+      model: qualityModel,
       prompt,
       schema: z.object({
         subject: z.string(),
@@ -281,7 +282,7 @@ OUTPUT FORMAT (JSON):
 
   try {
     const { object } = await generateObject({
-      model: "openai/gpt-4o",
+      model: qualityModel,
       prompt,
       schema: z.object({
         steps: z.array(
@@ -312,7 +313,7 @@ OUTPUT: Just the rewriting text with Spintax.
 `
   try {
     const { object } = await generateObject({
-      model: "openai/gpt-4o", // Use a cheaper model if possible for this simple task
+      model: qualityModel, // Use a cheaper model if possible for this simple task
       prompt,
       schema: z.object({
         spintaxText: z.string(),

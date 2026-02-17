@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getCurrentUserFromDb } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { generateObject } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { z } from "zod"
 
 const replySchema = z.object({
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { object: suggestion } = await generateObject({
-      model: "openai/gpt-4o-mini",
+      model: fastModel,
       schema: replySchema,
       prompt: `You are an AI sales assistant. Generate a professional reply to this prospect.
 

@@ -1,6 +1,7 @@
 "use server"
 
 import { generateText } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 
 interface LeadEnrichmentParams {
   firstName?: string
@@ -54,7 +55,7 @@ Format your response as JSON with these keys:
 }`
 
     const { text } = await generateText({
-      model: "openai/gpt-4o-mini",
+      model: fastModel,
       prompt,
     })
 
@@ -119,7 +120,7 @@ Format as JSON:
 }`
 
     const { text } = await generateText({
-      model: "openai/gpt-4o-mini",
+      model: fastModel,
       prompt,
     })
 

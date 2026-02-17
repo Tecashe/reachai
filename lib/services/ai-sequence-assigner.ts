@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { logger } from "@/lib/logger"
 import { generateText } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 
 interface ProspectData {
   id: string
@@ -74,7 +75,7 @@ class AISequenceAssigner {
 
       // Call AI to determine best sequence
       const { text } = await generateText({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         prompt,
         temperature: 0.3,
       })

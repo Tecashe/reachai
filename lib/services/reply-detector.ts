@@ -1,5 +1,6 @@
 
 import { generateObject } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { z } from "zod"
 import { db } from "../db"
 import { logger } from "../logger"
@@ -167,7 +168,7 @@ class ReplyDetector {
   private async analyzeReply(subject: string, body: string) {
     try {
       const { object: analysis } = await generateObject({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         schema: replyAnalysisSchema,
         prompt: `Analyze this email reply and categorize it.
 

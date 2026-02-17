@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server"
 import { streamText } from "ai"
-import { openai } from "@ai-sdk/openai"
+import { qualityModel } from "@/lib/ai-provider"
 import { protectApiRoute } from "@/lib/api-protection"
 import { db } from "@/lib/db"
 import { createMailfraTools } from "@/lib/services/mailfra-tools"
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         const tools = createMailfraTools(userId!, user!.id)
 
         const result = streamText({
-            model: openai("gpt-4o"),
+            model: qualityModel,
             system: MAILFRA_AGENT_SYSTEM_PROMPT,
             messages,
             tools,

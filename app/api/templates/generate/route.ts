@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { generateText } from "ai"
+import { qualityModel } from "@/lib/ai-provider"
 import { db } from "@/lib/db"
 
 export async function POST(req: NextRequest) {
@@ -20,13 +21,13 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { 
-      prompt, 
-      industry, 
-      purpose, 
+    const {
+      prompt,
+      industry,
+      purpose,
       tone = "professional",
       targetLength = "medium",
-      includePersonalization = true 
+      includePersonalization = true
     } = body
 
     if (!prompt) {
@@ -72,7 +73,7 @@ Remember to:
 
     // Generate template using AI
     const { text } = await generateText({
-      model: "openai/gpt-4.1",
+      model: qualityModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
@@ -92,8 +93,8 @@ Remember to:
       }
     } catch (parseError) {
       console.error("Failed to parse AI response:", text)
-      return NextResponse.json({ 
-        error: "Failed to generate template. Please try again." 
+      return NextResponse.json({
+        error: "Failed to generate template. Please try again."
       }, { status: 500 })
     }
 
@@ -143,8 +144,8 @@ Remember to:
 
   } catch (error) {
     console.error("[v0] Template generation error:", error)
-    return NextResponse.json({ 
-      error: "Failed to generate template" 
+    return NextResponse.json({
+      error: "Failed to generate template"
     }, { status: 500 })
   }
 }

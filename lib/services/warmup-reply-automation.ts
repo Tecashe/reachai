@@ -1,4 +1,5 @@
 import { generateText } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { logger } from "@/lib/logger"
 
 /**
@@ -17,7 +18,7 @@ export class WarmupReplyAutomation {
   }): Promise<string> {
     try {
       const { text } = await generateText({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         prompt: `You are generating a natural, friendly reply to a warmup email. The goal is to create realistic email engagement that looks human.
 
 Original Email:

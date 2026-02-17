@@ -1,5 +1,6 @@
 
 import { generateObject, generateText } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { z } from "zod"
 import { db } from "../db"
 import { logger } from "../logger"
@@ -56,7 +57,7 @@ class AIEmailOptimizer {
       logger.info("Generating email variants", { variantCount })
 
       const { object: optimization } = await generateObject({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         schema: optimizationSchema,
         prompt: `You are an expert cold email copywriter. Generate ${variantCount} high-performing variants of this email.
 
@@ -112,7 +113,7 @@ Make each variant significantly different to test different hypotheses.`,
   async optimizeSubjectLine(subject: string, context: any): Promise<string[]> {
     try {
       const { text } = await generateText({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         prompt: `Generate 5 high-performing subject line variants for this cold email.
 
 Original: ${subject}

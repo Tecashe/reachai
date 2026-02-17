@@ -1,4 +1,5 @@
 import { generateObject } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { z } from "zod"
 import { db } from "../db"
 import { logger } from "../logger"
@@ -45,7 +46,7 @@ class EmailValidator {
 
       // Use AI to analyze email content
       const { object: analysis } = await generateObject({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         schema: validationSchema,
         prompt: `You are an email deliverability expert. Analyze this cold email and provide detailed scoring.
 

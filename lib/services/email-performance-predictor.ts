@@ -1,4 +1,5 @@
 import { generateObject } from "ai"
+import { qualityModel } from "@/lib/ai-provider"
 import { z } from "zod"
 
 interface EmailAnalysis {
@@ -53,28 +54,26 @@ SUBJECT: ${subject}
 BODY:
 ${body}
 
-${
-  prospectData
-    ? `
+${prospectData
+      ? `
 PROSPECT CONTEXT:
 - Industry: ${prospectData.industry || "Unknown"}
 - Job Title: ${prospectData.jobTitle || "Unknown"}
 - Company Size: ${prospectData.companySize || "Unknown"}
 - Previous Engagement: ${prospectData.previousEngagement ? "Yes" : "No"}
 `
-    : ""
-}
+      : ""
+    }
 
-${
-  historicalData
-    ? `
+${historicalData
+      ? `
 HISTORICAL BENCHMARKS:
 - Average Open Rate: ${historicalData.avgOpenRate}%
 - Average Click Rate: ${historicalData.avgClickRate}%
 - Average Reply Rate: ${historicalData.avgReplyRate}%
 `
-    : ""
-}
+      : ""
+    }
 
 Provide a comprehensive analysis with:
 
@@ -107,7 +106,7 @@ Be brutally honest and specific. Focus on actionable insights that will improve 
 
   try {
     const { object } = await generateObject({
-      model: "openai/gpt-4o",
+      model: qualityModel,
       prompt,
       schema: z.object({
         predictedOpenRate: z.number().min(0).max(100),

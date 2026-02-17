@@ -1,9 +1,10 @@
-import OpenAI from "openai"
-import { env } from "./env"
+import { generateObject } from "ai"
+import { z } from "zod"
+import { fastModel, qualityModel } from "./ai-provider"
 
-export const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
-})
+// Re-export openai for backward compatibility if needed (though usage check showed none)
+// effectively deprecated but keeping file structure
+export const openai = null
 
 export async function generateEmailContent({
   prospectData,
@@ -56,30 +57,23 @@ Requirements:
 - Include a clear, specific call to action
 - Make it feel personal, not templated
 
-Generate both a subject line and email body. Return as JSON with keys "subject" and "body".`
+Generate both a subject line and email body.`
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: "You are an expert cold email copywriter who creates highly personalized, conversion-focused emails.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const schema = z.object({
+    subject: z.string(),
+    body: z.string(),
+  })
+
+  // Using fastModel (Gemini Flash) as it's sufficient for email gen and very fast
+  const { object } = await generateObject({
+    model: fastModel,
+    schema,
+    prompt,
+    system: "You are an expert cold email copywriter who creates highly personalized, conversion-focused emails.",
     temperature: 0.7,
   })
 
-  const content = response.choices[0].message.content
-  if (!content) {
-    throw new Error("No content generated from OpenAI")
-  }
-
-  return JSON.parse(content) as { subject: string; body: string }
+  return object
 }
 
 export async function analyzeEmailPerformance({
@@ -102,38 +96,25 @@ Provide predictions for:
 3. Reply rate (0-100%)
 4. Overall score (0-100)
 
-Also provide 3-5 specific suggestions to improve the email.
+Also provide 3-5 specific suggestions to improve the email.`
 
-Return as JSON with keys: "openRate", "clickRate", "replyRate", "overallScore", "suggestions" (array of strings).`
+  const schema = z.object({
+    openRate: z.number(),
+    clickRate: z.number(),
+    replyRate: z.number(),
+    overallScore: z.number(),
+    suggestions: z.array(z.string()),
+  })
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: "You are an email marketing expert who analyzes cold emails and predicts their performance.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const { object } = await generateObject({
+    model: fastModel,
+    schema,
+    prompt,
+    system: "You are an email marketing expert who analyzes cold emails and predicts their performance.",
     temperature: 0.3,
   })
 
-  const content = response.choices[0].message.content
-  if (!content) {
-    throw new Error("No analysis generated from OpenAI")
-  }
-
-  return JSON.parse(content) as {
-    openRate: number
-    clickRate: number
-    replyRate: number
-    overallScore: number
-    suggestions: string[]
-  }
+  return object
 }
 
 export async function enrichProspectData({
@@ -158,35 +139,22 @@ Provide:
 1. Likely pain points for this role
 2. Key priorities and goals
 3. Relevant talking points
-4. Personalization angles
+4. Personalization angles`
 
-Return as JSON with keys: "painPoints" (array), "priorities" (array), "talkingPoints" (array), "personalizationAngles" (array).`
+  const schema = z.object({
+    painPoints: z.array(z.string()),
+    priorities: z.array(z.string()),
+    talkingPoints: z.array(z.string()),
+    personalizationAngles: z.array(z.string()),
+  })
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content: "You are a B2B sales research expert who provides insights for cold email personalization.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-    response_format: { type: "json_object" },
+  const { object } = await generateObject({
+    model: fastModel,
+    schema,
+    prompt,
+    system: "You are a B2B sales research expert who provides insights for cold email personalization.",
     temperature: 0.5,
   })
 
-  const content = response.choices[0].message.content
-  if (!content) {
-    throw new Error("No enrichment data generated from OpenAI")
-  }
-
-  return JSON.parse(content) as {
-    painPoints: string[]
-    priorities: string[]
-    talkingPoints: string[]
-    personalizationAngles: string[]
-  }
+  return object
 }

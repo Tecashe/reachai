@@ -3,6 +3,7 @@
 import { db } from "../db"
 import { logger } from "../logger"
 import { generateObject } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { z } from "zod"
 
 const categorizationSchema = z.object({
@@ -124,7 +125,7 @@ class UnifiedInbox {
 
     try {
       const { object: categorization } = await generateObject({
-        model: "openai/gpt-4o-mini",
+        model: fastModel,
         schema: categorizationSchema,
         prompt: `You are an AI assistant analyzing email replies to cold outreach. Categorize this reply.
 

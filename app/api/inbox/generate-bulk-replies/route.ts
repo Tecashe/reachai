@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { getCurrentUserFromDb } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { generateText } from "ai"
+import { fastModel } from "@/lib/ai-provider"
 import { logger } from "@/lib/logger"
 
 export async function POST(req: NextRequest) {
@@ -47,7 +48,7 @@ Write a ${tone} reply that:
 Reply:`
 
         const { text } = await generateText({
-          model: "openai/gpt-4o-mini",
+          model: fastModel,
           prompt,
         })
 

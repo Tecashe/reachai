@@ -2,6 +2,7 @@
 "use server"
 
 import { generateText } from "ai"
+import { qualityModel } from "@/lib/ai-provider"
 import { db } from "@/lib/db"
 import { logger } from "@/lib/logger"
 
@@ -35,7 +36,7 @@ export class AIProspectResearcher {
 
       // Use AI to analyze and generate insights
       const { text } = await generateText({
-        model: "openai/gpt-4.1",
+        model: qualityModel,
         prompt: `You are an expert sales researcher. Analyze this prospect and provide actionable insights for cold outreach.
 
 Prospect Information:
