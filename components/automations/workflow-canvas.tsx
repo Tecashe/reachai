@@ -694,6 +694,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
 
     const reactFlowWrapper = useRef<HTMLDivElement>(null)
     const { screenToFlowPosition } = useReactFlow()
+    const connectionMadeRef = useRef(false)
 
     // Track pending connection source for action picker
     const [pendingConnection, setPendingConnection] = useState<{
@@ -707,6 +708,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
 
     // Handle manual connection (drag handle to target handle)
     const onConnect = useCallback((connection: Connection) => {
+        connectionMadeRef.current = true
         if (!connection.source || !connection.target) return
         const exists = edges.some(
             e => e.source === connection.source && e.target === connection.target
@@ -738,11 +740,22 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
         if (!pendingConnection) return
 
-        const targetElement = (event as MouseEvent).target as HTMLElement
-        const isPane = targetElement.classList.contains('react-flow__pane')
-            || !!targetElement.closest('.react-flow__pane')
+        // If a valid connection was just made via onConnect, skip the picker
+        if (connectionMadeRef.current) {
+            connectionMadeRef.current = false
+            setPendingConnection(null)
+            return
+        }
 
-        if (isPane) {
+        const targetElement = (event as MouseEvent).target as HTMLElement
+        // Check if the drop target is a node or handle — if not, it's an empty canvas drop
+        const isOnNode = !!targetElement.closest('.react-flow__node')
+        const isOnHandle = targetElement.classList.contains('react-flow__handle')
+            || !!targetElement.closest('.react-flow__handle')
+        const isInsideFlow = !!targetElement.closest('.react-flow')
+        const isEmptyDrop = isInsideFlow && !isOnNode && !isOnHandle
+
+        if (isEmptyDrop) {
             const clientX = (event as MouseEvent).clientX
             const clientY = (event as MouseEvent).clientY
             const flowPosition = screenToFlowPosition({ x: clientX, y: clientY })
