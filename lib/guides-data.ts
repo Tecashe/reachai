@@ -1217,7 +1217,7 @@ export const guides: Record<string, Guide> = {
     chapters: 12,
     difficulty: 'Beginner',
     featured: true,
-    image: '/images/guides/cold-email-masterclass.jpg',
+    image: '/images/guides/cold-email-masterclass.png',
     color: 'from-blue-500/20 to-purple-500/20',
     author: {
       name: 'Simon M',
