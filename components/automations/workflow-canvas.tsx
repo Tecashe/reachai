@@ -146,9 +146,9 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
 
     return (
         <div className={cn(
-            "w-44 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
+            "w-44 rounded-lg border-2 bg-card shadow-md transition-shadow duration-200 relative",
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : "border-amber-500/50",
-            "hover:shadow-lg hover:scale-[1.02]"
+            "hover:shadow-lg"
         )}>
             {/* Source Handle (Right) */}
             <Handle
@@ -158,8 +158,8 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                 className={cn(
                     "!w-3 !h-3 !bg-primary !border-2 !border-background",
                     "!-right-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-all duration-200",
-                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50",
+                    "transition-shadow duration-200",
+                    "hover:!shadow-lg hover:!shadow-primary/50",
                     "after:content-[''] after:absolute after:inset-0 after:rounded-full",
                     "after:animate-ping after:bg-primary/30 after:pointer-events-none"
                 )}
@@ -347,9 +347,9 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
 
     return (
         <div className={cn(
-            "w-44 rounded-lg border-2 bg-card shadow-md transition-all duration-200 relative",
+            "w-44 rounded-lg border-2 bg-card shadow-md transition-shadow duration-200 relative",
             selected ? "border-primary ring-2 ring-primary/20 shadow-lg shadow-primary/10" : borderColor,
-            "hover:shadow-lg hover:scale-[1.02]"
+            "hover:shadow-lg"
         )}>
             {/* Target Handle (Left) */}
             <Handle
@@ -359,8 +359,8 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                 className={cn(
                     "!w-3 !h-3 !bg-primary !border-2 !border-background",
                     "!-left-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-all duration-200",
-                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50"
+                    "transition-shadow duration-200",
+                    "hover:!shadow-lg hover:!shadow-primary/50"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -373,8 +373,8 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                 className={cn(
                     "!w-3 !h-3 !bg-primary !border-2 !border-background",
                     "!-right-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-all duration-200",
-                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-primary/50",
+                    "transition-shadow duration-200",
+                    "hover:!shadow-lg hover:!shadow-primary/50",
                     "after:content-[''] after:absolute after:inset-0 after:rounded-full",
                     "after:animate-ping after:bg-primary/30 after:pointer-events-none"
                 )}

@@ -39,11 +39,11 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
 
     return (
         <div className={cn(
-            "relative w-52 rounded-xl border-2 bg-card shadow-md transition-all duration-200",
+            "relative w-52 rounded-xl border-2 bg-card shadow-md transition-shadow duration-200",
             selected
                 ? "border-violet-500 ring-2 ring-violet-500/20 shadow-lg shadow-violet-500/10"
                 : "border-violet-500/50",
-            "hover:shadow-lg hover:scale-[1.02]"
+            "hover:shadow-lg"
         )}>
             {/* Target Handle (Left) */}
             <Handle
@@ -53,8 +53,8 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
                 className={cn(
                     "!w-3 !h-3 !bg-violet-500 !border-2 !border-background",
                     "!-left-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-all duration-200",
-                    "hover:!w-4 hover:!h-4 hover:!shadow-lg hover:!shadow-violet-500/50"
+                    "transition-shadow duration-200",
+                    "hover:!shadow-lg hover:!shadow-violet-500/50"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -153,8 +153,8 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
                         className={cn(
                             "!w-3 !h-3 !border-2 !border-background",
                             "!-right-1.5",
-                            "transition-all duration-200",
-                            "hover:!w-4 hover:!h-4 hover:!shadow-lg",
+                            "transition-shadow duration-200",
+                            "hover:!shadow-lg",
                             branch.id === 'true'
                                 ? "!bg-emerald-500 hover:!shadow-emerald-500/50"
                                 : branch.id === 'false'
