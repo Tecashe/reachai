@@ -182,12 +182,12 @@ function CustomConnectionLine({
             <path
                 d={edgePath}
                 fill="none"
-                stroke="white"
-                strokeWidth={2}
+                stroke="hsl(var(--primary))"
+                strokeWidth={1.5}
                 strokeLinecap="round"
                 strokeDasharray="6 8"
                 className="animate-edge-flow"
-                style={{ opacity: 0.6 }}
+                style={{ opacity: 0.4 }}
             />
             {/* Drop target indicator */}
             <circle
@@ -774,15 +774,15 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     const { screenToFlowPosition } = useReactFlow()
     const connectionMadeRef = useRef(false)
 
-    // Track pending connection source for action picker
-    const [pendingConnection, setPendingConnection] = useState<{
+    // Track pending connection source for action picker (ref to survive re-renders)
+    const pendingConnectionRef = useRef<{
         sourceNodeId: string
         sourceHandleId: string | null
     } | null>(null)
 
     // Floating action picker state
     const [actionPickerPos, setActionPickerPos] = useState<{ x: number; y: number } | null>(null)
-    const [actionPickerFlowPos, setActionPickerFlowPos] = useState<{ x: number; y: number } | null>(null)
+    const actionPickerFlowPosRef = useRef<{ x: number; y: number } | null>(null)
 
     // Handle manual connection (drag handle to target handle)
     const onConnect = useCallback((connection: Connection) => {
@@ -808,21 +808,21 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
 
     // Track connection start
     const onConnectStart: OnConnectStart = useCallback((_event, params) => {
-        setPendingConnection({
+        pendingConnectionRef.current = {
             sourceNodeId: params.nodeId || '',
             sourceHandleId: params.handleId || null,
-        })
+        }
     }, [])
 
     // Connection drop on empty canvas -> show floating action picker
     const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
-        if (!pendingConnection) return
+        if (!pendingConnectionRef.current) return
 
         // Use setTimeout to let onConnect fire first (it sets connectionMadeRef)
         setTimeout(() => {
             if (connectionMadeRef.current) {
                 connectionMadeRef.current = false
-                setPendingConnection(null)
+                pendingConnectionRef.current = null
                 return
             }
 
@@ -837,17 +837,19 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                 const clientX = (event as MouseEvent).clientX
                 const clientY = (event as MouseEvent).clientY
                 const flowPosition = screenToFlowPosition({ x: clientX, y: clientY })
-                setActionPickerFlowPos(flowPosition)
+                actionPickerFlowPosRef.current = flowPosition
                 setActionPickerPos({ x: clientX, y: clientY })
             } else {
-                setPendingConnection(null)
+                pendingConnectionRef.current = null
             }
         }, 50)
-    }, [pendingConnection, screenToFlowPosition])
+    }, [screenToFlowPosition])
 
     // Handle action selection from floating picker
     const handlePickerActionSelect = useCallback((actionType: string, label: string) => {
-        if (!pendingConnection || !actionPickerFlowPos) return
+        const conn = pendingConnectionRef.current
+        const flowPos = actionPickerFlowPosRef.current
+        if (!conn || !flowPos) return
 
         const isCondition = actionType === 'CONDITION_BRANCH'
         const newNodeId = generateNodeId()
@@ -856,8 +858,8 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             id: newNodeId,
             type: isCondition ? 'condition' : 'action',
             position: {
-                x: actionPickerFlowPos.x,
-                y: actionPickerFlowPos.y - 40,
+                x: flowPos.x,
+                y: flowPos.y - 40,
             },
             data: {
                 label: isCondition ? 'If / Else' : label,
@@ -874,9 +876,9 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
         }
 
         const newEdge: Edge = {
-            id: `edge_${pendingConnection.sourceNodeId}_${newNodeId}`,
-            source: pendingConnection.sourceNodeId,
-            sourceHandle: pendingConnection.sourceHandleId || 'source',
+            id: `edge_${conn.sourceNodeId}_${newNodeId}`,
+            source: conn.sourceNodeId,
+            sourceHandle: conn.sourceHandleId || 'source',
             target: newNodeId,
             targetHandle: 'target',
             type: 'custom',
@@ -887,14 +889,14 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
         setEdges((eds) => [...eds, newEdge])
 
         setActionPickerPos(null)
-        setActionPickerFlowPos(null)
-        setPendingConnection(null)
-    }, [pendingConnection, actionPickerFlowPos, setNodes, setEdges])
+        actionPickerFlowPosRef.current = null
+        pendingConnectionRef.current = null
+    }, [setNodes, setEdges])
 
     const closeActionPicker = useCallback(() => {
         setActionPickerPos(null)
-        setActionPickerFlowPos(null)
-        setPendingConnection(null)
+        actionPickerFlowPosRef.current = null
+        pendingConnectionRef.current = null
     }, [])
 
     // Validate connections: no self-loops, no duplicate edges

@@ -25,6 +25,7 @@ const WorkflowCanvasWithProvider = dynamic(
 import type { WorkflowCanvasRef, WorkflowNode } from '@/components/automations/workflow-canvas'
 import { actionsToNodes, nodesToActions } from '@/components/automations/workflow-canvas'
 import type { Edge } from '@xyflow/react'
+import { WaveLoader } from "@/components/loader/wave-loader"
 
 interface Automation {
     id: string
@@ -148,6 +149,7 @@ export default function EditAutomationPage({ params }: { params: Promise<{ id: s
         return (
             <div className="min-h-screen bg-background p-8 flex items-center justify-center">
                 <div className="text-muted-foreground">Loading automation...</div>
+                <WaveLoader size="sm" bars={8} gap="tight" />
             </div>
         )
     }
