@@ -51,10 +51,11 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
                 position={Position.Left}
                 id="target"
                 className={cn(
-                    "!w-3 !h-3 !bg-violet-500 !border-2 !border-background",
-                    "!-left-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-shadow duration-200",
-                    "hover:!shadow-lg hover:!shadow-violet-500/50"
+                    "!w-4 !h-4 !bg-violet-500 !border-2 !border-background !rounded-full",
+                    "!-left-2 !top-1/2 !-translate-y-1/2",
+                    "transition-all duration-200 !cursor-crosshair",
+                    "hover:!scale-150 hover:!shadow-[0_0_12px_4px_rgba(139,92,246,0.5)]",
+                    "after:content-[''] after:absolute after:-inset-3 after:rounded-full after:pointer-events-auto"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -139,7 +140,6 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
 
             {/* Source handles for each branch - positioned on the right edge */}
             {branches.map((branch, index) => {
-                // Spread handles vertically along the right edge
                 const totalHandles = branches.length
                 const spacing = 100 / (totalHandles + 1)
                 const topPercent = spacing * (index + 1)
@@ -151,23 +151,16 @@ function ConditionNodeComponent({ data, id, selected }: { data: ConditionNodeDat
                         position={Position.Right}
                         id={`branch-${branch.id}`}
                         className={cn(
-                            "!w-3 !h-3 !border-2 !border-background",
-                            "!-right-1.5",
-                            "transition-shadow duration-200",
-                            "hover:!shadow-lg",
+                            "!w-4 !h-4 !border-2 !border-background !rounded-full",
+                            "!-right-2",
+                            "transition-all duration-200 !cursor-crosshair",
+                            "hover:!scale-150",
+                            "after:content-[''] after:absolute after:-inset-3 after:rounded-full after:pointer-events-auto",
                             branch.id === 'true'
-                                ? "!bg-emerald-500 hover:!shadow-emerald-500/50"
+                                ? "!bg-emerald-500 hover:!shadow-[0_0_12px_4px_rgba(16,185,129,0.5)]"
                                 : branch.id === 'false'
-                                    ? "!bg-red-500 hover:!shadow-red-500/50"
-                                    : "!bg-violet-500 hover:!shadow-violet-500/50",
-                            "after:content-[''] after:absolute after:inset-0 after:rounded-full",
-                            "after:animate-ping",
-                            "after:pointer-events-none",
-                            branch.id === 'true'
-                                ? "after:bg-emerald-500/30"
-                                : branch.id === 'false'
-                                    ? "after:bg-red-500/30"
-                                    : "after:bg-violet-500/30"
+                                    ? "!bg-red-500 hover:!shadow-[0_0_12px_4px_rgba(239,68,68,0.5)]"
+                                    : "!bg-violet-500 hover:!shadow-[0_0_12px_4px_rgba(139,92,246,0.5)]"
                         )}
                         style={{
                             zIndex: 10,

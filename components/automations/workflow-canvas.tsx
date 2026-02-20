@@ -19,7 +19,9 @@ import {
     ConnectionMode,
     useReactFlow,
     reconnectEdge,
+    getBezierPath,
     type OnConnectStart,
+    type ConnectionLineComponentProps,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Plus, Zap, Settings, Trash2, ChevronDown } from 'lucide-react'
@@ -136,6 +138,83 @@ const PROVIDER_ICON_MAP: Record<string, string> = {
 }
 
 // ============================================================
+// CUSTOM CONNECTION LINE (animated bezier during drag)
+// ============================================================
+
+function CustomConnectionLine({
+    fromX,
+    fromY,
+    toX,
+    toY,
+    fromPosition,
+    toPosition,
+}: ConnectionLineComponentProps) {
+    const [edgePath] = getBezierPath({
+        sourceX: fromX,
+        sourceY: fromY,
+        sourcePosition: fromPosition,
+        targetX: toX,
+        targetY: toY,
+        targetPosition: toPosition,
+        curvature: 0.25,
+    })
+
+    return (
+        <g>
+            {/* Glow layer */}
+            <path
+                d={edgePath}
+                fill="none"
+                stroke="hsl(var(--primary))"
+                strokeWidth={8}
+                strokeLinecap="round"
+                style={{ filter: 'blur(6px)', opacity: 0.3 }}
+            />
+            {/* Main line */}
+            <path
+                d={edgePath}
+                fill="none"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+            />
+            {/* Animated dashes */}
+            <path
+                d={edgePath}
+                fill="none"
+                stroke="white"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeDasharray="6 8"
+                className="animate-edge-flow"
+                style={{ opacity: 0.6 }}
+            />
+            {/* Drop target indicator */}
+            <circle
+                cx={toX}
+                cy={toY}
+                r={6}
+                fill="hsl(var(--primary))"
+                stroke="hsl(var(--background))"
+                strokeWidth={2}
+            />
+            <circle
+                cx={toX}
+                cy={toY}
+                r={12}
+                fill="none"
+                stroke="hsl(var(--primary))"
+                strokeWidth={1.5}
+                strokeDasharray="3 3"
+                opacity={0.5}
+                className="animate-spin"
+                style={{ animationDuration: '3s' }}
+            />
+        </g>
+    )
+}
+
+// ============================================================
 // CUSTOM NODE COMPONENTS
 // ============================================================
 
@@ -156,12 +235,11 @@ function TriggerNodeComponent({ data, id, selected }: { data: WorkflowNode['data
                 position={Position.Right}
                 id="source"
                 className={cn(
-                    "!w-3 !h-3 !bg-primary !border-2 !border-background",
-                    "!-right-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-shadow duration-200",
-                    "hover:!shadow-lg hover:!shadow-primary/50",
-                    "after:content-[''] after:absolute after:inset-0 after:rounded-full",
-                    "after:animate-ping after:bg-primary/30 after:pointer-events-none"
+                    "!w-4 !h-4 !bg-primary !border-2 !border-background !rounded-full",
+                    "!-right-2 !top-1/2 !-translate-y-1/2",
+                    "transition-all duration-200 !cursor-crosshair",
+                    "hover:!scale-150 hover:!shadow-[0_0_12px_4px_hsl(var(--primary)/0.5)]",
+                    "after:content-[''] after:absolute after:-inset-3 after:rounded-full after:pointer-events-auto"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -357,10 +435,11 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                 position={Position.Left}
                 id="target"
                 className={cn(
-                    "!w-3 !h-3 !bg-primary !border-2 !border-background",
-                    "!-left-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-shadow duration-200",
-                    "hover:!shadow-lg hover:!shadow-primary/50"
+                    "!w-4 !h-4 !bg-primary !border-2 !border-background !rounded-full",
+                    "!-left-2 !top-1/2 !-translate-y-1/2",
+                    "transition-all duration-200 !cursor-crosshair",
+                    "hover:!scale-150 hover:!shadow-[0_0_12px_4px_hsl(var(--primary)/0.5)]",
+                    "after:content-[''] after:absolute after:-inset-3 after:rounded-full after:pointer-events-auto"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -371,12 +450,11 @@ function ActionNodeComponent({ data, id, selected }: { data: WorkflowNode['data'
                 position={Position.Right}
                 id="source"
                 className={cn(
-                    "!w-3 !h-3 !bg-primary !border-2 !border-background",
-                    "!-right-1.5 !top-1/2 !-translate-y-1/2",
-                    "transition-shadow duration-200",
-                    "hover:!shadow-lg hover:!shadow-primary/50",
-                    "after:content-[''] after:absolute after:inset-0 after:rounded-full",
-                    "after:animate-ping after:bg-primary/30 after:pointer-events-none"
+                    "!w-4 !h-4 !bg-primary !border-2 !border-background !rounded-full",
+                    "!-right-2 !top-1/2 !-translate-y-1/2",
+                    "transition-all duration-200 !cursor-crosshair",
+                    "hover:!scale-150 hover:!shadow-[0_0_12px_4px_hsl(var(--primary)/0.5)]",
+                    "after:content-[''] after:absolute after:-inset-3 after:rounded-full after:pointer-events-auto"
                 )}
                 style={{ zIndex: 10 }}
             />
@@ -616,7 +694,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             sourceHandle: 'source',
             target: newNodeId,
             targetHandle: 'target',
-            type: 'smoothstep',
+            type: 'custom',
             data: { deletable: true },
         }
 
@@ -656,7 +734,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                         sourceHandle: incoming.sourceHandle || 'source',
                         target: outgoing.target,
                         targetHandle: outgoing.targetHandle || 'target',
-                        type: 'smoothstep',
+                        type: 'custom',
                         data: { deletable: true },
                     })
                 }
@@ -722,7 +800,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             sourceHandle: connection.sourceHandle || 'source',
             target: connection.target,
             targetHandle: connection.targetHandle || 'target',
-            type: 'smoothstep',
+            type: 'custom',
             data: { deletable: true },
         }
         setEdges((eds) => [...eds, newEdge])
@@ -740,30 +818,31 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
         if (!pendingConnection) return
 
-        // If a valid connection was just made via onConnect, skip the picker
-        if (connectionMadeRef.current) {
-            connectionMadeRef.current = false
-            setPendingConnection(null)
-            return
-        }
+        // Use setTimeout to let onConnect fire first (it sets connectionMadeRef)
+        setTimeout(() => {
+            if (connectionMadeRef.current) {
+                connectionMadeRef.current = false
+                setPendingConnection(null)
+                return
+            }
 
-        const targetElement = (event as MouseEvent).target as HTMLElement
-        // Check if the drop target is a node or handle — if not, it's an empty canvas drop
-        const isOnNode = !!targetElement.closest('.react-flow__node')
-        const isOnHandle = targetElement.classList.contains('react-flow__handle')
-            || !!targetElement.closest('.react-flow__handle')
-        const isInsideFlow = !!targetElement.closest('.react-flow')
-        const isEmptyDrop = isInsideFlow && !isOnNode && !isOnHandle
+            const targetElement = (event as MouseEvent).target as HTMLElement
+            const isOnNode = !!targetElement.closest('.react-flow__node')
+            const isOnHandle = targetElement.classList.contains('react-flow__handle')
+                || !!targetElement.closest('.react-flow__handle')
+            const isInsideFlow = !!targetElement.closest('.react-flow')
+            const isEmptyDrop = isInsideFlow && !isOnNode && !isOnHandle
 
-        if (isEmptyDrop) {
-            const clientX = (event as MouseEvent).clientX
-            const clientY = (event as MouseEvent).clientY
-            const flowPosition = screenToFlowPosition({ x: clientX, y: clientY })
-            setActionPickerFlowPos(flowPosition)
-            setActionPickerPos({ x: clientX, y: clientY })
-        } else {
-            setPendingConnection(null)
-        }
+            if (isEmptyDrop) {
+                const clientX = (event as MouseEvent).clientX
+                const clientY = (event as MouseEvent).clientY
+                const flowPosition = screenToFlowPosition({ x: clientX, y: clientY })
+                setActionPickerFlowPos(flowPosition)
+                setActionPickerPos({ x: clientX, y: clientY })
+            } else {
+                setPendingConnection(null)
+            }
+        }, 50)
     }, [pendingConnection, screenToFlowPosition])
 
     // Handle action selection from floating picker
@@ -800,7 +879,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
             sourceHandle: pendingConnection.sourceHandleId || 'source',
             target: newNodeId,
             targetHandle: 'target',
-            type: 'smoothstep',
+            type: 'custom',
             data: { deletable: true },
         }
 
@@ -920,7 +999,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     fitViewOptions={{ padding: 0.4 }}
                     className="bg-background"
                     defaultEdgeOptions={{
-                        type: 'smoothstep',
+                        type: 'custom',
                         data: { deletable: true },
                     }}
                     proOptions={{ hideAttribution: true }}
@@ -934,11 +1013,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     deleteKeyCode={['Backspace', 'Delete']}
                     selectNodesOnDrag={false}
                     onPaneClick={closeActionPicker}
-                    connectionLineStyle={{
-                        stroke: 'hsl(var(--primary))',
-                        strokeWidth: 2,
-                        strokeDasharray: '8 4',
-                    }}
+                    connectionLineComponent={CustomConnectionLine}
                 >
                     <Controls
                         className="bg-card/90 backdrop-blur-sm border-border shadow-md"
@@ -1218,7 +1293,7 @@ export function actionsToNodes(
             sourceHandle: 'source',
             target: actionNode.id,
             targetHandle: 'target',
-            type: 'smoothstep',
+            type: 'custom',
             data: {
                 deletable: true,
                 delay: action.delayMinutes,
