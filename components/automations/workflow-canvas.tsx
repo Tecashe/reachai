@@ -140,9 +140,10 @@ const PROVIDER_ICON_MAP: Record<string, string> = {
 // ============================================================
 
 const connectionLineStyle = {
-    stroke: 'hsl(var(--primary))',
-    strokeWidth: 3,
+    stroke: '#e8622a',
+    strokeWidth: 2.5,
     strokeDasharray: '8 4',
+    strokeLinecap: 'round' as const,
 }
 
 // ============================================================
