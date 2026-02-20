@@ -9,6 +9,7 @@ import { logger } from '@/lib/logger'
 import { automationActionExecutor } from '@/lib/services/automation-actions'
 import type { AutomationAction, AutomationContext } from '@/lib/types/automation-types'
 import type { AutomationTriggerType } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
 /**
  * Main automation executor - processes automation actions
@@ -58,7 +59,7 @@ export const automationExecutor = inngest.createFunction(
         })
 
         // Build context
-        const context = await step.run('build-context', async () => {
+        const rawContext = await step.run('build-context', async () => {
             return buildExecutionContext(
                 userId,
                 automationId,
@@ -70,8 +71,19 @@ export const automationExecutor = inngest.createFunction(
             )
         })
 
+        // Rehydrate Date fields — Inngest serializes step results to JSON,
+        // which converts Date objects to strings. We restore them here.
+        if (rawContext.data.email) {
+            const e = rawContext.data.email as Record<string, unknown>
+            if (e.sentAt) e.sentAt = new Date(e.sentAt as string)
+            if (e.openedAt) e.openedAt = new Date(e.openedAt as string)
+            if (e.clickedAt) e.clickedAt = new Date(e.clickedAt as string)
+            if (e.repliedAt) e.repliedAt = new Date(e.repliedAt as string)
+        }
+        const context = rawContext as AutomationContext
+
         // Parse actions
-        const actions = execution.automation.actions as AutomationAction[]
+        const actions = execution.automation.actions as unknown as AutomationAction[]
         let currentIndex = execution.currentActionIndex
         let failedActions = 0
         let successfulActions = 0
@@ -129,7 +141,7 @@ export const automationExecutor = inngest.createFunction(
                         resultData: {
                             ...((execution.resultData as Record<string, unknown>) || {}),
                             [action.id]: result
-                        }
+                        } as Prisma.InputJsonValue
                     }
                 })
             })
@@ -289,13 +301,13 @@ async function buildExecutionContext(
             context.data.email = {
                 id: email.id,
                 subject: email.subject,
-                body: email.body,
+                body: email.body ?? undefined,
                 fromEmail: email.fromEmail,
                 toEmail: email.toEmail,
-                sentAt: email.sentAt || undefined,
-                openedAt: email.openedAt || undefined,
-                clickedAt: email.clickedAt || undefined,
-                repliedAt: email.repliedAt || undefined,
+                sentAt: email.sentAt ? new Date(email.sentAt) : undefined,
+                openedAt: email.openedAt ? new Date(email.openedAt) : undefined,
+                clickedAt: email.clickedAt ? new Date(email.clickedAt) : undefined,
+                repliedAt: email.repliedAt ? new Date(email.repliedAt) : undefined,
                 openCount: email.opens,
                 clickCount: email.clicks
             }

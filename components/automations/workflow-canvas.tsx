@@ -954,9 +954,18 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     connectionLineStyle={connectionLineStyle}
                 >
                     <Controls
-                        className="bg-card/90 backdrop-blur-sm border-border shadow-md"
-                        position="bottom-left"
-                        style={{ position: 'absolute', bottom: 16, left: 16, zIndex: 50 }}
+                        position="top-left"
+                        style={{
+                            position: 'absolute',
+                            top: 12,
+                            left: 12,
+                            zIndex: 50,
+                            background: 'var(--card, #fff)',
+                            border: '1px solid var(--border, #e5e7eb)',
+                            borderRadius: 8,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            color: 'var(--foreground, #111)',
+                        }}
                     />
                     <Background
                         variant={BackgroundVariant.Dots}
@@ -1154,6 +1163,8 @@ export const WorkflowCanvasWithProvider = forwardRef<WorkflowCanvasRef, Workflow
 
 /**
  * Convert workflow nodes/edges to automation actions array (graph-aware BFS)
+ * Also embeds full layout (positions + edges) into each action's config under __layout
+ * so it can be restored when the automation is loaded again.
  */
 export function nodesToActions(nodes: WorkflowNode[], edges: Edge[]): AutomationAction[] {
     const triggerNode = nodes.find((n) => n.type === 'trigger')
@@ -1171,7 +1182,6 @@ export function nodesToActions(nodes: WorkflowNode[], edges: Edge[]): Automation
         if (visited.has(currentId)) continue
         visited.add(currentId)
 
-        // Find all outgoing edges from current node
         const outEdges = edges.filter(e => e.source === currentId)
         for (const edge of outEdges) {
             const targetNode = actionNodes.find(n => n.id === edge.target)
@@ -1195,7 +1205,32 @@ export function nodesToActions(nodes: WorkflowNode[], edges: Edge[]): Automation
 }
 
 /**
- * Convert automation actions to workflow nodes/edges
+ * Build the layout snapshot to embed in triggerConfig so positions and
+ * condition-node edges (true/false handles) survive save/reload.
+ */
+export function buildLayoutSnapshot(
+    nodes: WorkflowNode[],
+    edges: Edge[]
+): Record<string, unknown> {
+    return {
+        positions: Object.fromEntries(nodes.map(n => [n.id, n.position])),
+        edges: edges.map(e => ({
+            id: e.id,
+            source: e.source,
+            sourceHandle: e.sourceHandle ?? null,
+            target: e.target,
+            targetHandle: e.targetHandle ?? null,
+            type: e.type,
+            data: e.data,
+        })),
+    }
+}
+
+/**
+ * Convert automation actions to workflow nodes/edges.
+ * If triggerConfig contains a __layout key (saved by buildLayoutSnapshot),
+ * node positions and full edge data (including sourceHandle for condition nodes)
+ * are restored exactly as the user left them.
  */
 export function actionsToNodes(
     triggerType: string,
@@ -1203,32 +1238,60 @@ export function actionsToNodes(
     actions: AutomationAction[]
 ): { nodes: WorkflowNode[]; edges: Edge[] } {
     const nodes: WorkflowNode[] = []
-    const edges: Edge[] = []
+
+    // Restore saved layout if available
+    const layout = triggerConfig.__layout as {
+        positions?: Record<string, { x: number; y: number }>
+        edges?: Array<{
+            id: string
+            source: string
+            sourceHandle: string | null
+            target: string
+            targetHandle: string | null
+            type?: string
+            data?: Record<string, unknown>
+        }>
+    } | undefined
+
+    const savedPositions = layout?.positions ?? {}
+    const savedEdges: Edge[] = (layout?.edges ?? []).map(e => ({
+        id: e.id,
+        source: e.source,
+        sourceHandle: e.sourceHandle ?? undefined,
+        target: e.target,
+        targetHandle: e.targetHandle ?? undefined,
+        type: e.type ?? 'custom',
+        data: e.data ?? { deletable: true },
+    }))
+
+    // Strip __layout from triggerConfig before putting it on the node
+    const { __layout: _removed, ...cleanTriggerConfig } = triggerConfig
 
     // Create trigger node
     const triggerLabel = TRIGGERS.find(t => t.type === triggerType)?.label || triggerType.replace(/_/g, ' ')
     const triggerNode: WorkflowNode = {
         id: 'trigger_main',
         type: 'trigger',
-        position: { x: 50, y: 150 },
+        position: savedPositions['trigger_main'] ?? { x: 50, y: 150 },
         data: {
             label: triggerLabel,
             type: triggerType,
-            config: triggerConfig,
+            config: cleanTriggerConfig,
             isConfigured: true,
         },
     }
     nodes.push(triggerNode)
 
-    // Create action nodes - positioned horizontally
-    let prevNodeId = triggerNode.id
+    // Create action nodes with saved positions when available
     actions.forEach((action, index) => {
         const actionLabel = ACTIONS.find(a => a.type === action.type)?.label || action.name || action.type.replace(/_/g, ' ')
         const isCondition = action.type === 'CONDITION_BRANCH'
+        const nodeId = action.id || `action_${index}`
         const actionNode: WorkflowNode = {
-            id: action.id || `action_${index}`,
+            id: nodeId,
             type: isCondition ? 'condition' : 'action',
-            position: { x: 270 + index * 220, y: 150 },
+            // Use saved position if available, otherwise fall back to auto-layout
+            position: savedPositions[nodeId] ?? { x: 270 + index * 220, y: 150 },
             data: {
                 label: actionLabel,
                 type: action.type,
@@ -1238,22 +1301,29 @@ export function actionsToNodes(
             },
         }
         nodes.push(actionNode)
+    })
 
-        // Create edge from previous node
+    // If we have saved edges (which preserve sourceHandle 'true'/'false' for condition nodes), use them
+    // Otherwise fall back to auto-connecting in sequence
+    if (savedEdges.length > 0) {
+        return { nodes, edges: savedEdges }
+    }
+
+    // Auto-connect fallback (new automations only)
+    const edges: Edge[] = []
+    let prevNodeId = triggerNode.id
+    actions.forEach((action, index) => {
+        const nodeId = action.id || `action_${index}`
         edges.push({
-            id: `edge_${prevNodeId}_${actionNode.id}`,
+            id: `edge_${prevNodeId}_${nodeId}`,
             source: prevNodeId,
             sourceHandle: 'source',
-            target: actionNode.id,
+            target: nodeId,
             targetHandle: 'target',
             type: 'custom',
-            data: {
-                deletable: true,
-                delay: action.delayMinutes,
-            },
+            data: { deletable: true, delay: action.delayMinutes },
         })
-
-        prevNodeId = actionNode.id
+        prevNodeId = nodeId
     })
 
     return { nodes, edges }

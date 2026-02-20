@@ -23,7 +23,7 @@ const WorkflowCanvasWithProvider = dynamic(
 
 // Import types and helpers
 import type { WorkflowCanvasRef, WorkflowNode } from '@/components/automations/workflow-canvas'
-import { actionsToNodes, nodesToActions } from '@/components/automations/workflow-canvas'
+import { actionsToNodes, nodesToActions, buildLayoutSnapshot } from '@/components/automations/workflow-canvas'
 import type { Edge } from '@xyflow/react'
 import { WaveLoader } from "@/components/loader/wave-loader"
 
@@ -115,7 +115,12 @@ export default function EditAutomationPage({ params }: { params: Promise<{ id: s
                     name: name.trim(),
                     description: description.trim() || undefined,
                     triggerType: canvasData.triggerType,
-                    triggerConfig: canvasData.triggerConfig,
+                    // Embed full layout so actionsToNodes can restore
+                    // exact positions + condition true/false edges on reload
+                    triggerConfig: {
+                        ...canvasData.triggerConfig,
+                        __layout: buildLayoutSnapshot(canvasData.nodes, canvasData.edges),
+                    },
                     actions: extractedActions.map((a, idx) => ({
                         ...a,
                         id: a.id || `action_${idx}`,
