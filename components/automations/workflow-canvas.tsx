@@ -19,9 +19,7 @@ import {
     ConnectionMode,
     useReactFlow,
     reconnectEdge,
-    getBezierPath,
     type OnConnectStart,
-    type ConnectionLineComponentProps,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { Plus, Zap, Settings, Trash2, ChevronDown } from 'lucide-react'
@@ -138,80 +136,13 @@ const PROVIDER_ICON_MAP: Record<string, string> = {
 }
 
 // ============================================================
-// CUSTOM CONNECTION LINE (animated bezier during drag)
+// CONNECTION LINE STYLE (applied via CSS for reliability)
 // ============================================================
 
-function CustomConnectionLine({
-    fromX,
-    fromY,
-    toX,
-    toY,
-    fromPosition,
-    toPosition,
-}: ConnectionLineComponentProps) {
-    const [edgePath] = getBezierPath({
-        sourceX: fromX,
-        sourceY: fromY,
-        sourcePosition: fromPosition,
-        targetX: toX,
-        targetY: toY,
-        targetPosition: toPosition,
-        curvature: 0.25,
-    })
-
-    return (
-        <g>
-            {/* Glow layer */}
-            <path
-                d={edgePath}
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth={8}
-                strokeLinecap="round"
-                style={{ filter: 'blur(6px)', opacity: 0.3 }}
-            />
-            {/* Main line */}
-            <path
-                d={edgePath}
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-            />
-            {/* Animated dashes */}
-            <path
-                d={edgePath}
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                strokeDasharray="6 8"
-                className="animate-edge-flow"
-                style={{ opacity: 0.4 }}
-            />
-            {/* Drop target indicator */}
-            <circle
-                cx={toX}
-                cy={toY}
-                r={6}
-                fill="hsl(var(--primary))"
-                stroke="hsl(var(--background))"
-                strokeWidth={2}
-            />
-            <circle
-                cx={toX}
-                cy={toY}
-                r={12}
-                fill="none"
-                stroke="hsl(var(--primary))"
-                strokeWidth={1.5}
-                strokeDasharray="3 3"
-                opacity={0.5}
-                className="animate-spin"
-                style={{ animationDuration: '3s' }}
-            />
-        </g>
-    )
+const connectionLineStyle = {
+    stroke: 'hsl(var(--primary))',
+    strokeWidth: 3,
+    strokeDasharray: '8 4',
 }
 
 // ============================================================
@@ -1015,7 +946,7 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
                     deleteKeyCode={['Backspace', 'Delete']}
                     selectNodesOnDrag={false}
                     onPaneClick={closeActionPicker}
-                    connectionLineComponent={CustomConnectionLine}
+                    connectionLineStyle={connectionLineStyle}
                 >
                     <Controls
                         className="bg-card/90 backdrop-blur-sm border-border shadow-md"
@@ -1092,8 +1023,12 @@ function FloatingActionPicker({
     const adjustedY = Math.min(position.y, window.innerHeight - 400)
 
     return (
-        <>
-            <div className="fixed inset-0 z-[100]" onClick={onClose} />
+        <div
+            className="fixed inset-0 z-[100]"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) onClose()
+            }}
+        >
             <div
                 className={cn(
                     "fixed z-[101] w-64 max-h-80 overflow-hidden",
@@ -1128,7 +1063,10 @@ function FloatingActionPicker({
                                         "w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left",
                                         "hover:bg-primary/10 transition-colors text-xs text-foreground"
                                     )}
-                                    onClick={() => onSelect(action.type, action.label)}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        onSelect(action.type, action.label)
+                                    }}
                                 >
                                     {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
                                         <Image
@@ -1164,7 +1102,10 @@ function FloatingActionPicker({
                                                 "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left",
                                                 "hover:bg-primary/10 transition-colors text-xs text-foreground"
                                             )}
-                                            onClick={() => onSelect(action.type, action.label)}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                onSelect(action.type, action.label)
+                                            }}
                                         >
                                             {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
                                                 <Image
@@ -1186,7 +1127,7 @@ function FloatingActionPicker({
                     )}
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 

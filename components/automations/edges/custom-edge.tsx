@@ -4,24 +4,23 @@ import { memo, useState, useCallback } from 'react'
 import {
     BaseEdge,
     EdgeLabelRenderer,
-    getBezierPath,
+    getSmoothStepPath,
     useReactFlow,
     type EdgeProps,
     type Edge,
 } from '@xyflow/react'
-import { X, Trash2 } from 'lucide-react'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ============================================================
 // ANIMATED CUSTOM EDGE COMPONENT
-// Professional workflow connection with animations & delete
+// Smooth step routing with theme-aware colors & hover delete
 // ============================================================
 
 export interface CustomEdgeData {
     label?: string
     delay?: number
     deletable?: boolean
-    // Index signature required for React Flow's Edge<Record<string, unknown>> constraint
     [key: string]: unknown
 }
 
@@ -41,18 +40,17 @@ const CustomEdge = memo(function CustomEdge({
     const { setEdges } = useReactFlow()
     const [isHovered, setIsHovered] = useState(false)
 
-    // Calculate bezier path for smooth curve
-    const [edgePath, labelX, labelY] = getBezierPath({
+    // Smooth step path for clean right-angle routing
+    const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX,
         sourceY,
         sourcePosition,
         targetX,
         targetY,
         targetPosition,
-        curvature: 0.25,
+        borderRadius: 16,
     })
 
-    // Handle edge deletion
     const onEdgeClick = useCallback((evt: React.MouseEvent) => {
         evt.stopPropagation()
         setEdges((edges) => edges.filter((edge) => edge.id !== id))
@@ -61,6 +59,7 @@ const CustomEdge = memo(function CustomEdge({
     const showDeleteButton = isHovered || selected
     const label = data?.label
     const delay = data?.delay
+    const active = isHovered || selected
 
     return (
         <>
@@ -75,44 +74,44 @@ const CustomEdge = memo(function CustomEdge({
                 style={{ cursor: 'pointer' }}
             />
 
-            {/* Glow effect layer (visible on hover) */}
+            {/* Glow effect layer (visible on hover/selected) */}
             <path
                 d={edgePath}
                 fill="none"
-                stroke="url(#edge-glow-gradient)"
-                strokeWidth={isHovered || selected ? 8 : 0}
+                className="edge-glow-stroke"
+                strokeWidth={active ? 10 : 0}
                 strokeLinecap="round"
                 style={{
                     transition: 'stroke-width 0.2s ease-out',
-                    filter: 'blur(4px)',
-                    opacity: 0.6,
+                    filter: 'blur(6px)',
+                    opacity: 0.4,
                 }}
             />
 
-            {/* Main animated edge path */}
+            {/* Main edge path */}
             <BaseEdge
                 path={edgePath}
                 markerEnd={markerEnd}
                 style={{
                     ...style,
-                    stroke: isHovered || selected ? 'url(#edge-gradient-active)' : 'url(#edge-gradient)',
-                    strokeWidth: isHovered || selected ? 3 : 2,
+                    strokeWidth: active ? 3 : 2,
                     strokeLinecap: 'round',
                     transition: 'stroke-width 0.2s ease-out',
                 }}
+                className={active ? 'edge-active-stroke' : 'edge-primary-stroke'}
             />
 
             {/* Animated flow particles overlay */}
             <path
                 d={edgePath}
                 fill="none"
-                stroke="url(#edge-flow-gradient)"
-                strokeWidth={2}
+                className="edge-primary-stroke"
+                strokeWidth={1.5}
                 strokeLinecap="round"
                 strokeDasharray="8 12"
-                className="animate-edge-flow"
                 style={{
-                    opacity: isHovered || selected ? 0.9 : 0.6,
+                    animation: 'edgeFlow 1.5s linear infinite',
+                    opacity: active ? 0.7 : 0.4,
                 }}
             />
 
@@ -129,7 +128,6 @@ const CustomEdge = memo(function CustomEdge({
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
-                    {/* Delete button */}
                     <button
                         onClick={onEdgeClick}
                         className={cn(
@@ -145,7 +143,6 @@ const CustomEdge = memo(function CustomEdge({
                         <X className="w-3.5 h-3.5" />
                     </button>
 
-                    {/* Optional label */}
                     {(label || (delay && delay > 0)) && (
                         <div className={cn(
                             "px-2 py-1 rounded-md text-xs font-medium",
@@ -157,40 +154,6 @@ const CustomEdge = memo(function CustomEdge({
                     )}
                 </div>
             </EdgeLabelRenderer>
-
-            {/* SVG gradient definitions */}
-            <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-                <defs>
-                    {/* Main edge gradient */}
-                    <linearGradient id="edge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="1" />
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-                    </linearGradient>
-
-                    {/* Active/hover gradient */}
-                    <linearGradient id="edge-gradient-active" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" />
-                        <stop offset="50%" stopColor="hsl(var(--chart-1))" />
-                        <stop offset="100%" stopColor="hsl(var(--primary))" />
-                    </linearGradient>
-
-                    {/* Flow animation gradient */}
-                    <linearGradient id="edge-flow-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="white" stopOpacity="0" />
-                        <stop offset="40%" stopColor="white" stopOpacity="0.8" />
-                        <stop offset="60%" stopColor="white" stopOpacity="0.8" />
-                        <stop offset="100%" stopColor="white" stopOpacity="0" />
-                    </linearGradient>
-
-                    {/* Glow effect gradient */}
-                    <linearGradient id="edge-glow-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-                        <stop offset="50%" stopColor="hsl(var(--primary))" stopOpacity="0.6" />
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-                    </linearGradient>
-                </defs>
-            </svg>
         </>
     )
 })
@@ -198,21 +161,36 @@ const CustomEdge = memo(function CustomEdge({
 export default CustomEdge
 
 // ============================================================
-// EDGE STYLES (to be added to global CSS or component styles)
+// EDGE STYLES — theme-aware using CSS classes
 // ============================================================
 
 export const edgeStyles = `
 @keyframes edgeFlow {
-    0% {
-        stroke-dashoffset: 40;
-    }
-    100% {
-        stroke-dashoffset: 0;
-    }
+    0% { stroke-dashoffset: 40; }
+    100% { stroke-dashoffset: 0; }
 }
 
 .animate-edge-flow {
     animation: edgeFlow 1.5s linear infinite;
+}
+
+/* Theme-aware edge colors via CSS classes */
+.edge-primary-stroke {
+    stroke: hsl(var(--primary));
+}
+
+.edge-active-stroke {
+    stroke: hsl(var(--chart-1, var(--primary)));
+}
+
+.edge-glow-stroke {
+    stroke: hsl(var(--primary));
+}
+
+/* Connection line visibility */
+.react-flow__connection-line {
+    stroke: hsl(var(--primary)) !important;
+    stroke-width: 2.5 !important;
 }
 
 .react-flow__edge:hover {
