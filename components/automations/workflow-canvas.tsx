@@ -825,10 +825,14 @@ export const WorkflowCanvas = forwardRef<WorkflowCanvasRef, WorkflowCanvasProps>
     }, [setNodes, setEdges])
 
     const closeActionPicker = useCallback(() => {
-        setActionPickerPos(null)
-        actionPickerFlowPosRef.current = null
-        pendingConnectionRef.current = null
-    }, [])
+        // Only clear connection refs if the picker is actually visible
+        // This prevents onPaneClick from clearing refs before the setTimeout in onConnectEnd fires
+        if (actionPickerPos) {
+            setActionPickerPos(null)
+            actionPickerFlowPosRef.current = null
+            pendingConnectionRef.current = null
+        }
+    }, [actionPickerPos])
 
     // Validate connections: no self-loops, no duplicate edges
     const isValidConnection = useCallback((connection: Edge | Connection) => {
@@ -1005,12 +1009,14 @@ function FloatingActionPicker({
     onClose: () => void
 }) {
     const [searchTerm, setSearchTerm] = useState('')
+    const pickerRef = useRef<HTMLDivElement>(null)
     const categories = ['Email', 'Prospect', 'Sequence', 'Communication', 'CRM', 'Productivity', 'Notification', 'Task', 'Logic']
 
     const filteredActions = searchTerm
         ? ACTIONS.filter(a => a.label.toLowerCase().includes(searchTerm.toLowerCase()))
         : ACTIONS
 
+    // Close on Escape key
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose()
@@ -1019,113 +1025,116 @@ function FloatingActionPicker({
         return () => window.removeEventListener('keydown', handleKeyDown)
     }, [onClose])
 
+    // Close on click outside the picker
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (pickerRef.current && !pickerRef.current.contains(e.target as HTMLElement)) {
+                onClose()
+            }
+        }
+        // Use mousedown to detect outside clicks before any button click fires
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [onClose])
+
     const adjustedX = Math.min(position.x, window.innerWidth - 280)
     const adjustedY = Math.min(position.y, window.innerHeight - 400)
 
     return (
         <div
-            className="fixed inset-0 z-[100]"
-            onClick={(e) => {
-                if (e.target === e.currentTarget) onClose()
-            }}
+            ref={pickerRef}
+            className={cn(
+                "fixed z-[101] w-64 max-h-80 overflow-hidden",
+                "bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl shadow-black/20",
+                "animate-in fade-in-0 zoom-in-95 duration-150"
+            )}
+            style={{ left: adjustedX, top: adjustedY }}
+            onMouseDown={(e) => e.stopPropagation()}
         >
-            <div
-                className={cn(
-                    "fixed z-[101] w-64 max-h-80 overflow-hidden",
-                    "bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-2xl shadow-black/20",
-                    "animate-in fade-in-0 zoom-in-95 duration-150"
-                )}
-                style={{ left: adjustedX, top: adjustedY }}
-            >
-                <div className="p-2 border-b border-border">
-                    <input
-                        type="text"
-                        placeholder="Search actions..."
-                        autoFocus
-                        className={cn(
-                            "w-full px-2.5 py-1.5 text-xs rounded-md",
-                            "bg-muted/50 border border-border/50",
-                            "placeholder:text-muted-foreground/50",
-                            "focus:outline-none focus:ring-1 focus:ring-primary/50"
-                        )}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-
-                <div className="overflow-y-auto max-h-64 p-1">
-                    {searchTerm ? (
-                        filteredActions.length > 0 ? (
-                            filteredActions.map((action) => (
-                                <button
-                                    key={action.type}
-                                    className={cn(
-                                        "w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left",
-                                        "hover:bg-primary/10 transition-colors text-xs text-foreground"
-                                    )}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        onSelect(action.type, action.label)
-                                    }}
-                                >
-                                    {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
-                                        <Image
-                                            src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
-                                            alt={action.provider}
-                                            width={14}
-                                            height={14}
-                                            className="object-contain"
-                                        />
-                                    ) : (
-                                        <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
-                                    )}
-                                    <span>{action.label}</span>
-                                    <span className="ml-auto text-[10px] text-muted-foreground">{action.category}</span>
-                                </button>
-                            ))
-                        ) : (
-                            <div className="p-3 text-center text-xs text-muted-foreground">No actions found</div>
-                        )
-                    ) : (
-                        categories.map((category) => {
-                            const categoryActions = filteredActions.filter(a => a.category === category)
-                            if (categoryActions.length === 0) return null
-                            return (
-                                <div key={category}>
-                                    <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                                        {category}
-                                    </div>
-                                    {categoryActions.map((action) => (
-                                        <button
-                                            key={action.type}
-                                            className={cn(
-                                                "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left",
-                                                "hover:bg-primary/10 transition-colors text-xs text-foreground"
-                                            )}
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                onSelect(action.type, action.label)
-                                            }}
-                                        >
-                                            {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
-                                                <Image
-                                                    src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
-                                                    alt={action.provider}
-                                                    width={14}
-                                                    height={14}
-                                                    className="object-contain"
-                                                />
-                                            ) : (
-                                                <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
-                                            )}
-                                            <span>{action.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            )
-                        })
+            <div className="p-2 border-b border-border">
+                <input
+                    type="text"
+                    placeholder="Search actions..."
+                    autoFocus
+                    className={cn(
+                        "w-full px-2.5 py-1.5 text-xs rounded-md",
+                        "bg-muted/50 border border-border/50",
+                        "placeholder:text-muted-foreground/50",
+                        "focus:outline-none focus:ring-1 focus:ring-primary/50"
                     )}
-                </div>
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            <div className="overflow-y-auto max-h-64 p-1">
+                {searchTerm ? (
+                    filteredActions.length > 0 ? (
+                        filteredActions.map((action) => (
+                            <button
+                                key={action.type}
+                                className={cn(
+                                    "w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left",
+                                    "hover:bg-primary/10 transition-colors text-xs text-foreground"
+                                )}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={() => onSelect(action.type, action.label)}
+                            >
+                                {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
+                                    <Image
+                                        src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
+                                        alt={action.provider}
+                                        width={14}
+                                        height={14}
+                                        className="object-contain"
+                                    />
+                                ) : (
+                                    <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
+                                )}
+                                <span>{action.label}</span>
+                                <span className="ml-auto text-[10px] text-muted-foreground">{action.category}</span>
+                            </button>
+                        ))
+                    ) : (
+                        <div className="p-3 text-center text-xs text-muted-foreground">No actions found</div>
+                    )
+                ) : (
+                    categories.map((category) => {
+                        const categoryActions = filteredActions.filter(a => a.category === category)
+                        if (categoryActions.length === 0) return null
+                        return (
+                            <div key={category}>
+                                <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                                    {category}
+                                </div>
+                                {categoryActions.map((action) => (
+                                    <button
+                                        key={action.type}
+                                        className={cn(
+                                            "w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left",
+                                            "hover:bg-primary/10 transition-colors text-xs text-foreground"
+                                        )}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onClick={() => onSelect(action.type, action.label)}
+                                    >
+                                        {action.provider && PROVIDER_ICON_MAP[action.provider] ? (
+                                            <Image
+                                                src={`/icons/${PROVIDER_ICON_MAP[action.provider]}.svg`}
+                                                alt={action.provider}
+                                                width={14}
+                                                height={14}
+                                                className="object-contain"
+                                            />
+                                        ) : (
+                                            <Plus className="h-3 w-3 text-muted-foreground opacity-50" />
+                                        )}
+                                        <span>{action.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )
+                    })
+                )}
             </div>
         </div>
     )

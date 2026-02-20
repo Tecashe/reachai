@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 
 // ============================================================
 // ANIMATED CUSTOM EDGE COMPONENT
-// Smooth step routing with theme-aware colors & hover delete
+// Smooth step routing with inline theme colors
 // ============================================================
 
 export interface CustomEdgeData {
@@ -23,6 +23,10 @@ export interface CustomEdgeData {
     deletable?: boolean
     [key: string]: unknown
 }
+
+// Edge color constant — defined once, used everywhere
+const EDGE_COLOR = 'hsl(var(--primary))'
+const EDGE_COLOR_ACTIVE = 'hsl(var(--chart-1, var(--primary)))'
 
 const CustomEdge = memo(function CustomEdge({
     id,
@@ -40,7 +44,6 @@ const CustomEdge = memo(function CustomEdge({
     const { setEdges } = useReactFlow()
     const [isHovered, setIsHovered] = useState(false)
 
-    // Smooth step path for clean right-angle routing
     const [edgePath, labelX, labelY] = getSmoothStepPath({
         sourceX,
         sourceY,
@@ -60,6 +63,7 @@ const CustomEdge = memo(function CustomEdge({
     const label = data?.label
     const delay = data?.delay
     const active = isHovered || selected
+    const strokeColor = active ? EDGE_COLOR_ACTIVE : EDGE_COLOR
 
     return (
         <>
@@ -78,7 +82,7 @@ const CustomEdge = memo(function CustomEdge({
             <path
                 d={edgePath}
                 fill="none"
-                className="edge-glow-stroke"
+                stroke={EDGE_COLOR}
                 strokeWidth={active ? 10 : 0}
                 strokeLinecap="round"
                 style={{
@@ -88,24 +92,24 @@ const CustomEdge = memo(function CustomEdge({
                 }}
             />
 
-            {/* Main edge path */}
+            {/* Main edge path — using inline style with stroke */}
             <BaseEdge
                 path={edgePath}
                 markerEnd={markerEnd}
                 style={{
                     ...style,
+                    stroke: strokeColor,
                     strokeWidth: active ? 3 : 2,
                     strokeLinecap: 'round',
-                    transition: 'stroke-width 0.2s ease-out',
+                    transition: 'stroke-width 0.2s ease-out, stroke 0.2s ease-out',
                 }}
-                className={active ? 'edge-active-stroke' : 'edge-primary-stroke'}
             />
 
             {/* Animated flow particles overlay */}
             <path
                 d={edgePath}
                 fill="none"
-                className="edge-primary-stroke"
+                stroke={EDGE_COLOR}
                 strokeWidth={1.5}
                 strokeLinecap="round"
                 strokeDasharray="8 12"
@@ -161,36 +165,13 @@ const CustomEdge = memo(function CustomEdge({
 export default CustomEdge
 
 // ============================================================
-// EDGE STYLES — theme-aware using CSS classes
+// EDGE STYLES
 // ============================================================
 
 export const edgeStyles = `
 @keyframes edgeFlow {
     0% { stroke-dashoffset: 40; }
     100% { stroke-dashoffset: 0; }
-}
-
-.animate-edge-flow {
-    animation: edgeFlow 1.5s linear infinite;
-}
-
-/* Theme-aware edge colors via CSS classes */
-.edge-primary-stroke {
-    stroke: hsl(var(--primary));
-}
-
-.edge-active-stroke {
-    stroke: hsl(var(--chart-1, var(--primary)));
-}
-
-.edge-glow-stroke {
-    stroke: hsl(var(--primary));
-}
-
-/* Connection line visibility */
-.react-flow__connection-line {
-    stroke: hsl(var(--primary)) !important;
-    stroke-width: 2.5 !important;
 }
 
 .react-flow__edge:hover {
